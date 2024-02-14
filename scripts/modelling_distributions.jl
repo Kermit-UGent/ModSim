@@ -4,6 +4,16 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+end
+
 # ╔═╡ 2d346892-cb15-11ee-2d81-73e08fcc3288
 using Distributions
 
@@ -14,7 +24,10 @@ using PlutoUI, Plots, LinearAlgebra
 using Sobol
 
 # ╔═╡ cfc49c56-f223-4b78-b6da-4e0c83a16bbf
-md"## Modeling with probability distributions"
+md"# Modeling with probability distributions"
+
+# ╔═╡ e0f96ed2-bc51-467e-be3e-8617293e33e2
+md"## Revision of basic probability theory"
 
 # ╔═╡ c0677edb-29a4-4c4d-8ca7-9d81eac05c85
 dist = Weibull(2, 7)
@@ -36,6 +49,9 @@ mean(dist)
 
 # ╔═╡ 36b475e9-a16b-464f-a423-a4fbfbf21ef0
 var(dist)
+
+# ╔═╡ 3b9e8f64-d307-48bc-9a71-1ab9accd134e
+md"## Sampling and the Law of Large Numbers"
 
 # ╔═╡ 1a991ac1-d4ed-4774-a9e2-a5f27f99e1ff
 rand(dist)
@@ -69,6 +85,83 @@ let
 	plot(ps...)
 end
 
+# ╔═╡ d7e88a1a-73e9-48ff-bb51-2292346f88e0
+begin
+	scatter(rand(200), rand(200), label="", title="200 pseudo-random numbers", aspect_ratio=:equal, xlims=[0,1])
+end
+
+# ╔═╡ 74e50a3d-7623-45c2-8d3a-2c34f363177e
+begin
+	s = SobolSeq(2)
+	p = reduce(hcat, next!(s) for i = 1:200)'
+	scatter(p[:,1], p[:,2], label="", title="200 Sobol quasi-random numbers", aspect_ratio=:equal, xlims=[0,1])
+end
+
+# ╔═╡ fe24583f-afc7-43ee-901f-c81585677ecd
+md"## Elementary probability distributions"
+
+# ╔═╡ 07949347-3e7b-499f-9ca6-c62c131e2a65
+md"## Combining simple distributions into complex ones"
+
+# ╔═╡ 432c5cd3-a359-4f80-9a78-d8198b100524
+dist_prod = product_distribution([Exponential(0.2), Normal(1, 1/2)])
+
+# ╔═╡ f2faec3d-3d44-43e9-bf03-37ba68e37300
+let
+	contourf(0:0.01:10, -10:0.01:10, (x,y)->logpdf(dist_prod, [x,y]), color=:speed, xlab="x", ylab="y")
+	title!("log PDF of a MVN")
+end
+
+# ╔═╡ 0252887f-b133-426e-82fc-43ac091a7de6
+@bind w1 Slider(0:0.05:1, default=0.2, show_value=true)
+
+# ╔═╡ 8bfd6e24-27ce-4caf-b68c-b13d89f08337
+w = [w1, 1-w1]
+
+# ╔═╡ e79c0f96-02ca-4ebf-bcc5-0f6e0dc3d7d6
+d1 = Normal(-2, 1)
+
+# ╔═╡ 5a4a0cb6-93b2-4194-8a65-eb84e396b999
+d2 = Normal(3, 2)
+
+# ╔═╡ c580ca85-78ff-4cbc-b033-f0c5acde3193
+dist_mixture = MixtureModel([d1, d2], w)
+
+# ╔═╡ 94dd1214-e63c-44d5-b5c3-9ca834a89ebf
+let
+	plot(x->pdf(dist_mixture, x), -5, 10, label="mixture", lw=2)
+	plot!(x->pdf(d1, x), -5, 10, label="component 1", ls=:dash)
+	plot!(x->pdf(d2, x), -5, 10, label="component 2", ls=:dash)
+end
+
+# ╔═╡ fb6698d6-c565-42f7-ab34-8a4c860f7ef4
+md"""
+σ₁: $(@bind σ₁ Slider(0.1:0.2:2, show_value=true, default=1))
+
+σ₂: $(@bind σ₂ Slider(0.1:0.2:2, show_value=true, default=2))
+
+ρ: $(@bind ρ Slider(-0.95:0.05:0.95, show_value=true, default=0.9))
+"""
+
+# ╔═╡ a1aed96d-8839-4c40-9f18-1ca453be740b
+μ = [1, 1]
+
+# ╔═╡ e0c947b7-306b-42d3-b004-5f37702be73a
+Σ = [σ₁^2 σ₁*σ₂*ρ;
+	 σ₁*σ₂*ρ σ₂^2]
+
+# ╔═╡ ccbcce90-c46f-4f61-8907-2ccc3e692184
+let
+	mvn = MultivariateNormal(μ, Σ)
+	contourf(-10:0.1:10, -10:0.1:10, (x,y)->logpdf(mvn, [x,y]), color=:speed, xlab="x", ylab="y")
+	title!("log PDF of a MVN")
+end
+
+# ╔═╡ 1ad364c5-b65d-48d7-a829-e284c5e8eebc
+md"""
+## Appendix
+"""
+
 # ╔═╡ efd7bcba-f393-4659-ac5b-006740085144
 cummean(x) = cumsum(x) ./ (1:length(x))
 
@@ -84,18 +177,6 @@ let
 	p
 end
 
-# ╔═╡ d7e88a1a-73e9-48ff-bb51-2292346f88e0
-begin
-	scatter(rand(200), rand(200), label="", title="200 pseudo-random numbers", aspect_ratio=:equal, xlims=[0,1])
-end
-
-# ╔═╡ 74e50a3d-7623-45c2-8d3a-2c34f363177e
-begin
-	s = SobolSeq(2)
-	p = reduce(hcat, next!(s) for i = 1:200)'
-	scatter(p[:,1], p[:,2], label="", title="200 Sobol quasi-random numbers", aspect_ratio=:equal, xlims=[0,1])
-end
-
 # ╔═╡ 67594833-14c8-423c-94ce-91ce2a44b6c9
 begin
 psob = reduce(hcat, next!(s) for i = 1:1024)'
@@ -109,11 +190,8 @@ plot!(pi_sob, label="quasi-random", lw=2)
 title!("Error estimating π using sampling")
 end
 
-# ╔═╡ ba903268-8d56-46d6-80fe-1d35ecc6844b
-(norm.(eachrow(psob)) .≤ 1) / 1024
-
-# ╔═╡ ccbcce90-c46f-4f61-8907-2ccc3e692184
-
+# ╔═╡ 5614c4b1-2c78-4fee-a480-3998a8e1ce6e
+TableOfContents()
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1339,12 +1417,14 @@ version = "1.4.1+1"
 # ╠═2d346892-cb15-11ee-2d81-73e08fcc3288
 # ╠═c175d1ab-28be-4766-bc0c-20cbc72f191d
 # ╠═cfc49c56-f223-4b78-b6da-4e0c83a16bbf
+# ╠═e0f96ed2-bc51-467e-be3e-8617293e33e2
 # ╠═c0677edb-29a4-4c4d-8ca7-9d81eac05c85
 # ╠═d786da44-5cfc-4c36-ae41-af6f623d5a4e
 # ╠═dd8c1370-5fb9-4ab7-8729-ea756762788d
 # ╟─b9be819e-2db9-4952-9453-98bf815b00e8
 # ╠═090d0c6f-de9f-4ce8-befa-4ae9dbe1b38e
 # ╠═36b475e9-a16b-464f-a423-a4fbfbf21ef0
+# ╠═3b9e8f64-d307-48bc-9a71-1ab9accd134e
 # ╠═1a991ac1-d4ed-4774-a9e2-a5f27f99e1ff
 # ╠═b5b55083-2fe3-4620-9759-8a2329154143
 # ╠═482d1da0-3415-425c-84de-69f7fb821934
@@ -1354,12 +1434,26 @@ version = "1.4.1+1"
 # ╠═5a1522f7-411d-40f5-92e8-b5a154b8d735
 # ╟─7779254a-83b9-4849-957c-af4b62c3916a
 # ╟─73898b6c-d8bd-49a9-ba36-a068e62a7ec3
-# ╠═efd7bcba-f393-4659-ac5b-006740085144
 # ╟─d7e88a1a-73e9-48ff-bb51-2292346f88e0
 # ╠═2b79770c-00a8-4c3b-b39e-b31400593ea4
 # ╟─74e50a3d-7623-45c2-8d3a-2c34f363177e
 # ╟─67594833-14c8-423c-94ce-91ce2a44b6c9
-# ╠═ba903268-8d56-46d6-80fe-1d35ecc6844b
+# ╠═fe24583f-afc7-43ee-901f-c81585677ecd
+# ╠═07949347-3e7b-499f-9ca6-c62c131e2a65
+# ╠═432c5cd3-a359-4f80-9a78-d8198b100524
+# ╠═f2faec3d-3d44-43e9-bf03-37ba68e37300
+# ╟─0252887f-b133-426e-82fc-43ac091a7de6
+# ╟─8bfd6e24-27ce-4caf-b68c-b13d89f08337
+# ╠═e79c0f96-02ca-4ebf-bcc5-0f6e0dc3d7d6
+# ╠═5a4a0cb6-93b2-4194-8a65-eb84e396b999
+# ╠═c580ca85-78ff-4cbc-b033-f0c5acde3193
+# ╟─94dd1214-e63c-44d5-b5c3-9ca834a89ebf
+# ╟─fb6698d6-c565-42f7-ab34-8a4c860f7ef4
+# ╠═a1aed96d-8839-4c40-9f18-1ca453be740b
+# ╠═e0c947b7-306b-42d3-b004-5f37702be73a
 # ╠═ccbcce90-c46f-4f61-8907-2ccc3e692184
+# ╠═1ad364c5-b65d-48d7-a829-e284c5e8eebc
+# ╠═efd7bcba-f393-4659-ac5b-006740085144
+# ╠═5614c4b1-2c78-4fee-a480-3998a8e1ce6e
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
