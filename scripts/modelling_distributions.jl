@@ -40,8 +40,8 @@ cdf(dist, 1.0)  # P(X ≤ 1)
 
 # ╔═╡ b9be819e-2db9-4952-9453-98bf815b00e8
 begin
-	plot(x->pdf(dist, x), 0, 20, label="pdf", xlab="x")
-	plot!(x->cdf(dist, x), 0, 20, label="cdf")
+	plot(x->pdf(dist, x), 0, 20, label="pdf", xlab="x", lw=2)
+	plot!(x->cdf(dist, x), 0, 20, label="cdf", lw=2)
 end
 
 # ╔═╡ 090d0c6f-de9f-4ce8-befa-4ae9dbe1b38e
@@ -103,14 +103,37 @@ md"## Elementary probability distributions"
 # ╔═╡ 07949347-3e7b-499f-9ca6-c62c131e2a65
 md"## Combining simple distributions into complex ones"
 
+# ╔═╡ 1d883714-026b-4206-8ee3-a58e89a70c52
+distX = Laplace(8, 6)
+
+# ╔═╡ 52fd8a26-93a1-4c83-a5fd-4247cdff3629
+distY = TriangularDist(-2, 2, 1)
+
 # ╔═╡ 432c5cd3-a359-4f80-9a78-d8198b100524
-dist_prod = product_distribution([Exponential(0.2), Normal(1, 1/2)])
+dist_prod = product_distribution([distX, distY])
+
+# ╔═╡ e495c24a-76d5-4cba-b1f9-76d3e25912d8
+@bind xslice Slider(-10:0.05:25, default=16, show_value=true)
+
+# ╔═╡ 4bd5e387-ac06-4f4b-822f-cbc89e7509f9
+plot(y->pdf(distY, y), -2:0.01:2, label="Y | X=$xslice", color="orange", lw=2, xlabel="y", )
+
+# ╔═╡ 46b4ef15-bd34-4b59-aef5-5dc4e1193ec3
+@bind yslice Slider(-2:0.01:2, default=0, show_value=true)
 
 # ╔═╡ f2faec3d-3d44-43e9-bf03-37ba68e37300
 let
-	contourf(0:0.01:10, -10:0.01:10, (x,y)->logpdf(dist_prod, [x,y]), color=:speed, xlab="x", ylab="y")
-	title!("log PDF of a MVN")
+	contourf(-10:0.05:25, -2:0.01:2, (x,y)->pdf(dist_prod, [x,y]), color=:speed, xlab="x", ylab="y")
+	vline!([xslice], label="Y | X=$xslice", color="orange", lw=2)
+	hline!([yslice], label="X | Y=$yslice", color="blue", ls=:dash, lw=2)
+	title!("PDF of a MVN")
 end
+
+# ╔═╡ c7b2fc1e-9dd3-42e9-aa55-f9aea4781784
+plot(x->pdf(distX, x), -10:0.05:25, label="f_{X | Y=$yslice}", color="blue", ls=:dash, lw=2, xlabel="x", )
+
+# ╔═╡ ffa84522-dd02-47f8-ac3b-b1db08806b2d
+md"### Mixtures of probability distribitions"
 
 # ╔═╡ 0252887f-b133-426e-82fc-43ac091a7de6
 @bind w1 Slider(0:0.05:1, default=0.2, show_value=true)
@@ -129,10 +152,54 @@ dist_mixture = MixtureModel([d1, d2], w)
 
 # ╔═╡ 94dd1214-e63c-44d5-b5c3-9ca834a89ebf
 let
-	plot(x->pdf(dist_mixture, x), -5, 10, label="mixture", lw=2)
+	plot(x->pdf(dist_mixture, x), -5, 10, label="mixture", lw=2, xlab="x")
 	plot!(x->pdf(d1, x), -5, 10, label="component 1", ls=:dash)
 	plot!(x->pdf(d2, x), -5, 10, label="component 2", ls=:dash)
 end
+
+# ╔═╡ d6cd5202-0171-40f9-bc17-d001dadee567
+@bind xm Slider(-5:0.1:10, default=0, show_value=true)
+
+# ╔═╡ fc3a7a70-89e5-43e4-8dae-b7d2d8b54355
+let
+	plot(x->pdf(dist_mixture, x), -5, 10, label="mixture", lw=2, xlab="x")
+	plot!(x->pdf(d1, x), -5, 10, label="component 1", ls=:dash)
+	plot!(x->pdf(d2, x), -5, 10, label="component 2", ls=:dash)
+	vline!([xm], color=:gold, lw=2, label="x=$xm")
+end
+
+# ╔═╡ e61e45a0-d9ec-4ab6-8c1b-fc8579a9a9b3
+let
+	likelihood = [pdf(d1, xm), pdf(d2, xm)]
+	posterior = likelihood .* w ./ pdf(dist_mixture, xm)
+	bar(posterior, xticks=1:length(w), xlabel="component", ylabel="posterior probability", label="X=$xm", color=:gold)
+end
+
+# ╔═╡ ebf13b85-7fa0-4859-88d1-a5189c5bbd40
+let
+	dmv1 = product_distribution([Normal(-2), Normal(-3)])
+	dmv2 = product_distribution([Normal(2, 0.7), Normal(3, 2)])
+	mvmixture = MixtureModel([dmv1, dmv2], [0.6, 0.4])
+
+	contourf(-5:0.1:5, -5:0.1:8, (x,y)->pdf(mvmixture, [x,y]), color=:speed, xlab="x", ylab="y")
+end
+
+# ╔═╡ 36093484-bdd1-4b1b-bd68-39c7b18a9f6b
+spn = MixtureModel(
+	[MixtureModel(
+		[product_distribution([Normal(10, 1), Normal(20, 1.5)]),
+				product_distribution([Normal(20, 1.5), Normal(21, 0.8)]),
+				product_distribution([Uniform(5, 25), Uniform(7, 9)]),
+				product_distribution([TriangularDist(12, 17), TriangularDist(14, 16, 15.5)]),
+				product_distribution([Uniform(2, 28), LogNormal(log(27), 0.1)]),
+			],[0.3, 0.25, 0.25, 0.15, 0.05]),
+		product_distribution([Uniform(0, 30), Uniform(0, 30)])], [0.99, 0.01])
+
+# ╔═╡ 40fbbc43-4a73-4d25-a37c-b39798d60761
+contourf(0:0.1:30, 0:0.1:30, (x,y)->logpdf(spn, [x,y]), color=:speed, xlab="x", ylab="y")
+
+# ╔═╡ 1efe9a9e-cd1b-4fe2-8392-2ce42c871a5f
+md"### The multivariate normal distribution"
 
 # ╔═╡ fb6698d6-c565-42f7-ab34-8a4c860f7ef4
 md"""
@@ -153,8 +220,8 @@ md"""
 # ╔═╡ ccbcce90-c46f-4f61-8907-2ccc3e692184
 let
 	mvn = MultivariateNormal(μ, Σ)
-	contourf(-10:0.1:10, -10:0.1:10, (x,y)->logpdf(mvn, [x,y]), color=:speed, xlab="x", ylab="y")
-	title!("log PDF of a MVN")
+	contourf(-5:0.1:5, -5:0.1:5, (x,y)->pdf(mvn, [x,y]), color=:speed, xlab="x", ylab="y")
+	title!("PDF of a MVN")
 end
 
 # ╔═╡ 1ad364c5-b65d-48d7-a829-e284c5e8eebc
@@ -201,21 +268,15 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Sobol = "ed01d8cd-4d21-5b2a-85b4-cc3bdc58bad4"
-
-[compat]
-Distributions = "~0.25.107"
-Plots = "~1.40.1"
-PlutoUI = "~0.7.55"
-Sobol = "~1.5.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.0"
+julia_version = "1.9.0"
 manifest_format = "2.0"
-project_hash = "323ea6a08c2105ae5ba4607a5f10351865bb71e2"
+project_hash = "6aca9d8dead7075c41fcc94d88140122a06318fe"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -303,7 +364,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.0.5+1"
+version = "1.0.2+0"
 
 [[deps.ConcurrentUtilities]]
 deps = ["Serialization", "Sockets"]
@@ -453,15 +514,15 @@ version = "3.3.9+0"
 
 [[deps.GR]]
 deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Preferences", "Printf", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "UUIDs", "p7zip_jll"]
-git-tree-sha1 = "3458564589be207fa6a77dbbf8b97674c9836aab"
+git-tree-sha1 = "27442171f28c952804dede8ff72828a96f2bfc1f"
 uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-version = "0.73.2"
+version = "0.72.10"
 
 [[deps.GR_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "FreeType2_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Qt6Base_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "77f81da2964cc9fa7c0127f941e8bce37f7f1d70"
+git-tree-sha1 = "025d171a2847f616becc0f84c8dc62fe18f0f6dd"
 uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
-version = "0.73.2+0"
+version = "0.72.10+0"
 
 [[deps.Gettext_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "XML2_jll"]
@@ -601,26 +662,21 @@ version = "0.16.1"
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
-version = "0.6.4"
+version = "0.6.3"
 
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "8.4.0+0"
+version = "7.84.0+0"
 
 [[deps.LibGit2]]
-deps = ["Base64", "LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
+deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
-
-[[deps.LibGit2_jll]]
-deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll"]
-uuid = "e37daf67-58a4-590a-8e99-b0245dd2ffc5"
-version = "1.6.4+0"
 
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
-version = "1.11.0+1"
+version = "1.10.2+0"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -726,7 +782,7 @@ version = "1.1.9"
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
-version = "2.28.2+1"
+version = "2.28.2+0"
 
 [[deps.Measures]]
 git-tree-sha1 = "c13304c81eec1ed3af7fc20e75fb6b26092a1102"
@@ -744,7 +800,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2023.1.10"
+version = "2022.10.11"
 
 [[deps.NaNMath]]
 deps = ["OpenLibm_jll"]
@@ -765,12 +821,12 @@ version = "1.3.5+1"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.23+2"
+version = "0.3.21+4"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
-version = "0.8.1+2"
+version = "0.8.1+0"
 
 [[deps.OpenSSL]]
 deps = ["BitFlags", "Dates", "MozillaCACerts_jll", "OpenSSL_jll", "Sockets"]
@@ -804,7 +860,7 @@ version = "1.6.3"
 [[deps.PCRE2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
-version = "10.42.0+1"
+version = "10.42.0+0"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
@@ -832,7 +888,7 @@ version = "0.42.2+0"
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.10.0"
+version = "1.9.0"
 
 [[deps.PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -847,10 +903,10 @@ uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
 version = "1.4.0"
 
 [[deps.Plots]]
-deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "PrecompileTools", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "UnitfulLatexify", "Unzip"]
-git-tree-sha1 = "c4fa93d7d66acad8f6f4ff439576da9d2e890ee0"
+deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "PrecompileTools", "Preferences", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "UnitfulLatexify", "Unzip"]
+git-tree-sha1 = "ccee59c6e48e6f2edf8a5b64dc817b6729f99eb5"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.40.1"
+version = "1.39.0"
 
     [deps.Plots.extensions]
     FileIOExt = "FileIO"
@@ -905,7 +961,7 @@ deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
 [[deps.Random]]
-deps = ["SHA"]
+deps = ["SHA", "Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[deps.RecipesBase]]
@@ -991,7 +1047,6 @@ version = "1.2.1"
 [[deps.SparseArrays]]
 deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-version = "1.10.0"
 
 [[deps.SpecialFunctions]]
 deps = ["IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
@@ -1008,7 +1063,7 @@ version = "2.3.1"
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-version = "1.10.0"
+version = "1.9.0"
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
@@ -1041,9 +1096,9 @@ deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 
 [[deps.SuiteSparse_jll]]
-deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
+deps = ["Artifacts", "Libdl", "Pkg", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
-version = "7.2.1+1"
+version = "5.10.1+6"
 
 [[deps.TOML]]
 deps = ["Dates"]
@@ -1305,7 +1360,7 @@ version = "1.5.0+0"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
-version = "1.2.13+1"
+version = "1.2.13+0"
 
 [[deps.Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1346,7 +1401,7 @@ version = "0.15.1+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.8.0+1"
+version = "5.7.0+0"
 
 [[deps.libevdev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1387,12 +1442,12 @@ version = "1.1.6+0"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.52.0+1"
+version = "1.48.0+0"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
-version = "17.4.0+2"
+version = "17.4.0+0"
 
 [[deps.x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1440,14 +1495,28 @@ version = "1.4.1+1"
 # ╟─67594833-14c8-423c-94ce-91ce2a44b6c9
 # ╠═fe24583f-afc7-43ee-901f-c81585677ecd
 # ╠═07949347-3e7b-499f-9ca6-c62c131e2a65
+# ╠═1d883714-026b-4206-8ee3-a58e89a70c52
+# ╠═52fd8a26-93a1-4c83-a5fd-4247cdff3629
 # ╠═432c5cd3-a359-4f80-9a78-d8198b100524
 # ╠═f2faec3d-3d44-43e9-bf03-37ba68e37300
+# ╟─e495c24a-76d5-4cba-b1f9-76d3e25912d8
+# ╟─4bd5e387-ac06-4f4b-822f-cbc89e7509f9
+# ╟─c7b2fc1e-9dd3-42e9-aa55-f9aea4781784
+# ╠═46b4ef15-bd34-4b59-aef5-5dc4e1193ec3
+# ╠═ffa84522-dd02-47f8-ac3b-b1db08806b2d
 # ╟─0252887f-b133-426e-82fc-43ac091a7de6
 # ╟─8bfd6e24-27ce-4caf-b68c-b13d89f08337
 # ╠═e79c0f96-02ca-4ebf-bcc5-0f6e0dc3d7d6
 # ╠═5a4a0cb6-93b2-4194-8a65-eb84e396b999
 # ╠═c580ca85-78ff-4cbc-b033-f0c5acde3193
-# ╟─94dd1214-e63c-44d5-b5c3-9ca834a89ebf
+# ╠═94dd1214-e63c-44d5-b5c3-9ca834a89ebf
+# ╠═d6cd5202-0171-40f9-bc17-d001dadee567
+# ╠═fc3a7a70-89e5-43e4-8dae-b7d2d8b54355
+# ╠═e61e45a0-d9ec-4ab6-8c1b-fc8579a9a9b3
+# ╠═ebf13b85-7fa0-4859-88d1-a5189c5bbd40
+# ╠═36093484-bdd1-4b1b-bd68-39c7b18a9f6b
+# ╠═40fbbc43-4a73-4d25-a37c-b39798d60761
+# ╠═1efe9a9e-cd1b-4fe2-8392-2ce42c871a5f
 # ╟─fb6698d6-c565-42f7-ab34-8a4c860f7ef4
 # ╠═a1aed96d-8839-4c40-9f18-1ca453be740b
 # ╠═e0c947b7-306b-42d3-b004-5f37702be73a
