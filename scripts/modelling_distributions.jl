@@ -18,7 +18,7 @@ end
 using Distributions
 
 # ╔═╡ c175d1ab-28be-4766-bc0c-20cbc72f191d
-using PlutoUI, Plots, LinearAlgebra
+using PlutoUI, Plots, LinearAlgebra, Markdown
 
 # ╔═╡ 2b79770c-00a8-4c3b-b39e-b31400593ea4
 using Sobol
@@ -60,19 +60,19 @@ rand(dist)
 rand(dist, 10)
 
 # ╔═╡ 482d1da0-3415-425c-84de-69f7fb821934
-f(r) = 4π * r^2  # area sphere
+g(r) = 4π * r^2  # area sphere
 
 # ╔═╡ 7008afc0-785e-45a8-9b6d-5b8f26bae09d
 dr = 1e-4
 
 # ╔═╡ 64e0265f-a621-495f-b73a-0af23b0ef1ac
-Ā_integrate = sum(r->f(r) * pdf(dist, r) * dr, 0:dr:50)
+Ā_integrate = sum(r->g(r) * pdf(dist, r) * dr, 0:dr:50)
 
 # ╔═╡ 18a1b129-eac5-4080-8af9-7d9fbf800107
-f(mean(dist))
+g(mean(dist))
 
 # ╔═╡ 5a1522f7-411d-40f5-92e8-b5a154b8d735
-Ā_sampling = mean(f, rand(dist, 1000_000))
+Ā_sampling = mean(g, rand(dist, 1000_000))
 
 # ╔═╡ 7779254a-83b9-4849-957c-af4b62c3916a
 let
@@ -84,6 +84,9 @@ let
 	end
 	plot(ps...)
 end
+
+# ╔═╡ e94fa51a-e1a7-4a1b-88ef-76b38d3a6d74
+plot(n->1/√(n), 1, 10000, lw=2, label="1/√n", yscale=:log10, xscale=:log10)
 
 # ╔═╡ d7e88a1a-73e9-48ff-bb51-2292346f88e0
 begin
@@ -220,7 +223,7 @@ md"""
 # ╔═╡ ccbcce90-c46f-4f61-8907-2ccc3e692184
 let
 	mvn = MultivariateNormal(μ, Σ)
-	contourf(-5:0.1:5, -5:0.1:5, (x,y)->pdf(mvn, [x,y]), color=:speed, xlab="x", ylab="y")
+	contourf(-5:0.05:5, -5:0.05:5, (x,y)->pdf(mvn, [x,y]), color=:speed, xlab="x", ylab="y")
 	title!("PDF of a MVN")
 end
 
@@ -236,7 +239,7 @@ cummean(x) = cumsum(x) ./ (1:length(x))
 let
 	d = Binomial(30, 0.3)
 	d = dist
-	p = hline([mean(d)], linestyle=:dash, lw=2, color=:red, label="E[X]", xlab="sample size n")
+	p = hline([mean(d)], linestyle=:dash, lw=2, color=:red, label="E[X]", xlab="sample size n", ylabel="running average")
 	for i in 1:5
 		plot!(cummean(rand(d, 500)), lw=2, label="", alpha=0.6)
 	end
@@ -265,18 +268,25 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Sobol = "ed01d8cd-4d21-5b2a-85b4-cc3bdc58bad4"
+
+[compat]
+Distributions = "~0.25.107"
+Plots = "~1.39.0"
+PlutoUI = "~0.7.55"
+Sobol = "~1.5.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.0"
+julia_version = "1.10.0"
 manifest_format = "2.0"
-project_hash = "6aca9d8dead7075c41fcc94d88140122a06318fe"
+project_hash = "920c02bb4e1dc65f1548764619007689050b9dbe"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -364,7 +374,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.0.2+0"
+version = "1.0.5+1"
 
 [[deps.ConcurrentUtilities]]
 deps = ["Serialization", "Sockets"]
@@ -662,21 +672,26 @@ version = "0.16.1"
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
-version = "0.6.3"
+version = "0.6.4"
 
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "7.84.0+0"
+version = "8.4.0+0"
 
 [[deps.LibGit2]]
-deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
+deps = ["Base64", "LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
+
+[[deps.LibGit2_jll]]
+deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll"]
+uuid = "e37daf67-58a4-590a-8e99-b0245dd2ffc5"
+version = "1.6.4+0"
 
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
-version = "1.10.2+0"
+version = "1.11.0+1"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -782,7 +797,7 @@ version = "1.1.9"
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
-version = "2.28.2+0"
+version = "2.28.2+1"
 
 [[deps.Measures]]
 git-tree-sha1 = "c13304c81eec1ed3af7fc20e75fb6b26092a1102"
@@ -800,7 +815,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2022.10.11"
+version = "2023.1.10"
 
 [[deps.NaNMath]]
 deps = ["OpenLibm_jll"]
@@ -821,12 +836,12 @@ version = "1.3.5+1"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.21+4"
+version = "0.3.23+2"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
-version = "0.8.1+0"
+version = "0.8.1+2"
 
 [[deps.OpenSSL]]
 deps = ["BitFlags", "Dates", "MozillaCACerts_jll", "OpenSSL_jll", "Sockets"]
@@ -860,7 +875,7 @@ version = "1.6.3"
 [[deps.PCRE2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
-version = "10.42.0+0"
+version = "10.42.0+1"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
@@ -888,7 +903,7 @@ version = "0.42.2+0"
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.9.0"
+version = "1.10.0"
 
 [[deps.PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -961,7 +976,7 @@ deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
 [[deps.Random]]
-deps = ["SHA", "Serialization"]
+deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[deps.RecipesBase]]
@@ -1047,6 +1062,7 @@ version = "1.2.1"
 [[deps.SparseArrays]]
 deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+version = "1.10.0"
 
 [[deps.SpecialFunctions]]
 deps = ["IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
@@ -1063,7 +1079,7 @@ version = "2.3.1"
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-version = "1.9.0"
+version = "1.10.0"
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
@@ -1096,9 +1112,9 @@ deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 
 [[deps.SuiteSparse_jll]]
-deps = ["Artifacts", "Libdl", "Pkg", "libblastrampoline_jll"]
+deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
-version = "5.10.1+6"
+version = "7.2.1+1"
 
 [[deps.TOML]]
 deps = ["Dates"]
@@ -1360,7 +1376,7 @@ version = "1.5.0+0"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
-version = "1.2.13+0"
+version = "1.2.13+1"
 
 [[deps.Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1401,7 +1417,7 @@ version = "0.15.1+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.7.0+0"
+version = "5.8.0+1"
 
 [[deps.libevdev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1442,12 +1458,12 @@ version = "1.1.6+0"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.48.0+0"
+version = "1.52.0+1"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
-version = "17.4.0+0"
+version = "17.4.0+2"
 
 [[deps.x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1489,6 +1505,7 @@ version = "1.4.1+1"
 # ╠═5a1522f7-411d-40f5-92e8-b5a154b8d735
 # ╟─7779254a-83b9-4849-957c-af4b62c3916a
 # ╟─73898b6c-d8bd-49a9-ba36-a068e62a7ec3
+# ╠═e94fa51a-e1a7-4a1b-88ef-76b38d3a6d74
 # ╟─d7e88a1a-73e9-48ff-bb51-2292346f88e0
 # ╠═2b79770c-00a8-4c3b-b39e-b31400593ea4
 # ╟─74e50a3d-7623-45c2-8d3a-2c34f363177e
@@ -1501,8 +1518,8 @@ version = "1.4.1+1"
 # ╠═f2faec3d-3d44-43e9-bf03-37ba68e37300
 # ╟─e495c24a-76d5-4cba-b1f9-76d3e25912d8
 # ╟─4bd5e387-ac06-4f4b-822f-cbc89e7509f9
-# ╟─c7b2fc1e-9dd3-42e9-aa55-f9aea4781784
 # ╠═46b4ef15-bd34-4b59-aef5-5dc4e1193ec3
+# ╟─c7b2fc1e-9dd3-42e9-aa55-f9aea4781784
 # ╠═ffa84522-dd02-47f8-ac3b-b1db08806b2d
 # ╟─0252887f-b133-426e-82fc-43ac091a7de6
 # ╟─8bfd6e24-27ce-4caf-b68c-b13d89f08337
@@ -1519,8 +1536,8 @@ version = "1.4.1+1"
 # ╠═1efe9a9e-cd1b-4fe2-8392-2ce42c871a5f
 # ╟─fb6698d6-c565-42f7-ab34-8a4c860f7ef4
 # ╠═a1aed96d-8839-4c40-9f18-1ca453be740b
-# ╠═e0c947b7-306b-42d3-b004-5f37702be73a
-# ╠═ccbcce90-c46f-4f61-8907-2ccc3e692184
+# ╟─e0c947b7-306b-42d3-b004-5f37702be73a
+# ╟─ccbcce90-c46f-4f61-8907-2ccc3e692184
 # ╠═1ad364c5-b65d-48d7-a829-e284c5e8eebc
 # ╠═efd7bcba-f393-4659-ac5b-006740085144
 # ╠═5614c4b1-2c78-4fee-a480-3998a8e1ce6e
