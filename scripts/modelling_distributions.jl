@@ -18,7 +18,7 @@ end
 using Distributions
 
 # ╔═╡ c175d1ab-28be-4766-bc0c-20cbc72f191d
-using PlutoUI, Plots, LinearAlgebra, Markdown
+using PlutoUI, Plots, LinearAlgebra, Markdown, Random, LaTeXStrings
 
 # ╔═╡ 2b79770c-00a8-4c3b-b39e-b31400593ea4
 using Sobol
@@ -85,8 +85,11 @@ let
 	plot(ps...)
 end
 
+# ╔═╡ e3d9a5b7-73ec-4c16-8799-2e2a4f99c018
+plot(n->1/√(n), 1, 100, lw=2, label=L"1/\sqrt{n}", ylab=L"\sigma_{\bar{X}_n}", xlabel=L"n")
+
 # ╔═╡ e94fa51a-e1a7-4a1b-88ef-76b38d3a6d74
-plot(n->1/√(n), 1, 10000, lw=2, label="1/√n", yscale=:log10, xscale=:log10)
+plot(n->1/√(n), 1, 1000_000, lw=2, yscale=:log10, xscale=:log10, label=L"1/\sqrt{n}", ylab=L"\sigma_{\bar{X}_n}", xlabel=L"n")
 
 # ╔═╡ d7e88a1a-73e9-48ff-bb51-2292346f88e0
 begin
@@ -102,6 +105,81 @@ end
 
 # ╔═╡ fe24583f-afc7-43ee-901f-c81585677ecd
 md"## Elementary probability distributions"
+
+# ╔═╡ 2db26aa9-7516-400c-905f-b6b710820667
+md"""
+### Distributions over integers
+
+| Distribution | PMF                                          | Support                           | Parameters                       | $E[X]$          | Meaning                                                                      | Example                                        |
+| ------------ | -------------------------------------------- | --------------------------------- | -------------------------------- | --------------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
+| Bernoulli    | $P(X=k)=p^k(1-p)^{1-k}$                      | $k\in\{0,1\}$                     | $p\in[0,1]$                      | $p$             | Outcome of an experiment that asks a yes-no question.                        | Coin flip.                                     |
+| Binomial     | $P(X=k) = \binom{n}{k}\, p^k (1-p)^{n-k}$    | $k \in \{0, 1, ..., n\}$          | $n \in \mathbb{N}, p \in [0, 1]$ | $np$            | Number of successes in a fixed number of independent trials.                 | Number of heads in $n$ coin flips.             |
+| Poisson      | $P(X=k) = \frac{e^{-\lambda} \lambda^k}{k!}$ | $k \in \{0, 1, 2, ...\}$          | $\lambda > 0$                    | $\lambda$       | Number of events occurring in a fixed interval of time or space.             | Number of mutations in a long sequence of DNA. |
+| Geometric    | $P(X=k) = (1-p)^{k-1}p$                      | $k \in \{1, 2, ...\}$             | $p \in (0,1]$                    | $\frac{1}{p}$   | Number of trials needed until the first success in Bernoulli trials.         | Number of coin flips until the first head.     |
+| Uniform      | $P(X=k) = \frac{1}{b-a+1}$                   | $k \in \{a, a+1,\ldots, b-1, b\}$ | $a, b$                           | $\frac{a+b}{2}$ | All outcomes in the integers $\{a, a+1,\ldots, b-1, b\}$ are equally likely. | Rolling a fair six-sided die.                  |
+
+**Example:** In a given period of time, a biologist is interested in counting the number of fish caught in a specific location. The average rate of fish caught per hour is $\lambda = 3$. The biologist can model the number of fish caught in a certain time interval using the Poisson distribution. The parameter $\lambda$ represents the average rate of events (in this case, catching fish) in a fixed time interval. The PMF of the Poisson distribution allows the biologist to calculate the probability of observing a specific number of fish caught within that time interval. This distribution is useful for studying rare events where the average rate is known and where each event is independent of others, such as counting occurrences of diseases in a population or arrivals at a service counter.
+"""
+
+# ╔═╡ 222cdcae-5b51-4fdc-a794-11471449ebcd
+let
+# Binomial
+	pbin = scatter(k->pdf(Binomial(20, .5), k), 0:25, label="n=25, p=0.5", xlab=L"k", ylab=L"P(X=k)")
+	scatter!(pbin, k->pdf(Binomial(20, .25), k), 0:25, label="n=25, p=0.25", marker=:^)
+	title!("Binomial distribution")
+	
+	# Poisson
+	ppois = scatter(k->pdf(Poisson(1), k), 0:20, label="λ=1", xlab=L"k", ylab=L"P(X=k)")
+	scatter!(ppois, k->pdf(Poisson(5), k), 0:20, label="λ=5", marker=:^)
+	scatter!(ppois, k->pdf(Poisson(10), k), 0:20, label="λ=10", marker=:v)
+	title!("Poisson distribution")
+	
+	# Geometric
+	pgeo = scatter(k->pdf(Geometric(0.1), k), 1:25, label="p=0.1", xlab=L"k", ylab=L"P(X=k)")
+	scatter!(pgeo, k->pdf(Geometric(0.2), k), 0:25, label="p=0.2", marker=:^)
+	scatter!(pgeo, k->pdf(Geometric(0.05), k), 0:25, label="p=0.05", marker=:v)
+	title!("Geometric distribution")
+	
+	# Geometric
+	punif = scatter(k->pdf(DiscreteUniform(5, 10), k), 0:30, label="a=5, b=10", xlab=L"k", ylab=L"P(X=k)")
+	scatter!(punif, k->pdf(DiscreteUniform(10, 25), k), 0:30, label="a=10, b=25", marker=:^)
+	title!("Uniform distribution")
+	
+	plot(pbin, ppois, pgeo, punif)
+end
+
+# ╔═╡ 8ae351eb-c1b8-4934-aa48-023f8feba75c
+md"""
+### Distributions over unbounded real numbers
+
+| Distribution | PDF                                                                                                                                                     | Support            | Parameters                       | $E[X]$                                   | Meaning                                                                                   | Example                                                     |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Normal       | $f_X(x) = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{(x-\mu)^2}{2\sigma^2}}$                                                                                 | $x \in \mathbb{R}$ | $\mu \in \mathbb{R}, \sigma > 0$ | $\mu$                                    | Models the distribution of a continuous random variable with symmetric bell-shaped curve. | Yearly rainfall                                             |
+| Student's t  | $f_X(x) = \frac{\Gamma\left(\frac{\nu+1}{2}\right)}{\sqrt{\nu\pi}\Gamma\left(\frac{\nu}{2}\right)} \left(1 + \frac{x^2}{\nu}\right)^{-\frac{\nu+1}{2}}$ | $x \in \mathbb{R}$ | $\nu > 0$                        | $0$, for $\nu > 1$, otherwise undefined. | Bell-shaped curve with potential unbounded variance.                                      | Gene expression differences in small groups                 |
+| Cauchy       | $f_X(x) = \frac{1}{\pi\gamma(1 + (\frac{x-x_0}{\gamma})^2)}$                                                                                            | $x \in \mathbb{R}$ | $x_0$, $\gamma$                  | Undefined                                | Heavy-tailed distribution, ratio of two normal distributions.                             | Exteme events, such as the annual maximum one-day rainfall  |
+| Laplace      | $f_X(x) = \frac{1}{2b} e^{-\frac{x-\mu}{b}}$                                                                                                            | $x \in \mathbb{R}$ | $\mu \in \mathbb{R}, b > 0$      | $\mu$                                    | Double exponential distibution.                                                           | Modelling noise in electronic devices or signal processing. |
+The normal or Gaussian distribution is by far the most used probability distribution for unbounded real numbers. The central limit theorem and other justifications are used why many naturally occuring phenomena follow a normal distribution. Indeed, the main bulk of a PDF is often bell-shaped. However, a striking feature of the normal distribution are its very light tail: the log-probability-density decreases quadratically. Encountering events that occurs more than $5\sigma$ from the expected value should only occur with a frequency of $6\times 10^{-7}$, which (as who has invested in the stock market can attest) not very realistic. Extreme events can occur much more frequently than a normal distribution would suggest. Many of these alternative distributions, such as the Laplace distribution have much ticker tails and are more suitable to describe processes with extreme events, such as in climate change.
+"""
+
+# ╔═╡ ebe190e6-da7a-4c88-bd31-b5dc53f6a3e1
+let
+	# normal
+	pnorm = plot(xlabel=L"x", ylabel=L"f_X(x)", title="Normal")
+	for (μ, σ) in [(0., 1.), (2., 1.), (0.0, 2.0), (-1, 2)]
+		plot!(x->pdf(Normal(μ, σ),x),-5, 5, lw=2, label="μ=$μ, σ=$σ")
+	end
+	pnorm
+
+	# normal
+	plaplace = plot(xlabel=L"x", ylabel=L"f_X(x)", title="Laplace")
+	for (μ, θ) in [(0., 1.), (2., 1.), (0.0, 2.0), (-1, 2)]
+		plot!(x->pdf(Laplace(μ, θ),x),-8, 8, lw=2, label="μ=$μ, θ=$θ")
+	end
+	plaplace
+
+	plot(pnorm, plaplace)
+
+end
 
 # ╔═╡ 07949347-3e7b-499f-9ca6-c62c131e2a65
 md"## Combining simple distributions into complex ones"
@@ -165,7 +243,7 @@ end
 
 # ╔═╡ fc3a7a70-89e5-43e4-8dae-b7d2d8b54355
 let
-	plot(x->pdf(dist_mixture, x), -5, 10, label="mixture", lw=2, xlab="x")
+	plot(x->pdf(dist_mixture, x), -5, 10, label="mixture", lw=2, xlab=L"x", ylab=L"f_X(x)")
 	plot!(x->pdf(d1, x), -5, 10, label="component 1", ls=:dash)
 	plot!(x->pdf(d2, x), -5, 10, label="component 2", ls=:dash)
 	vline!([xm], color=:gold, lw=2, label="x=$xm")
@@ -239,7 +317,7 @@ cummean(x) = cumsum(x) ./ (1:length(x))
 let
 	d = Binomial(30, 0.3)
 	d = dist
-	p = hline([mean(d)], linestyle=:dash, lw=2, color=:red, label="E[X]", xlab="sample size n", ylabel="running average")
+	p = hline([mean(d)], linestyle=:dash, lw=2, color=:red, label=L"E[X]", xlab=L"n", ylabel=L"\bar{X}_n")
 	for i in 1:5
 		plot!(cummean(rand(d, 500)), lw=2, label="", alpha=0.6)
 	end
@@ -248,16 +326,17 @@ let
 end
 
 # ╔═╡ 67594833-14c8-423c-94ce-91ce2a44b6c9
-begin
-psob = reduce(hcat, next!(s) for i = 1:1024)'
-ppseu = rand(1024, 2)
-
-pi_sob = pi .- 4cummean(norm.(eachrow(psob)) .≤ 1) .|> abs
-pi_pseu = pi .- 4cummean(norm.(eachrow(ppseu)) .≤ 1) .|> abs
-
-plot(pi_pseu, yscale=:log10, label="pseudo-random", xlab="sample size", ylab="absolute error", lw=2)
-plot!(pi_sob, label="quasi-random", lw=2)
-title!("Error estimating π using sampling")
+let
+	Random.seed!(12)
+	psob = reduce(hcat, next!(s) for i = 1:1024)'
+	ppseu = rand(1024, 2)
+	
+	pi_sob = pi .- 4cummean(norm.(eachrow(psob)) .≤ 1) .|> abs
+	pi_pseu = pi .- 4cummean(norm.(eachrow(ppseu)) .≤ 1) .|> abs
+	
+	plot(pi_pseu, yscale=:log10, label="pseudo-random", xlab=L"n", ylab=L"|E[X]-\bar{X}_n|", lw=2)
+	plot!(pi_sob, label="quasi-random", lw=2)
+	title!("Error estimating π using sampling")
 end
 
 # ╔═╡ 5614c4b1-2c78-4fee-a480-3998a8e1ce6e
@@ -267,14 +346,17 @@ TableOfContents()
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Sobol = "ed01d8cd-4d21-5b2a-85b4-cc3bdc58bad4"
 
 [compat]
 Distributions = "~0.25.107"
+LaTeXStrings = "~1.3.1"
 Plots = "~1.39.0"
 PlutoUI = "~0.7.55"
 Sobol = "~1.5.0"
@@ -284,9 +366,9 @@ Sobol = "~1.5.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.0"
+julia_version = "1.9.0"
 manifest_format = "2.0"
-project_hash = "920c02bb4e1dc65f1548764619007689050b9dbe"
+project_hash = "edc0273c2c387039201ab65ab9843bf6b131e820"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -374,7 +456,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.0.5+1"
+version = "1.0.2+0"
 
 [[deps.ConcurrentUtilities]]
 deps = ["Serialization", "Sockets"]
@@ -672,26 +754,21 @@ version = "0.16.1"
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
-version = "0.6.4"
+version = "0.6.3"
 
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "8.4.0+0"
+version = "7.84.0+0"
 
 [[deps.LibGit2]]
-deps = ["Base64", "LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
+deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
-
-[[deps.LibGit2_jll]]
-deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll"]
-uuid = "e37daf67-58a4-590a-8e99-b0245dd2ffc5"
-version = "1.6.4+0"
 
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
-version = "1.11.0+1"
+version = "1.10.2+0"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -797,7 +874,7 @@ version = "1.1.9"
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
-version = "2.28.2+1"
+version = "2.28.2+0"
 
 [[deps.Measures]]
 git-tree-sha1 = "c13304c81eec1ed3af7fc20e75fb6b26092a1102"
@@ -815,7 +892,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2023.1.10"
+version = "2022.10.11"
 
 [[deps.NaNMath]]
 deps = ["OpenLibm_jll"]
@@ -836,12 +913,12 @@ version = "1.3.5+1"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.23+2"
+version = "0.3.21+4"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
-version = "0.8.1+2"
+version = "0.8.1+0"
 
 [[deps.OpenSSL]]
 deps = ["BitFlags", "Dates", "MozillaCACerts_jll", "OpenSSL_jll", "Sockets"]
@@ -875,7 +952,7 @@ version = "1.6.3"
 [[deps.PCRE2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
-version = "10.42.0+1"
+version = "10.42.0+0"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
@@ -903,7 +980,7 @@ version = "0.42.2+0"
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.10.0"
+version = "1.9.0"
 
 [[deps.PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -976,7 +1053,7 @@ deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
 [[deps.Random]]
-deps = ["SHA"]
+deps = ["SHA", "Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[deps.RecipesBase]]
@@ -1062,7 +1139,6 @@ version = "1.2.1"
 [[deps.SparseArrays]]
 deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-version = "1.10.0"
 
 [[deps.SpecialFunctions]]
 deps = ["IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
@@ -1079,7 +1155,7 @@ version = "2.3.1"
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-version = "1.10.0"
+version = "1.9.0"
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
@@ -1112,9 +1188,9 @@ deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 
 [[deps.SuiteSparse_jll]]
-deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
+deps = ["Artifacts", "Libdl", "Pkg", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
-version = "7.2.1+1"
+version = "5.10.1+6"
 
 [[deps.TOML]]
 deps = ["Dates"]
@@ -1376,7 +1452,7 @@ version = "1.5.0+0"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
-version = "1.2.13+1"
+version = "1.2.13+0"
 
 [[deps.Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1417,7 +1493,7 @@ version = "0.15.1+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.8.0+1"
+version = "5.7.0+0"
 
 [[deps.libevdev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1458,12 +1534,12 @@ version = "1.1.6+0"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.52.0+1"
+version = "1.48.0+0"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
-version = "17.4.0+2"
+version = "17.4.0+0"
 
 [[deps.x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1505,12 +1581,17 @@ version = "1.4.1+1"
 # ╠═5a1522f7-411d-40f5-92e8-b5a154b8d735
 # ╟─7779254a-83b9-4849-957c-af4b62c3916a
 # ╟─73898b6c-d8bd-49a9-ba36-a068e62a7ec3
+# ╠═e3d9a5b7-73ec-4c16-8799-2e2a4f99c018
 # ╠═e94fa51a-e1a7-4a1b-88ef-76b38d3a6d74
 # ╟─d7e88a1a-73e9-48ff-bb51-2292346f88e0
 # ╠═2b79770c-00a8-4c3b-b39e-b31400593ea4
 # ╟─74e50a3d-7623-45c2-8d3a-2c34f363177e
 # ╟─67594833-14c8-423c-94ce-91ce2a44b6c9
 # ╠═fe24583f-afc7-43ee-901f-c81585677ecd
+# ╟─2db26aa9-7516-400c-905f-b6b710820667
+# ╠═222cdcae-5b51-4fdc-a794-11471449ebcd
+# ╟─8ae351eb-c1b8-4934-aa48-023f8feba75c
+# ╟─ebe190e6-da7a-4c88-bd31-b5dc53f6a3e1
 # ╠═07949347-3e7b-499f-9ca6-c62c131e2a65
 # ╠═1d883714-026b-4206-8ee3-a58e89a70c52
 # ╠═52fd8a26-93a1-4c83-a5fd-4247cdff3629
