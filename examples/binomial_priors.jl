@@ -4,438 +4,101 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-end
+# ╔═╡ 27037ea0-cd76-11ee-3d7f-07c43460afea
+using Turing, Plots
 
-# ╔═╡ 2d346892-cb15-11ee-2d81-73e08fcc3288
-using Distributions
-
-# ╔═╡ c175d1ab-28be-4766-bc0c-20cbc72f191d
-using PlutoUI, Plots, LinearAlgebra, Markdown, Random, LaTeXStrings
-
-# ╔═╡ 2b79770c-00a8-4c3b-b39e-b31400593ea4
-using Sobol
-
-# ╔═╡ ba4460b1-2855-4695-a3d8-4976666ef164
-using Turing
-
-# ╔═╡ cfc49c56-f223-4b78-b6da-4e0c83a16bbf
-md"# Modeling with probability distributions"
-
-# ╔═╡ e0f96ed2-bc51-467e-be3e-8617293e33e2
-md"## Revision of basic probability theory"
-
-# ╔═╡ c0677edb-29a4-4c4d-8ca7-9d81eac05c85
-dist = Weibull(2, 7)
-
-# ╔═╡ d786da44-5cfc-4c36-ae41-af6f623d5a4e
-pdf(dist, 1.0)  # density in point 1
-
-# ╔═╡ dd8c1370-5fb9-4ab7-8729-ea756762788d
-cdf(dist, 1.0)  # P(X ≤ 1)
-
-# ╔═╡ b9be819e-2db9-4952-9453-98bf815b00e8
-begin
-	plot(x->pdf(dist, x), 0, 20, label="pdf", xlab="x", lw=2)
-	plot!(x->cdf(dist, x), 0, 20, label="cdf", lw=2)
-end
-
-# ╔═╡ 090d0c6f-de9f-4ce8-befa-4ae9dbe1b38e
-mean(dist)
-
-# ╔═╡ 36b475e9-a16b-464f-a423-a4fbfbf21ef0
-var(dist)
-
-# ╔═╡ 3b9e8f64-d307-48bc-9a71-1ab9accd134e
-md"## Sampling and the Law of Large Numbers"
-
-# ╔═╡ 1a991ac1-d4ed-4774-a9e2-a5f27f99e1ff
-rand(dist)
-
-# ╔═╡ b5b55083-2fe3-4620-9759-8a2329154143
-rand(dist, 10)
-
-# ╔═╡ 482d1da0-3415-425c-84de-69f7fb821934
-g(r) = 4π * r^2  # area sphere
-
-# ╔═╡ 7008afc0-785e-45a8-9b6d-5b8f26bae09d
-dr = 1e-4
-
-# ╔═╡ 64e0265f-a621-495f-b73a-0af23b0ef1ac
-Ā_integrate = sum(r->g(r) * pdf(dist, r) * dr, 0:dr:50)
-
-# ╔═╡ 18a1b129-eac5-4080-8af9-7d9fbf800107
-g(mean(dist))
-
-# ╔═╡ 5a1522f7-411d-40f5-92e8-b5a154b8d735
-Ā_sampling = mean(g, rand(dist, 1000_000))
-
-# ╔═╡ 7779254a-83b9-4849-957c-af4b62c3916a
-let
-	ps = []
-	for n in [10, 100, 1000, 10_000]
-		p = histogram(rand(dist, n), label="", title="n=$n", normalize=true)
-		plot!(x -> pdf(dist, x), 0, 20, label="", lw=2)
-		push!(ps, p)
-	end
-	plot(ps...)
-end
-
-# ╔═╡ e3d9a5b7-73ec-4c16-8799-2e2a4f99c018
-plot(n->1/√(n), 1, 100, lw=2, label=L"1/\sqrt{n}", ylab=L"\sigma_{\bar{X}_n}", xlabel=L"n")
-
-# ╔═╡ e94fa51a-e1a7-4a1b-88ef-76b38d3a6d74
-plot(n->1/√(n), 1, 1000_000, lw=2, yscale=:log10, xscale=:log10, label=L"1/\sqrt{n}", ylab=L"\sigma_{\bar{X}_n}", xlabel=L"n")
-
-# ╔═╡ d7e88a1a-73e9-48ff-bb51-2292346f88e0
-begin
-	scatter(rand(200), rand(200), label="", title="200 pseudo-random numbers", aspect_ratio=:equal, xlims=[0,1])
-end
-
-# ╔═╡ 74e50a3d-7623-45c2-8d3a-2c34f363177e
-begin
-	s = SobolSeq(2)
-	p = reduce(hcat, next!(s) for i = 1:200)'
-	scatter(p[:,1], p[:,2], label="", title="200 Sobol quasi-random numbers", aspect_ratio=:equal, xlims=[0,1])
-end
-
-# ╔═╡ fe24583f-afc7-43ee-901f-c81585677ecd
-md"## Elementary probability distributions"
-
-# ╔═╡ 2db26aa9-7516-400c-905f-b6b710820667
+# ╔═╡ dd5d4013-d775-4942-9ede-ab7674b8e3a1
 md"""
-### Distributions over integers
 
-| Distribution | PMF                                          | Support                           | Parameters                       | $E[X]$          | Meaning                                                                      | Example                                        |
-| ------------ | -------------------------------------------- | --------------------------------- | -------------------------------- | --------------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
-| Bernoulli    | $P(X=k)=p^k(1-p)^{1-k}$                      | $k\in\{0,1\}$                     | $p\in[0,1]$                      | $p$             | Outcome of an experiment that asks a yes-no question.                        | Coin flip.                                     |
-| Binomial     | $P(X=k) = \binom{n}{k}\, p^k (1-p)^{n-k}$    | $k \in \{0, 1, ..., n\}$          | $n \in \mathbb{N}, p \in [0, 1]$ | $np$            | Number of successes in a fixed number of independent trials.                 | Number of heads in $n$ coin flips.             |
-| Poisson      | $P(X=k) = \frac{e^{-\lambda} \lambda^k}{k!}$ | $k \in \{0, 1, 2, ...\}$          | $\lambda > 0$                    | $\lambda$       | Number of events occurring in a fixed interval of time or space.             | Number of mutations in a long sequence of DNA. |
-| Geometric    | $P(X=k) = (1-p)^{k-1}p$                      | $k \in \{1, 2, ...\}$             | $p \in (0,1]$                    | $\frac{1}{p}$   | Number of trials needed until the first success in Bernoulli trials.         | Number of coin flips until the first head.     |
-| Uniform      | $P(X=k) = \frac{1}{b-a+1}$                   | $k \in \{a, a+1,\ldots, b-1, b\}$ | $a, b$                           | $\frac{a+b}{2}$ | All outcomes in the integers $\{a, a+1,\ldots, b-1, b\}$ are equally likely. | Rolling a fair six-sided die.                  |
+Give the histogram of $X\sim$ binom(100, p) with a prior distribution for $p$ as
+1.  $\delta(0.7)$ ($p$ is always 0.7),
+2.  $p\sim$ Uniform(0.6, 0.8)
+3.  $p\sim Normal(0.7, 0.1)$ (use TruncatedNormal to generate valid values for $p$)
+4.  $p\sim$ Beta(7, 3)
+5.  $p$ equal to 0.6 in 50% of the time and 0.8 elsewise
 
-**Example:** In a given period of time, a biologist is interested in counting the number of fish caught in a specific location. The average rate of fish caught per hour is $\lambda = 3$. The biologist can model the number of fish caught in a certain time interval using the Poisson distribution. The parameter $\lambda$ represents the average rate of events (in this case, catching fish) in a fixed time interval. The PMF of the Poisson distribution allows the biologist to calculate the probability of observing a specific number of fish caught within that time interval. This distribution is useful for studying rare events where the average rate is known and where each event is independent of others, such as counting occurrences of diseases in a population or arrivals at a service counter.
 """
 
-# ╔═╡ 222cdcae-5b51-4fdc-a794-11471449ebcd
-let
-# Binomial
-	pbin = scatter(k->pdf(Binomial(20, .5), k), 0:25, label="n=25, p=0.5", xlab=L"k", ylab=L"P(X=k)")
-	scatter!(pbin, k->pdf(Binomial(20, .25), k), 0:25, label="n=25, p=0.25", marker=:^)
-	title!("Binomial distribution")
-	
-	# Poisson
-	ppois = scatter(k->pdf(Poisson(1), k), 0:20, label="λ=1", xlab=L"k", ylab=L"P(X=k)")
-	scatter!(ppois, k->pdf(Poisson(5), k), 0:20, label="λ=5", marker=:^)
-	scatter!(ppois, k->pdf(Poisson(10), k), 0:20, label="λ=10", marker=:v)
-	title!("Poisson distribution")
-	
-	# Geometric
-	pgeo = scatter(k->pdf(Geometric(0.1), k), 1:25, label="p=0.1", xlab=L"k", ylab=L"P(X=k)")
-	scatter!(pgeo, k->pdf(Geometric(0.2), k), 0:25, label="p=0.2", marker=:^)
-	scatter!(pgeo, k->pdf(Geometric(0.05), k), 0:25, label="p=0.05", marker=:v)
-	title!("Geometric distribution")
-	
-	# Geometric
-	punif = scatter(k->pdf(DiscreteUniform(5, 10), k), 0:30, label="a=5, b=10", xlab=L"k", ylab=L"P(X=k)")
-	scatter!(punif, k->pdf(DiscreteUniform(10, 25), k), 0:30, label="a=10, b=25", marker=:^)
-	title!("Uniform distribution")
-	
-	plot(pbin, ppois, pgeo, punif)
-end
-
-# ╔═╡ 8ae351eb-c1b8-4934-aa48-023f8feba75c
-md"""
-### Distributions over unbounded real numbers
-
-| Distribution | PDF                                                                                                                                                     | Support            | Parameters                       | $E[X]$                                   | Meaning                                                                                   | Example                                                     |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| Normal       | $f_X(x) = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{(x-\mu)^2}{2\sigma^2}}$                                                                                 | $x \in \mathbb{R}$ | $\mu \in \mathbb{R}, \sigma > 0$ | $\mu$                                    | Models the distribution of a continuous random variable with symmetric bell-shaped curve. | Yearly rainfall                                             |
-| Student's t  | $f_X(x) = \frac{\Gamma\left(\frac{\nu+1}{2}\right)}{\sqrt{\nu\pi}\Gamma\left(\frac{\nu}{2}\right)} \left(1 + \frac{x^2}{\nu}\right)^{-\frac{\nu+1}{2}}$ | $x \in \mathbb{R}$ | $\nu > 0$                        | $0$, for $\nu > 1$, otherwise undefined. | Bell-shaped curve with potential unbounded variance.                                      | Gene expression differences in small groups                 |
-| Cauchy       | $f_X(x) = \frac{1}{\pi\gamma(1 + (\frac{x-x_0}{\gamma})^2)}$                                                                                            | $x \in \mathbb{R}$ | $x_0$, $\gamma$                  | Undefined                                | Heavy-tailed distribution, ratio of two normal distributions.                             | Exteme events, such as the annual maximum one-day rainfall  |
-| Laplace      | $f_X(x) = \frac{1}{2b} e^{-\frac{x-\mu}{b}}$                                                                                                            | $x \in \mathbb{R}$ | $\mu \in \mathbb{R}, b > 0$      | $\mu$                                    | Double exponential distibution.                                                           | Modelling noise in electronic devices or signal processing. |
-The normal or Gaussian distribution is by far the most used probability distribution for unbounded real numbers. The central limit theorem and other justifications are used why many naturally occuring phenomena follow a normal distribution. Indeed, the main bulk of a PDF is often bell-shaped. However, a striking feature of the normal distribution are its very light tail: the log-probability-density decreases quadratically. Encountering events that occurs more than $5\sigma$ from the expected value should only occur with a frequency of $6\times 10^{-7}$, which (as who has invested in the stock market can attest) not very realistic. Extreme events can occur much more frequently than a normal distribution would suggest. Many of these alternative distributions, such as the Laplace distribution have much ticker tails and are more suitable to describe processes with extreme events, such as in climate change.
-"""
-
-# ╔═╡ ebe190e6-da7a-4c88-bd31-b5dc53f6a3e1
-let
-	# normal
-	pnorm = plot(xlabel=L"x", ylabel=L"f_X(x)", title="Normal")
-	for (μ, σ) in [(0., 1.), (2., 1.), (0.0, 2.0), (-1, 2)]
-		plot!(x->pdf(Normal(μ, σ),x),-5, 5, lw=2, label="μ=$μ, σ=$σ")
-	end
-	pnorm
-
-	# normal
-	plaplace = plot(xlabel=L"x", ylabel=L"f_X(x)", title="Laplace")
-	for (μ, θ) in [(0., 1.), (2., 1.), (0.0, 2.0), (-1, 2)]
-		plot!(x->pdf(Laplace(μ, θ),x),-8, 8, lw=2, label="μ=$μ, θ=$θ")
-	end
-	plaplace
-
-	plot(pnorm, plaplace)
-
-end
-
-# ╔═╡ 07949347-3e7b-499f-9ca6-c62c131e2a65
-md"## Combining simple distributions into complex ones"
-
-# ╔═╡ 1d883714-026b-4206-8ee3-a58e89a70c52
-distX = Laplace(8, 6)
-
-# ╔═╡ 52fd8a26-93a1-4c83-a5fd-4247cdff3629
-distY = TriangularDist(-2, 2, 1)
-
-# ╔═╡ 432c5cd3-a359-4f80-9a78-d8198b100524
-dist_prod = product_distribution([distX, distY])
-
-# ╔═╡ e495c24a-76d5-4cba-b1f9-76d3e25912d8
-@bind xslice Slider(-10:0.05:25, default=16, show_value=true)
-
-# ╔═╡ 4bd5e387-ac06-4f4b-822f-cbc89e7509f9
-plot(y->pdf(distY, y), -2:0.01:2, label="Y | X=$xslice", color="orange", lw=2, xlabel="y", )
-
-# ╔═╡ 46b4ef15-bd34-4b59-aef5-5dc4e1193ec3
-@bind yslice Slider(-2:0.01:2, default=0, show_value=true)
-
-# ╔═╡ f2faec3d-3d44-43e9-bf03-37ba68e37300
-let
-	contourf(-10:0.05:25, -2:0.01:2, (x,y)->pdf(dist_prod, [x,y]), color=:speed, xlab="x", ylab="y")
-	vline!([xslice], label="Y | X=$xslice", color="orange", lw=2)
-	hline!([yslice], label="X | Y=$yslice", color="blue", ls=:dash, lw=2)
-	title!("PDF of a MVN")
-end
-
-# ╔═╡ c7b2fc1e-9dd3-42e9-aa55-f9aea4781784
-plot(x->pdf(distX, x), -10:0.05:25, label="f_{X | Y=$yslice}", color="blue", ls=:dash, lw=2, xlabel="x", )
-
-# ╔═╡ ffa84522-dd02-47f8-ac3b-b1db08806b2d
-md"### Mixtures of probability distribitions"
-
-# ╔═╡ 0252887f-b133-426e-82fc-43ac091a7de6
-@bind w1 Slider(0:0.05:1, default=0.2, show_value=true)
-
-# ╔═╡ 8bfd6e24-27ce-4caf-b68c-b13d89f08337
-w = [w1, 1-w1]
-
-# ╔═╡ e79c0f96-02ca-4ebf-bcc5-0f6e0dc3d7d6
-d1 = Normal(-2, 1)
-
-# ╔═╡ 5a4a0cb6-93b2-4194-8a65-eb84e396b999
-d2 = Normal(3, 2)
-
-# ╔═╡ c580ca85-78ff-4cbc-b033-f0c5acde3193
-dist_mixture = MixtureModel([d1, d2], w)
-
-# ╔═╡ 94dd1214-e63c-44d5-b5c3-9ca834a89ebf
-let
-	plot(x->pdf(dist_mixture, x), -5, 10, label="mixture", lw=2, xlab="x")
-	plot!(x->pdf(d1, x), -5, 10, label="component 1", ls=:dash)
-	plot!(x->pdf(d2, x), -5, 10, label="component 2", ls=:dash)
-end
-
-# ╔═╡ d6cd5202-0171-40f9-bc17-d001dadee567
-@bind xm Slider(-5:0.1:10, default=0, show_value=true)
-
-# ╔═╡ fc3a7a70-89e5-43e4-8dae-b7d2d8b54355
-let
-	plot(x->pdf(dist_mixture, x), -5, 10, label="mixture", lw=2, xlab=L"x", ylab=L"f_X(x)")
-	plot!(x->pdf(d1, x), -5, 10, label="component 1", ls=:dash)
-	plot!(x->pdf(d2, x), -5, 10, label="component 2", ls=:dash)
-	vline!([xm], color=:gold, lw=2, label="x=$xm")
-end
-
-# ╔═╡ e61e45a0-d9ec-4ab6-8c1b-fc8579a9a9b3
-let
-	likelihood = [pdf(d1, xm), pdf(d2, xm)]
-	posterior = likelihood .* w ./ pdf(dist_mixture, xm)
-	bar(posterior, xticks=1:length(w), xlabel="component", ylabel="posterior probability", label="X=$xm", color=:gold)
-end
-
-# ╔═╡ ebf13b85-7fa0-4859-88d1-a5189c5bbd40
-let
-	dmv1 = product_distribution([Normal(-2), Normal(-3)])
-	dmv2 = product_distribution([Normal(2, 0.7), Normal(3, 2)])
-	mvmixture = MixtureModel([dmv1, dmv2], [0.6, 0.4])
-
-	contourf(-5:0.1:5, -5:0.1:8, (x,y)->pdf(mvmixture, [x,y]), color=:speed, xlab="x", ylab="y")
-end
-
-# ╔═╡ 36093484-bdd1-4b1b-bd68-39c7b18a9f6b
-spn = MixtureModel(
-	[MixtureModel(
-		[product_distribution([Normal(10, 1), Normal(20, 1.5)]),
-				product_distribution([Normal(20, 1.5), Normal(21, 0.8)]),
-				product_distribution([Uniform(5, 25), Uniform(7, 9)]),
-				product_distribution([TriangularDist(12, 17), TriangularDist(14, 16, 15.5)]),
-				product_distribution([Uniform(2, 28), LogNormal(log(27), 0.1)]),
-			],[0.3, 0.25, 0.25, 0.15, 0.05]),
-		product_distribution([Uniform(0, 30), Uniform(0, 30)])], [0.99, 0.01])
-
-# ╔═╡ 40fbbc43-4a73-4d25-a37c-b39798d60761
-contourf(0:0.1:30, 0:0.1:30, (x,y)->logpdf(spn, [x,y]), color=:speed, xlab="x", ylab="y")
-
-# ╔═╡ 1efe9a9e-cd1b-4fe2-8392-2ce42c871a5f
-md"### The multivariate normal distribution"
-
-# ╔═╡ fb6698d6-c565-42f7-ab34-8a4c860f7ef4
-md"""
-σ₁: $(@bind σ₁ Slider(0.1:0.2:2, show_value=true, default=1))
-
-σ₂: $(@bind σ₂ Slider(0.1:0.2:2, show_value=true, default=2))
-
-ρ: $(@bind ρ Slider(-0.95:0.05:0.95, show_value=true, default=0.9))
-"""
-
-# ╔═╡ a1aed96d-8839-4c40-9f18-1ca453be740b
-μ = [1, 1]
-
-# ╔═╡ e0c947b7-306b-42d3-b004-5f37702be73a
-Σ = [σ₁^2 σ₁*σ₂*ρ;
-	 σ₁*σ₂*ρ σ₂^2]
-
-# ╔═╡ ccbcce90-c46f-4f61-8907-2ccc3e692184
-let
-	mvn = MultivariateNormal(μ, Σ)
-	contourf(-5:0.05:5, -5:0.05:5, (x,y)->pdf(mvn, [x,y]), color=:speed, xlab="x", ylab="y")
-	title!("PDF of a MVN")
-end
-
-# ╔═╡ 6602c372-158d-4b40-b7fe-aea7e534bd39
-plot(p->pdf(Beta(8, 3), p), 0, 1, lw=2, label="Beta(8,2)", xlab=L"x", ylab=L"f_p(p)")
-
-# ╔═╡ a3c7cd83-4488-40a1-8f0f-b79be73afb44
-@model function seed_germ(n=10)
-	p ~ Beta(8, 3)
+# ╔═╡ a2ca08ee-9b33-45b2-ab3c-bb273dfd8158
+@model function psample(pdist; n=50)
+	p ~ pdist
 	X ~ Binomial(n, p)
 end
 
-# ╔═╡ 8f13d578-f400-4885-a071-a54259b93f12
-Xp = rand(seed_germ())  # sample from the seed distribution
+# ╔═╡ b06dd24d-e146-4803-8e70-f800219bf923
+delta = Dirac(0.8)
 
-# ╔═╡ 788193d3-742b-4c27-aad4-41a9024ff0d0
-Xp[:p]  # value of p
+# ╔═╡ b134c532-4439-45f3-ae50-217e101ca2c5
+unif = Uniform(0.5, 0.9)
 
-# ╔═╡ dc668eb0-899a-42dd-901b-bbbde5d3d0dd
-Xp[:X]  # value of X
+# ╔═╡ 5f72e7ff-6b04-4a98-8996-3c70accd82b6
+plot(p->pdf(unif, p), 0, 1, xlab="p", ylab="f_p(p)", label="uniform")
 
-# ╔═╡ 03cedb9e-f74e-4662-abc8-e3cc87cad581
-seed_sample = [rand(seed_germ()) for i in 1:10_000]  # many samples
+# ╔═╡ daa8f129-d7bd-49f7-8adc-c21277cd45e7
+norm = TruncatedNormal(0.7, 0.1, 0, 1)
 
-# ╔═╡ c6e08f0d-e30e-4d30-989e-2463289ee038
-germination_counts = [Xp[:X] for Xp in seed_sample]
+# ╔═╡ 75d72d23-2eab-4ee1-b4d2-6d26c8f39611
+plot(p->pdf(norm, p), 0, 1, xlab="p", ylab="f_p(p)", label="normal")
 
-# ╔═╡ 77664b93-4b90-43b3-a0cc-0b09c7bd9854
-histogram(germination_counts, xticks=0:10,
-		xlabel=L"k", ylabel="frequency in sample",
-		label="germination succes X", title="Numer of pepper seeds that germinated")
+# ╔═╡ 2dca96c0-599d-48f7-a5f5-f45d93eb7103
+beta = Beta(7, 3)
 
-# ╔═╡ 42867e88-cd02-4634-a225-a9bf0ae46b70
-count(>(8), germination_counts)
+# ╔═╡ c0dbf5a3-edf3-49d5-af23-150f4f4e15e0
+plot(p->pdf(beta, p), 0, 1, xlab="p", ylab="f_p(p)", label="beta")
 
-# ╔═╡ 13cf931e-5333-46ff-a00a-ea94c0b2e509
-mean(>(8), germination_counts)
+# ╔═╡ 8846935e-ceea-46da-9f81-71449f8f4a68
+mixture = MixtureModel([Dirac(0.6), Dirac(0.8)], [0.5, 0.5])
 
-# ╔═╡ b1e85d42-199e-4874-843c-f5aa81728c38
-@bind ngerm Slider(0:10, show_value=true, default=8)
+# ╔═╡ d62d94f2-7210-4039-97fb-fe0657166439
+md"The means are all the same:"
 
-# ╔═╡ 7efb4160-8f16-435f-b50a-5cb7bee2634f
-p_cond = [p for (p, X) in seed_sample if X==ngerm]
+# ╔═╡ ac87933d-d488-4fe9-ab97-bcad13223620
+mean(delta)
 
-# ╔═╡ 6fe05275-f1f7-4b3f-bbc2-8077bf981391
-length(p_cond)
+# ╔═╡ 113d2b87-6a68-427d-995b-62c1b8f47e32
+mean(unif)
 
-# ╔═╡ cbb71827-67cd-43aa-8a36-757bdf98e16a
-histogram(p_cond, ylabel="frequency", xlab=L"p", label="p given n=$ngerm", xlims=[0,1])
+# ╔═╡ 7dbfdd33-12c5-40b1-b77c-6a3e907dca32
+mean(norm)
 
-# ╔═╡ f3f5595a-e82d-4a9c-b6ab-8dadb553056f
-@model function rainfall()
-	# we can just use names instead of symbols
-	intensity ~ Exponential(10)  
-	duration ~ Exponential(2 / (2 + intensity))
+# ╔═╡ 79e068b4-2f09-4c58-a12b-f281beb0b310
+mean(beta)
+
+# ╔═╡ 64e62e77-7f0f-40a1-a253-16b95f1ced55
+mean(mixture)
+
+# ╔═╡ fceb1451-de7f-40da-be0b-dbf460d95b26
+md"Let us make a function for the plots"
+
+# ╔═╡ 1e5677be-cab4-4557-a828-d7e2f2833b9d
+function plot_histogram(distribution; n_samples=10_000)
+	sample = [rand(psample(distribution))[:X] for i in 1:10_000]
+	return histogram(sample, label=string(distribution), xlab="x", legend = :outertop)
 end
 
-# ╔═╡ 374229a5-9c59-4fe8-b86c-96485168b80b
-mean(Exponential(5))
+# ╔═╡ e2ca2876-a4dd-4171-9458-7ac48e7e42a3
+plot_histogram(delta)
 
-# ╔═╡ d999582d-5c0e-42df-850f-f7bbe4ccb636
-rainfall_samples = [rand(rainfall()) for i in 1:10_000]
+# ╔═╡ f76da90c-4285-41ea-b508-450aac6e85ec
+plot_histogram(unif)
 
-# ╔═╡ cda5faf1-8d74-4679-a335-7a5974010f5a
-scatter(first.(rainfall_samples), last.(rainfall_samples), alpha=0.2, xlab="intensity (mm/h)", ylab="duration (h)", label="")
+# ╔═╡ 0c42f962-2961-48dd-84bc-c1d9d1c53d96
+plot_histogram(norm)
 
-# ╔═╡ 4b96292b-f0ad-48ac-99cd-360c0708ef72
-rainfall_amount = prod.(rainfall_samples)
+# ╔═╡ b3ec0fb1-46c4-4a8b-bac6-a2620daa2457
+plot_histogram(beta)
 
-# ╔═╡ f7ca0af5-dcdf-4e75-9063-2d194738be64
-histogram(rainfall_amount, xlab="rainfall amount", ylab="frequency", label="intensity * duration")
-
-# ╔═╡ 1ad364c5-b65d-48d7-a829-e284c5e8eebc
-md"""
-## Appendix
-"""
-
-# ╔═╡ efd7bcba-f393-4659-ac5b-006740085144
-cummean(x) = cumsum(x) ./ (1:length(x))
-
-# ╔═╡ 73898b6c-d8bd-49a9-ba36-a068e62a7ec3
-let
-	d = Binomial(30, 0.3)
-	d = dist
-	p = hline([mean(d)], linestyle=:dash, lw=2, color=:red, label=L"E[X]", xlab=L"n", ylabel=L"\bar{X}_n")
-	for i in 1:5
-		plot!(cummean(rand(d, 500)), lw=2, label="", alpha=0.6)
-	end
-	#ylims!(8, 10)
-	p
-end
-
-# ╔═╡ 67594833-14c8-423c-94ce-91ce2a44b6c9
-let
-	Random.seed!(12)
-	psob = reduce(hcat, next!(s) for i = 1:1024)'
-	ppseu = rand(1024, 2)
-	
-	pi_sob = pi .- 4cummean(norm.(eachrow(psob)) .≤ 1) .|> abs
-	pi_pseu = pi .- 4cummean(norm.(eachrow(ppseu)) .≤ 1) .|> abs
-	
-	plot(pi_pseu, yscale=:log10, label="pseudo-random", xlab=L"n", ylab=L"|E[X]-\bar{X}_n|", lw=2)
-	plot!(pi_sob, label="quasi-random", lw=2)
-	title!("Error estimating π using sampling")
-end
-
-# ╔═╡ 5614c4b1-2c78-4fee-a480-3998a8e1ce6e
-TableOfContents()
-
-# ╔═╡ 57052ba3-151c-4dda-904a-dac9c421241c
-
+# ╔═╡ ace3fed3-8362-486b-b811-647627c1cb02
+plot_histogram(mixture)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
-LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-Sobol = "ed01d8cd-4d21-5b2a-85b4-cc3bdc58bad4"
 Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 
 [compat]
-Distributions = "~0.25.107"
-LaTeXStrings = "~1.3.1"
 Plots = "~1.39.0"
-PlutoUI = "~0.7.55"
-Sobol = "~1.5.0"
 Turing = "~0.30.4"
 """
 
@@ -445,7 +108,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.0"
 manifest_format = "2.0"
-project_hash = "546a4285cc5ca9ea0d4c38b968585b216c5aeec6"
+project_hash = "58a2896cada497c54db2f07804cf7f71906f494d"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "41c37aa88889c171f1300ceac1313c06e891d245"
@@ -474,12 +137,6 @@ deps = ["AbstractMCMC", "DensityInterface", "Random", "Setfield", "SparseArrays"
 git-tree-sha1 = "917ad8da4becae82028aba80b7e25197f0c76dd1"
 uuid = "7a57a42e-76ec-4ea3-a279-07e840d6d9cf"
 version = "0.7.0"
-
-[[deps.AbstractPlutoDingetjes]]
-deps = ["Pkg"]
-git-tree-sha1 = "c278dfab760520b8bb7e9511b968bf4ba38b7acc"
-uuid = "6e696c72-6542-2067-7265-42206c756150"
-version = "1.2.3"
 
 [[deps.AbstractTrees]]
 git-tree-sha1 = "faa260e4cb5aba097a73fab382dd4b5819d8ec8c"
@@ -791,9 +448,9 @@ weakdeps = ["InverseFunctions"]
 
 [[deps.ConcurrentUtilities]]
 deps = ["Serialization", "Sockets"]
-git-tree-sha1 = "8cfa272e8bdedfa88b6aefbbca7c19f1befac519"
+git-tree-sha1 = "9c4708e3ed2b799e6124b5673a712dda0b596a9b"
 uuid = "f0e56b4a-5159-44fe-b623-3e5288b988bb"
-version = "2.3.0"
+version = "2.3.1"
 
 [[deps.ConsoleProgressMonitor]]
 deps = ["Logging", "ProgressMeter"]
@@ -1143,24 +800,6 @@ git-tree-sha1 = "f218fe3736ddf977e0e772bc9a586b2383da2685"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.23"
 
-[[deps.Hyperscript]]
-deps = ["Test"]
-git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
-uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
-version = "0.0.5"
-
-[[deps.HypertextLiteral]]
-deps = ["Tricks"]
-git-tree-sha1 = "7134810b1afce04bbc1045ca1985fbe81ce17653"
-uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.5"
-
-[[deps.IOCapture]]
-deps = ["Logging", "Random"]
-git-tree-sha1 = "8b72179abc660bfab5e28472e019392b97d0985c"
-uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.4"
-
 [[deps.InitialValues]]
 git-tree-sha1 = "4da0f88e9a39111c2fa3add390ab15f3a44f3ca3"
 uuid = "22cec73e-a1b8-11e9-2c92-598750a2cf9c"
@@ -1502,11 +1141,6 @@ git-tree-sha1 = "8ba8b1840d3ab5b38e7c71c23c3193bb5cbc02b5"
 uuid = "be115224-59cd-429b-ad48-344e309966f0"
 version = "0.3.10"
 
-[[deps.MIMEs]]
-git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
-uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
-version = "0.1.4"
-
 [[deps.MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl"]
 git-tree-sha1 = "72dc3cf284559eb8f53aa593fe62cb33f83ed0c0"
@@ -1732,12 +1366,6 @@ version = "1.39.0"
     IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
     ImageInTerminal = "d8c32880-2388-543b-8c61-d9f865259254"
     Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
-
-[[deps.PlutoUI]]
-deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
-git-tree-sha1 = "68723afdb616445c6caaef6255067a8339f91325"
-uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.55"
 
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
@@ -1983,12 +1611,6 @@ version = "1.1.0"
 git-tree-sha1 = "58e6353e72cde29b90a69527e56df1b5c3d8c437"
 uuid = "ce78b400-467f-4804-87d8-8f486da07d0a"
 version = "1.1.0"
-
-[[deps.Sobol]]
-deps = ["DelimitedFiles", "Random"]
-git-tree-sha1 = "5a74ac22a9daef23705f010f72c81d6925b19df8"
-uuid = "ed01d8cd-4d21-5b2a-85b4-cc3bdc58bad4"
-version = "1.5.0"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
@@ -2558,88 +2180,29 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╠═2d346892-cb15-11ee-2d81-73e08fcc3288
-# ╠═c175d1ab-28be-4766-bc0c-20cbc72f191d
-# ╠═cfc49c56-f223-4b78-b6da-4e0c83a16bbf
-# ╠═e0f96ed2-bc51-467e-be3e-8617293e33e2
-# ╠═c0677edb-29a4-4c4d-8ca7-9d81eac05c85
-# ╠═d786da44-5cfc-4c36-ae41-af6f623d5a4e
-# ╠═dd8c1370-5fb9-4ab7-8729-ea756762788d
-# ╟─b9be819e-2db9-4952-9453-98bf815b00e8
-# ╠═090d0c6f-de9f-4ce8-befa-4ae9dbe1b38e
-# ╠═36b475e9-a16b-464f-a423-a4fbfbf21ef0
-# ╠═3b9e8f64-d307-48bc-9a71-1ab9accd134e
-# ╠═1a991ac1-d4ed-4774-a9e2-a5f27f99e1ff
-# ╠═b5b55083-2fe3-4620-9759-8a2329154143
-# ╠═482d1da0-3415-425c-84de-69f7fb821934
-# ╠═7008afc0-785e-45a8-9b6d-5b8f26bae09d
-# ╠═64e0265f-a621-495f-b73a-0af23b0ef1ac
-# ╠═18a1b129-eac5-4080-8af9-7d9fbf800107
-# ╠═5a1522f7-411d-40f5-92e8-b5a154b8d735
-# ╟─7779254a-83b9-4849-957c-af4b62c3916a
-# ╟─73898b6c-d8bd-49a9-ba36-a068e62a7ec3
-# ╠═e3d9a5b7-73ec-4c16-8799-2e2a4f99c018
-# ╠═e94fa51a-e1a7-4a1b-88ef-76b38d3a6d74
-# ╟─d7e88a1a-73e9-48ff-bb51-2292346f88e0
-# ╠═2b79770c-00a8-4c3b-b39e-b31400593ea4
-# ╟─74e50a3d-7623-45c2-8d3a-2c34f363177e
-# ╟─67594833-14c8-423c-94ce-91ce2a44b6c9
-# ╠═fe24583f-afc7-43ee-901f-c81585677ecd
-# ╟─2db26aa9-7516-400c-905f-b6b710820667
-# ╠═222cdcae-5b51-4fdc-a794-11471449ebcd
-# ╟─8ae351eb-c1b8-4934-aa48-023f8feba75c
-# ╟─ebe190e6-da7a-4c88-bd31-b5dc53f6a3e1
-# ╠═07949347-3e7b-499f-9ca6-c62c131e2a65
-# ╠═1d883714-026b-4206-8ee3-a58e89a70c52
-# ╠═52fd8a26-93a1-4c83-a5fd-4247cdff3629
-# ╠═432c5cd3-a359-4f80-9a78-d8198b100524
-# ╠═f2faec3d-3d44-43e9-bf03-37ba68e37300
-# ╟─e495c24a-76d5-4cba-b1f9-76d3e25912d8
-# ╟─4bd5e387-ac06-4f4b-822f-cbc89e7509f9
-# ╠═46b4ef15-bd34-4b59-aef5-5dc4e1193ec3
-# ╟─c7b2fc1e-9dd3-42e9-aa55-f9aea4781784
-# ╠═ffa84522-dd02-47f8-ac3b-b1db08806b2d
-# ╟─0252887f-b133-426e-82fc-43ac091a7de6
-# ╟─8bfd6e24-27ce-4caf-b68c-b13d89f08337
-# ╠═e79c0f96-02ca-4ebf-bcc5-0f6e0dc3d7d6
-# ╠═5a4a0cb6-93b2-4194-8a65-eb84e396b999
-# ╠═c580ca85-78ff-4cbc-b033-f0c5acde3193
-# ╠═94dd1214-e63c-44d5-b5c3-9ca834a89ebf
-# ╠═d6cd5202-0171-40f9-bc17-d001dadee567
-# ╠═fc3a7a70-89e5-43e4-8dae-b7d2d8b54355
-# ╠═e61e45a0-d9ec-4ab6-8c1b-fc8579a9a9b3
-# ╠═ebf13b85-7fa0-4859-88d1-a5189c5bbd40
-# ╠═36093484-bdd1-4b1b-bd68-39c7b18a9f6b
-# ╠═40fbbc43-4a73-4d25-a37c-b39798d60761
-# ╠═1efe9a9e-cd1b-4fe2-8392-2ce42c871a5f
-# ╟─fb6698d6-c565-42f7-ab34-8a4c860f7ef4
-# ╠═a1aed96d-8839-4c40-9f18-1ca453be740b
-# ╟─e0c947b7-306b-42d3-b004-5f37702be73a
-# ╟─ccbcce90-c46f-4f61-8907-2ccc3e692184
-# ╠═ba4460b1-2855-4695-a3d8-4976666ef164
-# ╠═6602c372-158d-4b40-b7fe-aea7e534bd39
-# ╠═a3c7cd83-4488-40a1-8f0f-b79be73afb44
-# ╠═8f13d578-f400-4885-a071-a54259b93f12
-# ╠═788193d3-742b-4c27-aad4-41a9024ff0d0
-# ╠═dc668eb0-899a-42dd-901b-bbbde5d3d0dd
-# ╠═03cedb9e-f74e-4662-abc8-e3cc87cad581
-# ╠═c6e08f0d-e30e-4d30-989e-2463289ee038
-# ╠═77664b93-4b90-43b3-a0cc-0b09c7bd9854
-# ╠═42867e88-cd02-4634-a225-a9bf0ae46b70
-# ╠═13cf931e-5333-46ff-a00a-ea94c0b2e509
-# ╠═b1e85d42-199e-4874-843c-f5aa81728c38
-# ╠═7efb4160-8f16-435f-b50a-5cb7bee2634f
-# ╠═6fe05275-f1f7-4b3f-bbc2-8077bf981391
-# ╠═cbb71827-67cd-43aa-8a36-757bdf98e16a
-# ╠═f3f5595a-e82d-4a9c-b6ab-8dadb553056f
-# ╠═374229a5-9c59-4fe8-b86c-96485168b80b
-# ╠═d999582d-5c0e-42df-850f-f7bbe4ccb636
-# ╠═cda5faf1-8d74-4679-a335-7a5974010f5a
-# ╠═4b96292b-f0ad-48ac-99cd-360c0708ef72
-# ╠═f7ca0af5-dcdf-4e75-9063-2d194738be64
-# ╠═1ad364c5-b65d-48d7-a829-e284c5e8eebc
-# ╠═efd7bcba-f393-4659-ac5b-006740085144
-# ╠═5614c4b1-2c78-4fee-a480-3998a8e1ce6e
-# ╠═57052ba3-151c-4dda-904a-dac9c421241c
+# ╠═27037ea0-cd76-11ee-3d7f-07c43460afea
+# ╟─dd5d4013-d775-4942-9ede-ab7674b8e3a1
+# ╠═a2ca08ee-9b33-45b2-ab3c-bb273dfd8158
+# ╠═b06dd24d-e146-4803-8e70-f800219bf923
+# ╠═b134c532-4439-45f3-ae50-217e101ca2c5
+# ╟─5f72e7ff-6b04-4a98-8996-3c70accd82b6
+# ╠═daa8f129-d7bd-49f7-8adc-c21277cd45e7
+# ╟─75d72d23-2eab-4ee1-b4d2-6d26c8f39611
+# ╠═2dca96c0-599d-48f7-a5f5-f45d93eb7103
+# ╟─c0dbf5a3-edf3-49d5-af23-150f4f4e15e0
+# ╠═8846935e-ceea-46da-9f81-71449f8f4a68
+# ╟─d62d94f2-7210-4039-97fb-fe0657166439
+# ╠═ac87933d-d488-4fe9-ab97-bcad13223620
+# ╠═113d2b87-6a68-427d-995b-62c1b8f47e32
+# ╠═7dbfdd33-12c5-40b1-b77c-6a3e907dca32
+# ╠═79e068b4-2f09-4c58-a12b-f281beb0b310
+# ╠═64e62e77-7f0f-40a1-a253-16b95f1ced55
+# ╠═fceb1451-de7f-40da-be0b-dbf460d95b26
+# ╠═1e5677be-cab4-4557-a828-d7e2f2833b9d
+# ╠═e2ca2876-a4dd-4171-9458-7ac48e7e42a3
+# ╠═f76da90c-4285-41ea-b508-450aac6e85ec
+# ╠═0c42f962-2961-48dd-84bc-c1d9d1c53d96
+# ╠═b3ec0fb1-46c4-4a8b-bac6-a2620daa2457
+# ╠═ace3fed3-8362-486b-b811-647627c1cb02
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
