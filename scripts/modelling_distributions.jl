@@ -295,7 +295,7 @@ spn = MixtureModel(
 				product_distribution([TriangularDist(12, 17), TriangularDist(14, 16, 15.5)]),
 				product_distribution([Uniform(2, 28), LogNormal(log(27), 0.1)]),
 			],[0.3, 0.25, 0.25, 0.15, 0.05]),
-		product_distribution([Uniform(0, 30), Uniform(0, 30)])], [0.99, 0.01])
+		product_distribution([Uniform(0, 30), Uniform(0, 30)])], [0.99, 0.01]);
 
 # ╔═╡ 40fbbc43-4a73-4d25-a37c-b39798d60761
 contourf(0:0.1:30, 0:0.1:30, (x,y)->logpdf(spn, [x,y]), color=:speed, xlab="x", ylab="y")

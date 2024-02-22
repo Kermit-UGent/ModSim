@@ -65,7 +65,7 @@ plot(p->exp(logprior(seed_germ(k), (p=p,))+loglikelihood(seed_germ(k), (p=p,))),
 	μ ~ Normal(0.0, 20)
 	σ ~ InverseGamma()
 	for i in 1:length(y)
-		y[i] ~ Normal(μ, sqrt(σ))
+		y[i] ~ Normal(μ, σ)
 	end
 end
 
@@ -92,7 +92,7 @@ heatmap(-15:0.1:15, 0.1:0.02:5, norm_likelihood, color=:speed)
 heatmap(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed)
 
 # ╔═╡ 63af963c-a304-4142-8f23-a56a5fc14e76
-chain_HMC = sample(uncertain_normal(y), HMC(0.2, 10), 5000, drop_warmup=true, n_adapts=100, discard_adapt=true)
+chain_HMC = sample(uncertain_normal(y), HMC(0.1, 10), 50, drop_warmup=true, n_adapts=100, discard_adapt=true)
 
 # ╔═╡ 06e83a23-fa3a-49f7-8f43-d46f3285e943
 #chain_HMC = sample(uncertain_normal(y), Gibbs(HMC(0.4, 10, :μ), HMC(0.2, 10, :σ)), 50, drop_warmup=true, n_adapts=100, discard_adapt=true)
@@ -101,7 +101,7 @@ chain_HMC = sample(uncertain_normal(y), HMC(0.2, 10), 5000, drop_warmup=true, n_
 
 
 # ╔═╡ e5d604e0-44c4-4d10-8faa-7ade5f5fbfff
-mean(y)
+mean(y), std(y)
 
 # ╔═╡ f1625268-cc94-49c4-b3d7-5012f49ec24f
 chain_HMC[:μ], chain_HMC[:σ]
@@ -135,6 +135,28 @@ c1 = sample(gdemo(1.5, 2), SMC(), 1000)
 # ╔═╡ 45ae7bf3-6381-4476-bcd6-b32a0ac08e21
 summarize(c1)
 
+# ╔═╡ d1086c61-c3af-40b2-aeb6-bf9b388adaf0
+md"""
+
+Markov mixing example
+
+
+
+![](https://www.probabilitycourse.com/images/chapter11/MC-diagram-solved-tek.png)
+"""
+
+# ╔═╡ e7bd6347-ac8a-4460-b0f7-4692968205f7
+T = [1/4 1/2 1/4; 1/3 0 2/3; 1/2 0 1/2]
+
+# ╔═╡ fcfa5203-73df-40f6-a6c9-eda531054b38
+p₀ = [i==3 ? 1.0 : 0.0 for i in 1:size(T,2)]
+
+# ╔═╡ b2cbf023-a0ea-4714-b30b-b331a081c7fa
+π = (T')^100 * p₀
+
+# ╔═╡ bfd58734-b396-4424-9343-4562932f70e3
+groupedbar(0:20, vcat([p₀' * T^i for i in 0:20]...), bar_position = :stack, xlab = L"t", ylab = "fraction in state i", xticks=0:20, label=reshape(["state $i" for i in 1:size(T,2)], 1, :))
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -149,8 +171,8 @@ Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 Distributions = "~0.25.107"
 LaTeXStrings = "~1.3.1"
 Plots = "~1.40.1"
-PlutoUI = "~0.7.56"
-StatsPlots = "~0.15.7"
+PlutoUI = "~0.7.55"
+StatsPlots = "~0.15.6"
 Turing = "~0.30.4"
 """
 
@@ -160,7 +182,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.0"
 manifest_format = "2.0"
-project_hash = "4c04ebba85fb744da27cca39de889632df9797f1"
+project_hash = "f232191d9baf0752ae997cf5df0de6a3fb15ee67"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "41c37aa88889c171f1300ceac1313c06e891d245"
@@ -248,9 +270,9 @@ version = "0.6.1"
 
 [[deps.AdvancedMH]]
 deps = ["AbstractMCMC", "Distributions", "FillArrays", "LinearAlgebra", "LogDensityProblems", "Random", "Requires"]
-git-tree-sha1 = "16589dbdd36c782ff01700908e962b303474f641"
+git-tree-sha1 = "1cc336be36fef7df68473a7d0d60ebba25958b9e"
 uuid = "5b7e9947-ddc0-4b3f-9b55-0d8042f74170"
-version = "0.8.1"
+version = "0.8.0"
 weakdeps = ["DiffResults", "ForwardDiff", "MCMCChains", "StructArrays"]
 
     [deps.AdvancedMH.extensions]
@@ -328,9 +350,9 @@ version = "0.1.0"
 
 [[deps.AxisAlgorithms]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "WoodburyMatrices"]
-git-tree-sha1 = "01b8ccb13d68535d73d2b0c23e39bd23155fb712"
+git-tree-sha1 = "66771c8d21c8ff5e3a93379480a2307ac36863f7"
 uuid = "13072b0f-2c55-5437-9ae7-d433b7a33950"
-version = "1.1.0"
+version = "1.0.1"
 
 [[deps.AxisArrays]]
 deps = ["Dates", "IntervalSets", "IterTools", "RangeArrays"]
@@ -500,9 +522,9 @@ version = "0.3.0"
 
 [[deps.Compat]]
 deps = ["TOML", "UUIDs"]
-git-tree-sha1 = "d2c021fbdde94f6cdaa799639adfeeaa17fd67f5"
+git-tree-sha1 = "75bd5b6fc5089df449b5d35fa501c846c9b6549b"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.13.0"
+version = "4.12.0"
 weakdeps = ["Dates", "LinearAlgebra"]
 
     [deps.Compat.extensions]
@@ -871,9 +893,9 @@ version = "1.0.2"
 
 [[deps.HTTP]]
 deps = ["Base64", "CodecZlib", "ConcurrentUtilities", "Dates", "ExceptionUnwrapping", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
-git-tree-sha1 = "ac7b73d562b8f4287c3b67b4c66a5395a19c1ae8"
+git-tree-sha1 = "abbbb9ec3afd783a7cbd82ef01dcd088ea051398"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-version = "1.10.2"
+version = "1.10.1"
 
 [[deps.HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg"]
@@ -927,14 +949,10 @@ deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[deps.Interpolations]]
-deps = ["Adapt", "AxisAlgorithms", "ChainRulesCore", "LinearAlgebra", "OffsetArrays", "Random", "Ratios", "Requires", "SharedArrays", "SparseArrays", "StaticArrays", "WoodburyMatrices"]
-git-tree-sha1 = "88a101217d7cb38a7b481ccd50d21876e1d1b0e0"
+deps = ["AxisAlgorithms", "ChainRulesCore", "LinearAlgebra", "OffsetArrays", "Random", "Ratios", "Requires", "SharedArrays", "SparseArrays", "StaticArrays", "WoodburyMatrices"]
+git-tree-sha1 = "00a19d6ab0cbdea2978fc23c5a6482e02c192501"
 uuid = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
-version = "0.15.1"
-weakdeps = ["Unitful"]
-
-    [deps.Interpolations.extensions]
-    InterpolationsUnitfulExt = "Unitful"
+version = "0.14.0"
 
 [[deps.IntervalSets]]
 git-tree-sha1 = "dba9ddf07f77f60450fe5d2e2beb9854d9a49bd0"
@@ -1220,9 +1238,9 @@ version = "1.7.0"
 
 [[deps.LogExpFunctions]]
 deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]
-git-tree-sha1 = "18144f3e9cbe9b15b070288eef858f71b291ce37"
+git-tree-sha1 = "7d6dd4e9212aebaeed356de34ccf262a3cd415aa"
 uuid = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
-version = "0.3.27"
+version = "0.3.26"
 weakdeps = ["ChainRulesCore", "ChangesOfVariables", "InverseFunctions"]
 
     [deps.LogExpFunctions.extensions]
@@ -1326,9 +1344,9 @@ version = "0.10.2"
 
 [[deps.NNlib]]
 deps = ["Adapt", "Atomix", "ChainRulesCore", "GPUArraysCore", "KernelAbstractions", "LinearAlgebra", "Pkg", "Random", "Requires", "Statistics"]
-git-tree-sha1 = "877f15c331337d54cf24c797d5bcb2e48ce21221"
+git-tree-sha1 = "d2811b435d2f571bdfdfa644bb806a66b458e186"
 uuid = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
-version = "0.9.12"
+version = "0.9.11"
 
     [deps.NNlib.extensions]
     NNlibAMDGPUExt = "AMDGPU"
@@ -1501,9 +1519,9 @@ version = "1.40.1"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
-git-tree-sha1 = "211cdf570992b0d977fda3745f72772e0d5423f2"
+git-tree-sha1 = "68723afdb616445c6caaef6255067a8339f91325"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.56"
+version = "0.7.55"
 
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
@@ -1687,9 +1705,9 @@ version = "0.7.0"
 
 [[deps.SciMLBase]]
 deps = ["ADTypes", "ArrayInterface", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "EnumX", "FillArrays", "FunctionWrappersWrappers", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "PrecompileTools", "Preferences", "Printf", "RecipesBase", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SciMLOperators", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface", "Tables", "TruncatedStacktraces"]
-git-tree-sha1 = "33e40003f4ef424e8a8700e0a3a189c6ece2af27"
+git-tree-sha1 = "a123011b1711f3449bc4e5d66746be5725af92fd"
 uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
-version = "2.26.1"
+version = "2.26.0"
 
     [deps.SciMLBase.extensions]
     SciMLBaseChainRulesCoreExt = "ChainRulesCore"
@@ -1839,9 +1857,9 @@ version = "0.34.2"
 
 [[deps.StatsFuns]]
 deps = ["HypergeometricFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
-git-tree-sha1 = "cef0472124fab0695b58ca35a77c6fb942fdab8a"
+git-tree-sha1 = "f625d686d5a88bcd2b15cd81f18f98186fdc0c9a"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
-version = "1.3.1"
+version = "1.3.0"
 weakdeps = ["ChainRulesCore", "InverseFunctions"]
 
     [deps.StatsFuns.extensions]
@@ -1850,9 +1868,9 @@ weakdeps = ["ChainRulesCore", "InverseFunctions"]
 
 [[deps.StatsPlots]]
 deps = ["AbstractFFTs", "Clustering", "DataStructures", "Distributions", "Interpolations", "KernelDensity", "LinearAlgebra", "MultivariateStats", "NaNMath", "Observables", "Plots", "RecipesBase", "RecipesPipeline", "Reexport", "StatsBase", "TableOperations", "Tables", "Widgets"]
-git-tree-sha1 = "3b1dcbf62e469a67f6733ae493401e53d92ff543"
+git-tree-sha1 = "9115a29e6c2cf66cf213ccc17ffd61e27e743b24"
 uuid = "f3b207a7-027a-5e70-b257-86293d7955fd"
-version = "0.15.7"
+version = "0.15.6"
 
 [[deps.StringManipulation]]
 deps = ["PrecompileTools"]
@@ -2065,9 +2083,9 @@ version = "0.6.6"
 
 [[deps.WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "c1a7aa6219628fcd757dede0ca95e245c5cd9511"
+git-tree-sha1 = "5f24e158cf4cee437052371455fe361f526da062"
 uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
-version = "1.0.0"
+version = "0.5.6"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Zlib_jll"]
@@ -2083,9 +2101,9 @@ version = "1.1.34+0"
 
 [[deps.XZ_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "ac88fb95ae6447c8dda6a5503f3bafd496ae8632"
+git-tree-sha1 = "522b8414d40c4cbbab8dee346ac3a09f9768f25d"
 uuid = "ffd25f8a-64ca-5728-b0f7-c24cf3aae800"
-version = "5.4.6+0"
+version = "5.4.5+0"
 
 [[deps.Xorg_libICE_jll]]
 deps = ["Libdl", "Pkg"]
@@ -2303,9 +2321,9 @@ version = "1.18.0+0"
 
 [[deps.libpng_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "873b4f805771d3e4bafe63af759a26ea8ca84d14"
+git-tree-sha1 = "93284c28274d9e75218a416c65ec49d0e0fcdf3d"
 uuid = "b53b4c65-9356-5827-b1ea-8c7a1a84506f"
-version = "1.6.42+0"
+version = "1.6.40+0"
 
 [[deps.libvorbis_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Ogg_jll", "Pkg"]
@@ -2381,5 +2399,10 @@ version = "1.4.1+1"
 # ╠═7c1edd3f-9a36-4074-baf9-e1e3bcf82843
 # ╠═d9a82abf-3bd4-4ef3-98ea-d311c916222c
 # ╠═45ae7bf3-6381-4476-bcd6-b32a0ac08e21
+# ╠═d1086c61-c3af-40b2-aeb6-bf9b388adaf0
+# ╠═e7bd6347-ac8a-4460-b0f7-4692968205f7
+# ╠═fcfa5203-73df-40f6-a6c9-eda531054b38
+# ╠═b2cbf023-a0ea-4714-b30b-b331a081c7fa
+# ╠═bfd58734-b396-4424-9343-4562932f70e3
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
