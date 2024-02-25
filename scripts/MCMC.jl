@@ -21,7 +21,7 @@ using Turing, StatsPlots
 using Distributions
 
 # ╔═╡ 2c4d5454-b734-4ecb-8f71-d38496951307
-using Plots, PlutoUI, LaTeXStrings
+using Plots, PlutoUI, LaTeXStrings, LinearAlgebra
 
 # ╔═╡ eb37dd4b-3af0-4534-92c2-e495b83024be
 @bind k Slider(0:10, default=9, show_value=true)
@@ -63,7 +63,7 @@ plot(p->exp(logprior(seed_germ(k), (p=p,))+loglikelihood(seed_germ(k), (p=p,))),
 # ╔═╡ d8ff625a-6204-4579-a8f5-9650544c7222
 @model function uncertain_normal(y=missing)
 	μ ~ Normal(0.0, 20)
-	σ ~ InverseGamma()
+	σ ~ Gamma(1)
 	for i in 1:length(y)
 		y[i] ~ Normal(μ, σ)
 	end
@@ -71,7 +71,6 @@ end
 
 # ╔═╡ 4d6d6c9e-c2a8-4c7d-9d18-89d2e9d0c213
 y = [7.2, 8.3, 5.4, 9.8, 7.9]
-#y = 2randn(10) .+ π
 
 # ╔═╡ 7cfc4306-746b-434a-8160-52341c1e6519
 norm_prior(μ, σ) = exp(logprior(uncertain_normal(y), (μ=μ, σ=σ)))
@@ -146,22 +145,71 @@ Markov mixing example
 """
 
 # ╔═╡ e7bd6347-ac8a-4460-b0f7-4692968205f7
-T = [1/4 1/2 1/4; 1/3 0 2/3; 1/2 0 1/2]
+#T = [1/4 1/2 1/4; 1/3 0 2/3; 1/2 0 1/2]
+
+# ╔═╡ eab53e8a-b7cd-4c97-83f1-bcfd9c59cc4f
+begin
+	T = Tridiagonal(0.3ones(9), 0.1ones(10), 0.6ones(9))
+	T ./= sum(T, dims=2)
+end
 
 # ╔═╡ fcfa5203-73df-40f6-a6c9-eda531054b38
-p₀ = [i==3 ? 1.0 : 0.0 for i in 1:size(T,2)]
+p₀ = [i==5 ? 1.0 : 0.0 for i in 1:size(T,2)]
 
 # ╔═╡ b2cbf023-a0ea-4714-b30b-b331a081c7fa
 π = (T')^100 * p₀
 
 # ╔═╡ bfd58734-b396-4424-9343-4562932f70e3
-groupedbar(0:20, vcat([p₀' * T^i for i in 0:20]...), bar_position = :stack, xlab = L"t", ylab = "fraction in state i", xticks=0:20, label=reshape(["state $i" for i in 1:size(T,2)], 1, :))
+groupedbar(0:30, vcat([p₀' * T^i for i in 0:30]...), bar_position = :stack, xlab = L"t", ylab = "fraction in state i", xticks=0:30, label=reshape(["state $i" for i in 1:size(T,2)], 1, :))
+
+# ╔═╡ 96f05537-6fb3-45ce-8d75-28efdfa03279
+@model function donut(R=5)
+	θ ~ Uniform(0.0, 2pi)
+	x ~ Normal(R * cos(θ))
+	y ~ Normal(R * sin(θ))
+end
+
+# ╔═╡ 3708eb56-53e4-43b8-8af4-e1f6e302a0cf
+let
+	samples_donut = [rand(donut()) for i in 1:1000]
+	x = [s[:x] for s in samples_donut]
+	y = [s[:y] for s in samples_donut]
+	scatter(x, y, aspect_ratio=:equal)
+end
+
+# ╔═╡ 07da284a-8f21-4088-b936-244d11f517dd
+x_nuts = sample(donut(), HMC(0.1, 10), 10000)
+
+# ╔═╡ 9d14bb2f-2c8e-4b45-9775-e168a11005ff
+begin
+	pdf_donut(x, y) = exp(())
+	#heatmap(-15:0.1:15, 0.1:0.02:10, pdf_donut, color=:speed)
+	scatter(x_nuts[:x], x_nuts[:y], alpha=0.2)
+end
+
+# ╔═╡ 5ce17f7f-7e93-4c43-9f75-b3b677af9fd1
+@model function trending(yl, ym, yr)
+	σa ~ Gamma()
+	σn ~ Gamma()
+	a ~ Normal(0, σa)
+	b ~ Normal(0, σa)
+	yl ~ Normal(-a + b, σn)
+	ym ~ Normal(b, σn)
+	yr ~ Normal(a + b, σn)
+end
+
+# ╔═╡ 71c210f8-34ad-469a-89fa-dc99efb6b72a
+quantile(sample(trending(-2.3, 0.3, -2.8), NUTS(), 10_000))
+
+# ╔═╡ d5db3698-8546-4606-8346-85475619a3e0
+quantile
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
@@ -182,7 +230,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.0"
 manifest_format = "2.0"
-project_hash = "f232191d9baf0752ae997cf5df0de6a3fb15ee67"
+project_hash = "28e92609f4ce30e4594ab2006dc4a68bdef5bdc9"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "41c37aa88889c171f1300ceac1313c06e891d245"
@@ -2401,8 +2449,16 @@ version = "1.4.1+1"
 # ╠═45ae7bf3-6381-4476-bcd6-b32a0ac08e21
 # ╠═d1086c61-c3af-40b2-aeb6-bf9b388adaf0
 # ╠═e7bd6347-ac8a-4460-b0f7-4692968205f7
+# ╠═eab53e8a-b7cd-4c97-83f1-bcfd9c59cc4f
 # ╠═fcfa5203-73df-40f6-a6c9-eda531054b38
 # ╠═b2cbf023-a0ea-4714-b30b-b331a081c7fa
 # ╠═bfd58734-b396-4424-9343-4562932f70e3
+# ╠═96f05537-6fb3-45ce-8d75-28efdfa03279
+# ╠═3708eb56-53e4-43b8-8af4-e1f6e302a0cf
+# ╠═07da284a-8f21-4088-b936-244d11f517dd
+# ╠═9d14bb2f-2c8e-4b45-9775-e168a11005ff
+# ╠═5ce17f7f-7e93-4c43-9f75-b3b677af9fd1
+# ╠═71c210f8-34ad-469a-89fa-dc99efb6b72a
+# ╠═d5db3698-8546-4606-8346-85475619a3e0
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

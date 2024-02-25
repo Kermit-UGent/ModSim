@@ -29,6 +29,31 @@ using Turing
 # ╔═╡ cfc49c56-f223-4b78-b6da-4e0c83a16bbf
 md"# Modeling with probability distributions"
 
+# ╔═╡ 5db3ed2d-ee29-4cd5-b438-b60d550a6ff8
+x_unif = rand(1000)
+
+# ╔═╡ 7d1e1a93-510c-4f81-bb09-d87e3b40e136
+y_unif = rand(1000)
+
+# ╔═╡ 5821aaf1-744d-452a-96d2-6516c7423fff
+in_circle = x_unif.^2 .+ y_unif.^2 .≤ 1
+
+# ╔═╡ 41967e5b-9068-4318-acb6-d958b608c8f7
+begin
+	plot(x->sqrt(1-x^2), 0, 1, aspect_ratio=:equal, xlim=[0,1], ylim=[0, 1], lw=2, fillrange=zero, fillalpha=0.3, xlab=L"x", ylab=L"y", label="circle", title="Monte Carlo for estimating π/4")
+	scatter!(x_unif[in_circle], y_unif[in_circle], ms=0.8, markercolor="orange", markerstrokewidth=0, label="in circle")
+	scatter!(x_unif[.!in_circle], y_unif[.!in_circle], ms=0.8, markercolor="green", markerstrokewidth=0, label="out of circle")
+end
+
+# ╔═╡ cb36a752-da05-4da8-8dc8-1c2d34a11ad5
+sum(in_circle)
+
+# ╔═╡ 7c244dc0-6c7b-451e-b7c0-da25a77da657
+sum(in_circle) / length(in_circle)
+
+# ╔═╡ fe471a6a-5c29-49f6-afba-83be7ab5d770
+π / 4
+
 # ╔═╡ e0f96ed2-bc51-467e-be3e-8617293e33e2
 md"## Revision of basic probability theory"
 
@@ -70,6 +95,12 @@ mean(dist)
 
 # ╔═╡ 36b475e9-a16b-464f-a423-a4fbfbf21ef0
 var(dist)
+
+# ╔═╡ 83db8998-125e-4cae-b6fe-1cdddfe3f868
+median(dist)
+
+# ╔═╡ 9f525fef-80b3-4417-85ea-e318ad387985
+mode(dist)
 
 # ╔═╡ 3b9e8f64-d307-48bc-9a71-1ab9accd134e
 md"## Sampling and the Law of Large Numbers"
@@ -407,10 +438,26 @@ rainfall_amount = prod.(rainfall_samples)
 # ╔═╡ f7ca0af5-dcdf-4e75-9063-2d194738be64
 histogram(rainfall_amount, xlab="rainfall amount", ylab="frequency", label="intensity * duration")
 
+# ╔═╡ 875cb743-7c6e-4aed-893d-03b969dc4c35
+@model function circle_throw()
+	x ~ Uniform()
+	y ~ Uniform()
+	in_circle ~ Dirac(x^2 + y^2 ≤ 1)
+end
+
+# ╔═╡ c12e165f-14b1-4df3-bc88-28ada3bf5add
+rand(circle_throw())
+
+# ╔═╡ b76245bf-a5a4-41f4-a20b-0327280e68e6
+mean([rand(circle_throw())[:in_circle] for i in 1:10_000])
+
 # ╔═╡ 1ad364c5-b65d-48d7-a829-e284c5e8eebc
 md"""
 ## Appendix
 """
+
+# ╔═╡ 5614c4b1-2c78-4fee-a480-3998a8e1ce6e
+TableOfContents()
 
 # ╔═╡ efd7bcba-f393-4659-ac5b-006740085144
 cummean(x) = cumsum(x) ./ (1:length(x))
@@ -440,9 +487,6 @@ let
 	plot!(pi_sob, label="quasi-random", lw=2)
 	title!("Error estimating π using sampling")
 end
-
-# ╔═╡ 5614c4b1-2c78-4fee-a480-3998a8e1ce6e
-TableOfContents()
 
 # ╔═╡ 57052ba3-151c-4dda-904a-dac9c421241c
 
@@ -2598,6 +2642,13 @@ version = "1.4.1+1"
 # ╠═2d346892-cb15-11ee-2d81-73e08fcc3288
 # ╠═c175d1ab-28be-4766-bc0c-20cbc72f191d
 # ╠═cfc49c56-f223-4b78-b6da-4e0c83a16bbf
+# ╠═5db3ed2d-ee29-4cd5-b438-b60d550a6ff8
+# ╠═7d1e1a93-510c-4f81-bb09-d87e3b40e136
+# ╠═41967e5b-9068-4318-acb6-d958b608c8f7
+# ╠═5821aaf1-744d-452a-96d2-6516c7423fff
+# ╠═cb36a752-da05-4da8-8dc8-1c2d34a11ad5
+# ╠═7c244dc0-6c7b-451e-b7c0-da25a77da657
+# ╠═fe471a6a-5c29-49f6-afba-83be7ab5d770
 # ╠═e0f96ed2-bc51-467e-be3e-8617293e33e2
 # ╠═c0677edb-29a4-4c4d-8ca7-9d81eac05c85
 # ╠═c56a657c-d211-4fab-91c0-ff0959bceb37
@@ -2606,10 +2657,12 @@ version = "1.4.1+1"
 # ╠═1f9b17a8-d8f1-4256-bebc-d5f92e085fe8
 # ╠═dd8c1370-5fb9-4ab7-8729-ea756762788d
 # ╠═1882bc65-abca-45b7-8f53-e76360b8dacd
-# ╟─b9be819e-2db9-4952-9453-98bf815b00e8
+# ╠═b9be819e-2db9-4952-9453-98bf815b00e8
 # ╠═2538dd4a-96a3-4d4f-b03e-82d2e8b9ea1f
 # ╠═090d0c6f-de9f-4ce8-befa-4ae9dbe1b38e
 # ╠═36b475e9-a16b-464f-a423-a4fbfbf21ef0
+# ╠═83db8998-125e-4cae-b6fe-1cdddfe3f868
+# ╠═9f525fef-80b3-4417-85ea-e318ad387985
 # ╠═3b9e8f64-d307-48bc-9a71-1ab9accd134e
 # ╠═1a991ac1-d4ed-4774-a9e2-a5f27f99e1ff
 # ╠═b5b55083-2fe3-4620-9759-8a2329154143
@@ -2683,9 +2736,12 @@ version = "1.4.1+1"
 # ╠═cda5faf1-8d74-4679-a335-7a5974010f5a
 # ╠═4b96292b-f0ad-48ac-99cd-360c0708ef72
 # ╠═f7ca0af5-dcdf-4e75-9063-2d194738be64
+# ╠═875cb743-7c6e-4aed-893d-03b969dc4c35
+# ╠═c12e165f-14b1-4df3-bc88-28ada3bf5add
+# ╠═b76245bf-a5a4-41f4-a20b-0327280e68e6
 # ╠═1ad364c5-b65d-48d7-a829-e284c5e8eebc
-# ╠═efd7bcba-f393-4659-ac5b-006740085144
 # ╠═5614c4b1-2c78-4fee-a480-3998a8e1ce6e
+# ╠═efd7bcba-f393-4659-ac5b-006740085144
 # ╠═57052ba3-151c-4dda-904a-dac9c421241c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
