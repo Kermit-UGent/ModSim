@@ -90,7 +90,7 @@ end
 
 
 # ╔═╡ ed5e7bb7-1a0f-4c89-9b88-d9a960400bda
-samples_MH, accepted_MH = metropolings_hastings(f, x->MultivariateNormal(x, 0.1I), randn(2); n=100)
+samples_MH, accepted_MH = metropolings_hastings(f, x->MultivariateNormal(x, 0.3I), randn(2); n=100)
 
 # ╔═╡ d51d6929-a6c6-4b31-ba42-201a783a1869
 begin
@@ -118,13 +118,14 @@ function hamiltonian_monte_carlo(f, x₀; σₚ=1, ϵ, L, n=100)
 		for _ in 1:L
 			xₜ, pₜ = leapfrog(xₜ, pₜ, ϵ, ∇U)
 		end
+		pₜ .= randn(length(x₀)) .* σₚ
 		push!(samples, xₜ)
 	end
 	return samples
 end
 
 # ╔═╡ 7a2dcc5c-b7b7-4e09-88b5-b38619a3e249
-samples_hmc = hamiltonian_monte_carlo(f, randn(2), σₚ=1, ϵ=0.1, L=5)
+samples_hmc = hamiltonian_monte_carlo(f, randn(2), σₚ=1, ϵ=0.1, L=5, n=100)
 
 # ╔═╡ d5450495-3d9a-46b1-a53d-c0a3d69a6f5f
 begin

@@ -60,15 +60,6 @@ plot(p->exp(logprior(seed_germ(k), (p=p,))), 0, 1)
 # ╔═╡ 87cfcde3-f039-4de9-af87-4941a3e28c93
 plot(p->exp(logprior(seed_germ(k), (p=p,))+loglikelihood(seed_germ(k), (p=p,))), 0, 1)
 
-# ╔═╡ d8ff625a-6204-4579-a8f5-9650544c7222
-@model function uncertain_normal(y=missing)
-	μ ~ Normal(0.0, 20)
-	σ ~ Gamma(1)
-	for i in 1:length(y)
-		y[i] ~ Normal(μ, σ)
-	end
-end
-
 # ╔═╡ 01fb5888-a01a-4dd8-af08-bb70894a99b8
 p_univar = MixtureModel([Normal(2, 0.4), Normal(4, 1.2)], [0.25, 0.75])
 
@@ -79,7 +70,7 @@ q = TruncatedNormal(2.5, 3, -1, 10)
 @bind M Slider(2.1:0.2:10, show_value=true)
 
 # ╔═╡ d91cea07-fb14-4b93-8ad1-31fb8f3afe8d
-@bind n_rejection_sampling Slider(10:10:1000, default=100, show_value=true)
+@bind n_rejection_sampling Slider(10:10:5000, default=100, show_value=true)
 
 # ╔═╡ fae76f2c-caae-49ff-9dfe-b67cd53d8dea
 begin
@@ -95,8 +86,8 @@ begin
 	plot!(x->M*pdf(q, x), -1, 10, lw=2, label="proposal distribiton M * q(x)")
 	plot!(zero, -1:0.02:10, fillrange=x->pdf(p_univar, x), fillalpha=0.3, lw=2, label="acceptance region", linealpha=0)
 	plot!(x->pdf(p_univar, x), -1, 10, fillrange=x->M*pdf(q, x), fillalpha=0.3, lw=2, label="rejection region", linealpha=0)
-	scatter!(x_prop[acc], u_rj[acc], label="accepted", ms=3)
-	scatter!(x_prop[.!acc], u_rj[.!acc], label="rejected", ms=3)
+	scatter!(x_prop[acc], u_rj[acc], label="accepted", ms=3, alpha=0.8)
+	scatter!(x_prop[.!acc], u_rj[.!acc], label="rejected", ms=3, alpha=0.8)
 end
 
 # ╔═╡ 9db5d774-8e6d-4bd1-a85a-d0e0705197ae
@@ -104,6 +95,66 @@ x_rejection_sampling
 
 # ╔═╡ d3b6cf36-a2d1-40fa-952c-f20d1468eb38
 acceptance_probability = length(x_rejection_sampling) / n_rejection_sampling
+
+# ╔═╡ 5e6c6135-f4f9-447c-8f7a-a49ec25e414a
+md"""
+σ₁: $(@bind σ₁ Slider(0.1:0.2:2, show_value=true, default=1))
+
+σ₂: $(@bind σ₂ Slider(0.1:0.2:2, show_value=true, default=2))
+
+ρ: $(@bind ρ Slider(-0.95:0.05:0.95, show_value=true, default=0.9))
+
+n : $(@bind n_gibbs Slider(5:5:100, show_value=true, default=25))
+"""
+
+# ╔═╡ 3fca01f3-ac6e-4fdc-b8ca-48040ca562f3
+μ = [1, 0]
+
+# ╔═╡ d8ff625a-6204-4579-a8f5-9650544c7222
+@model function uncertain_normal(y=missing)
+	μ ~ Normal(0.0, 20)
+	σ ~ Gamma(1)
+	for i in 1:length(y)
+		y[i] ~ Normal(μ, σ)
+	end
+end
+
+# ╔═╡ 138bf97c-9295-440d-99f4-24f7fe58b774
+Σ = [σ₁^2 σ₁*σ₂*ρ;
+	 σ₁*σ₂*ρ σ₂^2]
+
+# ╔═╡ 87b984ee-2daa-4cca-b5eb-60c4aa3b2fb5
+mvn = MultivariateNormal(μ, Σ)
+
+# ╔═╡ 76b0886a-fc91-40ef-89d5-dcf5d261907f
+let	
+	X1 = Normal(μ[1], σ₁)
+	X1cond(x2) = Normal(μ[1] + Σ[1,2]*inv(Σ[2,2])*(x2-μ[2]), 
+						√(Σ[1,1] - Σ[2,1]*inv(Σ[2,2])*Σ[1,2]))
+	X2cond(x1) = Normal(μ[2] + Σ[1,2]*inv(Σ[1,1])*(x1-μ[1]), 
+					√(Σ[2,2] - Σ[1,2]*inv(Σ[1,1])*Σ[2,1]))
+
+	x1 = rand(X1)
+	x2 = rand(X2cond(x1))
+	(x1, x2)
+
+	x1_gibbs = [x1]
+	x2_gibbs = [x2]
+	for t in 1:n_gibbs
+		x2 = last(x2_gibbs)
+		x1 = rand(X1cond(x2))
+		push!(x1_gibbs, x1)
+		push!(x2_gibbs, x2)
+		x2 = rand(X2cond(x1))
+		push!(x1_gibbs, x1)
+		push!(x2_gibbs, x2)
+	end
+	contour(-5:0.05:5, -5:0.05:5, (x,y)->pdf(mvn, [x,y]), color=:speed, xlab=L"x", ylab=L"y")
+	plot!(x1_gibbs, x2_gibbs, color="blue", alpha=0.7, label="Gibbs chain")
+	#scatter!([last(x1_gibbs)], [last(x2_gibbs)])
+	#plot!(x->pdf(X1cond(last(x2_gibbs)), x)-5, -4, 4, label="X1|x2")
+	
+end
 
 # ╔═╡ 4d6d6c9e-c2a8-4c7d-9d18-89d2e9d0c213
 y = [7.2, 8.3, 5.4, 9.8, 7.9]
@@ -118,16 +169,16 @@ norm_likelihood(μ, σ) = exp(loglikelihood(uncertain_normal(y), (μ=μ, σ=σ))
 norm_posterior(μ, σ) = norm_prior(μ, σ) * norm_likelihood(μ, σ)
 
 # ╔═╡ a09eda2e-0bb7-46c9-8d60-2b4447257772
-heatmap(-15:0.1:15, 0.1:0.02:5, norm_prior, color=:speed)
+heatmap(-15:0.1:15, 0.1:0.02:5, norm_prior, color=:speed, ylab=L"\sigma", xlab=L"\mu")
 
 # ╔═╡ 3b821e04-a27a-489f-924e-e82a08693371
-heatmap(-15:0.1:15, 0.1:0.02:5, norm_likelihood, color=:speed)
+heatmap(-15:0.1:15, 0.1:0.02:5, norm_likelihood, color=:speed, ylab=L"\sigma", xlab=L"\mu")
 
 # ╔═╡ b4eef7a8-a61c-471d-baf0-1d0b5fb997e6
-heatmap(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed)
+heatmap(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu")
 
 # ╔═╡ 63af963c-a304-4142-8f23-a56a5fc14e76
-chain_HMC = sample(uncertain_normal(y), NUTS(), 50, drop_warmup=true, n_adapts=100, discard_adapt=true)
+chain_HMC = sample(uncertain_normal(y), HMC(0.1, 5), 5000, drop_warmup=true, n_adapts=100, discard_adapt=true)
 
 # ╔═╡ 06e83a23-fa3a-49f7-8f43-d46f3285e943
 #chain_HMC = sample(uncertain_normal(y), Gibbs(HMC(0.4, 10, :μ), HMC(0.2, 10, :σ)), 50, drop_warmup=true, n_adapts=100, discard_adapt=true)
@@ -2476,16 +2527,21 @@ version = "1.4.1+1"
 # ╠═d8ff625a-6204-4579-a8f5-9650544c7222
 # ╠═01fb5888-a01a-4dd8-af08-bb70894a99b8
 # ╠═34cf42a4-b38d-4a94-89ee-6fb85c44acbd
-# ╠═a0a1deec-75b6-4061-aa32-ad5e940d4123
-# ╠═d91cea07-fb14-4b93-8ad1-31fb8f3afe8d
+# ╟─a0a1deec-75b6-4061-aa32-ad5e940d4123
+# ╟─d91cea07-fb14-4b93-8ad1-31fb8f3afe8d
 # ╟─fae76f2c-caae-49ff-9dfe-b67cd53d8dea
 # ╠═9db5d774-8e6d-4bd1-a85a-d0e0705197ae
 # ╟─d3b6cf36-a2d1-40fa-952c-f20d1468eb38
+# ╟─5e6c6135-f4f9-447c-8f7a-a49ec25e414a
+# ╠═3fca01f3-ac6e-4fdc-b8ca-48040ca562f3
+# ╠═138bf97c-9295-440d-99f4-24f7fe58b774
+# ╠═87b984ee-2daa-4cca-b5eb-60c4aa3b2fb5
+# ╟─76b0886a-fc91-40ef-89d5-dcf5d261907f
 # ╠═4d6d6c9e-c2a8-4c7d-9d18-89d2e9d0c213
 # ╠═7cfc4306-746b-434a-8160-52341c1e6519
 # ╠═fb35033f-3d11-4ab1-bed8-2c22396064f8
 # ╠═e3e51306-385a-461b-94e8-e2a18b5250ab
-# ╠═a09eda2e-0bb7-46c9-8d60-2b4447257772
+# ╟─a09eda2e-0bb7-46c9-8d60-2b4447257772
 # ╠═3b821e04-a27a-489f-924e-e82a08693371
 # ╠═b4eef7a8-a61c-471d-baf0-1d0b5fb997e6
 # ╠═63af963c-a304-4142-8f23-a56a5fc14e76
