@@ -32,33 +32,89 @@ using Plots, PlutoUI, LaTeXStrings, LinearAlgebra
 	X ~ Binomial(n, p)
 end
 
+# ╔═╡ 768ea152-00a5-4409-86eb-9a1c554eb3b2
+mean(Beta(8, 3))
+
+# ╔═╡ 959cd079-59a4-42f5-a868-4cc0675c694b
+seed_likelihood = p -> pdf(Binomial(10, p), k)
+
+# ╔═╡ 39cb8a88-9bfe-4b51-8f2f-b89b45dccc95
+seed_prior = p -> pdf(Beta(8, 3), p)
+
+# ╔═╡ 667f2069-fd32-4c3e-aebb-b75a38bf84b9
+seed_posterior = p -> pdf(Beta(8+k, 3+10-k), p)
+
 # ╔═╡ 0bc4cdff-f86d-4174-8aac-d2ca61717f96
-plot(p->pdf(Binomial(10, p), k), 0, 1, lw=2, label="likelihood", xlab=L"p", color="blue")
+plot(seed_likelihood, 0, 1, lw=2, label="likelihood", xlab=L"p", color="blue")
 
 # ╔═╡ 08d33254-5013-4e4f-ae0b-1f5b6f3a2fb2
-plot(p->pdf(Beta(8, 3), p), 0, 1, lw=2, label="prior", xlab=L"p", color="green")
+plot(seed_prior, 0, 1, lw=2, label="prior", xlab=L"p", color="green")
 
 # ╔═╡ 217edb24-a555-4deb-ab58-2969d8564a7b
-plot(p->pdf(Beta(8+k, 3+10-k), p), 0, 1, lw=2, label="posterior", xlab=L"p", color="orange")
+plot(seed_posterior, 0, 1, lw=2, label="posterior", xlab=L"p", color="orange")
 
-# ╔═╡ 34a5bb1a-8919-4e41-89a5-fdd4e48bec26
-let
-	plot(p->pdf(Beta(8, 3), p), 0, 1, lw=2, label="prior", xlab=L"p", color="green")
-	plot!(p->pdf(Binomial(10, p), k), 0, 1, lw=2, label="likelihood", color="blue")
-	plot!(p->pdf(Beta(8+k, 3+10-k), p), 0, 1, lw=2, label="posterior", color="orange")
-end
+# ╔═╡ 3ef47022-f9e3-434e-87a3-20b1870a7c24
+p_ML = argmax(seed_likelihood, 0:0.01:1)
 
-# ╔═╡ 09903d31-6d16-452f-beaf-04b8d4ed54c5
-loglikelihood(seed_germ(k), (p=0.9,))
+# ╔═╡ 6004b26a-8f10-492d-bdd2-1d317d8bb394
+p_MAP = argmax(seed_posterior, 0:0.01:1)
 
-# ╔═╡ 9b1ae98e-ed19-488c-9b83-56fc4620ff6a
-plot(p->exp(loglikelihood(seed_germ(k), (p=p,))), 0, 1)
+# ╔═╡ 2ab01769-42cd-44e1-8d4c-2c8b477c732a
+md"Let us consider a bit of a more familiar example. Suppose we have a vector $\mathbf{y}$ with values i.i.d. distrubuted from a normal distribution $y_i\sim$Normal($\mu$, $\sigma$), with unknown mean and standard deviation."
 
-# ╔═╡ 3720a687-6002-42a9-859c-6f75796fca0b
-plot(p->exp(logprior(seed_germ(k), (p=p,))), 0, 1)
+# ╔═╡ 4d6d6c9e-c2a8-4c7d-9d18-89d2e9d0c213
+y = [7.2, 8.3, 5.4, 9.8, 7.9, 8.9]
 
-# ╔═╡ 87cfcde3-f039-4de9-af87-4941a3e28c93
-plot(p->exp(logprior(seed_germ(k), (p=p,))+loglikelihood(seed_germ(k), (p=p,))), 0, 1)
+# ╔═╡ ba06e8a5-c142-4963-97b4-783ed4c706bf
+mean(y), std(y)  # sample mean and standard deviation
+
+# ╔═╡ f44abcc5-9010-4d10-b722-ef8147c8fd66
+md"""Your basic statistics course would course have estimators for $\mu$ and $\sigma$, the sample mean and the square root of the sample variance, respectively. Let us use a Bayesian reasoning and place a prior on these two unknown parameters:
+
+$$\mu \sim \text{Normal}(0, 20)$$
+
+$$\sigma \sim \text{InverseGamma}(1/10)$$
+
+which are chosen to be "reasonable". 
+"""
+
+# ╔═╡ 0c29af96-949d-47b3-869f-274ed39c9d25
+md"The full, hierarchical model can be implemented as a Turing model."
+
+# ╔═╡ 2cbe07e6-8cf0-4dc4-8aea-f56059ffa367
+md"Note that this is now a distribution over 2 + $n$ variables as $\mathbf{y}$ can be of arbirary length. By giving $y$ as an argument, we fix the variables, though the parameters $\mu$ and $\sigma$ remain random variables."
+
+# ╔═╡ afb7bdca-a8de-4342-9212-5e81fa47963a
+md"The prior over $\mu$ and $\sigma$ is a product distribution of a normal (centered around 0 and large standard deviation) and an inverse Gamma."
+
+# ╔═╡ 1fbd13c1-cc93-4e5b-98f1-ace195d20f97
+md"The likelihood of $\mu$ and $\sigma$ can be obtainded from the PDF of a normal distirbution over the parameters:
+
+$$L(\mu, \sigma\mid\mathbf{y}) = \prod_{i=1}^n \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(y_i-\mu)^2}{2\sigma^2}}\,.$$"
+
+# ╔═╡ 213465af-f980-4848-9e5a-0cb5429f4af8
+md"The posterior is the product of the prior and the likelihood."
+
+# ╔═╡ 7f2a7d88-442f-431e-8e09-42082bda8d24
+md"The posterior is slightly shifted compared to the likelihood, though both are quite close! We see that the posterio distribution is centred around the sample mean and standard deviation. The posterior identifies which parameters of the normal distribution have likely given rise to the data. At sight, the mean $\mu$ is likely between 6 and 9, while the standard deviation is likely to be between 1 and 2. Using numerical methods, we can identify the MAP estimator of the parameters and credibility intervals. Inference in two dimensions is hence still quite tractable. However, in what follows, we will use sampling to get observations from the posterior, which we can use to learn everything we want to know about the distributions and hence our parameters or variables of interest."
+
+# ╔═╡ 985c1d3e-bc02-4dc5-9a28-d0ec9edf5cc9
+
+
+# ╔═╡ e7bd6347-ac8a-4460-b0f7-4692968205f7
+Tweather = [0.9 0.1; 0.5 0.5]
+
+# ╔═╡ 807fe053-bf07-446b-aac6-e8de716c5e2a
+q0 = [0,1]
+
+# ╔═╡ 012ff9ea-08ae-46fd-afab-49341f35f57a
+q1 = Tweather' * q0  # distribution after one time step
+
+# ╔═╡ cf858c95-d2b9-4f53-af1a-d5a511f531ce
+q2 = Tweather' * q1  # distribution after two time steps
+
+# ╔═╡ cc92d39d-830f-451c-81b4-de00f74545bf
+q100 = Tweather'^100 * q0  # stationary distribution
 
 # ╔═╡ 01fb5888-a01a-4dd8-af08-bb70894a99b8
 p_univar = MixtureModel([Normal(2, 0.4), Normal(4, 1.2)], [0.25, 0.75])
@@ -67,10 +123,10 @@ p_univar = MixtureModel([Normal(2, 0.4), Normal(4, 1.2)], [0.25, 0.75])
 q = TruncatedNormal(2.5, 3, -1, 10)
 
 # ╔═╡ a0a1deec-75b6-4061-aa32-ad5e940d4123
-@bind M Slider(2.1:0.2:10, show_value=true)
+md"M : $(@bind M Slider(2.1:0.2:10, show_value=true))"
 
 # ╔═╡ d91cea07-fb14-4b93-8ad1-31fb8f3afe8d
-@bind n_rejection_sampling Slider(10:10:5000, default=100, show_value=true)
+md" n throws : $(@bind n_rejection_sampling Slider(10:10:5000, default=100, show_value=true))"
 
 # ╔═╡ fae76f2c-caae-49ff-9dfe-b67cd53d8dea
 begin
@@ -113,11 +169,32 @@ n : $(@bind n_gibbs Slider(5:5:100, show_value=true, default=25))
 # ╔═╡ d8ff625a-6204-4579-a8f5-9650544c7222
 @model function uncertain_normal(y=missing)
 	μ ~ Normal(0.0, 20)
-	σ ~ Gamma(1)
+	σ ~ InverseGamma(1/10)
 	for i in 1:length(y)
 		y[i] ~ Normal(μ, σ)
 	end
 end
+
+# ╔═╡ b04ce3ab-c5c0-4a13-8d82-05198532b22d
+uncertain_normal(y)
+
+# ╔═╡ 7cfc4306-746b-434a-8160-52341c1e6519
+norm_prior(μ, σ) = exp(logprior(uncertain_normal(y), (μ=μ, σ=σ)))
+
+# ╔═╡ a09eda2e-0bb7-46c9-8d60-2b4447257772
+heatmap(-15:0.1:15, 0.1:0.02:5, norm_prior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Prior")
+
+# ╔═╡ fb35033f-3d11-4ab1-bed8-2c22396064f8
+norm_likelihood(μ, σ) = exp(loglikelihood(uncertain_normal(y), (μ=μ, σ=σ)))
+
+# ╔═╡ 3b821e04-a27a-489f-924e-e82a08693371
+heatmap(-15:0.1:15, 0.1:0.02:5, norm_likelihood, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Likelihood")
+
+# ╔═╡ e3e51306-385a-461b-94e8-e2a18b5250ab
+norm_posterior(μ, σ) = norm_prior(μ, σ) * norm_likelihood(μ, σ)
+
+# ╔═╡ b4eef7a8-a61c-471d-baf0-1d0b5fb997e6
+heatmap(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu", label="Posterior")
 
 # ╔═╡ 138bf97c-9295-440d-99f4-24f7fe58b774
 Σ = [σ₁^2 σ₁*σ₂*ρ;
@@ -150,35 +227,15 @@ let
 		push!(x2_gibbs, x2)
 	end
 	contour(-5:0.05:5, -5:0.05:5, (x,y)->pdf(mvn, [x,y]), color=:speed, xlab=L"x", ylab=L"y")
-	plot!(x1_gibbs, x2_gibbs, color="blue", alpha=0.7, label="Gibbs chain")
+	plot!(x1_gibbs, x2_gibbs, color="blue", alpha=0.7, label="Gibbs chain", lw=1.3)
+	scatter!(x1_gibbs[2:2:end], x2_gibbs[2:2:end], label="sample", ms=2, alpha=0.7)
 	#scatter!([last(x1_gibbs)], [last(x2_gibbs)])
 	#plot!(x->pdf(X1cond(last(x2_gibbs)), x)-5, -4, 4, label="X1|x2")
 	
 end
 
-# ╔═╡ 4d6d6c9e-c2a8-4c7d-9d18-89d2e9d0c213
-y = [7.2, 8.3, 5.4, 9.8, 7.9]
-
-# ╔═╡ 7cfc4306-746b-434a-8160-52341c1e6519
-norm_prior(μ, σ) = exp(logprior(uncertain_normal(y), (μ=μ, σ=σ)))
-
-# ╔═╡ fb35033f-3d11-4ab1-bed8-2c22396064f8
-norm_likelihood(μ, σ) = exp(loglikelihood(uncertain_normal(y), (μ=μ, σ=σ)))
-
-# ╔═╡ e3e51306-385a-461b-94e8-e2a18b5250ab
-norm_posterior(μ, σ) = norm_prior(μ, σ) * norm_likelihood(μ, σ)
-
-# ╔═╡ a09eda2e-0bb7-46c9-8d60-2b4447257772
-heatmap(-15:0.1:15, 0.1:0.02:5, norm_prior, color=:speed, ylab=L"\sigma", xlab=L"\mu")
-
-# ╔═╡ 3b821e04-a27a-489f-924e-e82a08693371
-heatmap(-15:0.1:15, 0.1:0.02:5, norm_likelihood, color=:speed, ylab=L"\sigma", xlab=L"\mu")
-
-# ╔═╡ b4eef7a8-a61c-471d-baf0-1d0b5fb997e6
-heatmap(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu")
-
 # ╔═╡ 63af963c-a304-4142-8f23-a56a5fc14e76
-chain_HMC = sample(uncertain_normal(y), HMC(0.1, 5), 5000, drop_warmup=true, n_adapts=100, discard_adapt=true)
+chain_HMC = sample(uncertain_normal(y), HMC(0.1, 5), 50, drop_warmup=true, n_adapts=100, discard_adapt=true)
 
 # ╔═╡ 06e83a23-fa3a-49f7-8f43-d46f3285e943
 #chain_HMC = sample(uncertain_normal(y), Gibbs(HMC(0.4, 10, :μ), HMC(0.2, 10, :σ)), 50, drop_warmup=true, n_adapts=100, discard_adapt=true)
@@ -234,29 +291,11 @@ Markov mixing example
 ![](https://www.probabilitycourse.com/images/chapter11/MC-diagram-solved-tek.png)
 """
 
-# ╔═╡ e7bd6347-ac8a-4460-b0f7-4692968205f7
-Tweather = [0.9 0.1; 0.5 0.5]
-
-# ╔═╡ 807fe053-bf07-446b-aac6-e8de716c5e2a
-q0 = [0,1]
-
-# ╔═╡ 012ff9ea-08ae-46fd-afab-49341f35f57a
-q1 = Tweather' * q0
-
-# ╔═╡ cf858c95-d2b9-4f53-af1a-d5a511f531ce
-q2 = Tweather' * q1
-
-# ╔═╡ cc92d39d-830f-451c-81b4-de00f74545bf
-q100 = Tweather'^100 * q0
-
 # ╔═╡ eab53e8a-b7cd-4c97-83f1-bcfd9c59cc4f
 begin
 	T = Tridiagonal(0.3ones(9), 0.1ones(10), 0.6ones(9))
 	T ./= sum(T, dims=2)
 end
-
-# ╔═╡ abf864f0-09c1-494a-8615-13232bdb9a4e
-clipboard(T)
 
 # ╔═╡ fcfa5203-73df-40f6-a6c9-eda531054b38
 p₀ = [i==1 ? 1.0 : 0.0 for i in 1:size(T,2)]
@@ -308,6 +347,57 @@ quantile(sample(trending(-2.3, 0.3, -2.8), NUTS(), 10_000))
 
 # ╔═╡ d5db3698-8546-4606-8346-85475619a3e0
 quantile
+
+# ╔═╡ 6a178a79-ae85-4496-abef-11bf62d64da8
+md"# Appendix 🐉"
+
+# ╔═╡ d9d417f3-a427-409e-9090-c76c8226be04
+TableOfContents()
+
+# ╔═╡ 0d45d6f9-f27c-4d8e-b117-26132418be55
+dist2pdf(distribution) = x -> pdf(distribution, x)
+
+# ╔═╡ 3eac18d0-f755-42aa-bbcc-9714cc64dc5a
+plot(dist2pdf(Normal(0, 20)), -50, 50, xlabel=L"\mu", label="Normal(0, 20)", title="prior for μ", lw=2)
+
+# ╔═╡ cd8bf990-4f36-4a56-83c2-c58217448b1e
+plot(dist2pdf(InverseGamma(.1)), 0, 20, xlabel=L"\sigma", label="InverseGamma(1)", title="prior for σ", lw=2)
+
+# ╔═╡ 037b15f6-0858-41fa-a8fd-c6cc8c8d8e7a
+function seed_bayesian_plot(k; a=8, b=3, n=10, title="Inference of p given $k of $n seed germinated")
+
+	seed_likelihood(p) = pdf(Binomial(n, p), k)
+	seed_prior(p) = pdf(Beta(a, b), p)
+	seed_posterior(p) = pdf(Beta(a+k, b+n-k), p)
+
+	p_ML = argmax(seed_likelihood, 0:0.01:1)
+	p_MAP = argmax(seed_posterior, 0:0.01:1)
+		
+	plot_seed = plot(seed_prior, 0, 1, lw=2, label="prior (Beta($a, $b))", xlab=L"p", color="green"; title)
+	plot!(p->n * seed_likelihood(p), 0, 1, lw=2, label="likelihood (rescaled)", color="blue")
+	plot!(seed_posterior, 0, 1, lw=2, label="posterior", color="orange")
+	vline!([p_ML], lw=2, alpha=0.5, label="p* (maximum likelihood)", ls=:dash)
+	vline!([p_MAP], lw=2, alpha=0.5, label="p* (maximum a posterior likelihood)", ls=:dot)
+	return plot_seed
+end
+
+# ╔═╡ 34a5bb1a-8919-4e41-89a5-fdd4e48bec26
+seed_bayesian_plot(k)
+
+# ╔═╡ 92cd9bfb-8a58-4b73-ab02-5ac4447499d0
+seed_bayesian_plot(10)
+
+# ╔═╡ fb486bb6-b462-40f5-8189-2b46c5817fc1
+seed_bayesian_plot(2)
+
+# ╔═╡ 780b3e4e-7959-401f-aca5-5dad90276128
+seed_bayesian_plot(k, a=1, b=1)
+
+# ╔═╡ ba15b522-e4e8-4de7-882e-a0d14da2fac1
+seed_bayesian_plot(k, a=80, b=30)
+
+# ╔═╡ 9609ee3c-2a5e-450f-8822-d616552cae09
+seed_bayesian_plot(10k, n=100)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2516,15 +2606,47 @@ version = "1.4.1+1"
 # ╠═2c4d5454-b734-4ecb-8f71-d38496951307
 # ╠═eb37dd4b-3af0-4534-92c2-e495b83024be
 # ╠═730e5cbb-1787-44b3-9bb4-32dba7035ea8
+# ╠═768ea152-00a5-4409-86eb-9a1c554eb3b2
+# ╠═959cd079-59a4-42f5-a868-4cc0675c694b
+# ╠═39cb8a88-9bfe-4b51-8f2f-b89b45dccc95
+# ╠═667f2069-fd32-4c3e-aebb-b75a38bf84b9
 # ╠═0bc4cdff-f86d-4174-8aac-d2ca61717f96
 # ╠═08d33254-5013-4e4f-ae0b-1f5b6f3a2fb2
 # ╠═217edb24-a555-4deb-ab58-2969d8564a7b
+# ╠═3ef47022-f9e3-434e-87a3-20b1870a7c24
+# ╠═6004b26a-8f10-492d-bdd2-1d317d8bb394
 # ╠═34a5bb1a-8919-4e41-89a5-fdd4e48bec26
-# ╠═09903d31-6d16-452f-beaf-04b8d4ed54c5
-# ╠═9b1ae98e-ed19-488c-9b83-56fc4620ff6a
-# ╠═3720a687-6002-42a9-859c-6f75796fca0b
-# ╠═87cfcde3-f039-4de9-af87-4941a3e28c93
+# ╠═92cd9bfb-8a58-4b73-ab02-5ac4447499d0
+# ╠═fb486bb6-b462-40f5-8189-2b46c5817fc1
+# ╠═780b3e4e-7959-401f-aca5-5dad90276128
+# ╠═ba15b522-e4e8-4de7-882e-a0d14da2fac1
+# ╠═9609ee3c-2a5e-450f-8822-d616552cae09
+# ╠═2ab01769-42cd-44e1-8d4c-2c8b477c732a
+# ╠═4d6d6c9e-c2a8-4c7d-9d18-89d2e9d0c213
+# ╠═ba06e8a5-c142-4963-97b4-783ed4c706bf
+# ╠═f44abcc5-9010-4d10-b722-ef8147c8fd66
+# ╠═3eac18d0-f755-42aa-bbcc-9714cc64dc5a
+# ╠═cd8bf990-4f36-4a56-83c2-c58217448b1e
+# ╠═0c29af96-949d-47b3-869f-274ed39c9d25
 # ╠═d8ff625a-6204-4579-a8f5-9650544c7222
+# ╠═2cbe07e6-8cf0-4dc4-8aea-f56059ffa367
+# ╠═b04ce3ab-c5c0-4a13-8d82-05198532b22d
+# ╠═afb7bdca-a8de-4342-9212-5e81fa47963a
+# ╠═7cfc4306-746b-434a-8160-52341c1e6519
+# ╟─a09eda2e-0bb7-46c9-8d60-2b4447257772
+# ╠═1fbd13c1-cc93-4e5b-98f1-ace195d20f97
+# ╠═fb35033f-3d11-4ab1-bed8-2c22396064f8
+# ╠═3b821e04-a27a-489f-924e-e82a08693371
+# ╠═213465af-f980-4848-9e5a-0cb5429f4af8
+# ╠═e3e51306-385a-461b-94e8-e2a18b5250ab
+# ╟─b4eef7a8-a61c-471d-baf0-1d0b5fb997e6
+# ╠═7f2a7d88-442f-431e-8e09-42082bda8d24
+# ╠═985c1d3e-bc02-4dc5-9a28-d0ec9edf5cc9
+# ╠═e7bd6347-ac8a-4460-b0f7-4692968205f7
+# ╠═807fe053-bf07-446b-aac6-e8de716c5e2a
+# ╠═012ff9ea-08ae-46fd-afab-49341f35f57a
+# ╠═cf858c95-d2b9-4f53-af1a-d5a511f531ce
+# ╠═cc92d39d-830f-451c-81b4-de00f74545bf
 # ╠═01fb5888-a01a-4dd8-af08-bb70894a99b8
 # ╠═34cf42a4-b38d-4a94-89ee-6fb85c44acbd
 # ╟─a0a1deec-75b6-4061-aa32-ad5e940d4123
@@ -2534,16 +2656,9 @@ version = "1.4.1+1"
 # ╟─d3b6cf36-a2d1-40fa-952c-f20d1468eb38
 # ╟─5e6c6135-f4f9-447c-8f7a-a49ec25e414a
 # ╠═3fca01f3-ac6e-4fdc-b8ca-48040ca562f3
-# ╠═138bf97c-9295-440d-99f4-24f7fe58b774
+# ╟─138bf97c-9295-440d-99f4-24f7fe58b774
 # ╠═87b984ee-2daa-4cca-b5eb-60c4aa3b2fb5
 # ╟─76b0886a-fc91-40ef-89d5-dcf5d261907f
-# ╠═4d6d6c9e-c2a8-4c7d-9d18-89d2e9d0c213
-# ╠═7cfc4306-746b-434a-8160-52341c1e6519
-# ╠═fb35033f-3d11-4ab1-bed8-2c22396064f8
-# ╠═e3e51306-385a-461b-94e8-e2a18b5250ab
-# ╟─a09eda2e-0bb7-46c9-8d60-2b4447257772
-# ╠═3b821e04-a27a-489f-924e-e82a08693371
-# ╠═b4eef7a8-a61c-471d-baf0-1d0b5fb997e6
 # ╠═63af963c-a304-4142-8f23-a56a5fc14e76
 # ╠═06e83a23-fa3a-49f7-8f43-d46f3285e943
 # ╠═444a89d1-a8c1-4df8-945d-6e8dd32ae204
@@ -2557,13 +2672,7 @@ version = "1.4.1+1"
 # ╠═d9a82abf-3bd4-4ef3-98ea-d311c916222c
 # ╠═45ae7bf3-6381-4476-bcd6-b32a0ac08e21
 # ╠═d1086c61-c3af-40b2-aeb6-bf9b388adaf0
-# ╠═e7bd6347-ac8a-4460-b0f7-4692968205f7
-# ╠═807fe053-bf07-446b-aac6-e8de716c5e2a
-# ╠═012ff9ea-08ae-46fd-afab-49341f35f57a
-# ╠═cf858c95-d2b9-4f53-af1a-d5a511f531ce
-# ╠═cc92d39d-830f-451c-81b4-de00f74545bf
 # ╠═eab53e8a-b7cd-4c97-83f1-bcfd9c59cc4f
-# ╠═abf864f0-09c1-494a-8615-13232bdb9a4e
 # ╠═fcfa5203-73df-40f6-a6c9-eda531054b38
 # ╠═b2cbf023-a0ea-4714-b30b-b331a081c7fa
 # ╟─bfd58734-b396-4424-9343-4562932f70e3
@@ -2574,5 +2683,9 @@ version = "1.4.1+1"
 # ╠═5ce17f7f-7e93-4c43-9f75-b3b677af9fd1
 # ╠═71c210f8-34ad-469a-89fa-dc99efb6b72a
 # ╠═d5db3698-8546-4606-8346-85475619a3e0
+# ╠═6a178a79-ae85-4496-abef-11bf62d64da8
+# ╠═d9d417f3-a427-409e-9090-c76c8226be04
+# ╠═0d45d6f9-f27c-4d8e-b117-26132418be55
+# ╠═037b15f6-0858-41fa-a8fd-c6cc8c8d8e7a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
