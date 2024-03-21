@@ -306,3 +306,5 @@ TSWLatexianTemp*
 
 # vscode
 .vscode/
+
+examples/launch_pluto/Manifest.toml
