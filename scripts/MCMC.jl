@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.40
 
 using Markdown
 using InteractiveUtils
@@ -185,7 +185,9 @@ Rejection sampling uses a *proposal distribution* $q(x)$ from which it is easy t
 The acceptance probability, $\alpha = \frac{\tilde{p}(x)}{Mq(x)}$, ensures that the accepted samples are drawn from the target distribution $p(x)$. When a sample $x$ is generated from the proposal distribution $q(x)$ and an acceptance probability $\alpha$ is computed, it effectively scales the probability of accepting $x$ based on how likely it is under the target distribution relative to the proposal distribution. Rejection sampling is an exact method; accepted samples follow the target distribution.
 
 We might fail at generating a sample (rejection), so we must rerun it until it accepts a sample. The probability of accepting a sample is 
+
 $$P(\text{accept}) = \int_{-\infty}^\infty\alpha q(x)\mathrm{d}x=\int_{-\infty}^\infty\frac{\tilde{p}(x)}{Mq(x)} q(x)\mathrm{d}x=\frac{Z}{M}\,,$$
+
 meaning that we need on average $M/Z$ throws to generate a sample from $p(x)$ (this follows a geometric distribution). It should be clear that very low acceptance rates are the main potential reasons why rejection sampling won't scale for certain problems. A low acceptance rate could be due to:
 - a poor match between $q(x)$ and $p(z)$ (try to find a proposal distribution that closely resembles the shape of the target distribution);
 - the constant $M$ being too high (try to find as small a value of $M$ as possible).

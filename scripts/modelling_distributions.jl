@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.40
 
 using Markdown
 using InteractiveUtils
@@ -48,6 +48,9 @@ md"n throws : $(@bind n_pi Slider(1000:1000:100_000, default=1000, show_value=tr
 # ╔═╡ 5e81b02d-a879-4023-a7fe-e6f187a558f1
 n_pi  # number of throws
 
+# ╔═╡ 9b3f076f-e50b-4f23-a282-91fac47de21b
+md"Generate points in $[0,1]\times[0,1]$."
+
 # ╔═╡ 5db3ed2d-ee29-4cd5-b438-b60d550a6ff8
 x_unif = rand(n_pi)
 
@@ -68,10 +71,10 @@ end
 sum(in_circle)
 
 # ╔═╡ 7c244dc0-6c7b-451e-b7c0-da25a77da657
-pi_est = sum(in_circle) / length(in_circle)
+pi_est = 4sum(in_circle) / length(in_circle)
 
 # ╔═╡ fe471a6a-5c29-49f6-afba-83be7ab5d770
-π / 4  # true value
+π  # true value
 
 # ╔═╡ e0f96ed2-bc51-467e-be3e-8617293e33e2
 md"""
@@ -522,6 +525,28 @@ md"""
 | Triangular    | $f_X(x) = \begin{cases} \frac{2(x-a)}{(b-a)(c-a)} & \text{for } a \leq x < c \\ \frac{2}{b-a} & \text{for } c \leq x < b \\ 0 & \text{otherwise} \end{cases}$ | $x \in [a, b]$ | $a, b, c \in \mathbb{R}, a \leq c \leq b$ | $\frac{a+b+c}{3}$              | Continuous probability distribution with lower and upper limits.                                         | Estimation of time to complete a task.                   |
 | Beta          | $f_X(x) = \frac{x^{\alpha-1}(1-x^{\beta-1}}{B(\alpha,\beta)}$                                                                                                 | $x\in [0,1]$   | $\alpha>0, \beta > 0$                     | $\frac{\alpha}{\alpha+\beta}$  | Distribution over a success probability of a Bernoulli, having seen $\alpha$ success and $\beta$ misses. | Belief of a fraction of mutants.                         |
 
+"""
+
+# ╔═╡ 4290b2c6-1f5f-4780-9f32-08ae949b666c
+md"""
+### MaxEnt: building distributions
+
+You might wonder how one can come up with sensible probability distributions. One way is using the *maximum entropy principe* (MaxEnt). For any probability function, one can compute the information entropy as:
+
+$$H(X)=-\int_{-\infty}^\infty f_X(x) \log(f_X(x))\,,$$
+
+or,  for discrete probability distributions
+
+$$H(X) = -\sum_ip_i\log(p_i)\,,$$
+
+which measures the average degree of "uncertainty", "information" or "surprise" in the distribution. The MaxEnt method finds distributions that have a maximal entropy, given some fixed properties, such as the support, the mean, etc. For example, the normal distribution is the unique distribution with a mean $\mu$ and a variance $\sigma^2$ with the largest entropy. 
+
+Maximum entropy can be motivated by:
+1. It yields the least informative distributions with the largest uncertainty given the data.
+2. Nature tends to generate empirical distributions with high entropy.
+3. It just works.
+
+Most of the distributions you know and love can be obtained this way. The MaxEnt principle is used a lot in the life sciences. For example, in ecology in species distribution modelling, one often takes the distribution with the largest entropy that fits the data.
 """
 
 # ╔═╡ 07949347-3e7b-499f-9ca6-c62c131e2a65
@@ -3081,6 +3106,7 @@ version = "1.4.1+1"
 # ╟─cfc49c56-f223-4b78-b6da-4e0c83a16bbf
 # ╟─c469b254-ffc4-458d-8676-db135e11b306
 # ╠═5e81b02d-a879-4023-a7fe-e6f187a558f1
+# ╟─9b3f076f-e50b-4f23-a282-91fac47de21b
 # ╠═5db3ed2d-ee29-4cd5-b438-b60d550a6ff8
 # ╠═7d1e1a93-510c-4f81-bb09-d87e3b40e136
 # ╟─41967e5b-9068-4318-acb6-d958b608c8f7
@@ -3145,6 +3171,7 @@ version = "1.4.1+1"
 # ╟─8ae351eb-c1b8-4934-aa48-023f8feba75c
 # ╟─ebe190e6-da7a-4c88-bd31-b5dc53f6a3e1
 # ╟─af7119a0-2470-4bf0-8b30-59b38ddd8d5d
+# ╟─4290b2c6-1f5f-4780-9f32-08ae949b666c
 # ╟─07949347-3e7b-499f-9ca6-c62c131e2a65
 # ╟─8e7fa947-480d-4037-88a9-652ed7cc2cbd
 # ╠═1d883714-026b-4206-8ee3-a58e89a70c52
