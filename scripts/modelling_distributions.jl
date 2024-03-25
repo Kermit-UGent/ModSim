@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.38
 
 using Markdown
 using InteractiveUtils
@@ -43,7 +43,7 @@ The following recipe gives the general Monte Carlo method:
 """
 
 # ╔═╡ c469b254-ffc4-458d-8676-db135e11b306
-md"n throws : $(@bind n_pi Slider(1000:1000:100_000, default=1000, show_value=true))"
+md"n throws : $(@bind n_pi Slider(1000:1000:100_000, default=5000, show_value=true))"
 
 # ╔═╡ 5e81b02d-a879-4023-a7fe-e6f187a558f1
 n_pi  # number of throws
@@ -59,13 +59,6 @@ y_unif = rand(n_pi)
 
 # ╔═╡ 5821aaf1-744d-452a-96d2-6516c7423fff
 in_circle = x_unif.^2 .+ y_unif.^2 .≤ 1
-
-# ╔═╡ 41967e5b-9068-4318-acb6-d958b608c8f7
-begin
-	plot(x->sqrt(1-x^2), 0, 1, aspect_ratio=:equal, xlim=[0,1], ylim=[0, 1], lw=2, fillrange=zero, fillalpha=0.3, xlab=L"x", ylab=L"y", label="circle", title="Monte Carlo for estimating π/4")
-	scatter!(x_unif[in_circle], y_unif[in_circle], ms=0.8, markercolor="orange", markerstrokewidth=0, label="in circle")
-	scatter!(x_unif[.!in_circle], y_unif[.!in_circle], ms=0.8, markercolor="green", markerstrokewidth=0, label="out of circle")
-end
 
 # ╔═╡ cb36a752-da05-4da8-8dc8-1c2d34a11ad5
 sum(in_circle)
@@ -136,15 +129,6 @@ F_X(5) - F_X(1)  # P(1 < X ≤ 5)
 
 # ╔═╡ 2538dd4a-96a3-4d4f-b03e-82d2e8b9ea1f
 md"x : $(@bind xpdf Slider(0:0.2:20, default=5, show_value=true))"
-
-# ╔═╡ b9be819e-2db9-4952-9453-98bf815b00e8
-let
-	pfx = plot(f_X, 0, 20, label="pdf", xlab=L"x", lw=2, ylab=L"f_X(x)")
-	plot!(pfx, zero, 0, xpdf, fillrange=f_X, fillalpha=0.5, label="P(X≤$xpdf)")
-	pFx = plot(F_X, 0, 20, label="cdf", lw=2)
-	scatter!(pFx, [xpdf], [F_X(xpdf)], label="P(X≤$xpdf)", xlab=L"x", ylab=L"F_X(x)")
-	plot(pfx, pFx, layout=(2,1))
-end
 
 # ╔═╡ fff75ceb-b21c-49fe-b1c0-0d2f3213b37d
 md"""
@@ -288,8 +272,6 @@ There are two version of this law, the weak and the strong law of large numbers:
 - **Strong law** means that the sample average will almost surely converge to the true average: $P(\lim_{n\rightarrow\infty}\bar{X}_n=\mu)=1$.
 
 Note that the LLN only holds if the mean and variance are finite. For example, what would happen if you wanted to estimate the average mass of objects in our solar system by collecting a large number of them (cars, asteroids, particles, etc.)? Might some objects skew the mean?
-
-
 """
 
 # ╔═╡ 1a991ac1-d4ed-4774-a9e2-a5f27f99e1ff
@@ -321,17 +303,6 @@ g(mean(dist))  # g(E[X])
 
 # ╔═╡ 5a1522f7-411d-40f5-92e8-b5a154b8d735
 Ā_sampling = mean(g, rand(dist, 100_000))  # E[g(x)]
-
-# ╔═╡ 7779254a-83b9-4849-957c-af4b62c3916a
-let
-	ps = []
-	for n in [10, 100, 1000, 10_000]
-		p = histogram(rand(dist, n), label="", title="n=$n", normalize=true)
-		plot!(x -> pdf(dist, x), 0, 20, label="", lw=2)
-		push!(ps, p)
-	end
-	plot(ps...)
-end
 
 # ╔═╡ 8a493f5e-1f1b-4cf5-91e1-5504593cee9d
 md"""
@@ -383,18 +354,6 @@ For some specialized statistical studies or when safety is of concern, such as c
 For some applications, (pseudo-)random numbers are too random! This is because there are likely to cover the space uniformly in expected values (and hence only for large samples). For some Monte-Carlo application, such as estimating  a volume in a space, one needs numbers that cover the space a bit more homogeneously. These are called low-discrepancy or *quasi-random numbers*. These would fail tests to check if they are random because they often look too 'regular'. One method to generate such numbers is the *Sobol method*.  If we compare pseudo- and quasi-random numbers for estimating $\pi$ using simple rejection sampling, we see that the latter often converges faster. 
 """
 
-# ╔═╡ d7e88a1a-73e9-48ff-bb51-2292346f88e0
-begin
-	scatter(rand(200), rand(200), label="", title="200 pseudo-random numbers", aspect_ratio=:equal, xlims=[0,1])
-end
-
-# ╔═╡ 74e50a3d-7623-45c2-8d3a-2c34f363177e
-begin
-	s = SobolSeq(2)
-	p = reduce(hcat, next!(s) for i = 1:200)'
-	scatter(p[:,1], p[:,2], label="", title="200 Sobol quasi-random numbers", aspect_ratio=:equal, xlims=[0,1])
-end
-
 # ╔═╡ a8f762eb-e3b6-434a-9526-8f58ae227ae5
 md"""
 ### Convergence of the mean
@@ -423,12 +382,6 @@ $$P(|\bar{X}_n-\mu|\ge k\sigma) \le \frac{1}{nk^2}\,,$$
 These bounds are extremely general, though in practice weak to the point of being nearly useless. For example, if we want to compute the probability that throwing a fair coin a 100 times gives exactly 50 times head ($p=0.5\times 100$ in a binomial distribution with $\sigma=\sqrt{100\times(0.5\times 0.5)}=5$) we would find that the probability is less than $1/0.1^2=100$, which is not very helpful to say the least... 
 
 The *central limit theorem*, which states that sample averages of i.i.d. distributed values converge to a normal distribution with corresponding mean and standard deviation, is much more accurate. So, here $X$ is approximately distributed as Normal(50, 5). Here, we can easily estimate the probability $P(49.5<X\le 55.5) \approx 0.04839$. By the way, the true probability of $P(X=50)\approx0.07959$. Statisticians seems to use 30 as the magical sample size where the central limit theory kicks in (a poor man's infinity, if you will). In practice, the convergence is greatly determined by how "bell-shaped" the initial distribution is. """
-
-# ╔═╡ e3d9a5b7-73ec-4c16-8799-2e2a4f99c018
-plot(n->1/√(n), 1, 100, lw=2, label=L"1/\sqrt{n}", ylab=L"\sigma_{\bar{X}_n}", xlabel=L"n", title="Standard error of the mean")
-
-# ╔═╡ e94fa51a-e1a7-4a1b-88ef-76b38d3a6d74
-plot(n->1/√(n), 1, 1000_000, lw=2, yscale=:log10, xscale=:log10, label=L"1/\sqrt{n}", ylab=L"\sigma_{\bar{X}_n}", xlabel=L"n", title="Standard error of the mean (log-scale)")
 
 # ╔═╡ fe24583f-afc7-43ee-901f-c81585677ecd
 md"""## Elementary probability distributions
@@ -554,7 +507,7 @@ md"## Combining simple distributions into complex ones"
 
 # ╔═╡ 8e7fa947-480d-4037-88a9-652ed7cc2cbd
 md"""
-### Jont distributions of independent variables
+### Joint distributions of independent variables
 
 The easiest way of combining univariate distributions of random variables into a multivariate distribution is by taking an ensemble of independent variables. The joint PDF can then be constructed from the product of the individual variables. So, combining two random variables $X$ and $Y$ the way results in the joint distribution of $X\times Y$:
 
@@ -579,22 +532,8 @@ dist_prod = product_distribution([distX, distY])
 # ╔═╡ e495c24a-76d5-4cba-b1f9-76d3e25912d8
 md" x conditioning : $(@bind xslice Slider(-10:0.05:25, default=16, show_value=true))"
 
-# ╔═╡ 4bd5e387-ac06-4f4b-822f-cbc89e7509f9
-plot(y->pdf(distY, y), -2:0.01:2, label="Y | X=$xslice", color="orange", lw=2, xlabel="y", )
-
 # ╔═╡ 46b4ef15-bd34-4b59-aef5-5dc4e1193ec3
 md"y conditioning : $(@bind yslice Slider(-2:0.01:2, default=0, show_value=true))"
-
-# ╔═╡ f2faec3d-3d44-43e9-bf03-37ba68e37300
-let
-	contourf(-10:0.05:25, -2:0.01:2, (x,y)->pdf(dist_prod, [x,y]), color=:speed, xlab=L"x", ylab=L"y")
-	vline!([xslice], label="Y | X=$xslice", color="orange", lw=2)
-	hline!([yslice], label="X | Y=$yslice", color="blue", ls=:dash, lw=2)
-	title!("Joint PDF of a Laplace and Triangular distribution")
-end
-
-# ╔═╡ c7b2fc1e-9dd3-42e9-aa55-f9aea4781784
-plot(x->pdf(distX, x), -10:0.05:25, label="f_{X | Y=$yslice}", color="blue", ls=:dash, lw=2, xlabel="x", )
 
 # ╔═╡ ffa84522-dd02-47f8-ac3b-b1db08806b2d
 md"""
@@ -627,13 +566,6 @@ d2 = Normal(3, 2)
 # ╔═╡ c580ca85-78ff-4cbc-b033-f0c5acde3193
 dist_mixture = MixtureModel([d1, d2], w)
 
-# ╔═╡ 94dd1214-e63c-44d5-b5c3-9ca834a89ebf
-let
-	plot(x->pdf(dist_mixture, x), -5, 10, label="mixture", lw=2, xlab=L"x")
-	plot!(x->pdf(d1, x), -5, 10, label="component 1", ls=:dash)
-	plot!(x->pdf(d2, x), -5, 10, label="component 2", ls=:dash)
-end
-
 # ╔═╡ f1906adc-79f7-44da-a085-486e8f46e027
 md"""
 Using Bayes' rule, one can estimate the probability that an observation originates from one of the $k$ distributions:
@@ -644,21 +576,6 @@ $$P(\text{sample $x$ originates from component $i$}) = \frac{w_i \times f_{X_i}(
 # ╔═╡ d6cd5202-0171-40f9-bc17-d001dadee567
 md" x : $(@bind xm Slider(-5:0.1:10, default=0, show_value=true))"
 
-# ╔═╡ fc3a7a70-89e5-43e4-8dae-b7d2d8b54355
-let
-	plot(x->pdf(dist_mixture, x), -5, 10, label="mixture", lw=2, xlab=L"x", ylab=L"f_X(x)")
-	plot!(x->pdf(d1, x), -5, 10, label="component 1", ls=:dash)
-	plot!(x->pdf(d2, x), -5, 10, label="component 2", ls=:dash)
-	vline!([xm], color=:gold, lw=2, label="x=$xm")
-end
-
-# ╔═╡ e61e45a0-d9ec-4ab6-8c1b-fc8579a9a9b3
-let
-	likelihood = [pdf(d1, xm), pdf(d2, xm)]
-	posterior = likelihood .* w ./ pdf(dist_mixture, xm)
-	bar(posterior, xticks=1:length(w), xlabel="component", ylabel="posterior probability", label="X=$xm", color=:gold)
-end
-
 # ╔═╡ 89178521-511e-4c53-a2e1-c1d4dad03a23
 md"Mixtures allow for creating complex distributions of more simple variables. We have seen that product distributions are an easy way of combining different random variables $X$, $Y$ into a joint distribution $X\times Y$. They are not very exciting in themselves as there is no dependence between the two variables. However, combining multiple product distributions $X_1\times Y_1$, $X_2\times Y_2$, ... into a mixture, we can introduce some sophisticated dependencies between the variables! This way of combining distributions are sometimes called sum-product networks, for the operations that are used to combine them."
 
@@ -667,12 +584,6 @@ begin
 	dmv1 = product_distribution([Normal(-2), Normal(-3)])
 	dmv2 = product_distribution([Normal(2, 0.7), Normal(3, 2)])
 	mvmixture = MixtureModel([dmv1, dmv2], [0.6, 0.4])
-end
-
-# ╔═╡ ebf13b85-7fa0-4859-88d1-a5189c5bbd40
-let
-
-	contourf(-5:0.1:5, -5:0.1:8, (x,y)->pdf(mvmixture, [x,y]), color=:speed, xlab=L"x", ylab=L"y", title="mixture of two MVN")
 end
 
 # ╔═╡ 9381abbc-3715-4f1a-97cf-2487706e13f6
@@ -688,9 +599,6 @@ spn = MixtureModel(
 				product_distribution([Uniform(2, 28), LogNormal(log(27), 0.1)]),
 			],[0.3, 0.25, 0.25, 0.15, 0.05]),
 		product_distribution([Uniform(0, 30), Uniform(0, 30)])], [0.99, 0.01]);
-
-# ╔═╡ 40fbbc43-4a73-4d25-a37c-b39798d60761
-contourf(0:0.1:30, 0:0.1:30, (x,y)->logpdf(spn, [x,y]), color=:speed, xlab=L"x", ylab=L"y")
 
 # ╔═╡ 1efe9a9e-cd1b-4fe2-8392-2ce42c871a5f
 md"""### The multivariate normal distribution
@@ -724,13 +632,6 @@ md"""
 Σ = [σ₁^2 σ₁*σ₂*ρ;
 	 σ₁*σ₂*ρ σ₂^2]
 
-# ╔═╡ ccbcce90-c46f-4f61-8907-2ccc3e692184
-let
-	mvn = MultivariateNormal(μ, Σ)
-	contourf(-5:0.05:5, -5:0.05:5, (x,y)->pdf(mvn, [x,y]), color=:speed, xlab=L"x", ylab=L"y")
-	title!("PDF of a MVN")
-end
-
 # ╔═╡ af983208-c64e-4efe-9322-000b2ce09072
 md"""
 ### Bayesian hierarchical modeling
@@ -761,49 +662,11 @@ Though simple, this model above already illustrates something pretty powerful. W
 # ╔═╡ e295e21f-40a7-47ae-b680-4831b3d0cdbb
 dist_p = Beta(8, 3)
 
-# ╔═╡ 6602c372-158d-4b40-b7fe-aea7e534bd39
-plot(p->pdf(dist_p, p), 0, 1, lw=2, label="Beta(8,3)", xlab=L"x", ylab=L"f_p(p)")
-
 # ╔═╡ cc058abb-e7b6-433e-aacf-13295a401c5f
 md"We use a `Turing` model to encode our distribution."
 
-# ╔═╡ a3c7cd83-4488-40a1-8f0f-b79be73afb44
-@model function seed_germ(n=10)
-	p ~ Beta(8, 3)
-	X ~ Binomial(n, p)
-end
-
-# ╔═╡ 8f13d578-f400-4885-a071-a54259b93f12
-Xp = rand(seed_germ())  # sample from the seed distribution
-
-# ╔═╡ 788193d3-742b-4c27-aad4-41a9024ff0d0
-Xp[:p]  # value of p
-
-# ╔═╡ dc668eb0-899a-42dd-901b-bbbde5d3d0dd
-Xp[:X]  # value of X
-
-# ╔═╡ 03cedb9e-f74e-4662-abc8-e3cc87cad581
-seed_sample = [rand(seed_germ()) for i in 1:10_000]  # many samples
-
-# ╔═╡ c6e08f0d-e30e-4d30-989e-2463289ee038
-germination_counts = [Xp[:X] for Xp in seed_sample]  # extract X
-
-# ╔═╡ 77664b93-4b90-43b3-a0cc-0b09c7bd9854
-histogram(germination_counts, xticks=0:10,
-		xlabel=L"k", ylabel="frequency in sample",
-		label="germination succes X", title="Numer of pepper seeds that germinated")
-
 # ╔═╡ f24fffb4-deb7-428a-ba21-0e4999962624
 md"How many packages in this large sample have more than 8 seeds germinating?"
-
-# ╔═╡ 6d565e90-7aa6-480f-96fb-25c745ec6974
-count(((p, X),)->X>8, seed_sample)
-
-# ╔═╡ 42867e88-cd02-4634-a225-a9bf0ae46b70
-count(>(8), germination_counts)
-
-# ╔═╡ 13cf931e-5333-46ff-a00a-ea94c0b2e509
-mean(>(8), germination_counts)  # P(X > 8)
 
 # ╔═╡ 95502761-d344-448a-9259-a1a6079a4a8b
 md"""
@@ -826,14 +689,8 @@ end
 # ╔═╡ d999582d-5c0e-42df-850f-f7bbe4ccb636
 rainfall_samples = [rand(rainfall()) for i in 1:10_000]
 
-# ╔═╡ cda5faf1-8d74-4679-a335-7a5974010f5a
-scatter(first.(rainfall_samples), last.(rainfall_samples), alpha=0.2, xlab="intensity (mm/h)", ylab="duration (h)", label="")
-
 # ╔═╡ 4b96292b-f0ad-48ac-99cd-360c0708ef72
 rainfall_amount = prod.(rainfall_samples)
-
-# ╔═╡ f7ca0af5-dcdf-4e75-9063-2d194738be64
-histogram(rainfall_amount, xlab="rainfall amount (mm)", ylab="frequency", label="intensity * duration")
 
 # ╔═╡ cb903ece-6f36-4840-ad53-1b095f189070
 md"""
@@ -888,21 +745,6 @@ md"$(@bind ngerm Slider(0:10, default=8))"
 # ╔═╡ 6d8c2a59-baf3-45e4-8811-adc7857e1732
 ngerm
 
-# ╔═╡ 79be0044-9856-4b3b-80e3-6c362e23b9f4
-p_cond = [p for (p, X) in seed_sample if X==ngerm]
-
-# ╔═╡ 18e788ca-5b74-4a0b-81f0-5f307857e7e2
-mean(>(0.9), p_cond)  # probability of p > 0.9 given x
-
-# ╔═╡ 037a2175-22b2-48c9-9664-3743b11e8f7c
-mean(p_cond), var(p_cond)  # mean and variance of the conditional distr. of p
-
-# ╔═╡ 6fe05275-f1f7-4b3f-bbc2-8077bf981391
-length(p_cond)
-
-# ╔═╡ cbb71827-67cd-43aa-8a36-757bdf98e16a
-histogram(p_cond, ylabel="frequency", xlab=L"p", label="p given n=$ngerm", xlims=[0,1])
-
 # ╔═╡ a0e20b67-3d84-44cf-b12e-8c0b2edba982
 md"""
 In this syntax, you can iterate over all values in `seed_sample` and chose which value to retain under what condition! We can compute the conditional mean and variance of `p_cond`, compute the posterior likelihood that $p$ is greater than some value and much more!
@@ -924,6 +766,43 @@ TableOfContents()
 # ╔═╡ efd7bcba-f393-4659-ac5b-006740085144
 cummean(x) = cumsum(x) ./ (1:length(x))
 
+# ╔═╡ 57052ba3-151c-4dda-904a-dac9c421241c
+plots = Dict()  # storing all the figures
+
+# ╔═╡ 41967e5b-9068-4318-acb6-d958b608c8f7
+let
+	p = plot(x->sqrt(1-x^2), 0, 1, aspect_ratio=:equal, xlim=[0,1], ylim=[0, 1], lw=2, fillrange=zero, fillalpha=0.3, xlab=L"x", ylab=L"y", label="circle", title="Monte Carlo for estimating π/4")
+	scatter!(x_unif[in_circle], y_unif[in_circle], ms=0.8, markercolor="orange", markerstrokewidth=0, label="in circle")
+	scatter!(x_unif[.!in_circle], y_unif[.!in_circle], ms=0.8, markercolor="green", markerstrokewidth=0, label="out of circle")
+	plots["pi_sample"] = p
+	p
+end
+
+# ╔═╡ b9be819e-2db9-4952-9453-98bf815b00e8
+let
+	pfx = plot(f_X, 0, 20, label="pdf", xlab=L"x", lw=2, ylab=L"f_X(x)")
+	plot!(pfx, zero, 0, xpdf, fillrange=f_X, fillalpha=0.5, label="P(X≤$xpdf)")
+	pFx = plot(F_X, 0, 20, label="cdf", lw=2)
+	scatter!(pFx, [xpdf], [F_X(xpdf)], label="P(X≤$xpdf)", xlab=L"x", ylab=L"F_X(x)")
+	p = plot(pfx, pFx, layout=(2,1))
+	plots["pdf_cdf"] = p
+	plots["pdf"] = pfx
+	plots["cdf"] = pFx
+	p
+end
+
+# ╔═╡ 7779254a-83b9-4849-957c-af4b62c3916a
+let
+	ps = []
+	for n in [10, 100, 1000, 10_000]
+		p = histogram(rand(dist, n), label="", title="n=$n", normalize=true)
+		plot!(x -> pdf(dist, x), 0, 20, label="", lw=2)
+		push!(ps, p)
+	end
+	plots["lln_vert"] = plot(ps..., layout=(4,:))
+	plot(ps...)
+end
+
 # ╔═╡ 73898b6c-d8bd-49a9-ba36-a068e62a7ec3
 let
 	d = Binomial(30, 0.3)
@@ -933,8 +812,65 @@ let
 		plot!(cummean(rand(d, 250)), lw=2, label="", alpha=0.6)
 	end
 	#ylims!(8, 10)
+	plots["llm_conv"] = p
 	p
 end
+
+# ╔═╡ d7e88a1a-73e9-48ff-bb51-2292346f88e0
+let
+	p = scatter(rand(200), rand(200), label="", title="200 pseudo-random numbers", aspect_ratio=:equal, xlims=[0,1])
+	plots["PRN"] = p
+end
+
+# ╔═╡ 74e50a3d-7623-45c2-8d3a-2c34f363177e
+begin
+	s = SobolSeq(2)
+	p = reduce(hcat, next!(s) for i = 1:200)'
+	pl = scatter(p[:,1], p[:,2], label="", title="200 Sobol quasi-random numbers", aspect_ratio=:equal, xlims=[0,1])
+	plots["QRN"] = pl
+end
+
+# ╔═╡ a3c7cd83-4488-40a1-8f0f-b79be73afb44
+@model function seed_germ(n=10)
+	p ~ Beta(8, 3)
+	X ~ Binomial(n, p)
+end
+
+# ╔═╡ 8f13d578-f400-4885-a071-a54259b93f12
+Xp = rand(seed_germ())  # sample from the seed distribution
+
+# ╔═╡ 788193d3-742b-4c27-aad4-41a9024ff0d0
+Xp[:p]  # value of p
+
+# ╔═╡ dc668eb0-899a-42dd-901b-bbbde5d3d0dd
+Xp[:X]  # value of X
+
+# ╔═╡ 03cedb9e-f74e-4662-abc8-e3cc87cad581
+seed_sample = [rand(seed_germ()) for i in 1:10_000]  # many samples
+
+# ╔═╡ c6e08f0d-e30e-4d30-989e-2463289ee038
+germination_counts = [Xp[:X] for Xp in seed_sample]  # extract X
+
+# ╔═╡ 42867e88-cd02-4634-a225-a9bf0ae46b70
+count(>(8), germination_counts)
+
+# ╔═╡ 13cf931e-5333-46ff-a00a-ea94c0b2e509
+mean(>(8), germination_counts)  # P(X > 8)
+
+# ╔═╡ 6d565e90-7aa6-480f-96fb-25c745ec6974
+count(((p, X),)->X>8, seed_sample)
+
+# ╔═╡ 79be0044-9856-4b3b-80e3-6c362e23b9f4
+p_cond = [p for (p, X) in seed_sample if X==ngerm]
+
+# ╔═╡ 18e788ca-5b74-4a0b-81f0-5f307857e7e2
+mean(>(0.9), p_cond)  # probability of p > 0.9 given x
+
+# ╔═╡ 037a2175-22b2-48c9-9664-3743b11e8f7c
+mean(p_cond), var(p_cond)  # mean and variance of the conditional distr. of p
+
+# ╔═╡ 6fe05275-f1f7-4b3f-bbc2-8077bf981391
+length(p_cond)
 
 # ╔═╡ 67594833-14c8-423c-94ce-91ce2a44b6c9
 let
@@ -945,13 +881,99 @@ let
 	pi_sob = pi .- 4cummean(norm.(eachrow(psob)) .≤ 1) .|> abs
 	pi_pseu = pi .- 4cummean(norm.(eachrow(ppseu)) .≤ 1) .|> abs
 	
-	plot(pi_pseu, yscale=:log10, label="pseudo-random", xlab=L"n", ylab=L"|E[X]-\bar{X}_n|", lw=2)
+	p = plot(pi_pseu, yscale=:log10, label="pseudo-random", xlab=L"n", ylab=L"|E[X]-\bar{X}_n|", lw=2)
 	plot!(pi_sob, label="quasi-random", lw=2)
 	title!("Error estimating π using sampling")
+	plots["pi_sampling_conv"] = p
 end
 
-# ╔═╡ 57052ba3-151c-4dda-904a-dac9c421241c
+# ╔═╡ e3d9a5b7-73ec-4c16-8799-2e2a4f99c018
+let
+	p = plot(n->1/√(n), 1, 100, lw=2, label=L"1/\sqrt{n}", ylab=L"\sigma_{\bar{X}_n}", xlabel=L"n", title="Standard error of the mean")
+	plots["ste_mean"] = p
+end
 
+# ╔═╡ e94fa51a-e1a7-4a1b-88ef-76b38d3a6d74
+let
+	p = plot(n->1/√(n), 1, 1000_000, lw=2, yscale=:log10, xscale=:log10, label=L"1/\sqrt{n}", ylab=L"\sigma_{\bar{X}_n}", xlabel=L"n", title="Standard error of the mean (log-scale)")
+	plots["ste_mean_log"] = p
+end
+
+# ╔═╡ f2faec3d-3d44-43e9-bf03-37ba68e37300
+let
+	p = contourf(-10:0.05:25, -2:0.01:2, (x,y)->pdf(dist_prod, [x,y]), color=:speed, xlab=L"x", ylab=L"y")
+	vline!([xslice], label="Y | X=$xslice", color="orange", lw=2)
+	hline!([yslice], label="X | Y=$yslice", color="blue", ls=:dash, lw=2)
+	title!("Joint PDF of a Laplace and Triangular distribution")
+	plots["prod_distr"] = p
+end
+
+# ╔═╡ 4bd5e387-ac06-4f4b-822f-cbc89e7509f9
+plots["prod_cond_y"] = plot(y->pdf(distY, y), -2:0.01:2, label="Y | X=$xslice", color="orange", lw=2, xlabel="y", )
+
+# ╔═╡ c7b2fc1e-9dd3-42e9-aa55-f9aea4781784
+plots["prod_cond_x"] = plot(x->pdf(distX, x), -10:0.05:25, label="f_{X | Y=$yslice}", color="blue", ls=:dash, lw=2, xlabel="x", )
+
+# ╔═╡ 94dd1214-e63c-44d5-b5c3-9ca834a89ebf
+let
+	p = plot(x->pdf(dist_mixture, x), -5, 10, label="mixture", lw=2, xlab=L"x")
+	plot!(x->pdf(d1, x), -5, 10, label="component 1", ls=:dash)
+	plot!(x->pdf(d2, x), -5, 10, label="component 2", ls=:dash)
+	plots["mixture"] = p
+end
+
+# ╔═╡ fc3a7a70-89e5-43e4-8dae-b7d2d8b54355
+let
+	p = plot(x->pdf(dist_mixture, x), -5, 10, label="mixture", lw=2, xlab=L"x", ylab=L"f_X(x)")
+	plot!(x->pdf(d1, x), -5, 10, label="component 1", ls=:dash)
+	plot!(x->pdf(d2, x), -5, 10, label="component 2", ls=:dash)
+	vline!([xm], color=:gold, lw=2, label="x=$xm")
+	plots["cond_mixture"] = p
+end
+
+# ╔═╡ e61e45a0-d9ec-4ab6-8c1b-fc8579a9a9b3
+let
+	likelihood = [pdf(d1, xm), pdf(d2, xm)]
+	posterior = likelihood .* w ./ pdf(dist_mixture, xm)
+	plots["mixture_likelihood"] = bar(posterior, xticks=1:length(w), xlabel="component", ylabel="posterior probability", label="X=$xm", color=:gold)
+end
+
+# ╔═╡ ebf13b85-7fa0-4859-88d1-a5189c5bbd40
+let
+
+	plots["gaussian_mixture"] = contourf(-5:0.1:5, -5:0.1:8, (x,y)->pdf(mvmixture, [x,y]), color=:speed, xlab=L"x", ylab=L"y", title="mixture of two MVN")
+end
+
+# ╔═╡ 40fbbc43-4a73-4d25-a37c-b39798d60761
+plots["spn"] = contourf(0:0.1:30, 0:0.1:30, (x,y)->logpdf(spn, [x,y]), color=:speed, xlab=L"x", ylab=L"y")
+
+# ╔═╡ ccbcce90-c46f-4f61-8907-2ccc3e692184
+let
+	mvn = MultivariateNormal(μ, Σ)
+	p = contourf(-5:0.05:5, -5:0.05:5, (x,y)->pdf(mvn, [x,y]), color=:speed, xlab=L"x", ylab=L"y")
+	title!("PDF of a MVN")
+	plots["mvn"] = p
+end
+
+# ╔═╡ 6602c372-158d-4b40-b7fe-aea7e534bd39
+plots["beta"] = plot(p->pdf(dist_p, p), 0, 1, lw=2, label="Beta(8,3)", xlab=L"x", ylab=L"f_p(p)")
+
+# ╔═╡ 77664b93-4b90-43b3-a0cc-0b09c7bd9854
+plots["seeds"] = histogram(germination_counts, xticks=0:10,
+		xlabel=L"k", ylabel="frequency in sample",
+		label="germination succes X", title="Numer of pepper seeds that germinated")
+
+# ╔═╡ cda5faf1-8d74-4679-a335-7a5974010f5a
+plots["rainfall"] = scatter(first.(rainfall_samples), last.(rainfall_samples), alpha=0.2, xlab="intensity (mm/h)", ylab="duration (h)", label="")
+
+# ╔═╡ f7ca0af5-dcdf-4e75-9063-2d194738be64
+plots["rain_cond"] = histogram(rainfall_amount, xlab="rainfall amount (mm)", ylab="frequency", label="intensity * duration")
+
+# ╔═╡ cbb71827-67cd-43aa-8a36-757bdf98e16a
+plots["seeds_cond"] = histogram(p_cond, ylabel="frequency", xlab=L"p", label="p given n=$ngerm", xlims=[0,1])
+
+# ╔═╡ a9a8f40f-da04-475b-aeaa-07add585ad9c
+plots; # dictionary of all the figures, for saving
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -979,7 +1001,7 @@ Turing = "~0.30.4"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.0"
+julia_version = "1.10.0"
 manifest_format = "2.0"
 project_hash = "546a4285cc5ca9ea0d4c38b968585b216c5aeec6"
 
@@ -1314,7 +1336,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.0.2+0"
+version = "1.0.5+1"
 
 [[deps.CompositionsBase]]
 git-tree-sha1 = "802bb88cd69dfd1509f6670416bd4434015693ad"
@@ -1896,21 +1918,26 @@ version = "0.2.0"
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
-version = "0.6.3"
+version = "0.6.4"
 
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "7.84.0+0"
+version = "8.4.0+0"
 
 [[deps.LibGit2]]
-deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
+deps = ["Base64", "LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
+
+[[deps.LibGit2_jll]]
+deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll"]
+uuid = "e37daf67-58a4-590a-8e99-b0245dd2ffc5"
+version = "1.6.4+0"
 
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
-version = "1.10.2+0"
+version = "1.11.0+1"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -2079,7 +2106,7 @@ version = "1.1.9"
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
-version = "2.28.2+0"
+version = "2.28.2+1"
 
 [[deps.Measures]]
 git-tree-sha1 = "c13304c81eec1ed3af7fc20e75fb6b26092a1102"
@@ -2103,7 +2130,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2022.10.11"
+version = "2023.1.10"
 
 [[deps.NNlib]]
 deps = ["Adapt", "Atomix", "ChainRulesCore", "GPUArraysCore", "KernelAbstractions", "LinearAlgebra", "Pkg", "Random", "Requires", "Statistics"]
@@ -2162,12 +2189,12 @@ version = "1.3.5+1"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.21+4"
+version = "0.3.23+2"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
-version = "0.8.1+0"
+version = "0.8.1+2"
 
 [[deps.OpenSSL]]
 deps = ["BitFlags", "Dates", "MozillaCACerts_jll", "OpenSSL_jll", "Sockets"]
@@ -2207,7 +2234,7 @@ version = "1.6.3"
 [[deps.PCRE2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
-version = "10.42.0+0"
+version = "10.42.0+1"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
@@ -2235,7 +2262,7 @@ version = "0.42.2+0"
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.9.0"
+version = "1.10.0"
 
 [[deps.PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -2326,7 +2353,7 @@ deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
 [[deps.Random]]
-deps = ["SHA", "Serialization"]
+deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[deps.Random123]]
@@ -2538,6 +2565,7 @@ version = "1.2.1"
 [[deps.SparseArrays]]
 deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+version = "1.10.0"
 
 [[deps.SparseInverseSubset]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
@@ -2586,7 +2614,7 @@ version = "3.2.0"
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-version = "1.9.0"
+version = "1.10.0"
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
@@ -2635,9 +2663,9 @@ deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 
 [[deps.SuiteSparse_jll]]
-deps = ["Artifacts", "Libdl", "Pkg", "libblastrampoline_jll"]
+deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
-version = "5.10.1+6"
+version = "7.2.1+1"
 
 [[deps.SymbolicIndexingInterface]]
 git-tree-sha1 = "be414bfd80c2c91197823890c66ef4b74f5bf5fe"
@@ -2986,7 +3014,7 @@ version = "1.5.0+0"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
-version = "1.2.13+0"
+version = "1.2.13+1"
 
 [[deps.Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -3033,7 +3061,7 @@ version = "0.15.1+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.7.0+0"
+version = "5.8.0+1"
 
 [[deps.libevdev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -3074,12 +3102,12 @@ version = "1.1.6+0"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.48.0+0"
+version = "1.52.0+1"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
-version = "17.4.0+0"
+version = "17.4.0+2"
 
 [[deps.x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -3159,7 +3187,7 @@ version = "1.4.1+1"
 # ╠═44ca88b0-4256-4123-93f8-82d1ba3b3b77
 # ╟─896da840-ad94-40d7-8a65-be92b174e88b
 # ╟─d7e88a1a-73e9-48ff-bb51-2292346f88e0
-# ╟─2b79770c-00a8-4c3b-b39e-b31400593ea4
+# ╠═2b79770c-00a8-4c3b-b39e-b31400593ea4
 # ╟─74e50a3d-7623-45c2-8d3a-2c34f363177e
 # ╟─67594833-14c8-423c-94ce-91ce2a44b6c9
 # ╟─a8f762eb-e3b6-434a-9526-8f58ae227ae5
@@ -3245,5 +3273,6 @@ version = "1.4.1+1"
 # ╠═5614c4b1-2c78-4fee-a480-3998a8e1ce6e
 # ╠═efd7bcba-f393-4659-ac5b-006740085144
 # ╠═57052ba3-151c-4dda-904a-dac9c421241c
+# ╠═a9a8f40f-da04-475b-aeaa-07add585ad9c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
