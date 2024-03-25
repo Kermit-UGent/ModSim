@@ -3,7 +3,8 @@
 using Plots
 
 notebooks = Dict(
-    "probmod" => "modelling_distributions.jl"
+    "probmod" => "modelling_distributions.jl",
+    "simulation_tools" => "simulation_tools.jl"
 )
 
 
