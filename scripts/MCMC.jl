@@ -102,15 +102,6 @@ seed_posterior = p -> pdf(Beta(8+k, 3+10-k), p)
 # ╔═╡ 472cea3d-12a8-449a-8e87-6c1b5aaa1fd7
 md"In this case, we can compute the exact posterior because the beta distribution and the binomial distribibition are *conjugate*, meaning that a binomial likelihood on a beta prior results in a beta posterior with updated parameters. Though conjugated priors are important in Bayesian statistitics, we won't make use of them as we will use a sampling approach." 
 
-# ╔═╡ 0bc4cdff-f86d-4174-8aac-d2ca61717f96
-plot(seed_likelihood, 0, 1, lw=2, label="likelihood", xlab=L"p", color="blue")
-
-# ╔═╡ 08d33254-5013-4e4f-ae0b-1f5b6f3a2fb2
-plot(seed_prior, 0, 1, lw=2, label="prior", xlab=L"p", color="green")
-
-# ╔═╡ 217edb24-a555-4deb-ab58-2969d8564a7b
-plot(seed_posterior, 0, 1, lw=2, label="posterior", xlab=L"p", color="orange")
-
 # ╔═╡ 3ef47022-f9e3-434e-87a3-20b1870a7c24
 p_ML = argmax(seed_likelihood, 0:0.01:1)
 
@@ -285,12 +276,6 @@ p₀ = [i==i0 ? 1.0 : 0.0 for i in 1:size(T,2)]
 # ╔═╡ b2cbf023-a0ea-4714-b30b-b331a081c7fa
 π_mc = (T')^100 * p₀
 
-# ╔═╡ ff813a28-5ab7-4b49-8b05-b4b6a73b94a5
-bar(π_mc, xlab="state", ylab="PMF", label="", title="Stationary distribution birth-death process")
-
-# ╔═╡ bfd58734-b396-4424-9343-4562932f70e3
-groupedbar(0:30, vcat([p₀' * T^i for i in 0:30]...), bar_position = :stack, xlab = L"t", ylab = "fraction in state i", xticks=0:30, label=reshape(["state $i" for i in 1:size(T,2)], 1, :), title="State evolution in a birth-death process")
-
 # ╔═╡ 45e848aa-3e6a-47b5-a0cc-fa09dd9a4ae3
 md"Note that, except for states 1 and 10, the probability of moving to a higher state is twice that of moving to a lower state. Remaining in the same state occurs with a probability of 0.1. When we start in the first state, we see that the state probability vector quickly settles to an equilibrium distribution where higher states are much more likely than lower states. The time needed to approximately reach the stationary distribution is called the *mixing time*."
 
@@ -448,14 +433,8 @@ uncertain_normal(y)
 # ╔═╡ 7cfc4306-746b-434a-8160-52341c1e6519
 norm_prior(μ, σ) = exp(logprior(uncertain_normal(y), (μ=μ, σ=σ)))
 
-# ╔═╡ a09eda2e-0bb7-46c9-8d60-2b4447257772
-heatmap(-15:0.1:15, 0.1:0.02:5, norm_prior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Prior")
-
 # ╔═╡ fb35033f-3d11-4ab1-bed8-2c22396064f8
 norm_likelihood(μ, σ) = exp(loglikelihood(uncertain_normal(y), (μ=μ, σ=σ)))
-
-# ╔═╡ 3b821e04-a27a-489f-924e-e82a08693371
-heatmap(-15:0.1:15, 0.1:0.02:5, norm_likelihood, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Likelihood")
 
 # ╔═╡ e3e51306-385a-461b-94e8-e2a18b5250ab
 norm_posterior(μ, σ) = norm_prior(μ, σ) * norm_likelihood(μ, σ)
@@ -472,21 +451,8 @@ summarize(chain_MH)
 # ╔═╡ 6309cc65-59d4-4df2-b756-30c6e2f877cd
 quantile(chain_MH)
 
-# ╔═╡ 6227e4ee-6f89-4e45-b1d6-a087aa1bad40
-plot(chain_MH)
-
 # ╔═╡ 1b92c00e-8b2a-4cc8-b6f2-23d91cf4f989
 chain_MH2 = sample(MersenneTwister(1), uncertain_normal(y), my_MH, 1_000);
-
-# ╔═╡ 35bc2b8f-716d-4a85-8e60-7242709448c3
-plot(chain_MH2)
-
-# ╔═╡ ab09925c-4689-4f87-be44-f8eca12a5c9c
-begin
-	contour(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Metropolis-Hasting sampling", xlim=(-15,15), ylim=(0.1, 5))
-	plot!(chain_MH2[:μ], chain_MH2[:σ], label="", alpha=0.7)
-	scatter!(chain_MH2[:μ], chain_MH2[:σ], ms=0.2, label="chain")
-end
 
 # ╔═╡ 138bf97c-9295-440d-99f4-24f7fe58b774
 Σ = [σ₁^2 σ₁*σ₂*ρ;
@@ -495,52 +461,11 @@ end
 # ╔═╡ 87b984ee-2daa-4cca-b5eb-60c4aa3b2fb5
 mvn = MultivariateNormal(μ, Σ)
 
-# ╔═╡ 76b0886a-fc91-40ef-89d5-dcf5d261907f
-let	
-	X1 = Normal(μ[1], σ₁)
-	X1cond(x2) = Normal(μ[1] + Σ[1,2]*inv(Σ[2,2])*(x2-μ[2]), 
-						√(Σ[1,1] - Σ[2,1]*inv(Σ[2,2])*Σ[1,2]))
-	X2cond(x1) = Normal(μ[2] + Σ[1,2]*inv(Σ[1,1])*(x1-μ[1]), 
-					√(Σ[2,2] - Σ[1,2]*inv(Σ[1,1])*Σ[2,1]))
-
-	x1 = rand(X1)
-	x2 = rand(X2cond(x1))
-	(x1, x2)
-
-	x1_gibbs = [x1]
-	x2_gibbs = [x2]
-	for t in 1:n_gibbs
-		x2 = last(x2_gibbs)
-		x1 = rand(X1cond(x2))
-		push!(x1_gibbs, x1)
-		push!(x2_gibbs, x2)
-		x2 = rand(X2cond(x1))
-		push!(x1_gibbs, x1)
-		push!(x2_gibbs, x2)
-	end
-	contour(-5:0.05:5, -5:0.05:5, (x,y)->pdf(mvn, [x,y]), color=:speed, xlab=L"x", ylab=L"y")
-	plot!(x1_gibbs, x2_gibbs, color="blue", alpha=0.7, label="Gibbs chain", lw=1.3)
-	scatter!(x1_gibbs[2:2:end], x2_gibbs[2:2:end], label="sample", ms=2, alpha=0.7)
-	#scatter!([last(x1_gibbs)], [last(x2_gibbs)])
-	#plot!(x->pdf(X1cond(last(x2_gibbs)), x)-5, -4, 4, label="X1|x2")
-	
-end
-
 # ╔═╡ 06e83a23-fa3a-49f7-8f43-d46f3285e943
 chain_Gibbs = sample(MersenneTwister(1), uncertain_normal(y), Gibbs(MH(:μ), MH(:σ)), 1000)
 
-# ╔═╡ 444a89d1-a8c1-4df8-945d-6e8dd32ae204
-plot(chain_Gibbs)
-
 # ╔═╡ 9b4d67dc-9c75-45ee-9328-d229c527fdc6
 summarize(chain_Gibbs)
-
-# ╔═╡ 4d8fd482-11cb-4f2e-8c47-2428ee7e66c6
-begin
-	contour(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Gibbs sampling", xlim=(-15,15), ylim=(0.1, 5))
-	plot!(chain_Gibbs[:μ], chain_Gibbs[:σ], label="", alpha=0.7)
-	scatter!(chain_Gibbs[:μ], chain_Gibbs[:σ], ms=0.2, label="chain")
-end
 
 # ╔═╡ 1ba9efb2-cd95-4097-b8f6-3a770205c935
 md"Gibbs sampling is especially powerful because it can recombine samplers for different variables."
@@ -591,18 +516,8 @@ chain_HMC = sample(MersenneTwister(1), uncertain_normal(y), HMC(0.1, 5), 1000);
 # ╔═╡ afbf92d5-c72e-4041-a265-50d762df58f7
 summarize(chain_HMC)
 
-# ╔═╡ 99d638e6-1fae-4020-af2f-28703cc67377
-plot(chain_HMC)
-
 # ╔═╡ bec15afc-3f02-4c7d-b9e2-01f496e31689
 summarize(chain_HMC)
-
-# ╔═╡ 7f729aa1-78c0-4d2e-9ae5-c27502be22e8
-begin
-	contour(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="HMC sampling")
-	plot!(chain_HMC[:μ], chain_HMC[:σ], label="", alpha=0.7)
-	scatter!(chain_HMC[:μ], chain_HMC[:σ], ms=0.2, label="chain")
-end
 
 # ╔═╡ 786c8319-806c-461d-af08-f082d6f12339
 md"You may have noticed that HMC is more computationally demanding than the previously seen methods. We need to perform several integration steps to generate a single pseudo-sample (for which we need to keep track of momentum variables in addition to state variables) and compute the gradient of the log-probability density function. This gradient is usually computed automatically using automatic differentiation, which generally does not require too much computational resources. It also implies that the basic version of HMC can only be used for real-valued random variables, as one has to be able to compute derivatives. Given the same computational budget, one will obtain much fewer pseudo-samples using HMC than with MH. However, the samples generated by HMC will often be of a higher quality and cover the state space much more thoroughly, so it is likely worth the trade-off.
@@ -615,16 +530,6 @@ Making HMC behave well requires carefully tuning the parameters $\epsilon$ and $
 
 # ╔═╡ aa022156-efb4-4b2b-ac22-9b4228ee2578
 chain_NUTS = sample(MersenneTwister(1), uncertain_normal(y), NUTS(), 1000);
-
-# ╔═╡ 575ad310-8cbd-4b05-aee0-d84fb55ad6ed
-plot(chain_NUTS)
-
-# ╔═╡ 4a86bf84-434a-4ef3-a9c6-4c72df5068e0
-begin
-	contour(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="NUTS sampling")
-	plot!(chain_NUTS[:μ], chain_NUTS[:σ], label="", alpha=0.7)
-	scatter!(chain_NUTS[:μ], chain_NUTS[:σ], ms=0.2, label="chain")
-end
 
 # ╔═╡ e6201f93-d5fc-4f33-9e3c-f7d8eb0146b5
 md"""
@@ -684,12 +589,6 @@ TableOfContents()
 # ╔═╡ 0d45d6f9-f27c-4d8e-b117-26132418be55
 dist2pdf(distribution) = x -> pdf(distribution, x)
 
-# ╔═╡ 3eac18d0-f755-42aa-bbcc-9714cc64dc5a
-plot(dist2pdf(Normal(0, 20)), -50, 50, xlabel=L"\mu", label="Normal(0, 20)", title="prior for μ", lw=2)
-
-# ╔═╡ cd8bf990-4f36-4a56-83c2-c58217448b1e
-plot(dist2pdf(InverseGamma(.1)), 0, 20, xlabel=L"\sigma", label="InverseGamma(1)", title="prior for σ", lw=2)
-
 # ╔═╡ 037b15f6-0858-41fa-a8fd-c6cc8c8d8e7a
 function seed_bayesian_plot(k; a=8, b=3, n=10, title="Inference of p given $k of $n seed germinated", labels=true)
 
@@ -707,24 +606,6 @@ function seed_bayesian_plot(k; a=8, b=3, n=10, title="Inference of p given $k of
 	vline!([p_MAP], lw=2, alpha=0.5, label=labels ? "p* (maximum posterior likelihood)" : "", ls=:dot)
 	return plot_seed
 end
-
-# ╔═╡ 34a5bb1a-8919-4e41-89a5-fdd4e48bec26
-seed_bayesian_plot(k)
-
-# ╔═╡ 92cd9bfb-8a58-4b73-ab02-5ac4447499d0
-seed_bayesian_plot(10, labels=false)
-
-# ╔═╡ fb486bb6-b462-40f5-8189-2b46c5817fc1
-seed_bayesian_plot(2, labels=false)
-
-# ╔═╡ 780b3e4e-7959-401f-aca5-5dad90276128
-seed_bayesian_plot(k, a=1, b=1, labels=false)
-
-# ╔═╡ ba15b522-e4e8-4de7-882e-a0d14da2fac1
-seed_bayesian_plot(k, a=80, b=30, labels=false)
-
-# ╔═╡ 9609ee3c-2a5e-450f-8822-d616552cae09
-seed_bayesian_plot(10k, n=100, labels=false)
 
 # ╔═╡ df004387-ea5f-42b1-9409-7b37d1a5031a
 md"Distributions for rejection sampling"
@@ -744,26 +625,53 @@ end
 # ╔═╡ 91cfb385-5617-4129-b57b-69aff3621ce5
 x_mh, acc_mh = metropolis_hastings(p, 4.0, q_MH, n=200)
 
-# ╔═╡ ecfc2307-6926-42c1-b08d-6ff93502c5cd
-let
-	mc = ifelse.(acc_mh, :blue, :orange)
-	ind = 0:length(x_mh)-1
-	
-	plot(x->pdf(p_univar, x), -1, 10, lw=2, label="", xlabel=L"x", title="Metropolis-Hastings", ylab="PDF")
-	
-	plot!(twinx(), x_mh, ind, lw=0.5, label="", ylab="sample number")
-	scatter!(twinx(), x_mh[acc_mh], ind[acc_mh], label="accepted", color=:blue, ms=2)
-	scatter!(twinx(), x_mh[.!acc_mh], ind[.!acc_mh], label="rejected", color=:orange, ms=2)
-end
-
-# ╔═╡ 11fc7beb-2a11-4acb-8545-9842ca783682
-begin
-	histogram(x_mh[acc_mh], normalize=true, label="pseudosamples MH", xlab=L"x")
-	plot!(p, 0, 10, label="PDF target", lw=2, title="Histogram Metropolis-Hastings")
-end
-
 # ╔═╡ 34cf42a4-b38d-4a94-89ee-6fb85c44acbd
 q = TruncatedNormal(2.5, 3, -1, 10)
+
+# ╔═╡ efefaff1-e6c7-46fa-bfa7-b4e6dec67641
+plots = Dict()
+
+# ╔═╡ 0bc4cdff-f86d-4174-8aac-d2ca61717f96
+plots["seeds_likelihood"] = plot(seed_likelihood, 0, 1, lw=2, label="likelihood", xlab=L"p", color="blue")
+
+# ╔═╡ 08d33254-5013-4e4f-ae0b-1f5b6f3a2fb2
+plots["seeds_prior"] = plot(seed_prior, 0, 1, lw=2, label="prior", xlab=L"p", color="green")
+
+# ╔═╡ 217edb24-a555-4deb-ab58-2969d8564a7b
+plots["seeds_posterior"] = plot(seed_posterior, 0, 1, lw=2, label="posterior", xlab=L"p", color="orange")
+
+# ╔═╡ 34a5bb1a-8919-4e41-89a5-fdd4e48bec26
+plots["seeds_bayes"] = seed_bayesian_plot(k)
+
+# ╔═╡ 92cd9bfb-8a58-4b73-ab02-5ac4447499d0
+plots["seeds_10"] = seed_bayesian_plot(10, labels=false)
+
+# ╔═╡ fb486bb6-b462-40f5-8189-2b46c5817fc1
+plots["seeds_2"] = seed_bayesian_plot(2, labels=false)
+
+# ╔═╡ 780b3e4e-7959-401f-aca5-5dad90276128
+plots["seeds_weak_prior"] = seed_bayesian_plot(k, a=1, b=1, labels=false)
+
+# ╔═╡ ba15b522-e4e8-4de7-882e-a0d14da2fac1
+plots["seeds_strong_prior"] = seed_bayesian_plot(k, a=80, b=30, labels=false)
+
+# ╔═╡ 9609ee3c-2a5e-450f-8822-d616552cae09
+plots["seeds_large_dataset"] = seed_bayesian_plot(10k, n=100, labels=false)
+
+# ╔═╡ 3eac18d0-f755-42aa-bbcc-9714cc64dc5a
+plots["norm_muprior"] = plot(dist2pdf(Normal(0, 20)), -50, 50, xlabel=L"\mu", label="Normal(0, 20)", title="prior for μ", lw=2)
+
+# ╔═╡ cd8bf990-4f36-4a56-83c2-c58217448b1e
+plots["norm_sigmaprior"] = plot(dist2pdf(InverseGamma(.1)), 0, 20, xlabel=L"\sigma", label="InverseGamma(1)", title="prior for σ", lw=2)
+
+# ╔═╡ a09eda2e-0bb7-46c9-8d60-2b4447257772
+plots["norm_multiprior"] = heatmap(-15:0.1:15, 0.1:0.02:5, norm_prior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Prior")
+
+# ╔═╡ 3b821e04-a27a-489f-924e-e82a08693371
+plots["norm_likelihood"] = heatmap(-15:0.1:15, 0.1:0.02:5, norm_likelihood, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Likelihood")
+
+# ╔═╡ 2c81f5d1-2b8b-4fb5-b810-d5fcfdc8a5d6
+plots["norm_posterior"] = plot_post;
 
 # ╔═╡ fae76f2c-caae-49ff-9dfe-b67cd53d8dea
 begin
@@ -776,12 +684,13 @@ begin
 	x_rejection_sampling = x_prop[acc]
 	acceptance_probability = length(x_rejection_sampling) / n_rejection_sampling
 	
-	plot(x->pdf(p_univar, x), -1, 10, lw=2, label="target p(x)", xlabel=L"x", title="Rejection sampling\np(accept)=$(round(acceptance_probability, digits=2))")
+	prs = plot(x->pdf(p_univar, x), -1, 10, lw=2, label="target p(x)", xlabel=L"x", title="Rejection sampling\np(accept)=$(round(acceptance_probability, digits=2))")
 	plot!(x->M*pdf(q, x), -1, 10, lw=2, label="proposal distribiton M * q(x)")
 	plot!(zero, -1:0.02:10, fillrange=x->pdf(p_univar, x), fillalpha=0.3, lw=2, label="acceptance region", linealpha=0)
 	plot!(x->pdf(p_univar, x), -1, 10, fillrange=x->M*pdf(q, x), fillalpha=0.3, lw=2, label="rejection region", linealpha=0)
 	scatter!(x_prop[acc], u_rj[acc], label="accepted", ms=3, alpha=0.8)
 	scatter!(x_prop[.!acc], u_rj[.!acc], label="rejected", ms=3, alpha=0.8)
+	plots["rejection_sampling"] = prs
 end
 
 # ╔═╡ 9db5d774-8e6d-4bd1-a85a-d0e0705197ae
@@ -793,8 +702,110 @@ length(x_rejection_sampling)  # number of accepted samples
 # ╔═╡ d3b6cf36-a2d1-40fa-952c-f20d1468eb38
 acceptance_probability
 
-# ╔═╡ efefaff1-e6c7-46fa-bfa7-b4e6dec67641
+# ╔═╡ ff813a28-5ab7-4b49-8b05-b4b6a73b94a5
+plots["MC_ss"] = bar(π_mc, xlab="state", ylab="PMF", label="", title="Stationary distribution birth-death process")
 
+# ╔═╡ bfd58734-b396-4424-9343-4562932f70e3
+plots["MC_ss_conv"] = groupedbar(0:30, vcat([p₀' * T^i for i in 0:30]...), bar_position = :stack, xlab = L"t", ylab = "fraction in state i", xticks=0:30, label=reshape(["state $i" for i in 1:size(T,2)], 1, :), title="State evolution in a birth-death process")
+
+# ╔═╡ ecfc2307-6926-42c1-b08d-6ff93502c5cd
+let
+	mc = ifelse.(acc_mh, :blue, :orange)
+	ind = 0:length(x_mh)-1
+	
+	p = plot(x->pdf(p_univar, x), -1, 10, lw=2, label="", xlabel=L"x", title="Metropolis-Hastings", ylab="PDF")
+	
+	plot!(twinx(), x_mh, ind, lw=0.5, label="", ylab="sample number")
+	scatter!(twinx(), x_mh[acc_mh], ind[acc_mh], label="accepted", color=:blue, ms=2)
+	scatter!(twinx(), x_mh[.!acc_mh], ind[.!acc_mh], label="rejected", color=:orange, ms=2)
+	plots["MH"] = p
+end
+
+# ╔═╡ 11fc7beb-2a11-4acb-8545-9842ca783682
+let
+	p = histogram(x_mh[acc_mh], normalize=true, label="pseudosamples MH", xlab=L"x")
+	plot!(p, 0, 10, label="PDF target", lw=2, title="Histogram Metropolis-Hastings")
+	plots["MH_hist"] = p
+end
+
+# ╔═╡ 6227e4ee-6f89-4e45-b1d6-a087aa1bad40
+plots["MH_diagn"] = plot(chain_MH)
+
+# ╔═╡ 35bc2b8f-716d-4a85-8e60-7242709448c3
+plots["MH_diagn_tuned"] = plot(chain_MH2)
+
+# ╔═╡ ab09925c-4689-4f87-be44-f8eca12a5c9c
+let
+	p = contour(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Metropolis-Hasting sampling", xlim=(-15,15), ylim=(0.1, 5))
+	plot!(chain_MH2[:μ], chain_MH2[:σ], label="", alpha=0.7)
+	scatter!(chain_MH2[:μ], chain_MH2[:σ], ms=0.2, label="chain")
+	plots["MH_sampling"] =  p
+end
+
+# ╔═╡ 76b0886a-fc91-40ef-89d5-dcf5d261907f
+let	
+	X1 = Normal(μ[1], σ₁)
+	X1cond(x2) = Normal(μ[1] + Σ[1,2]*inv(Σ[2,2])*(x2-μ[2]), 
+						√(Σ[1,1] - Σ[2,1]*inv(Σ[2,2])*Σ[1,2]))
+	X2cond(x1) = Normal(μ[2] + Σ[1,2]*inv(Σ[1,1])*(x1-μ[1]), 
+					√(Σ[2,2] - Σ[1,2]*inv(Σ[1,1])*Σ[2,1]))
+
+	x1 = rand(X1)
+	x2 = rand(X2cond(x1))
+	(x1, x2)
+
+	x1_gibbs = [x1]
+	x2_gibbs = [x2]
+	for t in 1:n_gibbs
+		x2 = last(x2_gibbs)
+		x1 = rand(X1cond(x2))
+		push!(x1_gibbs, x1)
+		push!(x2_gibbs, x2)
+		x2 = rand(X2cond(x1))
+		push!(x1_gibbs, x1)
+		push!(x2_gibbs, x2)
+	end
+	p = contour(-5:0.05:5, -5:0.05:5, (x,y)->pdf(mvn, [x,y]), color=:speed, xlab=L"x", ylab=L"y")
+	plot!(x1_gibbs, x2_gibbs, color="blue", alpha=0.7, label="Gibbs chain", lw=1.3)
+	scatter!(x1_gibbs[2:2:end], x2_gibbs[2:2:end], label="sample", ms=2, alpha=0.7)
+	#scatter!([last(x1_gibbs)], [last(x2_gibbs)])
+	#plot!(x->pdf(X1cond(last(x2_gibbs)), x)-5, -4, 4, label="X1|x2")
+	plots["Gibbs"] = p
+	
+end
+
+# ╔═╡ 444a89d1-a8c1-4df8-945d-6e8dd32ae204
+plots["Gibbs_diagn"] = plot(chain_Gibbs)
+
+# ╔═╡ 4d8fd482-11cb-4f2e-8c47-2428ee7e66c6
+let
+	p = contour(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Gibbs sampling", xlim=(-15,15), ylim=(0.1, 5))
+	plot!(chain_Gibbs[:μ], chain_Gibbs[:σ], label="", alpha=0.7)
+	scatter!(chain_Gibbs[:μ], chain_Gibbs[:σ], ms=0.2, label="chain")
+	plots["Gibbs_sampling"] = p
+end
+
+# ╔═╡ 99d638e6-1fae-4020-af2f-28703cc67377
+plots["HMC_diagn"] = plot(chain_HMC)
+
+# ╔═╡ 7f729aa1-78c0-4d2e-9ae5-c27502be22e8
+let
+	p = contour(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="HMC sampling")
+	plot!(chain_HMC[:μ], chain_HMC[:σ], label="", alpha=0.7)
+	scatter!(chain_HMC[:μ], chain_HMC[:σ], ms=0.2, label="chain")
+	plots["HMC_sampling"] = p
+end
+
+# ╔═╡ 575ad310-8cbd-4b05-aee0-d84fb55ad6ed
+plots["NUTS_diagn"] = plot(chain_NUTS)
+
+# ╔═╡ 4a86bf84-434a-4ef3-a9c6-4c72df5068e0
+let
+	p = contour(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="NUTS sampling")
+	plot!(chain_NUTS[:μ], chain_NUTS[:σ], label="", alpha=0.7)
+	scatter!(chain_NUTS[:μ], chain_NUTS[:σ], ms=0.2, label="chain")
+	plots["NUTS_sampling"] = p
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -3020,11 +3031,11 @@ version = "1.4.1+1"
 # ╠═667f2069-fd32-4c3e-aebb-b75a38bf84b9
 # ╟─472cea3d-12a8-449a-8e87-6c1b5aaa1fd7
 # ╟─0bc4cdff-f86d-4174-8aac-d2ca61717f96
-# ╟─08d33254-5013-4e4f-ae0b-1f5b6f3a2fb2
-# ╟─217edb24-a555-4deb-ab58-2969d8564a7b
+# ╠═08d33254-5013-4e4f-ae0b-1f5b6f3a2fb2
+# ╠═217edb24-a555-4deb-ab58-2969d8564a7b
 # ╠═3ef47022-f9e3-434e-87a3-20b1870a7c24
 # ╠═6004b26a-8f10-492d-bdd2-1d317d8bb394
-# ╟─34a5bb1a-8919-4e41-89a5-fdd4e48bec26
+# ╠═34a5bb1a-8919-4e41-89a5-fdd4e48bec26
 # ╠═92cd9bfb-8a58-4b73-ab02-5ac4447499d0
 # ╠═fb486bb6-b462-40f5-8189-2b46c5817fc1
 # ╠═780b3e4e-7959-401f-aca5-5dad90276128
@@ -3034,21 +3045,22 @@ version = "1.4.1+1"
 # ╠═4d6d6c9e-c2a8-4c7d-9d18-89d2e9d0c213
 # ╠═ba06e8a5-c142-4963-97b4-783ed4c706bf
 # ╟─f44abcc5-9010-4d10-b722-ef8147c8fd66
-# ╟─3eac18d0-f755-42aa-bbcc-9714cc64dc5a
-# ╟─cd8bf990-4f36-4a56-83c2-c58217448b1e
+# ╠═3eac18d0-f755-42aa-bbcc-9714cc64dc5a
+# ╠═cd8bf990-4f36-4a56-83c2-c58217448b1e
 # ╟─0c29af96-949d-47b3-869f-274ed39c9d25
 # ╠═d8ff625a-6204-4579-a8f5-9650544c7222
 # ╟─2cbe07e6-8cf0-4dc4-8aea-f56059ffa367
 # ╠═b04ce3ab-c5c0-4a13-8d82-05198532b22d
 # ╟─afb7bdca-a8de-4342-9212-5e81fa47963a
 # ╠═7cfc4306-746b-434a-8160-52341c1e6519
-# ╟─a09eda2e-0bb7-46c9-8d60-2b4447257772
+# ╠═a09eda2e-0bb7-46c9-8d60-2b4447257772
 # ╟─1fbd13c1-cc93-4e5b-98f1-ace195d20f97
 # ╠═fb35033f-3d11-4ab1-bed8-2c22396064f8
-# ╟─3b821e04-a27a-489f-924e-e82a08693371
+# ╠═3b821e04-a27a-489f-924e-e82a08693371
 # ╟─213465af-f980-4848-9e5a-0cb5429f4af8
 # ╠═e3e51306-385a-461b-94e8-e2a18b5250ab
 # ╟─b4eef7a8-a61c-471d-baf0-1d0b5fb997e6
+# ╟─2c81f5d1-2b8b-4fb5-b810-d5fcfdc8a5d6
 # ╟─7f2a7d88-442f-431e-8e09-42082bda8d24
 # ╟─985c1d3e-bc02-4dc5-9a28-d0ec9edf5cc9
 # ╟─a0a1deec-75b6-4061-aa32-ad5e940d4123
@@ -3072,9 +3084,9 @@ version = "1.4.1+1"
 # ╟─53799772-c8a1-4055-a01e-42f147ffc253
 # ╟─fcfa5203-73df-40f6-a6c9-eda531054b38
 # ╠═b2cbf023-a0ea-4714-b30b-b331a081c7fa
-# ╟─ff813a28-5ab7-4b49-8b05-b4b6a73b94a5
+# ╠═ff813a28-5ab7-4b49-8b05-b4b6a73b94a5
 # ╟─b3c45c85-d075-452a-a827-b7d1e00a17a1
-# ╟─bfd58734-b396-4424-9343-4562932f70e3
+# ╠═bfd58734-b396-4424-9343-4562932f70e3
 # ╟─45e848aa-3e6a-47b5-a0cc-fa09dd9a4ae3
 # ╟─ae080b48-87f8-4af6-b9d1-224080d4b787
 # ╟─0a4f1446-e49e-4281-be44-52d3ac4a7854
@@ -3082,7 +3094,7 @@ version = "1.4.1+1"
 # ╠═5d8894c1-25d7-41e5-a99c-bca8119851fe
 # ╠═91cfb385-5617-4129-b57b-69aff3621ce5
 # ╟─ecfc2307-6926-42c1-b08d-6ff93502c5cd
-# ╟─11fc7beb-2a11-4acb-8545-9842ca783682
+# ╠═11fc7beb-2a11-4acb-8545-9842ca783682
 # ╟─094b4405-6205-4b85-a311-c79cf6028498
 # ╠═63af963c-a304-4142-8f23-a56a5fc14e76
 # ╟─e1cb4a40-4a8a-4ff9-9406-f99aee6fdd57
@@ -3096,25 +3108,25 @@ version = "1.4.1+1"
 # ╠═1b92c00e-8b2a-4cc8-b6f2-23d91cf4f989
 # ╠═35bc2b8f-716d-4a85-8e60-7242709448c3
 # ╟─0c652efb-0edb-4a4e-a14c-7d5ac6eb5ffa
-# ╟─ab09925c-4689-4f87-be44-f8eca12a5c9c
+# ╠═ab09925c-4689-4f87-be44-f8eca12a5c9c
 # ╟─69f2c623-632f-4df4-8566-a48574c0f9fb
 # ╟─1a24999d-1ab7-4220-8e22-b1ac33ad03ac
 # ╟─5e6c6135-f4f9-447c-8f7a-a49ec25e414a
 # ╠═3fca01f3-ac6e-4fdc-b8ca-48040ca562f3
 # ╟─138bf97c-9295-440d-99f4-24f7fe58b774
 # ╠═87b984ee-2daa-4cca-b5eb-60c4aa3b2fb5
-# ╟─76b0886a-fc91-40ef-89d5-dcf5d261907f
+# ╠═76b0886a-fc91-40ef-89d5-dcf5d261907f
 # ╠═06e83a23-fa3a-49f7-8f43-d46f3285e943
 # ╠═444a89d1-a8c1-4df8-945d-6e8dd32ae204
 # ╠═9b4d67dc-9c75-45ee-9328-d229c527fdc6
-# ╟─4d8fd482-11cb-4f2e-8c47-2428ee7e66c6
+# ╠═4d8fd482-11cb-4f2e-8c47-2428ee7e66c6
 # ╟─1ba9efb2-cd95-4097-b8f6-3a770205c935
 # ╟─e5d604e0-44c4-4d10-8faa-7ade5f5fbfff
 # ╠═4019f495-ce19-44e4-ad79-18349fa6ec18
 # ╠═afbf92d5-c72e-4041-a265-50d762df58f7
-# ╟─99d638e6-1fae-4020-af2f-28703cc67377
+# ╠═99d638e6-1fae-4020-af2f-28703cc67377
 # ╠═bec15afc-3f02-4c7d-b9e2-01f496e31689
-# ╟─7f729aa1-78c0-4d2e-9ae5-c27502be22e8
+# ╠═7f729aa1-78c0-4d2e-9ae5-c27502be22e8
 # ╟─786c8319-806c-461d-af08-f082d6f12339
 # ╟─81863647-168f-46b1-87f1-cc1169b7c6ff
 # ╠═aa022156-efb4-4b2b-ac22-9b4228ee2578

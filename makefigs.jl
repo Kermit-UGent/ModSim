@@ -2,12 +2,15 @@
 
 using Plots
 
+fontscale = 1.5
+
+Plots.scalefontsizes(fontscale)
+
 notebooks = Dict(
     "probmod" => "modelling_distributions.jl",
-    "simulation_tools" => "simulation_tools.jl"
+    "MCMC" => "MCMC.jl",
+    "simulation_tools" => "simulation_tools.jl",
 )
-
-
 
 for (dir, nb) in notebooks
     # run notebook and generate a plots dict
@@ -16,3 +19,6 @@ for (dir, nb) in notebooks
         savefig(pl, joinpath("figures", dir, name*".pdf"))
     end
 end
+
+# reset font
+Plots.scalefontsizes(1/fontscale)
