@@ -1,15 +1,23 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.38
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ eb128248-dfbc-11ee-2efb-cb60fad76024
+# ╠═╡ skip_as_script = true
+#=╠═╡
 begin
     using Pkg
 	Pkg.activate("..")
-    using Catalyst, DifferentialEquations, Plots, PlutoUI, LaTeXStrings
 end
+  ╠═╡ =#
+
+# ╔═╡ 4f364a47-c45e-4264-9a00-fb705ff3f169
+using Plots, PlutoUI, LaTeXStrings
+
+# ╔═╡ fd2f6fb4-d6da-4b07-8044-d3e2a09a6b4d
+using Catalyst, DifferentialEquations
 
 # ╔═╡ 0b52aede-1a71-4034-9921-2ffc9120c0ae
 using Latexify
@@ -357,6 +365,8 @@ plots
 
 # ╔═╡ Cell order:
 # ╠═eb128248-dfbc-11ee-2efb-cb60fad76024
+# ╠═4f364a47-c45e-4264-9a00-fb705ff3f169
+# ╠═fd2f6fb4-d6da-4b07-8044-d3e2a09a6b4d
 # ╟─4c420cd0-975a-4d3b-a6cc-9eca35490c62
 # ╠═081852cd-b589-4891-83c0-f19e4da2eb35
 # ╠═39ee1679-23ad-4448-ae20-b55345c950b4

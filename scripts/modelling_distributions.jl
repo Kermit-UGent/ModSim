@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.38
 
 using Markdown
 using InteractiveUtils
@@ -15,12 +15,19 @@ macro bind(def, element)
 end
 
 # ╔═╡ 2d346892-cb15-11ee-2d81-73e08fcc3288
+# ╠═╡ skip_as_script = true
+#=╠═╡
 begin
     using Pkg
 	Pkg.activate("..")
-    using Distributions
-	using PlutoUI, Plots, LinearAlgebra, Markdown, Random, LaTeXStrings
 end
+  ╠═╡ =#
+
+# ╔═╡ cf8dbe5e-d340-4ebb-8ad7-f483be07fffd
+	using PlutoUI, Plots, LinearAlgebra, Markdown, Random, LaTeXStrings
+
+# ╔═╡ 4d96d7ea-1216-46d6-80fe-5859640eb9c9
+using Distributions
 
 # ╔═╡ 2b79770c-00a8-4c3b-b39e-b31400593ea4
 using Sobol
@@ -783,9 +790,9 @@ end
 # ╔═╡ b9be819e-2db9-4952-9453-98bf815b00e8
 let
 	pfx = plot(f_X, 0, 20, label="pdf", xlab=L"x", lw=2, ylab=L"f_X(x)")
-	plot!(pfx, zero, 0, xpdf, fillrange=f_X, fillalpha=0.5, label="P(X≤$xpdf)")
+	plot!(pfx, zero, 0, xpdf, fillrange=f_X, fillalpha=0.5, label="P(X≤$xpdf)", title="Probability density function of Weibull distributon")
 	pFx = plot(F_X, 0, 20, label="cdf", lw=2)
-	scatter!(pFx, [xpdf], [F_X(xpdf)], label="P(X≤$xpdf)", xlab=L"x", ylab=L"F_X(x)")
+	scatter!(pFx, [xpdf], [F_X(xpdf)], label="P(X≤$xpdf)", xlab=L"x", ylab=L"F_X(x)",title="Cumulative density function of Weibull distributon")
 	p = plot(pfx, pFx, layout=(2,1))
 	plots["pdf_cdf"] = p
 	plots["pdf"] = pfx
@@ -979,6 +986,8 @@ plots; # dictionary of all the figures, for saving
 
 # ╔═╡ Cell order:
 # ╠═2d346892-cb15-11ee-2d81-73e08fcc3288
+# ╠═cf8dbe5e-d340-4ebb-8ad7-f483be07fffd
+# ╠═4d96d7ea-1216-46d6-80fe-5859640eb9c9
 # ╟─cfc49c56-f223-4b78-b6da-4e0c83a16bbf
 # ╟─c469b254-ffc4-458d-8676-db135e11b306
 # ╠═5e81b02d-a879-4023-a7fe-e6f187a558f1

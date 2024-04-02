@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.38
 
 using Markdown
 using InteractiveUtils
@@ -15,12 +15,19 @@ macro bind(def, element)
 end
 
 # ╔═╡ 103e5ba0-cfdc-11ee-13b1-cf53dfdd9a3b
+# ╠═╡ skip_as_script = true
+#=╠═╡
 begin
     using Pkg
-	Pkg.activate("..")
-    using Turing, StatsPlots, Distributions
-	using Plots, PlutoUI, LaTeXStrings, LinearAlgebra, Random
+	Pkg.activate("..")	
 end
+  ╠═╡ =#
+
+# ╔═╡ d778ce04-8df4-42ef-95f1-9cf4880e0420
+using Turing, StatsPlots, Distributions
+
+# ╔═╡ 0350aa5b-d105-4dfa-a454-59873672b3a0
+using Plots, PlutoUI, LaTeXStrings, LinearAlgebra, Random
 
 # ╔═╡ e87dd9a4-f4ed-46d7-9f9d-dae0cadb7d05
 md"""
@@ -464,7 +471,13 @@ chain_MH2 = sample(MersenneTwister(1), uncertain_normal(y), my_MH, 1_000);
 mvn = MultivariateNormal(μ, Σ)
 
 # ╔═╡ 06e83a23-fa3a-49f7-8f43-d46f3285e943
-chain_Gibbs = sample(MersenneTwister(1), uncertain_normal(y), Gibbs(MH(:μ), MH(:σ)), 1000)
+chain_Gibbs = sample(uncertain_normal(y), Gibbs(MH(:μ), MH(:σ)), 1000)
+
+# ╔═╡ a9bd2d76-16e6-4084-b65d-0645ec94aa9c
+sample(uncertain_normal(y), Gibbs(HMC(0.2, 3, :μ), PG(20, :σ)), 1000)
+
+# ╔═╡ ddf796f3-a951-426f-a0f3-9b43f3ff6aef
+
 
 # ╔═╡ 9b4d67dc-9c75-45ee-9328-d229c527fdc6
 summarize(chain_Gibbs)
@@ -811,6 +824,8 @@ end
 
 # ╔═╡ Cell order:
 # ╠═103e5ba0-cfdc-11ee-13b1-cf53dfdd9a3b
+# ╠═d778ce04-8df4-42ef-95f1-9cf4880e0420
+# ╠═0350aa5b-d105-4dfa-a454-59873672b3a0
 # ╟─e87dd9a4-f4ed-46d7-9f9d-dae0cadb7d05
 # ╟─0f6cf892-b218-4740-a298-43f47e51acae
 # ╟─eb37dd4b-3af0-4534-92c2-e495b83024be
@@ -868,8 +883,8 @@ end
 # ╠═cf858c95-d2b9-4f53-af1a-d5a511f531ce
 # ╟─d77c1db1-925f-4134-a860-8a1683b3adee
 # ╠═cc92d39d-830f-451c-81b4-de00f74545bf
-# ╟─c37ea17f-57b5-4871-a4d9-5aa5e609c846
-# ╟─38a6bd5f-78ab-43be-a010-6fe4c209b1a7
+# ╠═c37ea17f-57b5-4871-a4d9-5aa5e609c846
+# ╠═38a6bd5f-78ab-43be-a010-6fe4c209b1a7
 # ╟─eab53e8a-b7cd-4c97-83f1-bcfd9c59cc4f
 # ╠═7915a972-df48-462c-bcc7-2ca94a98e441
 # ╟─53799772-c8a1-4055-a01e-42f147ffc253
@@ -908,6 +923,8 @@ end
 # ╠═87b984ee-2daa-4cca-b5eb-60c4aa3b2fb5
 # ╠═76b0886a-fc91-40ef-89d5-dcf5d261907f
 # ╠═06e83a23-fa3a-49f7-8f43-d46f3285e943
+# ╠═a9bd2d76-16e6-4084-b65d-0645ec94aa9c
+# ╠═ddf796f3-a951-426f-a0f3-9b43f3ff6aef
 # ╠═444a89d1-a8c1-4df8-945d-6e8dd32ae204
 # ╠═9b4d67dc-9c75-45ee-9328-d229c527fdc6
 # ╠═4d8fd482-11cb-4f2e-8c47-2428ee7e66c6
