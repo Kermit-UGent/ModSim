@@ -7,12 +7,12 @@ fontscale = 1.5
 Plots.scalefontsizes(fontscale)
 
 notebooks = Dict(
-    "probmod" => "modelling_distributions.jl",
-    "MCMC" => "MCMC.jl",
-    "simulation_tools" => "simulation_tools.jl",
+     "modelling_distributions.jl" => "probmod",
+    "MCMC.jl" => "MCMC",
+    "simulation_tools.jl" => "simulation_tools",
 )
 
-for (dir, nb) in notebooks
+for (nb, dir) in notebooks
     # run notebook and generate a plots dict
     include(joinpath("scripts", nb))
     for (name, pl) in plots
