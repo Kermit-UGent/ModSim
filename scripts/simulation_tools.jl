@@ -7,11 +7,11 @@ using InteractiveUtils
 # ╔═╡ eb128248-dfbc-11ee-2efb-cb60fad76024
 using Catalyst, DifferentialEquations, Plots, PlutoUI, LaTeXStrings
 
-# ╔═╡ eb30d4b4-ced7-473a-a5df-5ebed6a1c357
-using Symbolics
-
 # ╔═╡ 0b52aede-1a71-4034-9921-2ffc9120c0ae
 using Latexify
+
+# ╔═╡ eb30d4b4-ced7-473a-a5df-5ebed6a1c357
+using Symbolics
 
 # ╔═╡ 6e94632a-cad9-49ea-8cdc-e4ec55871682
 using Distributions
@@ -58,11 +58,14 @@ diff_complstep(f, x; h=1e-10) = imag(f(x+im*h)) / h
 # ╔═╡ f61a7f2d-faa2-4a54-bd4a-c2fac6da888f
 g(x) = sin(cos(exp(x)) + x^2)
 
+# ╔═╡ 6ae135a1-72b5-434c-89e6-a0df76338d46
+g(x)
+
 # ╔═╡ 4aa42d80-81b5-4144-8b4a-6c3ebf29d84b
-Dx(g(x)) |> expand_derivatives
+dgdt = Dx(g(x)) |> expand_derivatives |> simplify
 
 # ╔═╡ 9be6aa61-46fe-4d53-941b-6cb0b21133a0
-Dx(Dx(g(x))) |> expand_derivatives
+d2gdt2 = Dx(Dx(g(x))) |> expand_derivatives |> simplify
 
 # ╔═╡ 4c420cd0-975a-4d3b-a6cc-9eca35490c62
 md"## Stiff ODEs"
@@ -2749,6 +2752,7 @@ version = "1.4.1+1"
 
 # ╔═╡ Cell order:
 # ╠═eb128248-dfbc-11ee-2efb-cb60fad76024
+# ╠═0b52aede-1a71-4034-9921-2ffc9120c0ae
 # ╟─aec510c8-6f67-4bad-ac60-db8081dfc7f2
 # ╠═eb30d4b4-ced7-473a-a5df-5ebed6a1c357
 # ╠═615370c3-4986-454e-85c5-11d447b51ff1
@@ -2767,6 +2771,7 @@ version = "1.4.1+1"
 # ╠═459fe27d-bc53-469d-919d-724a5df98fe9
 # ╟─ae5be024-863d-46f1-b5d9-fc691b10e63b
 # ╠═f61a7f2d-faa2-4a54-bd4a-c2fac6da888f
+# ╠═6ae135a1-72b5-434c-89e6-a0df76338d46
 # ╠═4aa42d80-81b5-4144-8b4a-6c3ebf29d84b
 # ╠═9be6aa61-46fe-4d53-941b-6cb0b21133a0
 # ╟─4c420cd0-975a-4d3b-a6cc-9eca35490c62
@@ -2790,7 +2795,6 @@ version = "1.4.1+1"
 # ╠═3d549763-2ba2-48b6-b486-2ddd462977dd
 # ╠═cba57c64-a43f-4a4c-a793-86358131ef70
 # ╠═44142e83-1f6c-4644-996e-246817748b7e
-# ╠═0b52aede-1a71-4034-9921-2ffc9120c0ae
 # ╠═1924514f-0112-4ec8-830a-4eed54d81392
 # ╠═a807b275-99fa-47c8-abc0-e9afcde445b8
 # ╠═bc5adc9a-6f9c-4d55-ae8f-9bb8af5ff644
