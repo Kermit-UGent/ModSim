@@ -61,10 +61,7 @@ md"# Monod"
 rs_Monod = @reaction_network begin
 	@species X(t) S(t)
 	@parameters μmax Ks Y
-	# μmax * S / (Ks + S), X => X
 	μmax / (Ks + S) * X * S, (1/Y)*S => X
-	# μ, S --> Y*X
-	# -μmax, S --> S
 end
 
 # ╔═╡ 32a9fc59-73b7-413f-bb41-a6140f84d16a
