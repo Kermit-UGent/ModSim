@@ -35,8 +35,14 @@ using Symbolics
 # ╔═╡ dfca2f9f-0134-461c-a18b-f66f2bf02943
 md"# Modelling with ordinary differential equations"
 
+# ╔═╡ 34bec0a1-40e8-48a2-9109-94872aaff1b9
+md"## Balance equations"
+
+# ╔═╡ abebedae-b977-43ae-aaa0-6b00990a5de4
+
+
 # ╔═╡ 73eb7d0a-5433-4e3d-a008-748db66b8ef9
-# coffee example
+md"### coffee example"
 
 # ╔═╡ d3b84441-ed9f-436d-a690-660c5f4b8fbd
 function coffee!(du, u, (q, Tmilk, Tenv, k), t)
@@ -57,7 +63,7 @@ coffee_prob = ODEProblem(coffee!, [1.5e-1, 80], (0.0, 8.0), (qin, 5, 20, 0.1
 ))
 
 # ╔═╡ bf062835-538d-437a-bae6-6309c66ebd19
-coffee_sol = solve(coffee_prob, saveat=0.1, tstops=1.9:0.01:3.3)
+coffee_sol = solve(coffee_prob, saveat=0.1, tstops=1.9:0.001:3.3)
 
 # ╔═╡ f3737612-5458-4c6e-a634-246b2cb8cb05
 begin
@@ -241,7 +247,7 @@ end
 convert(ODESystem, michealis_menten_direct)
 
 # ╔═╡ ba662f0d-7a45-4e90-b067-a57da5069b2b
-md"## Hill function"
+md"### Hill function"
 
 # ╔═╡ fe75d100-73b1-4f80-a2cb-bea922521365
 @bind n Slider(1:10, default=5)
@@ -266,7 +272,7 @@ let
 end
 
 # ╔═╡ 46b39ff2-7087-44ad-86b2-f630ec2195cc
-md"## Logistic growth"
+md"### Logistic growth"
 
 # ╔═╡ 4c73138a-fab1-405b-a442-007881dfd094
 logistic = @reaction_network begin
@@ -278,6 +284,84 @@ end
 
 # ╔═╡ 1955523c-7d60-4e7a-845b-8977dc9b01fb
 convert(ODESystem, logistic)
+
+# ╔═╡ 5140228d-a479-4232-8303-6f5b0da339d8
+md"## Compartmental models"
+
+# ╔═╡ 350eb38a-4345-460f-89ca-63982ceadcb1
+md"### Pharmacokinetic model"
+
+# ╔═╡ 43140694-0a7d-4fe6-af17-54662c856073
+pharkin = @reaction_network begin
+	@species B(t)=0 T(t)=0
+	k₁, G --> B
+	k₂, B --> T
+end
+
+# ╔═╡ ff620b5c-8aa8-4b48-83bd-de533c53f52e
+md"### Reactor with dead zone"
+
+# ╔═╡ 17689a8f-6da2-470a-b015-c55098c8a723
+reactor2 = @reaction_network begin
+	@species Ad(t)=0 B(t)=0
+	@parameters V=100 k=0.3 r=0.05 q=1 c=.1
+	q*c, 0 --> Am  # amount of A entering the bulk
+	q/(V*(1-f)), Am --> 0  # amount of A leaving the bulk
+	r, Am --> B  # reaction
+	(k/(V*(1-f)), k/(V*f)), Am <--> Ad  # exchange bulk-dead zone
+end
+
+# ╔═╡ 2f2398ed-355f-49ff-b5e0-1fa8215b51f6
+convert(ODESystem, reactor2)
+
+# ╔═╡ 40aedd69-a6b0-4f5e-a220-197d2e72d21a
+md"f: $(@bind f Slider(0.1:0.1:0.9, default=0.2, show_value=true))"
+
+# ╔═╡ af9e366a-53e7-49d4-9354-44a05fb67888
+let
+	pars = [:f=>f]
+	u0 = [:Am=>0]
+	prob = ODEProblem(reactor2, u0, (0.0, 100.), pars)
+	sol = solve(prob)
+	plot(sol, lw=2, ls=:auto, ylab="amount [mol]", title="Reactor with dead zone\nf=$f")
+end
+
+# ╔═╡ 2f829ebd-9a8c-41d0-854c-a8407d2b161f
+md"### SIR model"
+
+# ╔═╡ 67422772-6ffe-499a-ba86-4cf70fb2fd53
+sir = @reaction_network begin
+	@species S(t)=50 I(t)=5 R(t)=0
+	β, S + I --> 2I
+	γ, I --> R
+end
+
+# ╔═╡ e7c84c65-7f49-410e-99d8-b9345b4559d7
+md"### Leslie matrix model"
+
+# ╔═╡ f4acd112-3341-4df2-b7f3-4738bf8b3bb3
+butterfly = @reaction_network begin
+	@species E(t)=100 C(t)=0 P(t)=0 B(t)=0
+	@parameters f=0.5 s=0.05 m=0.12
+	s, E --> C
+	s, C --> P
+	s, P --> B
+	m, (E, C, P, B) --> 0
+	f, B --> B + E
+end
+
+# ╔═╡ 79b13806-4d55-4524-9a43-09e3dc6603a5
+# oefening: draagkracht voor 100 rupsen
+
+# ╔═╡ e0203b11-b75c-4e79-87d0-c74105894aa8
+convert(ODESystem, butterfly)
+
+# ╔═╡ 92d35635-cc1c-4485-8a40-9ca16a3dbee3
+let
+	pars = [:f=>5, :s=>0.05, :m=>0.12]
+	prob_sir = ODEProblem(butterfly, [], (0.0, 50.0), pars)
+	plot(solve(prob_sir), lw=2)
+end
 
 # ╔═╡ 380b6a1d-f5da-4ba9-b7b0-3dbca0e267b8
 md"## Appendix"
@@ -414,14 +498,51 @@ let
 	plots["logistic_sol"] = plot(solve(prob), lw=2, title="The logistic equation")
 end
 
+# ╔═╡ fdcfd565-349e-4047-842e-32d2dd8329e6
+let
+	for f in [0.1, 0.33, 0.66]
+		pars = [:f=>f]
+		u0 = [:Am=>0]
+		prob = ODEProblem(reactor2, u0, (0.0, 100.), pars)
+		sol = solve(prob)
+		plots["reactor_dead_zone_$(f)"] = plot(sol, lw=2, ls=:auto, ylab="amount [mol]", title="Reactor with dead zone\nf=$f")
+	end
+end
+
+# ╔═╡ 0e2b9af8-9701-4d1c-838d-c289669522d1
+let
+	β, γ = 0.03, 0.3
+	prob_sir = ODEProblem(sir, [], (0.0, 30.0), (;β, γ))
+	plots["sir_beta=$(β)_gamma=$v"] = plot(solve(prob_sir), lw=2, title="SIR model\nβ=$β γ=$γ", ls=:auto)
+end
+
+# ╔═╡ ac6c7513-3476-4968-9d6e-eec6d09e019d
+let
+	β, γ = 0.3, 0.3
+	prob_sir = ODEProblem(sir, [], (0.0, 30.0), (;β, γ))
+	plots["sir_beta=$(β)_gamma=$v"] = plot(solve(prob_sir), lw=2, title="SIR model\nβ=$β γ=$γ", ls=:auto)
+end
+
+# ╔═╡ d408c7dc-4a57-400d-bad2-7ac02cc4fa14
+let
+	β, γ = 0.01, 0.3
+	prob_sir = ODEProblem(sir, [], (0.0, 30.0), (;β, γ))
+	plots["sir_beta=$(β)_gamma=$v"] = plot(solve(prob_sir), lw=2, title="SIR model\nβ=$β γ=$γ", ls=:auto)
+end
+
 # ╔═╡ 2f4153cb-5aab-495b-98e8-cbdd8ae99816
 plots
+
+# ╔═╡ 4d4d8bea-faf7-4045-a8a7-fc0e6b92d7ea
+length(plots)
 
 # ╔═╡ Cell order:
 # ╠═dfca2f9f-0134-461c-a18b-f66f2bf02943
 # ╠═093b722d-28af-4219-8546-39a3262146b2
 # ╠═a52da2c2-f7df-11ee-033f-8500edb3c03f
 # ╠═8cff27a7-fde1-4b49-8ad6-513302997a4e
+# ╠═34bec0a1-40e8-48a2-9109-94872aaff1b9
+# ╠═abebedae-b977-43ae-aaa0-6b00990a5de4
 # ╠═73eb7d0a-5433-4e3d-a008-748db66b8ef9
 # ╠═d3b84441-ed9f-436d-a690-660c5f4b8fbd
 # ╠═ddd43577-eb2e-4c72-b829-d7195c165ddf
@@ -495,7 +616,27 @@ plots
 # ╠═4c73138a-fab1-405b-a442-007881dfd094
 # ╠═1955523c-7d60-4e7a-845b-8977dc9b01fb
 # ╠═30bbcf76-f92e-4291-aec2-1bfdd89bdc38
+# ╠═5140228d-a479-4232-8303-6f5b0da339d8
+# ╠═350eb38a-4345-460f-89ca-63982ceadcb1
+# ╠═43140694-0a7d-4fe6-af17-54662c856073
+# ╠═ff620b5c-8aa8-4b48-83bd-de533c53f52e
+# ╠═17689a8f-6da2-470a-b015-c55098c8a723
+# ╠═2f2398ed-355f-49ff-b5e0-1fa8215b51f6
+# ╟─40aedd69-a6b0-4f5e-a220-197d2e72d21a
+# ╠═af9e366a-53e7-49d4-9354-44a05fb67888
+# ╠═fdcfd565-349e-4047-842e-32d2dd8329e6
+# ╠═2f829ebd-9a8c-41d0-854c-a8407d2b161f
+# ╠═67422772-6ffe-499a-ba86-4cf70fb2fd53
+# ╠═0e2b9af8-9701-4d1c-838d-c289669522d1
+# ╠═ac6c7513-3476-4968-9d6e-eec6d09e019d
+# ╠═d408c7dc-4a57-400d-bad2-7ac02cc4fa14
+# ╠═e7c84c65-7f49-410e-99d8-b9345b4559d7
+# ╠═f4acd112-3341-4df2-b7f3-4738bf8b3bb3
+# ╠═79b13806-4d55-4524-9a43-09e3dc6603a5
+# ╠═e0203b11-b75c-4e79-87d0-c74105894aa8
+# ╠═92d35635-cc1c-4485-8a40-9ca16a3dbee3
 # ╟─380b6a1d-f5da-4ba9-b7b0-3dbca0e267b8
 # ╠═07afed5f-6306-4620-98dc-ec729750850b
 # ╠═c7ee808d-3ec0-4130-b6d1-1fb993178f41
 # ╠═2f4153cb-5aab-495b-98e8-cbdd8ae99816
+# ╠═4d4d8bea-faf7-4045-a8a7-fc0e6b92d7ea
