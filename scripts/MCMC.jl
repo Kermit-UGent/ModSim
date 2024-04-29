@@ -96,6 +96,12 @@ md" Number of seeds germinated : $(@bind k Slider(0:10, default=9, show_value=tr
 # ╔═╡ 29928abf-f010-438e-9b60-e6673a51ddf5
 k
 
+# ╔═╡ 730e5cbb-1787-44b3-9bb4-32dba7035ea8
+@model function seed_germ(X=missing, n=10)
+	p ~ Beta(8, 3)
+	X ~ Binomial(n, p)
+end
+
 # ╔═╡ 768ea152-00a5-4409-86eb-9a1c554eb3b2
 mean(Beta(8, 3))  
 
@@ -139,19 +145,43 @@ which are chosen to be "reasonable".
 # ╔═╡ 0c29af96-949d-47b3-869f-274ed39c9d25
 md"The full, hierarchical model can be implemented as a Turing model."
 
+# ╔═╡ d8ff625a-6204-4579-a8f5-9650544c7222
+@model function uncertain_normal(y=missing)
+	μ ~ Normal(0, 20)
+	σ ~ InverseGamma(1/10)
+	for i in 1:length(y)
+		y[i] ~ Normal(μ, σ)
+	end
+end
+
 # ╔═╡ 2cbe07e6-8cf0-4dc4-8aea-f56059ffa367
 md"Note that this is now a distribution over 2 + $n$ variables as $\mathbf{y}$ can be of arbirary length. By giving $y$ as an argument, we fix the variables, though the parameters $\mu$ and $\sigma$ remain random variables."
 
+# ╔═╡ b04ce3ab-c5c0-4a13-8d82-05198532b22d
+uncertain_normal(y)
+
 # ╔═╡ afb7bdca-a8de-4342-9212-5e81fa47963a
 md"The prior over $\mu$ and $\sigma$ is a product distribution of a normal (centered around 0 and large standard deviation) and an inverse Gamma."
+
+# ╔═╡ 7cfc4306-746b-434a-8160-52341c1e6519
+norm_prior(μ, σ) = exp(logprior(uncertain_normal(y), (μ=μ, σ=σ)))
 
 # ╔═╡ 1fbd13c1-cc93-4e5b-98f1-ace195d20f97
 md"The likelihood of $\mu$ and $\sigma$ can be obtainded from the PDF of a normal distirbution over the parameters:
 
 $$L(\mu, \sigma\mid\mathbf{y}) = \prod_{i=1}^n \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(y_i-\mu)^2}{2\sigma^2}}\,.$$"
 
+# ╔═╡ fb35033f-3d11-4ab1-bed8-2c22396064f8
+norm_likelihood(μ, σ) = exp(loglikelihood(uncertain_normal(y), (μ=μ, σ=σ)))
+
 # ╔═╡ 213465af-f980-4848-9e5a-0cb5429f4af8
 md"The posterior is the product of the prior and the likelihood."
+
+# ╔═╡ e3e51306-385a-461b-94e8-e2a18b5250ab
+norm_posterior(μ, σ) = norm_prior(μ, σ) * norm_likelihood(μ, σ)
+
+# ╔═╡ b4eef7a8-a61c-471d-baf0-1d0b5fb997e6
+plot_post = heatmap(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Posterior")
 
 # ╔═╡ 7f2a7d88-442f-431e-8e09-42082bda8d24
 md"The posterior is slightly shifted compared to the likelihood, though both are quite close! We see that the posterio distribution is centred around the sample mean and standard deviation. The posterior identifies which parameters of the normal distribution have likely given rise to the data. At sight, the mean $\mu$ is likely between 6 and 9, while the standard deviation is likely to be between 1 and 2. Using numerical methods, we can identify the MAP estimator of the parameters and credibility intervals. Inference in two dimensions is hence still quite tractable. However, in what follows, we will use sampling to get observations from the posterior, which we can use to learn everything we want to know about the distributions and hence our parameters or variables of interest."
@@ -364,11 +394,20 @@ q_MH = x -> Normal(x, 1)
 # ╔═╡ 094b4405-6205-4b85-a311-c79cf6028498
 md"Instead of using a homebrewn MH algorithm, it might now be the ideal time to illustrate the built-in Turing sampler on our `uncertain_normal` example. Sampling from the posterior distribution can be done using the `sample` function with the appropriate distribution, algorithm and sample size. Here, for didactive purposes, we fixed the seed in the optional first argument."
 
+# ╔═╡ 63af963c-a304-4142-8f23-a56a5fc14e76
+chain_MH = sample(MersenneTwister(1), uncertain_normal(y), MH(), 1_000)
+
 # ╔═╡ e1cb4a40-4a8a-4ff9-9406-f99aee6fdd57
 md"By deafult, the MH algorithm uses the prior diistribution. You can set this to whichever distribution you like. We can use the function `summarize` to look at some summary statistics of our chains."
 
+# ╔═╡ a9e11333-aab9-4e63-aee4-6bceb6b771bc
+summarize(chain_MH)
+
 # ╔═╡ 56f7dfd2-2c81-403a-9c11-0d93c10f604e
 md"For now, we focuss on the just the mean and standard deviation. The average and standard deviation of $\mu$ and $\sigma$ our chain more or less matches the what we expect based on the earlier plot. We can also use the function `quantile` to see these basic quantile distributions."
+
+# ╔═╡ 6309cc65-59d4-4df2-b756-30c6e2f877cd
+quantile(chain_MH)
 
 # ╔═╡ a8d1b7e7-03df-4d05-be5f-758f98bb1c26
 md"Plotting the values of the chain, together with empirical data (can be done using just `plot(chain)`) shows that the MH chain does not generate a lote of unique values."
@@ -379,6 +418,9 @@ md" Most of the candidates are rejected! This is because our prior is far too br
 # ╔═╡ 2cf4022e-1b68-4a69-b6d0-669c3e5ac230
 my_MH = MH(:σ=>s->InverseGamma(s),
 		   :μ=>m->Normal(m, 1/2))
+
+# ╔═╡ 1b92c00e-8b2a-4cc8-b6f2-23d91cf4f989
+chain_MH2 = sample(MersenneTwister(1), uncertain_normal(y), my_MH, 1_000);
 
 # ╔═╡ 0c652efb-0edb-4a4e-a14c-7d5ac6eb5ffa
 md"This looks much better! Our proposal is closer to our canidates, so we can stick closer to high-density regions. Likely using this chain, we can make sensible inferences about that parameters of the model! 
@@ -426,42 +468,6 @@ n : $(@bind n_gibbs Slider(5:5:100, show_value=true, default=25))
 
 # ╔═╡ 3fca01f3-ac6e-4fdc-b8ca-48040ca562f3
 μ = [1, 0]
-
-# ╔═╡ d8ff625a-6204-4579-a8f5-9650544c7222
-@model function uncertain_normal(y=missing)
-	μ ~ Normal(0, 20)
-	σ ~ InverseGamma(1/10)
-	for i in 1:length(y)
-		y[i] ~ Normal(μ, σ)
-	end
-end
-
-# ╔═╡ b04ce3ab-c5c0-4a13-8d82-05198532b22d
-uncertain_normal(y)
-
-# ╔═╡ 7cfc4306-746b-434a-8160-52341c1e6519
-norm_prior(μ, σ) = exp(logprior(uncertain_normal(y), (μ=μ, σ=σ)))
-
-# ╔═╡ fb35033f-3d11-4ab1-bed8-2c22396064f8
-norm_likelihood(μ, σ) = exp(loglikelihood(uncertain_normal(y), (μ=μ, σ=σ)))
-
-# ╔═╡ e3e51306-385a-461b-94e8-e2a18b5250ab
-norm_posterior(μ, σ) = norm_prior(μ, σ) * norm_likelihood(μ, σ)
-
-# ╔═╡ b4eef7a8-a61c-471d-baf0-1d0b5fb997e6
-plot_post = heatmap(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Posterior")
-
-# ╔═╡ 63af963c-a304-4142-8f23-a56a5fc14e76
-chain_MH = sample(MersenneTwister(1), uncertain_normal(y), MH(), 1_000)
-
-# ╔═╡ a9e11333-aab9-4e63-aee4-6bceb6b771bc
-summarize(chain_MH)
-
-# ╔═╡ 6309cc65-59d4-4df2-b756-30c6e2f877cd
-quantile(chain_MH)
-
-# ╔═╡ 1b92c00e-8b2a-4cc8-b6f2-23d91cf4f989
-chain_MH2 = sample(MersenneTwister(1), uncertain_normal(y), my_MH, 1_000);
 
 # ╔═╡ 138bf97c-9295-440d-99f4-24f7fe58b774
 Σ = [σ₁^2 σ₁*σ₂*ρ;
@@ -630,12 +636,6 @@ p_univar = MixtureModel([Normal(2, 0.4), Normal(4, 1.2)], [0.25, 0.75])
 
 # ╔═╡ 66c3e374-389c-4be9-bf16-341565d4b4c9
 p = dist2pdf(p_univar)
-
-# ╔═╡ 730e5cbb-1787-44b3-9bb4-32dba7035ea8
-@model function seed_germ(X=missing, n=10)
-	p ~ Beta(8, 3)
-	X ~ Binomial(n, p)
-end
 
 # ╔═╡ 91cfb385-5617-4129-b57b-69aff3621ce5
 x_mh, acc_mh = metropolis_hastings(p, 4.0, q_MH, n=200)
