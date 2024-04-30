@@ -20,7 +20,7 @@ using Optim, Turing, StatsPlots, StatsBase
 t = [0, 1, 5, 8, 10]
 
 # ╔═╡ 03457e54-33ae-4cf8-a4a9-85dab26c1ef9
-y = [1.2, 3, 4, 5, 5.4]
+y = [1.2, 3, 4, 5.1, 5.4]
 
 # ╔═╡ 0c6aebf8-b18f-4987-b13e-e687436af550
 scatter(t, y)
@@ -54,31 +54,49 @@ ll(r, K) = loglikelihood(logistic_fit, (;r, K, σ=0.5))
 contourf(0.01:.01:5, 1:.01:10, ll, color=cgrad(:speed, rev=true))
 
 # ╔═╡ 9b82503e-48a0-4c78-b7e7-0102b2d1f9d5
+#=╠═╡
 ll(0.1, 2)
+  ╠═╡ =#
 
 # ╔═╡ 1a283f5a-ad39-4f16-b2b2-ff531f1a9634
+#=╠═╡
 ml_log = optimize(logistic_fit, MLE(), BFGS())
+  ╠═╡ =#
 
 # ╔═╡ 4acefe9c-8ea1-4491-9f03-0be80c5211c3
+#=╠═╡
 coeftable(ml_log)
+  ╠═╡ =#
 
 # ╔═╡ e2eaca92-3b18-4448-967f-ec78d165bd68
+#=╠═╡
 lprior(r, K) = logprior(logistic_fit, (;r, K, σ=0.5))
+  ╠═╡ =#
 
 # ╔═╡ cc104cdb-47d0-4b6b-adc4-103a6dad5421
+#=╠═╡
 contourf(0.01:.01:5, 1:.01:10, lprior, color=cgrad(:speed, rev=true))
+  ╠═╡ =#
 
 # ╔═╡ f55335b3-c0ec-467f-9056-c5416b662088
+#=╠═╡
 lp(r, K) = ll(r, K) + lprior(r, K)
+  ╠═╡ =#
 
 # ╔═╡ 99399d90-29cc-4648-871d-67adbebfec8a
+#=╠═╡
 contourf(0.01:.01:5, 1:.01:10, lp, color=cgrad(:speed, rev=true))
+  ╠═╡ =#
 
 # ╔═╡ e7e7dd46-835a-4cf1-aec5-e5ae1d2b1b1b
+#=╠═╡
 map_log = optimize(logistic_fit, MAP(), BFGS())
+  ╠═╡ =#
 
 # ╔═╡ 41c6b352-77f9-4480-be19-20db633c7a6e
+#=╠═╡
 map_log.values[:K]
+  ╠═╡ =#
 
 # ╔═╡ c4652a3b-630d-4eb3-a5f0-63034f077730
 
@@ -90,22 +108,63 @@ map_log.values[:K]
 
 
 # ╔═╡ f5819e00-2e6a-4886-b363-f23ddc5abd72
+#=╠═╡
 coeftable(map_log)
+  ╠═╡ =#
 
 # ╔═╡ 16b6935f-1a37-4b12-ac18-5803175555a5
+#=╠═╡
 chain = sample(logistic_fit, NUTS(), 10_000)
+  ╠═╡ =#
 
 # ╔═╡ 255c791b-0012-4a04-b794-f9ffe1c62a26
+#=╠═╡
 summarize(chain)
+  ╠═╡ =#
 
 # ╔═╡ 290d4176-5715-4b49-85d5-c90bde256b00
+#=╠═╡
 quantile(chain)
+  ╠═╡ =#
 
 # ╔═╡ 80d28884-c66e-4384-ac44-d8768d8c810f
+#=╠═╡
 plot(chain)
+  ╠═╡ =#
 
 # ╔═╡ 63ea89c5-df05-4651-b655-10d678fde222
+@model function polynomial_regression(x, y, m)
+	σm ~ InverseGamma(1)  # standard deviation of the error
+	λ ~ InverseGamma(.1)
+	n = length(y)
+	β ~ MultivariateNormal(m + 1, λ)
+	x_stand = (x .- mean(x)) ./ std(x)
+	for i in 1:n
+		yv = 0.0
+		for j in 0:m
+			yv += β[j+1] * (x_stand[i])^j / factorial(j)
+		end
+		y[i] ~ Normal(yv, σm)
+	end
+end
 
+# ╔═╡ 9b3e76fc-0c0b-4bd0-8af8-5e6053e24094
+xp = 10rand(200) .- 5 |> sort!
+
+# ╔═╡ 960814cb-611e-4057-8667-0c4de798a96e
+yp = 3randn(200) .+ 2 .- 4xp
+
+# ╔═╡ 9b317909-8997-46e2-809d-b005332c1022
+sample(polynomial_regression(xp, yp, 5), NUTS(), 1000) |> summarize
+
+# ╔═╡ bf80bb42-75c8-4064-952c-0613e3e8188d
+optimize(polynomial_regression(xp, yp, 2), MLE(), NelderMead())
+
+# ╔═╡ 5ff4ccf6-9bd8-4318-9de3-7752ed66f51a
+optimize(polynomial_regression(xp, yp, 5), MAP()) |> coeftable
+
+# ╔═╡ 63214fc8-2c39-4cbe-8aa7-da36e904e978
+MultivariateNormal(3, 0.1)
 
 # ╔═╡ dd7415cd-2646-4135-a389-baf8d6657fe1
 md"## Appendix"
@@ -151,6 +210,12 @@ plots
 # ╠═290d4176-5715-4b49-85d5-c90bde256b00
 # ╠═80d28884-c66e-4384-ac44-d8768d8c810f
 # ╠═63ea89c5-df05-4651-b655-10d678fde222
+# ╠═9b3e76fc-0c0b-4bd0-8af8-5e6053e24094
+# ╠═960814cb-611e-4057-8667-0c4de798a96e
+# ╠═9b317909-8997-46e2-809d-b005332c1022
+# ╠═bf80bb42-75c8-4064-952c-0613e3e8188d
+# ╠═5ff4ccf6-9bd8-4318-9de3-7752ed66f51a
+# ╠═63214fc8-2c39-4cbe-8aa7-da36e904e978
 # ╠═dd7415cd-2646-4135-a389-baf8d6657fe1
 # ╠═2f28d23a-36a3-4831-a8df-ce08cfd7c44e
 # ╠═55459b43-4e53-4f44-80d7-84c1f929fa52
