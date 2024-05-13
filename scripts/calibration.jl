@@ -11,47 +11,72 @@ begin
 end
 
 # ╔═╡ ab31fa80-0606-11ef-06f5-bd74bc457ff5
-using Plots, PlutoUI, LaTeXStrings, Latexify
+using Plots, PlutoUI, LaTeXStrings, Latexify, LinearAlgebra
 
 # ╔═╡ a10a9f8e-4088-49e2-a497-b1d253d83ecc
 using Optim, Turing, StatsPlots, StatsBase
 
-# ╔═╡ 470ba643-ed55-4789-9384-c88982ca0c05
-t = [0, 1, 5, 8, 10]
+# ╔═╡ 4b38ba22-8c3f-4c90-b42a-79063489641e
+using Catalyst, DifferentialEquations
+
+# ╔═╡ 0e5831ff-f542-40e1-9376-2abb420494b7
+md"[mm?](https://chem.libretexts.org/Bookshelves/Biological_Chemistry/Supplemental_Modules_(Biological_Chemistry)/Enzymes/Enzymatic_Kinetics/Michaelis-Menten_Kinetics)
+MM?"
+
+# ╔═╡ 894bfbf5-26c0-43e2-8f5b-fef4c41e3438
+# ╠═╡ disabled = true
+#=╠═╡
+data = [(14.4, 1.0), (15.9, 2.3), (17.3, 4.0), (18.7, 6.0), (20.1, 7.9), (21.6, 9.2), (23.1, 9.8), (24.6, 9.9)]
+  ╠═╡ =#
 
 # ╔═╡ 03457e54-33ae-4cf8-a4a9-85dab26c1ef9
-y = [1.2, 3, 4, 5.1, 5.4]
+#=╠═╡
+t, y = first.(data), last.(data)
+  ╠═╡ =#
 
 # ╔═╡ 0c6aebf8-b18f-4987-b13e-e687436af550
+#=╠═╡
 scatter(t, y)
+  ╠═╡ =#
 
 # ╔═╡ 5dee9551-a275-4c92-8a35-9bf7d2a91e7d
-logistic(t; r, K, y0=1) = K / (1 + (K-y0) / y0 * exp(-r*t))
+logistic(t; r, K, y₀=.1) = K / (1 + (K-y₀) / y₀ * exp(-r*t))
 
 # ╔═╡ 6984bd57-e95f-40b1-aecc-a864177bdb72
-sq_loss(r, K) = sum(abs2, logistic.(t; r, K) .- y)
+#=╠═╡
+sq_loss(r, K) = sum(abs2, logistic.(t; r, K) .- y) |> sqrt
+  ╠═╡ =#
 
 # ╔═╡ e4fd9a2f-92be-4d4f-a3b0-475848e7aed3
-contourf(0.01:.01:5, 1:.01:10, sq_loss, color=:speed)
+#=╠═╡
+contourf(0.01:.01:2, 1:.01:20, sq_loss, color=:speed)
+  ╠═╡ =#
 
 # ╔═╡ d43ee840-dfc5-4d2d-bb0f-14faf1573e73
-@model function logistic_model(t, y)
+@model function logistic_model(t, y; y₀=missing)
 	σ ~ InverseGamma()
-	r ~ TriangularDist(0.1, 5, 2)
-	K ~ TriangularDist(1, 10, 5)
+	r ~ Exponential(.1)
+	K ~ Exponential(5)
+	y₀ ~ Exponential(1)
 	for i in 1:length(y)
-		y[i] ~ Normal(logistic(t[i]; r, K), σ)
+		y[i] ~ Normal(logistic(t[i]; r, K, y₀), σ)
 	end
 end
 
 # ╔═╡ 3b0ca57f-d7f3-4bbf-91b8-23d488c3d3cd
+#=╠═╡
 logistic_fit = logistic_model(t, y)
+  ╠═╡ =#
 
 # ╔═╡ 7cff29b5-3478-49ae-abea-712cfbee762d
-ll(r, K) = loglikelihood(logistic_fit, (;r, K, σ=0.5))
+#=╠═╡
+ll(r, K) = loglikelihood(logistic_model(t, y; y₀=0.1), (;r, K, y₀=0.000213524, σ=0.5))
+  ╠═╡ =#
 
 # ╔═╡ 8f08acd8-4480-418d-89dd-64f795be6347
-contourf(0.01:.01:5, 1:.01:10, ll, color=cgrad(:speed, rev=true))
+#=╠═╡
+contourf(0.01:.01:2, 1:.01:20, ll, color=cgrad(:speed, rev=true))
+  ╠═╡ =#
 
 # ╔═╡ 9b82503e-48a0-4c78-b7e7-0102b2d1f9d5
 #=╠═╡
@@ -60,7 +85,7 @@ ll(0.1, 2)
 
 # ╔═╡ 1a283f5a-ad39-4f16-b2b2-ff531f1a9634
 #=╠═╡
-ml_log = optimize(logistic_fit, MLE(), BFGS())
+ml_log = optimize(logistic_fit, MLE(), NelderMead())
   ╠═╡ =#
 
 # ╔═╡ 4acefe9c-8ea1-4491-9f03-0be80c5211c3
@@ -70,7 +95,7 @@ coeftable(ml_log)
 
 # ╔═╡ e2eaca92-3b18-4448-967f-ec78d165bd68
 #=╠═╡
-lprior(r, K) = logprior(logistic_fit, (;r, K, σ=0.5))
+lprior(r, K) = logprior(logistic_model(t, y; y₀=0.1), (;r, K, σ=0.5))
   ╠═╡ =#
 
 # ╔═╡ cc104cdb-47d0-4b6b-adc4-103a6dad5421
@@ -90,22 +115,13 @@ contourf(0.01:.01:5, 1:.01:10, lp, color=cgrad(:speed, rev=true))
 
 # ╔═╡ e7e7dd46-835a-4cf1-aec5-e5ae1d2b1b1b
 #=╠═╡
-map_log = optimize(logistic_fit, MAP(), BFGS())
+map_log = optimize(logistic_fit, MAP(), NelderMead())
   ╠═╡ =#
 
 # ╔═╡ 41c6b352-77f9-4480-be19-20db633c7a6e
 #=╠═╡
 map_log.values[:K]
   ╠═╡ =#
-
-# ╔═╡ c4652a3b-630d-4eb3-a5f0-63034f077730
-
-
-# ╔═╡ b317a124-a044-48e0-af65-68be95593a6a
-
-
-# ╔═╡ 087e8eb2-019e-4ffe-a520-636d4f13c01f
-
 
 # ╔═╡ f5819e00-2e6a-4886-b363-f23ddc5abd72
 #=╠═╡
@@ -114,7 +130,7 @@ coeftable(map_log)
 
 # ╔═╡ 16b6935f-1a37-4b12-ac18-5803175555a5
 #=╠═╡
-chain = sample(logistic_fit, NUTS(), 10_000)
+chain = sample(logistic_fit, NUTS(), 10_000);
   ╠═╡ =#
 
 # ╔═╡ 255c791b-0012-4a04-b794-f9ffe1c62a26
@@ -164,7 +180,73 @@ optimize(polynomial_regression(xp, yp, 2), MLE(), NelderMead())
 optimize(polynomial_regression(xp, yp, 5), MAP()) |> coeftable
 
 # ╔═╡ 63214fc8-2c39-4cbe-8aa7-da36e904e978
-MultivariateNormal(3, 0.1)
+yeast = @reaction_network begin
+	X * mm(G, μ, K), X + G => 2X
+	m, X --> 0 
+end
+
+# ╔═╡ f241d041-34a1-4399-a724-8be968ed4677
+yeast_ode = convert(ODESystem, yeast)
+
+# ╔═╡ 0a283dff-c28e-4349-ad3f-a07b16bf274b
+parameters(yeast_ode)
+
+# ╔═╡ 0a461157-58f1-4478-9700-65bf5fb80ebe
+prob_yeast = ODEProblem(yeast, [:X=>10.1, :G=>180], (0, 50), [:μ=>0.3, :K=>250, :m=>0.03])
+
+# ╔═╡ 25ac2424-170c-463d-9a5e-c900f3ed8674
+sol_yeast = solve(prob_yeast, Tsit5(), saveat=5)
+
+# ╔═╡ 0e6ba65b-067c-42f4-90b7-8b8c387a2fa9
+plot(sol_yeast)
+
+# ╔═╡ 0c9c49af-59cc-4f2a-9de2-6095d379e18b
+σ_X, σ_G = 7.4, 19
+
+# ╔═╡ 018aa4ed-b4c2-4413-80c9-af4f34256865
+length(sol_yeast)
+
+# ╔═╡ 7e6dbcd1-be40-4315-87a9-129b7f8ce341
+Xobs = sol_yeast[:X] .+ σ_X .* randn(length(sol_yeast))
+
+# ╔═╡ 3fea2784-e662-4b01-896c-54bc913adf40
+Gobs = sol_yeast[:G] .+ σ_G .* randn(length(sol_yeast))
+
+# ╔═╡ 0f40a683-d4e7-4fc8-bf5e-18de8e3d6111
+let
+	scatter(sol_yeast.t, Xobs)
+	scatter!(sol_yeast.t, Gobs)
+end
+
+
+# ╔═╡ 1ba6e0d0-3166-41ab-a106-df73e4579f39
+tsteps = sol_yeast.t
+
+# ╔═╡ 6185ec28-3286-40c8-bdcc-6d8e812bb7df
+@model function yeast_inference(tsteps, X, G)
+	σ_X ~ InverseGamma()
+	σ_G ~ InverseGamma()
+	μ ~ LogNormal()
+	m ~ LogNormal()
+	sol = solve(prob_yeast, Tsit5(), saveat=tsteps, p=[μ, 250.0, m])
+	X ~ MvNormal(sol[:X], σ_X^2 * I)
+	G ~ MvNormal(sol[:G], σ_G^2 * I)
+end
+
+# ╔═╡ c4896649-a42c-4fd8-a8ef-ecc2eeee61d9
+yeast_mod = yeast_inference(tsteps, Xobs, Gobs)
+
+# ╔═╡ 95b92274-f1a2-4c4f-b058-d384211b9c1a
+optimize(yeast_mod, MLE(), NelderMead()) |> coeftable
+
+# ╔═╡ dd285391-6df6-47f7-a568-8786d2000f24
+optimize(yeast_mod, MAP(), NelderMead()) |> coeftable
+
+# ╔═╡ 16089b87-a760-4309-86b9-8300bb5a23cf
+chain_yeast = sample(yeast_mod, NUTS(), MCMCSerial(), 5000, 5);
+
+# ╔═╡ 05ed997f-e9b1-4f10-a186-78eac7f8aa8a
+summarize(chain_yeast)
 
 # ╔═╡ dd7415cd-2646-4135-a389-baf8d6657fe1
 md"## Appendix"
@@ -181,8 +263,10 @@ plots
 # ╔═╡ Cell order:
 # ╠═ab31fa80-0606-11ef-06f5-bd74bc457ff5
 # ╠═a10a9f8e-4088-49e2-a497-b1d253d83ecc
+# ╠═4b38ba22-8c3f-4c90-b42a-79063489641e
 # ╠═3e70b82a-e4d3-4747-9679-aa5ab41d5b06
-# ╠═470ba643-ed55-4789-9384-c88982ca0c05
+# ╠═0e5831ff-f542-40e1-9376-2abb420494b7
+# ╠═894bfbf5-26c0-43e2-8f5b-fef4c41e3438
 # ╠═03457e54-33ae-4cf8-a4a9-85dab26c1ef9
 # ╠═0c6aebf8-b18f-4987-b13e-e687436af550
 # ╠═5dee9551-a275-4c92-8a35-9bf7d2a91e7d
@@ -201,9 +285,6 @@ plots
 # ╠═99399d90-29cc-4648-871d-67adbebfec8a
 # ╠═e7e7dd46-835a-4cf1-aec5-e5ae1d2b1b1b
 # ╠═41c6b352-77f9-4480-be19-20db633c7a6e
-# ╠═c4652a3b-630d-4eb3-a5f0-63034f077730
-# ╠═b317a124-a044-48e0-af65-68be95593a6a
-# ╠═087e8eb2-019e-4ffe-a520-636d4f13c01f
 # ╠═f5819e00-2e6a-4886-b363-f23ddc5abd72
 # ╠═16b6935f-1a37-4b12-ac18-5803175555a5
 # ╠═255c791b-0012-4a04-b794-f9ffe1c62a26
@@ -216,6 +297,23 @@ plots
 # ╠═bf80bb42-75c8-4064-952c-0613e3e8188d
 # ╠═5ff4ccf6-9bd8-4318-9de3-7752ed66f51a
 # ╠═63214fc8-2c39-4cbe-8aa7-da36e904e978
+# ╠═f241d041-34a1-4399-a724-8be968ed4677
+# ╠═0a283dff-c28e-4349-ad3f-a07b16bf274b
+# ╠═0a461157-58f1-4478-9700-65bf5fb80ebe
+# ╠═25ac2424-170c-463d-9a5e-c900f3ed8674
+# ╠═0e6ba65b-067c-42f4-90b7-8b8c387a2fa9
+# ╠═0c9c49af-59cc-4f2a-9de2-6095d379e18b
+# ╠═018aa4ed-b4c2-4413-80c9-af4f34256865
+# ╠═7e6dbcd1-be40-4315-87a9-129b7f8ce341
+# ╠═3fea2784-e662-4b01-896c-54bc913adf40
+# ╠═0f40a683-d4e7-4fc8-bf5e-18de8e3d6111
+# ╠═1ba6e0d0-3166-41ab-a106-df73e4579f39
+# ╠═6185ec28-3286-40c8-bdcc-6d8e812bb7df
+# ╠═c4896649-a42c-4fd8-a8ef-ecc2eeee61d9
+# ╠═95b92274-f1a2-4c4f-b058-d384211b9c1a
+# ╠═dd285391-6df6-47f7-a568-8786d2000f24
+# ╠═16089b87-a760-4309-86b9-8300bb5a23cf
+# ╠═05ed997f-e9b1-4f10-a186-78eac7f8aa8a
 # ╠═dd7415cd-2646-4135-a389-baf8d6657fe1
 # ╠═2f28d23a-36a3-4831-a8df-ce08cfd7c44e
 # ╠═55459b43-4e53-4f44-80d7-84c1f929fa52
