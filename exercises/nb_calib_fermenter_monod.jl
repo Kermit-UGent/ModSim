@@ -5,11 +5,14 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ c54dae10-60af-4141-b56d-ed61cb0ced8a
+# ╠═╡ skip_as_script = true
+#=╠═╡
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
+  ╠═╡ =#
 
 # ╔═╡ 245ca9d0-10f9-11ef-0ef6-a73594e96db9
 using Markdown
@@ -36,6 +39,8 @@ $$\begin{eqnarray*}
 %S \xrightarrow[\quad\quad]{\beta} Y \, X
 S \xrightarrow[\quad\quad]{r} Y \, X \quad\quad\quad\quad r = \mu \, X \quad \textrm{with} \quad \mu = \mu_{max} \, \cfrac{S}{S + K_s}
 \end{eqnarray*}$$
+
+Note that $Y$ is the yield and not a species.
 "
 
 # ╔═╡ 824db995-7a66-4719-a534-7e0f6dec90b5
@@ -45,7 +50,7 @@ The *reaction network object* for this model could be set-up as:
 
 # ╔═╡ 245c2636-95da-4c76-8b03-c4d20bbabb48
 fermenter_monod = @reaction_network begin
-    X * mm(S, μmax, Ks), S --> Y*X
+    X * mm(S, μmax, Ks), S => Y*X
     Q/V, (S, X) --> ∅
     Q/V*Sin, ∅ --> S
 end
@@ -59,6 +64,9 @@ $$\begin{eqnarray*}
 \cfrac{dX}{dt} &=& -\cfrac{Q}{V} X + Y \mu_{max}\cfrac{S}{S + K_s} X
 \end{eqnarray*}$$
 "
+
+# ╔═╡ 94a8834d-9528-41a2-b9d1-54f87833adca
+convert(ODESystem, fermenter_monod, combinatoric_ratelaws=false)
 
 # ╔═╡ b7b7d58f-d406-4596-b834-ced6d8fada83
 md"
@@ -249,6 +257,7 @@ end
 # ╠═824db995-7a66-4719-a534-7e0f6dec90b5
 # ╠═245c2636-95da-4c76-8b03-c4d20bbabb48
 # ╠═de8ddc14-8f82-403d-8f42-29673ef2a722
+# ╠═94a8834d-9528-41a2-b9d1-54f87833adca
 # ╠═b7b7d58f-d406-4596-b834-ced6d8fada83
 # ╠═99c6f31a-0968-4804-9980-71fcc1af1f49
 # ╠═bf4ad873-e0fe-415c-9e78-fe0b5ac1414e

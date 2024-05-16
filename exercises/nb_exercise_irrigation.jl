@@ -5,11 +5,14 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 806ed5ad-788b-4f4b-b72f-3720766b6959
+# ╠═╡ skip_as_script = true
+#=╠═╡
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
+  ╠═╡ =#
 
 # ╔═╡ f3ae43dc-f7e1-11ee-3615-695b9e85b621
 using Markdown
@@ -53,8 +56,11 @@ Create a *reaction network object* model for the aforementioned problem in order
 
 Tips:
 - You can use any kind of expression for the reaction rates.
-- The term $- v \,S_2^2$ is created by the reaction `v, 2S₂ --> ∅`
+- The term $- v \,S_2^2$ is created by the reaction `v*S₂^2, S₂ => ∅`, meaning we overrule custom behavior and say that `S₂` is removed with a rate of $vS_2^2$.
 "
+
+# ╔═╡ 33c6a48a-4424-400a-b984-7b19cb19149e
+R(t) = ifelse(t < 60, 5, 10)
 
 # ╔═╡ e557a067-52a1-42d5-98ae-40a0c63a2611
 # Uncomment and complete the instruction
@@ -63,9 +69,9 @@ Tips:
 # end
 irrigation_mod = @reaction_network begin
     k/Smax, S₁ --> S₂
-    v, 2S₂ --> ∅
-    R * (1 - S₁res / Smax), ∅ --> S₁
-    R/Smax, S₁ --> ∅
+    v*S₂^2, S₂ => ∅
+    R(t) * (1 - S₁res / Smax), ∅ --> S₁
+    R(t)/Smax, S₁ --> ∅
 end
 
 # ╔═╡ 79277f44-ffca-44e3-867d-07a95dcb538c
@@ -102,7 +108,7 @@ Initialize a vector `param` with the parameter values:
 
 # ╔═╡ d172fc24-0fbe-46b4-a030-1ba44b4b57cd
 # params = ...       # Uncomment and complete the instruction
-params = [:k => 3.0, :Smax => 150.0, :v => 1.0e-3, :R => 5.0, :S₁res => 10.0]
+params = [:k => 3.0, :Smax => 150.0, :v => 1.0e-3, :S₁res => 10.0]
 
 # ╔═╡ 309fc7b7-ba9d-41ea-a834-e3b60eeb0226
 md"
@@ -202,6 +208,7 @@ Interpret the results. Ask yourself the following questions:
 # ╠═a7bb2db8-8e7e-45b6-843d-2db43f1a7ad1
 # ╠═5d812731-8340-49c9-b181-aef5299388b5
 # ╠═072d96fa-4933-43ed-a4fd-162f64be5cdd
+# ╠═33c6a48a-4424-400a-b984-7b19cb19149e
 # ╠═e557a067-52a1-42d5-98ae-40a0c63a2611
 # ╠═79277f44-ffca-44e3-867d-07a95dcb538c
 # ╠═2f5b954b-1615-4b14-bc3b-3426c9296221

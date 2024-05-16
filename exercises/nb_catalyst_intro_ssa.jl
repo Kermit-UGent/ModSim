@@ -1,15 +1,18 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.38
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ a2582acb-7d17-43ab-b883-d766b1a2c984
+# ╠═╡ skip_as_script = true
+#=╠═╡
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
+  ╠═╡ =#
 
 # ╔═╡ e5f8c320-eda0-11ee-37d0-458bdbd94f15
 using Markdown
