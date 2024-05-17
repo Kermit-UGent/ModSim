@@ -277,7 +277,7 @@ A possible *reaction network object* for the exponential growth model can be imp
 "
 
 # ╔═╡ 97bdfce1-a670-469a-b8a9-34e1d1964409
-growth_mod_exp = @reaction_network begin
+growth_exp = @reaction_network begin
     μ*Wf, ∅ --> W
     μ, W --> ∅
 end
@@ -307,7 +307,7 @@ Create the corresponding ODE problem and store it in `oprob_uncert_exp`:
 
 # ╔═╡ 7fcec514-192b-4694-b149-14f5f87bae17
 # oprob_uncert_exp = missing       # Uncomment and complete the instruction
-oprob_uncert_exp = ODEProblem(growth_mod_exp, u₀_exp, tspan, params_uncert_exp)
+oprob_uncert_exp = ODEProblem(growth_exp, u₀_exp, tspan, params_uncert_exp)
 
 # ╔═╡ bd120dbc-827a-499a-a11c-25423ec5f397
 md"
@@ -347,7 +347,7 @@ A possible *reaction network object* for the Gompertz growth model can be implem
 "
 
 # ╔═╡ 3e16bd3a-898a-49f9-9ed1-8998be7dc045
-growth_mod_gom = @reaction_network begin
+growth_gom = @reaction_network begin
     -μ, W --> ∅
     D*log(W), W --> ∅
 end
@@ -377,7 +377,7 @@ Create the corresponding ODE problem and store it in `oprob_uncert_log`:
 
 # ╔═╡ 1aed2273-7b3e-4a49-a8d0-91251c58b700
 # oprob_uncert_gom = missing      # Uncomment and complete the instruction
-oprob_uncert_gom = ODEProblem(growth_mod_gom, u₀_gom, tspan, params_uncert_gom)
+oprob_uncert_gom = ODEProblem(growth_gom, u₀_gom, tspan, params_uncert_gom)
 
 # ╔═╡ 76da6edd-9e9f-4f5b-8673-b737c8f9c5f8
 md"

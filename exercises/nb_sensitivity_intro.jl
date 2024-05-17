@@ -251,15 +251,15 @@ md"
 
 # ╔═╡ dca50b37-b06c-4efe-881e-cf966ebc8fd7
 md"
-Create a *reaction network object* for the exponential growth model. Name it `growth_mod_exp`.
+Create a *reaction network object* for the exponential growth model. Name it `growth_exp`.
 "
 
 # ╔═╡ 2836f231-3b90-4829-9012-3ed9a09239ff
 # Uncomment and complete the instruction
-# growth_mod_exp = @reaction_network begin
+# growth_exp = @reaction_network begin
 #     missing
 # end
-growth_mod_exp = @reaction_network begin
+growth_exp = @reaction_network begin
     μ*Wf, ∅ --> W
     μ, W --> ∅
 end
@@ -271,7 +271,7 @@ Convert the system to a symbolic differential equation model (name it: `osys_exp
 
 # ╔═╡ 78d175b4-a9b2-49b5-bbc8-eb348799985b
 # osys_exp = missing           # Uncomment and complete the instruction
-osys_exp = convert(ODESystem, growth_mod_exp)
+osys_exp = convert(ODESystem, growth_exp)
 
 # ╔═╡ 63952c54-3304-4500-9536-b375c5c8f280
 md"
@@ -303,7 +303,7 @@ Create the ODE problem and store it in `oprob_exp`:
 
 # ╔═╡ 025c1154-b2ae-4e1c-af1b-277b24d648a4
 # oprob_exp = missing         # Uncomment and complete the instruction
-oprob_exp = ODEProblem(growth_mod_exp, u₀_exp, tspan, params_exp)
+oprob_exp = ODEProblem(growth_exp, u₀_exp, tspan, params_exp)
 
 # ╔═╡ f58825d2-55fc-43f1-b164-9555bf9f5b84
 md"
@@ -391,15 +391,15 @@ md"
 
 # ╔═╡ f311e943-c96b-4af3-8757-c662fd302a88
 md"
-Create a *reaction network object* for the exponential growth model. Name it `growth_mod_gom`.
+Create a *reaction network object* for the exponential growth model. Name it `growth_gom`.
 "
 
 # ╔═╡ 1ae76036-42ef-46e9-88bf-d66d4267addc
 # Uncomment and complete the instruction
-# growth_mod_gom = @reaction_network begin
+# growth_gom = @reaction_network begin
 #     missing
 # end
-growth_mod_gom = @reaction_network begin
+growth_gom = @reaction_network begin
     -μ, W --> ∅
     D*log(W), W --> ∅
 end
@@ -411,7 +411,7 @@ Convert the system to a symbolic differential equation model (name it: `osys_gom
 
 # ╔═╡ acaf5b91-accc-4dfa-9371-6495a47c8736
 # osys_gom = missing                  # Uncomment and complete the instruction
-osys_gom = convert(ODESystem, growth_mod_gom)
+osys_gom = convert(ODESystem, growth_gom)
 
 # ╔═╡ ed1150f1-9c75-4867-b7f5-535d605810f4
 md"
@@ -443,7 +443,7 @@ Create the ODE problem and store it in `oprob_gom`:
 
 # ╔═╡ 3aab9073-cf4d-4ee5-9e8a-e3db586d9f68
 # oprob_gom = missing                 # Uncomment and complete the instruction
-oprob_gom = ODEProblem(growth_mod_gom, u₀_gom, tspan, params_gom)
+oprob_gom = ODEProblem(growth_gom, u₀_gom, tspan, params_gom)
 
 # ╔═╡ 30c35371-d106-4673-8569-d07b39edbdfe
 md"

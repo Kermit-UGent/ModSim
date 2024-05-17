@@ -5,14 +5,11 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ e6e748a5-b692-4c7c-b39e-ef0fe9e46c35
-# ╠═╡ skip_as_script = true
-#=╠═╡
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate("..")
+	Pkg.activate(".")
 end
-  ╠═╡ =#
 
 # ╔═╡ be326550-25ea-4c5f-ac4a-dd74d12bc89a
 using Markdown
@@ -185,7 +182,7 @@ osys  = convert(ODESystem, infection_model)
 
 # ╔═╡ eeb25e50-165b-4e93-8397-5b09fe8e7242
 md"""
-Note that the model equations are essentially:
+Note that the model equations are essencially:
 
 $$\cfrac{dS(t)}{dt} = -\alpha \beta S(t) I(t)$$
 $$\cfrac{dI(t)}{dt} = \alpha \beta S(t) I(t) - r I(t)$$
@@ -226,13 +223,13 @@ We first need to load the Differential and Plot package, which is required for s
 
 # ╔═╡ 3197244f-655b-4dca-80f3-794b30722551
 md"
-Now we wish to simulate our model. To do this, we need to provide the following information:
+Now we wish to simulate our model. To do this, we need to provide some the following information:
 
 - Initial conditions for the state variables $S$, $I$, $D$ and $R$.
 - The parameter values for $\alpha$, $\beta$, $r$ and $m$.
 - The timespan, which is the timeframe over which we wish to run the simulation.
 
-Assume in this example that there are $10\,000\,000$ people in the country and that initially $1\,000$ person are infected. Hence, $I_0 = 1\,000$, $S_0 = 10\,000\,000-I_0 = 9\,999\,000$, $D_0 = 0$ and $R_0 = 0$.\
+Assume in this example that there are $10\,000\,000$ people in the country, and that initially $1\,000$ person are infected. Hence, $I_0 = 1\,000$, $S_0 = 10\,000\,000-I_0 = 9\,999\,000$, $D_0 = 0$ and $R_0 = 0$.\
 Furthermore, we take the following values for the parameters: $\alpha = 0.08\;person/contact$, $\beta = 10^{-6}\;contact/(person^2\,day)$, $r = 0.2\;day^{-1}$ (i.e. a person is contagious for an average of $5\;days$) and $m=0.4$.\
 Finally, we want to run our simulation from day $0$ till day $90$.
 "
@@ -318,7 +315,7 @@ Futhermore, note that executing the `solve` command at different occasions with 
 
 # ╔═╡ 0af3c166-46b6-455d-af6b-a72c4d2a5ce4
 md"
-Finally, we can plot the solution through the `plot` function.
+Finally, we can plot the solution through the plot function.
 "
 
 # ╔═╡ 513c037b-c54c-47fa-b97a-06f69a983386
@@ -331,18 +328,6 @@ If you want to see the final values of $S$, $I$, $D$ and $R$, type:
 
 # ╔═╡ ab4940b8-b8ec-4835-8d6e-4e57a5e2e464
 osol.u[end]
-
-# ╔═╡ 5717a33a-83b9-4791-a6da-a0010321c60c
-md"If you only need to see a subset of the variables, you can use the `idxs`
-
-# ╔═╡ cf815edf-8980-4bfd-853e-6c4560cb9f2a
-plot(osol, idxs=[:D, :R], title="Deceased & recovered")  # square brackets for time-state plot
-
-# ╔═╡ 6c78a7c5-f319-4bc4-91ab-dbea7c8546f4
-plot(osol, idxs=(:S, :I), title="Phase plot of S vs. I")  # round brackets for a phase plot
-
-# ╔═╡ 5b396040-6d9d-4e35-b028-555d5b11848c
-md"More information about plotting differential equation can be found in the [documentations](https://docs.sciml.ai/DiffEqDocs/stable/basics/plot/."
 
 # ╔═╡ 764e2f1a-f974-4916-8573-cacba897cf07
 md"
@@ -377,11 +362,8 @@ md"
 We will create een new parameter value vector, ODE problem and solution object by putting `1` at the end of the corresponding variable names. In that way, the previous simulation results will be unaffected! The model, the initial conditions and the timespan are identical as before.
 "
 
-# ╔═╡ 114fac6a-5c73-4e38-b49c-d0c3143649f9
-r = 0.1
-
 # ╔═╡ d44da6c6-c93d-4c61-8125-9eee464c897e
-params1 = [:α => 0.08, :β => 1.0e-6, :r => r, :m => 0.4]
+params1 = [:α => 0.08, :β => 1.0e-6, :r => 0.1, :m => 0.4]
 
 # ╔═╡ 00a72697-d36a-41cc-9eec-8e821829ce0e
 # put semi-colon at end of instruction to avoid seeing its output.
@@ -466,7 +448,7 @@ Then, we solve the ODE problem, specifying the callback function `cb2`. Note, th
 "
 
 # ╔═╡ b0864d84-f17f-4e58-ad63-a9610f8fc3dc
-osol2 = solve(deepcopy(oprob), Tsit5(), saveat=0.05, callback=cb2)
+osol2 = solve(deepcopy(oprob), Tsit5(), saveat=0.5, callback=cb2)
 
 # ╔═╡ 1e039147-7c48-4d5c-a432-0925eaa0872f
 md"
@@ -498,8 +480,7 @@ Try to interpret the results yourself. Ask yourself the following questions:
 md"
 ##### Example 3 - Using ContinuousCallback
 
-When the number of infected individuals reaches $1\,000\,000$, then $999\,000$ of them are promptly put into isolation (or removed from the population). Hence, $1000$ individuals remain infected at some point. To realize that we need to now the order of the state variables in the model because we will need to address the value of $I$ using an index.
-
+Suppose that when the number of infected individuals reaches $1\,000\,000$, then $999\,000$ of them are promptly put into isolation (or removed from the population). Hence, a $1000$ individuals remain infected at some point. In order to realize that we need to now the order of the state variables in the model because we will need to address the value of $I$ by means of an index.\
 Check the order of the state variables in the model with:
 "
 
@@ -531,7 +512,7 @@ Next, we create the *condition function*, that we will call `condition3` in the 
 
 # ╔═╡ 48d2b79a-6cf8-4888-96f5-af7618747042
 function condition3(u, t, integrator)
-	u[2] - 1.0e6 * proceed_with_condition[1]
+	u[2] - 1.0e6*proceed_with_condition[1]
 end
 
 # ╔═╡ e1dd4816-1cd2-4aac-ac1e-0dda5c2726aa
@@ -658,16 +639,11 @@ Try to interpret the results yourself. Ask yourself the following questions:
 # ╠═513c037b-c54c-47fa-b97a-06f69a983386
 # ╠═b07f09c6-0515-4d27-9ca1-c45427a5988c
 # ╠═ab4940b8-b8ec-4835-8d6e-4e57a5e2e464
-# ╠═5717a33a-83b9-4791-a6da-a0010321c60c
-# ╠═cf815edf-8980-4bfd-853e-6c4560cb9f2a
-# ╠═6c78a7c5-f319-4bc4-91ab-dbea7c8546f4
-# ╠═5b396040-6d9d-4e35-b028-555d5b11848c
 # ╟─764e2f1a-f974-4916-8573-cacba897cf07
 # ╠═2ae76ddb-71f5-49d7-a250-429d6c0138f6
 # ╠═590f1b49-7442-4a71-af8c-8acdea071448
 # ╠═45c1c238-a9f7-4f7b-a0ce-07b5bb4768d4
 # ╠═ae38c663-0ee4-409e-bfca-5f13ed88b67d
-# ╠═114fac6a-5c73-4e38-b49c-d0c3143649f9
 # ╠═d44da6c6-c93d-4c61-8125-9eee464c897e
 # ╠═00a72697-d36a-41cc-9eec-8e821829ce0e
 # ╠═cf39b4cf-9cd0-4755-80db-ca4aea7c1084

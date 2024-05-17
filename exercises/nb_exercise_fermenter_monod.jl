@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate("..")
+	Pkg.activate(".")
 end
 
 # ╔═╡ 2e58f4ae-f711-11ee-2598-7f3a6f2e2013
@@ -33,7 +33,7 @@ md"
 In a fermenter reactor biomass grows on substrate. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. Inside the reactor, biomass, with a concentration of $X$ [$g/L$], is produced through **Monod** kinetics:
 
 $$\begin{eqnarray*}
-%S \xrightarrow[\quad\quad]{\beta} Y + X
+%S \xrightarrow[\quad\quad]{\beta} Y \, X
 S \xrightarrow[\quad\quad]{r} Y \, X \quad\quad\quad\quad r = \mu \, X
 \end{eqnarray*}$$
 
@@ -60,7 +60,7 @@ Tip: The specific growth rate $\mu = \mu_{max} \, \cfrac{S}{S + K_s}$ can be imp
 # end
 fermenter_monod = @reaction_network begin
 	# Y*X is created from one S at a rate X * mm(S, μmax, Ks)
-    X * mm(S, μmax, Ks), S => Y * X
+    X * mm(S, μmax, Ks), S --> Y*X
     Q/V, (S, X) --> 0               # S and X are degraded at a rate Q/V*S
     Q/V*Sin, 0 --> S                # S is created at a rate Q/V*Sin 
 end
