@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.42
 
 using Markdown
 using InteractiveUtils
@@ -39,10 +39,49 @@ md"# Modelling with ordinary differential equations"
 md"## Balance equations"
 
 # ╔═╡ abebedae-b977-43ae-aaa0-6b00990a5de4
+md"""
+### Water tank example
 
+Water flows with a constant flow $q$ (in m$^3$/h) into a cylindrical with a height $H$ (in m) and a floor area $A$ (in m$^2$). Water leaves the tank with a rate that is proportional to the height of the water: 
+$$q_\text{out}=rh(t)\,,$$
+Describe the volume $V(t)$ (in m$^3$) using an ODE and solve it when you know that at $t=0$, the tank is empty.
+
+In this system, we have a "conservation of water": the volume of water in the system is determined by the in-and outgoing flows. Let us consider what happens in a small time step $\Delta t$ and how this impacts a change in volume $\Delta V$:
+
+$$\Delta V = q \Delta t - rh(t)\Delta t$$
+
+We see that the change in water volume in a small time interval is determined by:
+- the ingoing flow $q$, which is constant here;
+- the outgoing flow, $rh(t)$, which depends on the height, which in turn depends on how full the tank is. Note that, for this geometry, $h(t)=V(t)/A$.
+
+Putting things together and rearranging, we have:
+
+$$\Delta V / \Delta t= q  - rV(t)/A\,.$$
+
+If we take the limit of $\Delta t\rightarrow 0$, we obtain:
+
+$$\frac{\mathrm{d}V(t)}{\mathrm{d}t}= q  - rV(t)/A\,.$$
+
+This is a linear first-order differential equation. Its general solution is 
+
+$$V(t)=Ce^{-r/At} + q/r\,,$$
+
+and filling in the initial condition $V(0)=0$ allows us to obtain a specific solution to the initial value problem:
+
+$$V(t)=qA/re^{-rt} + qA/r\,,$$
+"""
+
+# ╔═╡ 0d09ba2e-3cac-4051-b98f-26b79736b225
+q = 10
+
+# ╔═╡ fdc534e1-e334-48c1-aac4-5a89c47484e0
+A = 1^2 * π
+
+# ╔═╡ 104ad25e-743b-4f47-8b10-0d3d6715f95c
+r = 0.2
 
 # ╔═╡ 73eb7d0a-5433-4e3d-a008-748db66b8ef9
-md"### coffee example"
+md"### Coffee example"
 
 # ╔═╡ d3b84441-ed9f-436d-a690-660c5f4b8fbd
 function coffee!(du, u, (q, Tmilk, Tenv, k), t)
@@ -341,7 +380,7 @@ md"### Leslie matrix model"
 
 # ╔═╡ f4acd112-3341-4df2-b7f3-4738bf8b3bb3
 butterfly = @reaction_network begin
-	@species E(t)=100 C(t)=0 P(t)=0 B(t)=0
+	@species E(t)=10 C(t)=0 P(t)=0 B(t)=0
 	@parameters f=0.5 s=0.05 m=0.12
 	s, E --> C
 	s, C --> P
@@ -371,6 +410,9 @@ TableOfContents()
 
 # ╔═╡ c7ee808d-3ec0-4130-b6d1-1fb993178f41
 plots = Dict()
+
+# ╔═╡ e2b7dd60-327c-45fd-a8d7-683b5d4f1274
+plots["tank"] = plot(t->q*A/r - q*A/r*exp(-t*r/A), 0, 50, lw=2, label=L"V(t)", title="Tank filling problem")
 
 # ╔═╡ 34906c24-e13c-422f-b330-bb905c356276
 let
@@ -543,6 +585,10 @@ length(plots)
 # ╠═8cff27a7-fde1-4b49-8ad6-513302997a4e
 # ╠═34bec0a1-40e8-48a2-9109-94872aaff1b9
 # ╠═abebedae-b977-43ae-aaa0-6b00990a5de4
+# ╠═0d09ba2e-3cac-4051-b98f-26b79736b225
+# ╠═fdc534e1-e334-48c1-aac4-5a89c47484e0
+# ╠═104ad25e-743b-4f47-8b10-0d3d6715f95c
+# ╠═e2b7dd60-327c-45fd-a8d7-683b5d4f1274
 # ╠═73eb7d0a-5433-4e3d-a008-748db66b8ef9
 # ╠═d3b84441-ed9f-436d-a690-660c5f4b8fbd
 # ╠═ddd43577-eb2e-4c72-b829-d7195c165ddf
