@@ -4,176 +4,144 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 268f2426-e2e4-45b5-9d34-279dc5de5182
-using ModelingToolkit, Plots, DifferentialEquations
+# ╔═╡ 1c4709fc-58a6-4a2c-857c-49a5442a180f
+using DifferentialEquations, ModelingToolkit, Unitful
 
-# ╔═╡ 785a59ba-c716-11ec-3225-e5ec94a651a2
-md"""
-# Modelling cocktail shaking
+# ╔═╡ 21357c48-f35d-11ee-23f8-2534bb1d82f4
+begin
+	
+	# make this cell invisible when you are finished
+	title = "Cocktail shaking model"
+	names = ["Michiel"]
 
-![](https://github.com/MichielStock/michielstock.github.io/blob/main/images/2022_cocktails/clovis-wood-photography-FT1PJqW0qtE-unsplash.jpg?raw=true)
+	academic_year = "2023_20224"
 
-Plenty of cool stuff going on in the Julia community. One of the language's strengths is that it allows one to write tools that can work on the language itself (e.g. its metaprogramming capacities). Recently, the community has invested in building [the foundation for a computer algebra system](https://symbolicutils.juliasymbolics.org/), allowing tools that reason about equations. One of the flagship packages is [ModelingToolKit](https://github.com/SciML/ModelingToolkit.jl), a library that can help to construct, modify and analyse complex models. By way of exploration, let us use this software to generate a model for cocktail shaking!"""
+	email_main_person = "mail@domain.be"
 
-# ╔═╡ e85060ec-e334-4b2d-844f-8e748b532b34
-md"""
-## Fundamentals of cocktail making
-
-As I discussed in [an earlier post](https://michielstock.github.io/posts/2020/2020-05-21-compuational-mixology/), cocktail making is quite instructive from a thermodynamics point of view. After mixing, the bartender typically shakes or stirs the cocktail with ice (which is usually discarded afterwards). The reaction with ice has two interconnected effects. Firstly, the ice melts, diluting the cocktail. Secondly, ice melting is a strongly endothermic reaction, absorbing heat from the liquid and cooling your cocktail. Cooling is diluting, and diluting is cooling. This is called the *First Law of Cocktail Making* by Dave Arnolds. 
-
-The dilution and cooling will also impact the perceived flavour of the cocktail. Most of its balance is determined by the sweetness and the acidity. Sweetness, in particular, depends in a complex way on the sucrose concentration and the temperature of the solution. This is why shaken cocktails, which are drunk more chilled, typically contain more sugar.
-"""
-
-# ╔═╡ b298c1d2-8ecf-459b-b238-64714923086d
-md"""
-## Using ModelingToolKit to model how a cocktail changes
-
-The change of the cocktail while shaking can be described by elementary chemical and physical laws. Typically, one would use the mass and energy balances of the quantities of interest to derive a suitable system of differential equations. Let us try to automate this process using ModelingToolKit. We only provide the conservation laws and some behaviours and let the CAS figure it out for itself.
-
-To keep it simple, let us treat a cocktail as a mere sugar solution (a virgin cocktail, if you will) with sufficient ice; it cannot completely melt. First, we define the variables.
-"""
-
-# ╔═╡ c07f3dd4-8983-4bc9-b864-8df9c664e740
-@variables t I(t) V(t) S(t) Z(t) T(t)
-
-# ╔═╡ 579ced03-c8eb-4fb1-80ac-66c3fba92b7f
-md"""
-These correspond to:
-- the time (in seconds): $t$;
-- the amount of ice in kg $I(t)$;
-- the volume of the cocktail, in litres: $V(t)$;
-- the concencentration of sucrose in grammes per litre: $S(t)$;
-- the temperature of the cocktail, in degrees Celcius: $T(t)$.
-"""
-
-# ╔═╡ 37d0eb59-1fb7-4832-8aba-dbf4d95aef4e
-md"We also define the derivative w.r.t. time operator:"
-
-# ╔═╡ 7e627856-f165-4f29-b500-ea08c8c1330e
-D = Differential(t)
-
-# ╔═╡ ce939f44-8fe0-4080-b4c2-8208fc8cd7b9
-md"Firstly, we define the melting of ice. This process depends on shaking intensity and the temperature of the liquid. Based on *Liquid Intelligence*, the following rate works well." 
-
-# ╔═╡ 954505b3-77b0-482a-8ad0-71af7288f114
-İ = -0.001*I^0.66*T#(-5e-4(T + 7)) #* (I > 0)
-
-# ╔═╡ a84b89dc-18a5-4afe-aae1-1bbe7973dba2
-md"We set this rate equal to the change in ice mass."
-
-# ╔═╡ d54b27c0-2292-4e13-a427-ace53856c119
-melting = D(I) ~ İ  
-
-# ╔═╡ 08985029-5100-4571-96d4-2d8fba4c7a68
-md"Next, we have our *conservation of water*. Any change in volume $\frac{\text{d}V}{\text{d}t}$ can only take place because a corresponding quantity of ice has melted. So we have:"
-
-# ╔═╡ e6b01aa7-0aa0-42b8-aac4-e95cf167a5e9
-#water_balance = İ + D(V) ~ 0
-water_balance = D(I)+D(V) ~ 0
-
-# ╔═╡ 6f57980d-2cc1-4115-9b9b-eb7c49a8590e
-md"Next, we consider the heat balance. During the short time period, the liquid does not absorb heat from the surroundings, the liquid only cools because the melting of ice is endothermic. Our heat balance is given by"
-
-# ╔═╡ 3d183855-d846-4e5b-bfd4-810364418f34
-md"For simplicity's sake, we use the thermodynamic properties of water. Here, `Cmelt` is the [enthalpy of fusion for water](https://en.wikipedia.org/wiki/Enthalpy_of_fusion) while `Cₚ` is the [specific heat capacity](https://en.wikipedia.org/wiki/Specific_heat_capacity) of water. Considerting the heat of water-ethanol mixtures correctly is rather [messy](https://en.wikipedia.org/wiki/Ethanol_(data_page))."
-
-# ╔═╡ b2f0dff9-0cb8-4ef3-9642-8ad1645dc61b
-const Cmelt = 3.34e5 # J/kg
-
-# ╔═╡ de6c1273-682e-461f-b182-103ad1878580
-const Cₚ = 4.187e3 # J/kg * K
-
-# ╔═╡ 2edeadc7-b5ba-4737-8ab9-95036ad5cd1a
-heat_balance = Cmelt * İ ~ Cₚ * V * D(T)
-
-# ╔═╡ 09195d0d-687c-4738-bb20-518b3d4aa8f4
-md"The conservation of sugar is rather simple. Though the concentration might change, the total quanity of sugar is fixed."
-
-# ╔═╡ 2b7fe775-db50-4e83-aa79-334a771d4f0f
-#sugar_balance = S * V ~ V₀ * S₀
-sugar_balance = D(S) * V + S * D(V)~ 0
-
-
-# ╔═╡ f29fc313-355b-43ac-abca-90445844bf4b
-md"Finally, the perceived sweetness depends on the sugar concentration and the temperature. Setting up such a relation is done in the field of psychophysics (e.g. [Steven's law](https://en.wikipedia.org/wiki/Stevens%27s_power_law)). Based on [this article](https://pubmed.ncbi.nlm.nih.gov/7100291/), we obtain a fairly simple emperical relation."
-
-# ╔═╡ dfc5132b-e082-47c5-9a36-fbfaaae396c8
-sweetness = Z ~ 14.9 * (S / 342.30)^(1.422 - 0.0146T)
-
-# ╔═╡ afd38f19-41ee-4c52-aaef-c8239250c92f
-md"Let us model a [Bee's Knees](https://www.liquor.com/recipes/bees-knees/) cocktail. Liquid Intelligence kindly provides the intial mixing volume and concentration:" 
-
-# ╔═╡ 0066669f-4541-4d32-b13b-fcc98c637de8
-V₀ = 0.105  # L
-
-# ╔═╡ e78790ab-31f3-46bf-8d62-96fb5b9d0ac6
-S₀ = 10.1  # g / L
-
-# ╔═╡ 9453473b-4b1a-493b-93b8-f71cf33a78d5
-md"And let us use 150 g of ice."
-
-# ╔═╡ 1c9e5668-8a96-487e-a001-7b041b044205
-I₀ = 0.2  # kg
-
-# ╔═╡ bf4c7a1c-ac8a-4bab-a2ae-5e4ccb05967a
-md"Now for the cool part! Let us piece everything together and use `structural_simplify` to derive a simpler system a solver can handle."
-
-# ╔═╡ cdf1ee0c-b250-45ef-a910-c3aa1aac9d4b
-@named sys = ODESystem([melting,
-						water_balance,
-						heat_balance,
-						sugar_balance,
-						sweetness])
-
-# ╔═╡ 1afbf3a1-56b3-46bd-b192-d3bbcfb11c6c
-equations(sys)
-
-# ╔═╡ 647a62bf-acb6-4008-84c3-0c220b1ef3e1
-states(sys)
-
-# ╔═╡ e13257e4-741b-4b44-be42-dfb1a618db5b
-simpsys = structural_simplify(sys, simplify=true)
-
-# ╔═╡ f167eb5a-8eb7-4da2-8cca-044c3318539e
-equations(simpsys)
-
-# ╔═╡ d8170974-0e42-49d4-b79e-e0647b9617c0
-states(simpsys)
-
-# ╔═╡ 88de08b6-ac27-4d39-9266-9769eb2d1002
-md"""
-We see that by simplification, the five laws are turned into three ODEs and one simple law from which sugar concentration can be derived. Perceived sweetness depends directly on everything above, so it does not need to be taken into account for the solver.
-
-Now we add the initial conditions and turn the system in an ODE problem we can solve!
-"""
-
-# ╔═╡ d5276187-42c4-4e9e-a274-c298964ca53b
-prob = ODEProblem(simpsys, [V=>V₀, S=>S₀, I=>0.20, T=>20, ModelingToolkit.missing_variable_defaults(simpsys)[end]], (0.0, 20.0))
-
-# ╔═╡ d3c0b55d-9d6a-4c1b-84f5-cfc5d1f51d25
-solution = solve(prob);
-
-# ╔═╡ 90fe88dc-b8c7-4e36-9fc3-3e5e8d21a511
-md"""
-Finally, we plot our states (note that `z(t)` can still be extracted). All processes are simulated as we please, we can see how the composition, temperature and sweetness change with time. Most drinks are in their prime between -5 and -1 degrees of Celcius, so five seconds of shaking would do the trick! 👌
-"""
-
-# ╔═╡ 7c9b299f-2b94-4cc9-b05d-611678c311a7
-plot(plot(solution, idxs=[I, V, Z], lw=2), plot(solution, idxs=[T, S], lw=2), title="Cocktail states while shaking")
-
-# ╔═╡ dca7ab9c-0ed8-4352-bab1-64ac891d55ff
-let
-	temps = [44, 36, 28, 20, 12, 4]
-	slopes = [0.8, 0.89, 1.01, 1.02, 1.4, 1.31]
-	X = [ones(6) temps]
-	β̂ = X \ slopes
+	using PlutoUI  # interactivity
+	using Plots  # plotting
+	TableOfContents()
 end;
 
-# ╔═╡ 53eddad6-e5c3-41fe-8cc7-ab2e7fa33c59
+# ╔═╡ 14c7e803-c0ff-4211-8b60-2c9c246934dd
+md"""
+# $title
+
+**$(join(names, ", ", " and "))**
+"""
+
+# ╔═╡ 6948149f-854e-4b3c-b51c-099dd221ab83
+md"""
+## Abstract
+
+About 250 words about your project:
+- (1-2 sentence) basic introduction to your topic, accessible to every bioengineering student
+- (1-2 sentences) bit more specialized introduction
+- (1-2 sentences) general goal of the project
+- (2-3 sentences) short overview of how you built the model and what analysis you did
+"""
+
+# ╔═╡ 89551690-500d-4e37-ae20-5beb71cc87ac
+md"""
+## Model
+
+general outline of the model + variables + parameters
+
+For example, the metabolic rate $y$ as a function of the mass $m$ of an organism follows a power law.
+"""
+
+# ╔═╡ 7b1a87c5-0856-4968-ba2b-36da650cd0c8
+begin
+	@variables t #[unit = u"s"]   # mixing time in seconds
+	@variables I(t)=200 #[unit = u"g"]  # amount of ice
+	@variables L(t)=100 #[unit = u"L"]  # amount of liquid
+	@variables T(t)=20 #[unit = u"°C"]  # cocktail temperature
+	@variables S(t)=203 #[unit = u"g/L"]  # sugar concentration
+	@variables Z(t)  
+end;
+
+# ╔═╡ 08b40947-7218-4885-b25c-982821ca0361
+begin
+	@constants Cmelt = 3.34e5 #[unit = u"J/kg"]
+	@constants Cₚ = 4.187e3 #[unit = u"J/kg * K"]
+end;
+
+# ╔═╡ b1073c63-cb31-4160-98e1-ec1a0ca22d9c
+10u"J/kg/K" * (10u"°C"-5u"°C")
+
+# ╔═╡ 7110e56a-dfc1-4885-9eee-c59eeb37010f
+Dₜ = Differential(t)
+
+# ╔═╡ d560e96d-c6dc-4127-9616-1c186914cef5
+melting = Dₜ(I) ~ -0.001 #* T #*I^0.66
+
+# ╔═╡ 75b7ed6d-f27f-4f73-9c78-014b659323b8
+#water_balance = Dₜ(I) + Dₜ(L) ~ 0 
+water_balance = I+L ~ 100 
+
+# ╔═╡ 3da54360-1f31-48a0-87cf-0d47132862bc
+heat_balance = Cmelt * Dₜ(I) ~ Cₚ * L * Dₜ(T)
+
+# ╔═╡ 3ccb5e2b-9ed3-486c-ac18-de62d2297e07
+sugar_balance = expand_derivatives(Dₜ(S*L)) ~ 0
+#sugar_balance = S*L ~ 10
+
+# ╔═╡ aed58771-86c1-4928-a1ba-b7d2f503b188
+md"Finally, the perceived sweetness depends on the sugar concentration and the temperature. Setting up such a relation is done in the field of psychophysics (e.g. [Steven's law](https://en.wikipedia.org/wiki/Stevens%27s_power_law)). Based on [this article](https://pubmed.ncbi.nlm.nih.gov/7100291/), we obtain a fairly simple emperical relation."
+
+# ╔═╡ 98451eb8-8755-47fe-b8c6-ce2959256dd8
+sweetness = Z ~ 14.0 * (S / 342.30)^(1.422 - 0.0146T)
+
+# ╔═╡ aa32c5e2-0f67-4910-a612-d958fa13169c
+@named sys_or = ODESystem([melting, water_balance,heat_balance,sugar_balance,sweetness])
+
+# ╔═╡ 4595b9f6-3e9b-4160-8def-456b0c6c0caf
+@mtkbuild sys = ODESystem([melting, water_balance,heat_balance,sugar_balance,sweetness])
+
+# ╔═╡ 7f9c8c7d-90ef-496c-b907-300feba5edfc
+simpsys = structural_simplify(sys, simplify=true)
+
+# ╔═╡ 58d13e42-4edc-412c-a1e0-30e11fb2585e
+states(simpsys)
+
+# ╔═╡ 8cf34815-4ff7-4930-bc91-11081e1ab3f3
+ODEProblem(simpsys, [S=>10, L=>0.3, S=>0.2, T=>21, I=>200], (0, 50))
+
+# ╔═╡ f284fda5-aaf7-4121-a8f0-b996d501bec5
+md"## Simulation and analysis"
+
+# ╔═╡ 2a0b0c1f-9510-4f71-9d65-b4fb7c854a98
+md"""
+Explore your model
+"""
+
+# ╔═╡ 67380c07-a07c-4a0e-8654-80f27b951461
+plot(y, 0.01, 1000, label="metabolic rate", xlab="mass (kg)")
+
+# ╔═╡ 86307aaa-1349-444b-bc9b-e5c115727671
+
+
+# ╔═╡ ef1b3843-a963-4a18-85c4-ca5a6e791d00
+
+
+# ╔═╡ aa4ebdb8-27a1-493b-b95e-d2ac4c3e6d54
+
+
+# ╔═╡ 60c63f1b-5a27-4539-a486-78c083457b0e
+md"""
+## Conclusion
+
+A short conclusion of your analysis with a relection on how you would improve this model.
+"""
+
+# ╔═╡ 890afefc-f42b-4d74-b775-6dee5e5f0c2b
+md"## Appendix"
+
+# ╔═╡ 1f4b988a-6632-4589-8913-5de0574d94b3
 perceived_sweetness(S, T) = 14.9 * (S / 342.30)^(1.42224 - 0.0146071T)
 
-# ╔═╡ 36ee98f4-2476-470d-bb69-0f9d1d333a30
-heatmap(1:200, 4:40, perceived_sweetness, xlabel="Sugar concentration (g/L)", ylabel="temperature (degree Celcius)", title="perceived sweetness")
+# ╔═╡ 797ce7d7-c49d-4a00-a8e3-058b6de4d3a9
+heatmap(1:200, 4:40, perceived_sweetness, xlabel="Sugar concentration (g/L)", ylabel="temperature (°C)", title="perceived sweetness")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -181,11 +149,15 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 DifferentialEquations = "~7.13.0"
 ModelingToolkit = "~8.75.0"
-Plots = "~1.40.4"
+Plots = "~1.39.0"
+PlutoUI = "~0.7.58"
+Unitful = "~1.19.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -194,7 +166,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.0"
 manifest_format = "2.0"
-project_hash = "cccd71e8b84d64bdfbaab2981ecb0318c2c1be30"
+project_hash = "a7255f58d02bc974b024509e272a27584fdf4bd4"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "016833eb52ba2d6bea9fcb50ca295980e728ee24"
@@ -206,6 +178,12 @@ deps = ["GroupsCore", "InteractiveUtils", "LinearAlgebra", "MacroTools", "Prefer
 git-tree-sha1 = "d7832de8cf7af26abac741f10372080ac6cb73df"
 uuid = "c3fe647b-3220-5bb0-a1ea-a7954cac585d"
 version = "0.34.7"
+
+[[deps.AbstractPlutoDingetjes]]
+deps = ["Pkg"]
+git-tree-sha1 = "6e1d2a35f2f90a4bc7c2ed98079b2ba09c35b83a"
+uuid = "6e696c72-6542-2067-7265-42206c756150"
+version = "1.3.2"
 
 [[deps.AbstractTrees]]
 git-tree-sha1 = "2d9c9a55f9c93e8887ad391fbae72f8ef55e1177"
@@ -221,6 +199,12 @@ weakdeps = ["StaticArrays"]
 
     [deps.Adapt.extensions]
     AdaptStaticArraysExt = "StaticArrays"
+
+[[deps.AliasTables]]
+deps = ["Random"]
+git-tree-sha1 = "82b912bb5215792fd33df26f407d064d3602af98"
+uuid = "66dad0bd-aa9a-41b7-9441-69ab47430ed8"
+version = "1.1.2"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -269,9 +253,9 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[deps.BandedMatrices]]
 deps = ["ArrayLayouts", "FillArrays", "LinearAlgebra", "PrecompileTools"]
-git-tree-sha1 = "c946c5014cf4cdbfacacb363b110e7bffba3e742"
+git-tree-sha1 = "30b7ea34abc4fe816eb1a5f434a43da804836163"
 uuid = "aae01518-5342-5314-be14-df237901396f"
-version = "1.6.1"
+version = "1.7.0"
 weakdeps = ["SparseArrays"]
 
     [deps.BandedMatrices.extensions]
@@ -329,9 +313,9 @@ version = "0.2.4"
 
 [[deps.CSTParser]]
 deps = ["Tokenize"]
-git-tree-sha1 = "b544d62417a99d091c569b95109bc9d8c223e9e3"
+git-tree-sha1 = "0157e592151e39fa570645e2b2debcdfb8a0f112"
 uuid = "00ebfdb7-1f24-5e51-bd34-a7502290713f"
-version = "3.4.2"
+version = "3.4.3"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -369,9 +353,9 @@ version = "0.7.4"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "PrecompileTools", "Random"]
-git-tree-sha1 = "67c1f244b991cad9b0aa4b7540fb758c2488b129"
+git-tree-sha1 = "4b270d6465eb21ae89b732182c20dc165f8bf9f2"
 uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
-version = "3.24.0"
+version = "3.25.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
@@ -419,9 +403,9 @@ version = "0.3.0"
 
 [[deps.Compat]]
 deps = ["TOML", "UUIDs"]
-git-tree-sha1 = "c955881e3c981181362ae4088b35995446298b80"
+git-tree-sha1 = "b1c55339b7c6c350ee89f2c1604299660525b248"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.14.0"
+version = "4.15.0"
 weakdeps = ["Dates", "LinearAlgebra"]
 
     [deps.Compat.extensions]
@@ -590,10 +574,10 @@ deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
-deps = ["FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "7c302d7a5fec5214eb8a5a4c466dcf7a51fcf169"
+deps = ["AliasTables", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
+git-tree-sha1 = "22c595ca4146c07b16bcf9c8bea86f731f7109d2"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.107"
+version = "0.25.108"
 
     [deps.Distributions.extensions]
     DistributionsChainRulesCoreExt = "ChainRulesCore"
@@ -630,9 +614,9 @@ version = "0.6.8"
 
 [[deps.DynamicPolynomials]]
 deps = ["Future", "LinearAlgebra", "MultivariatePolynomials", "MutableArithmetics", "Pkg", "Reexport", "Test"]
-git-tree-sha1 = "0c056035f7de73b203a5295a22137f96fc32ad46"
+git-tree-sha1 = "30a1848c4f4fc35d1d4bbbd125650f6a11b5bc6c"
 uuid = "7c1d4256-1411-5781-91ec-d7bc3513ac07"
-version = "0.5.6"
+version = "0.5.7"
 
 [[deps.EnumX]]
 git-tree-sha1 = "bdb1942cd4c45e3c678fd11569d5cccd80976237"
@@ -662,9 +646,9 @@ version = "0.1.10"
 
 [[deps.Expat_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "4558ab818dcceaab612d1bb8c19cee87eda2b83c"
+git-tree-sha1 = "1c6317308b9dc757616f0b5cb379db10494443a7"
 uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
-version = "2.5.0+0"
+version = "2.6.2+0"
 
 [[deps.ExponentialUtilities]]
 deps = ["Adapt", "ArrayInterface", "GPUArraysCore", "GenericSchur", "LinearAlgebra", "PrecompileTools", "Printf", "SparseArrays", "libblastrampoline_jll"]
@@ -708,18 +692,18 @@ version = "0.3.2"
 
 [[deps.FastLapackInterface]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "0a59c7d1002f3131de53dc4568a47d15a44daef7"
+git-tree-sha1 = "f4102aab9c7df8691ed09f9c42e34f5ab5458ab9"
 uuid = "29a986be-02c6-4525-aec4-84b980013641"
-version = "2.0.2"
+version = "2.0.3"
 
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[deps.FillArrays]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "bfe82a708416cf00b73a3198db0859c82f741558"
+git-tree-sha1 = "0653c0a2396a6da5bc4766c43041ef5fd3efbe57"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
-version = "1.10.0"
+version = "1.11.0"
 weakdeps = ["PDMats", "SparseArrays", "Statistics"]
 
     [deps.FillArrays.extensions]
@@ -750,10 +734,10 @@ uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 version = "0.8.4"
 
 [[deps.Fontconfig_jll]]
-deps = ["Artifacts", "Bzip2_jll", "Expat_jll", "FreeType2_jll", "JLLWrappers", "Libdl", "Libuuid_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "21efd19106a55620a188615da6d3d06cd7f6ee03"
+deps = ["Artifacts", "Bzip2_jll", "Expat_jll", "FreeType2_jll", "JLLWrappers", "Libdl", "Libuuid_jll", "Zlib_jll"]
+git-tree-sha1 = "db16beca600632c95fc8aca29890d83788dd8b23"
 uuid = "a3f928ae-7b40-5064-980b-68af3947d34b"
-version = "2.13.93+0"
+version = "2.13.96+0"
 
 [[deps.Format]]
 git-tree-sha1 = "9c68794ef81b08086aeb32eeaf33531668d5f5fc"
@@ -777,10 +761,10 @@ uuid = "d7e528f0-a631-5988-bf34-fe36492bcfd7"
 version = "2.13.1+0"
 
 [[deps.FriBidi_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "aa31987c2ba8704e23c6c8ba8a4f769d5d7e4f91"
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "1ed150b39aebcc805c26b93a8d0122c940f64ce2"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
-version = "1.0.10+0"
+version = "1.0.14+0"
 
 [[deps.FunctionWrappers]]
 git-tree-sha1 = "d62485945ce5ae9c0c48f124a84998d755bae00e"
@@ -817,15 +801,15 @@ version = "0.1.5"
 
 [[deps.GR]]
 deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Preferences", "Printf", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "UUIDs", "p7zip_jll"]
-git-tree-sha1 = "3437ade7073682993e092ca570ad68a2aba26983"
+git-tree-sha1 = "27442171f28c952804dede8ff72828a96f2bfc1f"
 uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-version = "0.73.3"
+version = "0.72.10"
 
 [[deps.GR_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "FreeType2_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Qt6Base_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "a96d5c713e6aa28c242b0d25c1347e258d6541ab"
+git-tree-sha1 = "025d171a2847f616becc0f84c8dc62fe18f0f6dd"
 uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
-version = "0.73.3+0"
+version = "0.72.10+0"
 
 [[deps.GenericSchur]]
 deps = ["LinearAlgebra", "Printf"]
@@ -858,9 +842,9 @@ version = "1.3.14+0"
 
 [[deps.Graphs]]
 deps = ["ArnoldiMethod", "Compat", "DataStructures", "Distributed", "Inflate", "LinearAlgebra", "Random", "SharedArrays", "SimpleTraits", "SparseArrays", "Statistics"]
-git-tree-sha1 = "3863330da5466410782f2bffc64f3d505a6a8334"
+git-tree-sha1 = "4f2b57488ac7ee16124396de4f2bbdd51b2602ad"
 uuid = "86223c79-3864-5bf0-83f7-82e725a168b6"
-version = "1.10.0"
+version = "1.11.0"
 
 [[deps.Grisu]]
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
@@ -881,9 +865,9 @@ version = "0.4.2"
 
 [[deps.HTTP]]
 deps = ["Base64", "CodecZlib", "ConcurrentUtilities", "Dates", "ExceptionUnwrapping", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
-git-tree-sha1 = "8e59b47b9dc525b70550ca082ce85bcd7f5477cd"
+git-tree-sha1 = "ab5b37dc4f98fc037527968852a6f9b2bdf9f32d"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-version = "1.10.5"
+version = "1.10.7"
 
 [[deps.HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg"]
@@ -903,6 +887,24 @@ git-tree-sha1 = "f218fe3736ddf977e0e772bc9a586b2383da2685"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.23"
 
+[[deps.Hyperscript]]
+deps = ["Test"]
+git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
+uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
+version = "0.0.5"
+
+[[deps.HypertextLiteral]]
+deps = ["Tricks"]
+git-tree-sha1 = "7134810b1afce04bbc1045ca1985fbe81ce17653"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.9.5"
+
+[[deps.IOCapture]]
+deps = ["Logging", "Random"]
+git-tree-sha1 = "8b72179abc660bfab5e28472e019392b97d0985c"
+uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+version = "0.2.4"
+
 [[deps.IfElse]]
 git-tree-sha1 = "debdd00ffef04665ccbb3e150747a77560e8fad1"
 uuid = "615f187c-cbe4-4ef1-ba3b-2fcf58d6d173"
@@ -920,9 +922,9 @@ version = "0.1.2"
 
 [[deps.IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "5fdf2fe6724d8caabf43b557b84ce53f3b7e2f6b"
+git-tree-sha1 = "be50fe8df3acbffa0274a744f1a99d29c45a57f4"
 uuid = "1d5cc7b8-4909-519e-a0f8-d0f5ad9712d0"
-version = "2024.0.2+0"
+version = "2024.1.0+0"
 
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
@@ -969,9 +971,9 @@ version = "0.21.4"
 
 [[deps.JpegTurbo_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "3336abae9a713d2210bb57ab484b1e065edd7d23"
+git-tree-sha1 = "c84a835e1a09b289ffcd2271bf2a337bbdda6637"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
-version = "3.0.2+0"
+version = "3.0.3+0"
 
 [[deps.JuliaFormatter]]
 deps = ["CSTParser", "CommonMark", "DataStructures", "Glob", "Pkg", "PrecompileTools", "Tokenize"]
@@ -997,15 +999,15 @@ version = "0.4.1"
 
 [[deps.Krylov]]
 deps = ["LinearAlgebra", "Printf", "SparseArrays"]
-git-tree-sha1 = "8a6837ec02fe5fb3def1abc907bb802ef11a0729"
+git-tree-sha1 = "267dad6b4b7b5d529c76d40ff48d33f7e94cb834"
 uuid = "ba0b0d4f-ebba-5204-a429-3ac8c609bfb7"
-version = "0.9.5"
+version = "0.9.6"
 
 [[deps.LAME_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "f6250b16881adf048549549fba48b1161acdac8c"
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "170b660facf5df5de098d866564877e119141cbd"
 uuid = "c1c5ebd0-6772-5130-a774-d5fcae4a789d"
-version = "3.100.1+0"
+version = "3.100.2+0"
 
 [[deps.LERC_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1020,10 +1022,10 @@ uuid = "1d63c593-3942-5779-bab2-d838dc0a180e"
 version = "15.0.7+0"
 
 [[deps.LZO_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "e5b909bcf985c5e2605737d2ce278ed791b89be6"
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "70c5da094887fd2cae843b8db33920bac4b6f07d"
 uuid = "dd4b983a-f0e5-5f8d-a1b7-129d4a5fb1ac"
-version = "2.10.1+0"
+version = "2.10.2+0"
 
 [[deps.LaTeXStrings]]
 git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"
@@ -1069,9 +1071,9 @@ version = "0.15.1"
 
 [[deps.LazyArrays]]
 deps = ["ArrayLayouts", "FillArrays", "LinearAlgebra", "MacroTools", "MatrixFactorizations", "SparseArrays"]
-git-tree-sha1 = "30fc74040b7507231ba889e363fd1135f5067395"
+git-tree-sha1 = "35079a6a869eecace778bcda8641f9a54ca3a828"
 uuid = "5078a376-72f3-5289-bfd5-ec5146d43c02"
-version = "1.9.1"
+version = "1.10.0"
 weakdeps = ["StaticArrays"]
 
     [deps.LazyArrays.extensions]
@@ -1116,10 +1118,10 @@ uuid = "e9f186c6-92d2-5b65-8a66-fee21dc1b490"
 version = "3.2.2+1"
 
 [[deps.Libgcrypt_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgpg_error_jll", "Pkg"]
-git-tree-sha1 = "64613c82a59c120435c067c2b809fc61cf5166ae"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgpg_error_jll"]
+git-tree-sha1 = "9fd170c4bbfd8b935fdc5f8b7aa33532c991a673"
 uuid = "d4300ac3-e22c-5743-9152-c294e39db1e4"
-version = "1.8.7+0"
+version = "1.8.11+0"
 
 [[deps.Libglvnd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll", "Xorg_libXext_jll"]
@@ -1128,10 +1130,10 @@ uuid = "7e76a0d4-f3c7-5321-8279-8d96eeed0f29"
 version = "1.6.0+0"
 
 [[deps.Libgpg_error_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "c333716e46366857753e273ce6a69ee0945a6db9"
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "fbb1f2bef882392312feb1ede3615ddc1e9b99ed"
 uuid = "7add5ba3-2f88-524e-9cd5-f83b8a55f7b8"
-version = "1.42.0+0"
+version = "1.49.0+0"
 
 [[deps.Libiconv_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1141,9 +1143,9 @@ version = "1.17.0+0"
 
 [[deps.Libmount_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "dae976433497a2f841baadea93d27e68f1a12a97"
+git-tree-sha1 = "4b683b19157282f50bfd5dcaa2efe5295814ea22"
 uuid = "4b2f31a3-9ecc-558c-b454-b3730dcb73e9"
-version = "2.39.3+0"
+version = "2.40.0+0"
 
 [[deps.Libtiff_jll]]
 deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "LERC_jll", "Libdl", "XZ_jll", "Zlib_jll", "Zstd_jll"]
@@ -1153,9 +1155,9 @@ version = "4.5.1+1"
 
 [[deps.Libuuid_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "0a04a1318df1bf510beb2562cf90fb0c386f58c4"
+git-tree-sha1 = "27fd5cc10be85658cacfe11bb81bee216af13eda"
 uuid = "38a345b3-de98-5d2b-a5d3-14cd9215e700"
-version = "2.39.3+1"
+version = "2.40.0+0"
 
 [[deps.LineSearches]]
 deps = ["LinearAlgebra", "NLSolversBase", "NaNMath", "Parameters", "Printf"]
@@ -1229,20 +1231,25 @@ version = "1.0.3"
 
 [[deps.LoopVectorization]]
 deps = ["ArrayInterface", "CPUSummary", "CloseOpenIntervals", "DocStringExtensions", "HostCPUFeatures", "IfElse", "LayoutPointers", "LinearAlgebra", "OffsetArrays", "PolyesterWeave", "PrecompileTools", "SIMDTypes", "SLEEFPirates", "Static", "StaticArrayInterface", "ThreadingUtilities", "UnPack", "VectorizationBase"]
-git-tree-sha1 = "a13f3be5d84b9c95465d743c82af0b094ef9c2e2"
+git-tree-sha1 = "8f6786d8b2b3248d79db3ad359ce95382d5a6df8"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
-version = "0.12.169"
+version = "0.12.170"
 weakdeps = ["ChainRulesCore", "ForwardDiff", "SpecialFunctions"]
 
     [deps.LoopVectorization.extensions]
     ForwardDiffExt = ["ChainRulesCore", "ForwardDiff"]
     SpecialFunctionsExt = "SpecialFunctions"
 
+[[deps.MIMEs]]
+git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
+uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
+version = "0.1.4"
+
 [[deps.MKL_jll]]
-deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl"]
-git-tree-sha1 = "72dc3cf284559eb8f53aa593fe62cb33f83ed0c0"
+deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "oneTBB_jll"]
+git-tree-sha1 = "80b2833b56d466b3858d565adcd16a4a05f2089b"
 uuid = "856f044c-d86e-5d09-b602-aeab76dc8ba7"
-version = "2024.0.0+0"
+version = "2024.1.0+0"
 
 [[deps.MLStyle]]
 git-tree-sha1 = "bc38dff0548128765760c79eb7388a4b37fae2c8"
@@ -1332,9 +1339,9 @@ version = "0.5.4"
 
 [[deps.MutableArithmetics]]
 deps = ["LinearAlgebra", "SparseArrays", "Test"]
-git-tree-sha1 = "c2e2d748aea87f006a87c1654878349baa04aaf0"
+git-tree-sha1 = "a3589efe0005fc4718775d8641b2de9060d23f73"
 uuid = "d8a4904e-b15c-11e9-3269-09a3773c0cb0"
-version = "1.4.3"
+version = "1.4.4"
 
 [[deps.NLSolversBase]]
 deps = ["DiffResults", "Distributed", "FiniteDiff", "ForwardDiff"]
@@ -1415,9 +1422,9 @@ version = "0.8.1+0"
 
 [[deps.OpenSSL]]
 deps = ["BitFlags", "Dates", "MozillaCACerts_jll", "OpenSSL_jll", "Sockets"]
-git-tree-sha1 = "af81a32750ebc831ee28bdaaba6e1067decef51e"
+git-tree-sha1 = "38cb508d080d21dc1128f7fb04f20387ed4c0af4"
 uuid = "4d8831e6-92b7-49fb-bdf8-b643e874388c"
-version = "1.4.2"
+version = "1.4.3"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1518,10 +1525,10 @@ uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
 version = "1.4.1"
 
 [[deps.Plots]]
-deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "PrecompileTools", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "UnitfulLatexify", "Unzip"]
-git-tree-sha1 = "442e1e7ac27dd5ff8825c3fa62fbd1e86397974b"
+deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "PrecompileTools", "Preferences", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "UnitfulLatexify", "Unzip"]
+git-tree-sha1 = "ccee59c6e48e6f2edf8a5b64dc817b6729f99eb5"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.40.4"
+version = "1.39.0"
 
     [deps.Plots.extensions]
     FileIOExt = "FileIO"
@@ -1536,6 +1543,12 @@ version = "1.40.4"
     IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
     ImageInTerminal = "d8c32880-2388-543b-8c61-d9f865259254"
     Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+
+[[deps.PlutoUI]]
+deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
+git-tree-sha1 = "ab55ee1510ad2af0ff674dbcced5e94921f867a9"
+uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+version = "0.7.59"
 
 [[deps.PoissonRandom]]
 deps = ["Random"]
@@ -1866,9 +1879,9 @@ version = "0.3.9"
 
 [[deps.SpecialFunctions]]
 deps = ["IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
-git-tree-sha1 = "e2cfc4012a19088254b3950b85c3c1d8882d864d"
+git-tree-sha1 = "2f5d4697f21388cbe1ff299430dd169ef97d7e14"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
-version = "2.3.1"
+version = "2.4.0"
 weakdeps = ["ChainRulesCore"]
 
     [deps.SpecialFunctions.extensions]
@@ -1952,9 +1965,9 @@ version = "6.65.1"
 
 [[deps.StrideArraysCore]]
 deps = ["ArrayInterface", "CloseOpenIntervals", "IfElse", "LayoutPointers", "LinearAlgebra", "ManualMemory", "SIMDTypes", "Static", "StaticArrayInterface", "ThreadingUtilities"]
-git-tree-sha1 = "b518da45c50dfab8384125ba829f1739bda41034"
+git-tree-sha1 = "25349bf8f63aa36acbff5e3550a86e9f5b0ef682"
 uuid = "7792a7ef-975c-4747-a70f-980b88e8d1da"
-version = "0.5.5"
+version = "0.5.6"
 
 [[deps.StringManipulation]]
 deps = ["PrecompileTools"]
@@ -2051,14 +2064,14 @@ uuid = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
 version = "0.5.23"
 
 [[deps.Tokenize]]
-git-tree-sha1 = "5b5a892ba7704c0977013bd0f9c30f5d962181e0"
+git-tree-sha1 = "468b4685af4abe0e9fd4d7bf495a6554a6276e75"
 uuid = "0796e94c-ce3b-5d07-9a54-7f471281c624"
-version = "0.5.28"
+version = "0.5.29"
 
 [[deps.TranscodingStreams]]
-git-tree-sha1 = "71509f04d045ec714c4748c785a59045c3736349"
+git-tree-sha1 = "5d54d076465da49d6746c647022f3b3674e64156"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
-version = "0.10.7"
+version = "0.10.8"
 weakdeps = ["Random", "Test"]
 
     [deps.TranscodingStreams.extensions]
@@ -2137,9 +2150,9 @@ version = "0.2.0"
 
 [[deps.VectorizationBase]]
 deps = ["ArrayInterface", "CPUSummary", "HostCPUFeatures", "IfElse", "LayoutPointers", "Libdl", "LinearAlgebra", "SIMDTypes", "Static", "StaticArrayInterface"]
-git-tree-sha1 = "ac377f0a248753a1b1d58bbc92a64f5a726dfb71"
+git-tree-sha1 = "6129a4faf6242e7c3581116fbe3270f3ab17c90d"
 uuid = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
-version = "0.21.66"
+version = "0.21.67"
 
 [[deps.VertexSafeGraphs]]
 deps = ["Graphs"]
@@ -2184,16 +2197,16 @@ uuid = "ffd25f8a-64ca-5728-b0f7-c24cf3aae800"
 version = "5.4.6+0"
 
 [[deps.Xorg_libICE_jll]]
-deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "e5becd4411063bdcac16be8b66fc2f9f6f1e8fe5"
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "326b4fea307b0b39892b3e85fa451692eda8d46c"
 uuid = "f67eecfb-183a-506d-b269-f58e52b52d7c"
-version = "1.0.10+1"
+version = "1.1.1+0"
 
 [[deps.Xorg_libSM_jll]]
-deps = ["Libdl", "Pkg", "Xorg_libICE_jll"]
-git-tree-sha1 = "4a9d9e4c180e1e8119b5ffc224a7b59d3a7f7e18"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Xorg_libICE_jll"]
+git-tree-sha1 = "3796722887072218eabafb494a13c963209754ce"
 uuid = "c834827a-8449-5923-a945-d239c165b7dd"
-version = "1.2.3+0"
+version = "1.2.4+0"
 
 [[deps.Xorg_libX11_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Xorg_libxcb_jll", "Xorg_xtrans_jll"]
@@ -2220,10 +2233,10 @@ uuid = "a3789734-cfe1-5b06-b2d0-1dd0d9d62d05"
 version = "1.1.4+0"
 
 [[deps.Xorg_libXext_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll"]
-git-tree-sha1 = "b7c0aa8c376b31e4852b360222848637f481f8c3"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Xorg_libX11_jll"]
+git-tree-sha1 = "d2d1a5c49fae4ba39983f63de6afcbea47194e85"
 uuid = "1082639a-0dae-5f34-9b06-72781eeb8cb3"
-version = "1.3.4+4"
+version = "1.3.6+0"
 
 [[deps.Xorg_libXfixes_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll"]
@@ -2250,10 +2263,10 @@ uuid = "ec84b674-ba8e-5d96-8ba1-2a689ba10484"
 version = "1.5.2+4"
 
 [[deps.Xorg_libXrender_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll"]
-git-tree-sha1 = "19560f30fd49f4d4efbe7002a1037f8c43d43b96"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Xorg_libX11_jll"]
+git-tree-sha1 = "47e45cd78224c53109495b3e324df0c37bb61fbe"
 uuid = "ea2f1a96-1ddc-540d-b46f-429655e07cfa"
-version = "0.9.10+4"
+version = "0.9.11+0"
 
 [[deps.Xorg_libpthread_stubs_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -2414,6 +2427,12 @@ deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
 version = "1.48.0+0"
 
+[[deps.oneTBB_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "7d0ea0f4895ef2f5cb83645fa689e52cb55cf493"
+uuid = "1317d2d5-d96f-522e-a858-c73665f53c3e"
+version = "2021.12.0+0"
+
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
@@ -2439,48 +2458,35 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─785a59ba-c716-11ec-3225-e5ec94a651a2
-# ╟─e85060ec-e334-4b2d-844f-8e748b532b34
-# ╟─b298c1d2-8ecf-459b-b238-64714923086d
-# ╠═268f2426-e2e4-45b5-9d34-279dc5de5182
-# ╠═c07f3dd4-8983-4bc9-b864-8df9c664e740
-# ╟─579ced03-c8eb-4fb1-80ac-66c3fba92b7f
-# ╟─37d0eb59-1fb7-4832-8aba-dbf4d95aef4e
-# ╠═7e627856-f165-4f29-b500-ea08c8c1330e
-# ╟─ce939f44-8fe0-4080-b4c2-8208fc8cd7b9
-# ╠═954505b3-77b0-482a-8ad0-71af7288f114
-# ╟─a84b89dc-18a5-4afe-aae1-1bbe7973dba2
-# ╠═d54b27c0-2292-4e13-a427-ace53856c119
-# ╟─08985029-5100-4571-96d4-2d8fba4c7a68
-# ╠═e6b01aa7-0aa0-42b8-aac4-e95cf167a5e9
-# ╟─6f57980d-2cc1-4115-9b9b-eb7c49a8590e
-# ╠═2edeadc7-b5ba-4737-8ab9-95036ad5cd1a
-# ╟─3d183855-d846-4e5b-bfd4-810364418f34
-# ╠═b2f0dff9-0cb8-4ef3-9642-8ad1645dc61b
-# ╠═de6c1273-682e-461f-b182-103ad1878580
-# ╟─09195d0d-687c-4738-bb20-518b3d4aa8f4
-# ╠═2b7fe775-db50-4e83-aa79-334a771d4f0f
-# ╟─f29fc313-355b-43ac-abca-90445844bf4b
-# ╠═dfc5132b-e082-47c5-9a36-fbfaaae396c8
-# ╠═36ee98f4-2476-470d-bb69-0f9d1d333a30
-# ╟─afd38f19-41ee-4c52-aaef-c8239250c92f
-# ╠═0066669f-4541-4d32-b13b-fcc98c637de8
-# ╠═e78790ab-31f3-46bf-8d62-96fb5b9d0ac6
-# ╟─9453473b-4b1a-493b-93b8-f71cf33a78d5
-# ╠═1c9e5668-8a96-487e-a001-7b041b044205
-# ╟─bf4c7a1c-ac8a-4bab-a2ae-5e4ccb05967a
-# ╠═cdf1ee0c-b250-45ef-a910-c3aa1aac9d4b
-# ╠═1afbf3a1-56b3-46bd-b192-d3bbcfb11c6c
-# ╠═647a62bf-acb6-4008-84c3-0c220b1ef3e1
-# ╠═e13257e4-741b-4b44-be42-dfb1a618db5b
-# ╠═f167eb5a-8eb7-4da2-8cca-044c3318539e
-# ╠═d8170974-0e42-49d4-b79e-e0647b9617c0
-# ╟─88de08b6-ac27-4d39-9266-9769eb2d1002
-# ╠═d5276187-42c4-4e9e-a274-c298964ca53b
-# ╠═d3c0b55d-9d6a-4c1b-84f5-cfc5d1f51d25
-# ╟─90fe88dc-b8c7-4e36-9fc3-3e5e8d21a511
-# ╠═7c9b299f-2b94-4cc9-b05d-611678c311a7
-# ╟─dca7ab9c-0ed8-4352-bab1-64ac891d55ff
-# ╠═53eddad6-e5c3-41fe-8cc7-ab2e7fa33c59
+# ╟─14c7e803-c0ff-4211-8b60-2c9c246934dd
+# ╠═6948149f-854e-4b3c-b51c-099dd221ab83
+# ╠═1c4709fc-58a6-4a2c-857c-49a5442a180f
+# ╠═89551690-500d-4e37-ae20-5beb71cc87ac
+# ╠═7b1a87c5-0856-4968-ba2b-36da650cd0c8
+# ╠═08b40947-7218-4885-b25c-982821ca0361
+# ╠═b1073c63-cb31-4160-98e1-ec1a0ca22d9c
+# ╠═7110e56a-dfc1-4885-9eee-c59eeb37010f
+# ╠═d560e96d-c6dc-4127-9616-1c186914cef5
+# ╠═75b7ed6d-f27f-4f73-9c78-014b659323b8
+# ╠═3da54360-1f31-48a0-87cf-0d47132862bc
+# ╠═3ccb5e2b-9ed3-486c-ac18-de62d2297e07
+# ╠═aed58771-86c1-4928-a1ba-b7d2f503b188
+# ╠═98451eb8-8755-47fe-b8c6-ce2959256dd8
+# ╟─797ce7d7-c49d-4a00-a8e3-058b6de4d3a9
+# ╠═aa32c5e2-0f67-4910-a612-d958fa13169c
+# ╠═7f9c8c7d-90ef-496c-b907-300feba5edfc
+# ╠═4595b9f6-3e9b-4160-8def-456b0c6c0caf
+# ╠═58d13e42-4edc-412c-a1e0-30e11fb2585e
+# ╠═8cf34815-4ff7-4930-bc91-11081e1ab3f3
+# ╟─f284fda5-aaf7-4121-a8f0-b996d501bec5
+# ╠═2a0b0c1f-9510-4f71-9d65-b4fb7c854a98
+# ╠═67380c07-a07c-4a0e-8654-80f27b951461
+# ╠═86307aaa-1349-444b-bc9b-e5c115727671
+# ╠═ef1b3843-a963-4a18-85c4-ca5a6e791d00
+# ╠═aa4ebdb8-27a1-493b-b95e-d2ac4c3e6d54
+# ╠═60c63f1b-5a27-4539-a486-78c083457b0e
+# ╟─890afefc-f42b-4d74-b775-6dee5e5f0c2b
+# ╠═21357c48-f35d-11ee-23f8-2534bb1d82f4
+# ╟─1f4b988a-6632-4589-8913-5de0574d94b3
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
