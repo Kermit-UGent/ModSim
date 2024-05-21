@@ -413,33 +413,6 @@ md"""
 **Example:** In a given period of time, a biologist is interested in counting the number of fish caught in a specific location. The average rate of fish caught per hour is $\lambda = 3$. The biologist can model the number of fish caught in a certain time interval using the Poisson distribution. The parameter $\lambda$ represents the average rate of events (in this case, catching fish) in a fixed time interval. The PMF of the Poisson distribution allows the biologist to calculate the probability of observing a specific number of fish caught within that time interval. This distribution is useful for studying rare events where the average rate is known and where each event is independent of others, such as counting occurrences of diseases in a population or arrivals at a service counter.
 """
 
-# ╔═╡ 222cdcae-5b51-4fdc-a794-11471449ebcd
-let
-# Binomial
-	pbin = scatter(k->pdf(Binomial(20, .5), k), 0:25, label="n=25, p=0.5", xlab=L"k", ylab=L"P(X=k)")
-	scatter!(pbin, k->pdf(Binomial(20, .25), k), 0:25, label="n=25, p=0.25", marker=:^)
-	title!("Binomial distribution")
-	
-	# Poisson
-	ppois = scatter(k->pdf(Poisson(1), k), 0:20, label="λ=1", xlab=L"k", ylab=L"P(X=k)")
-	scatter!(ppois, k->pdf(Poisson(5), k), 0:20, label="λ=5", marker=:^)
-	scatter!(ppois, k->pdf(Poisson(10), k), 0:20, label="λ=10", marker=:v)
-	title!("Poisson distribution")
-	
-	# Geometric
-	pgeo = scatter(k->pdf(Geometric(0.1), k), 1:25, label="p=0.1", xlab=L"k", ylab=L"P(X=k)")
-	scatter!(pgeo, k->pdf(Geometric(0.2), k), 0:25, label="p=0.2", marker=:^)
-	scatter!(pgeo, k->pdf(Geometric(0.05), k), 0:25, label="p=0.05", marker=:v)
-	title!("Geometric distribution")
-	
-	# Geometric
-	punif = scatter(k->pdf(DiscreteUniform(5, 10), k), 0:30, label="a=5, b=10", xlab=L"k", ylab=L"P(X=k)")
-	scatter!(punif, k->pdf(DiscreteUniform(10, 25), k), 0:30, label="a=10, b=25", marker=:^)
-	title!("Uniform distribution")
-	
-	plot(pbin, ppois, pgeo, punif)
-end
-
 # ╔═╡ 8ae351eb-c1b8-4934-aa48-023f8feba75c
 md"""
 ### Distributions over unbounded real numbers
@@ -452,26 +425,6 @@ md"""
 | Laplace      | $f_X(x) = \frac{1}{2b} e^{-\frac{x-\mu}{b}}$                                                                                                            | $x \in \mathbb{R}$ | $\mu \in \mathbb{R}, b > 0$      | $\mu$                                    | Double exponential distibution.                                                           | Modelling noise in electronic devices or signal processing. |
 The normal or Gaussian distribution is by far the most used probability distribution for unbounded real numbers. The central limit theorem and other justifications are used why many naturally occuring phenomena follow a normal distribution. Indeed, the main bulk of a PDF is often bell-shaped. However, a striking feature of the normal distribution are its very light tail: the log-probability-density decreases quadratically. Encountering events that occurs more than $5\sigma$ from the expected value should only occur with a frequency of $6\times 10^{-7}$, which (as who has invested in the stock market can attest) not very realistic. Extreme events can occur much more frequently than a normal distribution would suggest. Many of these alternative distributions, such as the Laplace distribution have much ticker tails and are more suitable to describe processes with extreme events, such as in climate change.
 """
-
-# ╔═╡ ebe190e6-da7a-4c88-bd31-b5dc53f6a3e1
-let
-	# normal
-	pnorm = plot(xlabel=L"x", ylabel=L"f_X(x)", title="Normal")
-	for (μ, σ) in [(0., 1.), (2., 1.), (0.0, 2.0), (-1, 2)]
-		plot!(x->pdf(Normal(μ, σ),x),-5, 5, lw=2, label="μ=$μ, σ=$σ")
-	end
-	pnorm
-
-	# normal
-	plaplace = plot(xlabel=L"x", ylabel=L"f_X(x)", title="Laplace")
-	for (μ, θ) in [(0., 1.), (2., 1.), (0.0, 2.0), (-1, 2)]
-		plot!(x->pdf(Laplace(μ, θ),x),-8, 8, lw=2, label="μ=$μ, θ=$θ")
-	end
-	plaplace
-
-	plot(pnorm, plaplace)
-
-end
 
 # ╔═╡ af7119a0-2470-4bf0-8b30-59b38ddd8d5d
 md"""
@@ -775,6 +728,12 @@ TableOfContents()
 # ╔═╡ efd7bcba-f393-4659-ac5b-006740085144
 cummean(x) = cumsum(x) ./ (1:length(x))
 
+# ╔═╡ 0b9060d0-9c5a-4806-8d68-20e4ffd8f864
+dist2pdf(distribution) = x -> pdf(distribution, x)
+
+# ╔═╡ 7d71303b-defc-4e5f-beee-2bf684674ecf
+dist2cdf(distribution) = x -> cdf(distribution, x)
+
 # ╔═╡ 57052ba3-151c-4dda-904a-dac9c421241c
 plots = Dict()  # storing all the figures
 
@@ -807,6 +766,7 @@ let
 		p = histogram(rand(dist, n), label="", title="n=$n", normalize=true)
 		plot!(x -> pdf(dist, x), 0, 20, label="", lw=2)
 		push!(ps, p)
+		plots["lln_$(n)"] = p
 	end
 	plots["lln_vert"] = plot(ps..., layout=(4,:))
 	plot(ps...)
@@ -908,6 +868,109 @@ let
 	plots["ste_mean_log"] = p
 end
 
+# ╔═╡ 222cdcae-5b51-4fdc-a794-11471449ebcd
+let
+# Binomial
+	pbin = scatter(k->pdf(Binomial(20, .5), k), 0:25, label="n=25, p=0.5", xlab=L"k", ylab=L"P(X=k)")
+	scatter!(pbin, k->pdf(Binomial(20, .25), k), 0:25, label="n=25, p=0.25", marker=:^)
+	title!("Binomial distribution")
+	plots["binomial_distr"] = pbin
+	
+	# Poisson
+	ppois = scatter(k->pdf(Poisson(1), k), 0:20, label="λ=1", xlab=L"k", ylab=L"P(X=k)")
+	scatter!(ppois, k->pdf(Poisson(5), k), 0:20, label="λ=5", marker=:^)
+	scatter!(ppois, k->pdf(Poisson(10), k), 0:20, label="λ=10", marker=:v)
+	title!("Poisson distribution")
+	plots["poisson_distr"] = ppois
+	
+	# Geometric
+	pgeo = scatter(k->pdf(Geometric(0.1), k), 1:25, label="p=0.1", xlab=L"k", ylab=L"P(X=k)")
+	scatter!(pgeo, k->pdf(Geometric(0.2), k), 0:25, label="p=0.2", marker=:^)
+	scatter!(pgeo, k->pdf(Geometric(0.05), k), 0:25, label="p=0.05", marker=:v)
+	title!("Geometric distribution")
+	plots["geom_distr"] = pgeo
+	
+	# Geometric
+	punif = scatter(k->pdf(DiscreteUniform(5, 10), k), 0:30, label="a=5, b=10", xlab=L"k", ylab=L"P(X=k)")
+	scatter!(punif, k->pdf(DiscreteUniform(10, 25), k), 0:30, label="a=10, b=25", marker=:^)
+	title!("Uniform distribution")
+	plots["unif_discr_distr"] = punif
+	
+	plot(pbin, ppois, pgeo, punif)
+end
+
+# ╔═╡ ebe190e6-da7a-4c88-bd31-b5dc53f6a3e1
+let
+	# normal
+	pnorm = plot(xlabel=L"x", ylabel=L"f_X(x)", title="Normal distribution")
+	for (μ, σ) in [(0, 1), (2, 1), (0, 2), (-1, 2)]
+		plot!(x->pdf(Normal(μ, σ),x),-5, 5, lw=2, label="N($μ, $σ)", ls=:auto)
+	end
+	plots["normal_distr"] = pnorm
+
+
+
+
+end
+
+# ╔═╡ 3de53132-5b89-483a-872e-4cf1142fc90b
+let
+		# Laplace
+	plaplace = plot(xlabel=L"x", ylabel=L"f_X(x)", title="Laplace distribution")
+	for (μ, θ) in [(0, 1), (2, 1), (0, 2), (-1, 2)]
+		plot!(x->pdf(Laplace(μ, θ),x),-8, 8, lw=2, label="Laplace($μ, $θ)", ls=:auto)
+	end
+	plaplace
+
+	plots["laplace_distr"] = plaplace
+end
+
+# ╔═╡ 4360ca84-c0bd-4c7a-afbc-edfef5a5f976
+let
+	dist_trian = TriangularDist(-2, 2) 
+	dist_trian2 = TriangularDist(-2, 2, 1)  # non-symmetric
+
+	p = plot(dist2pdf(dist_trian), -3, 3, xlab=L"x", label="Triang(-2, 2)", lw=2,ylab=L"f_X(x)", title="Triangular distribution")
+	plot!(dist2pdf(dist_trian2), -3, 3, label="Triang(-2, 2, 1)", lw=2, ls=:auto)
+	plot!(dist2pdf(TriangularDist(-3, 1, -2)), -3, 3, label="Triang(-3, 1, -2)", lw=2, ls=:auto)
+	plots["triangular_distr"] = p
+end
+
+# ╔═╡ dbdf1da5-67fd-47ea-b363-f03e1e0cdeb0
+let
+	p = plot(dist2pdf(Exponential(1)), 0, 8, xlab=L"x", label="Exp(1)", lw=2,ylab=L"f_X(x)", title="Exponential distribution")
+	plot!(dist2pdf(Exponential(2)), 0, 8, label="Exp(2)", lw=2, ls=:dash)
+	plot!(dist2pdf(Exponential(1/2)), 0, 8, label="Exp(1/2)", lw=2, ls=:dot)
+	plots["exp_distr"] = p
+end
+
+# ╔═╡ 0b3e16bd-032b-4630-8cb3-57c63bc44572
+let
+	p = plot(dist2cdf(Exponential(1)), 0, 8, xlab=L"x", label="Exp(1)", lw=2,ylab=L"F_X(x)", title="Exponential distribution (CDF)")
+	plot!(dist2cdf(Exponential(2)), 0, 8, label="Exp(2)", lw=2, ls=:dash)
+	plot!(dist2cdf(Exponential(1/2)), 0, 8, label="Exp(1/2)", lw=2, ls=:dot)
+	plots["exp_distr_CDF"] = p
+end
+
+# ╔═╡ 05152721-dbb5-4e26-86ba-2fc16c03dac8
+let
+	xm = 4
+	p = plot(dist2pdf(LogNormal()), 0, xm, xlab=L"x", label="Log-normal(0, 1)", lw=2,ylab=L"f_X(x)", title="Log-normal distribution")
+	plot!(dist2pdf(LogNormal(1, 1)), 0, xm, label="log-normal(1, 1)", lw=2, ls=:auto)
+	plot!(dist2pdf(LogNormal(0, 2)), 0, xm, label="log-normal(0, 2)", lw=2, ls=:auto)
+	plot!(dist2pdf(LogNormal(1, 2)), 0, xm, label="log-normal(1, 2)", lw=2, ls=:auto)
+	plots["lognorm_distr"] = p
+end
+
+# ╔═╡ adbb17b4-56d2-49ca-8bdb-ecd2d3f418cd
+let
+	p = plot(dist2pdf(Beta(1, 1)), 0, 1, xlab=L"x", label="Beta(1, 1)", lw=2,ylab=L"f_X(x)", title="Beta distribution")
+	plot!(dist2pdf(Beta(4, 4)), 0, 1, label="Beta(4, 4)", lw=2, ls=:auto)
+	plot!(dist2pdf(Beta(8, 2)), 0, 1, label="Beta(8, 2)", lw=2, ls=:auto)
+	plot!(dist2pdf(Beta(1, 3)), 0, 1, label="Beta(1, 3)", lw=2, ls=:auto)
+	plots["beta_distr"] = p
+end
+
 # ╔═╡ f2faec3d-3d44-43e9-bf03-37ba68e37300
 let
 	p = contourf(-10:0.05:25, -2:0.01:2, (x,y)->pdf(dist_prod, [x,y]), color=:speed, xlab=L"x", ylab=L"y")
@@ -982,7 +1045,7 @@ plots["rain_cond"] = histogram(rainfall_amount, xlab="rainfall amount (mm)", yla
 plots["seeds_cond"] = histogram(p_cond, ylabel="frequency", xlab=L"p", label="p given n=$ngerm", xlims=[0,1])
 
 # ╔═╡ a9a8f40f-da04-475b-aeaa-07add585ad9c
-plots; # dictionary of all the figures, for saving
+plots # dictionary of all the figures, for saving
 
 # ╔═╡ Cell order:
 # ╠═2d346892-cb15-11ee-2d81-73e08fcc3288
@@ -1055,7 +1118,13 @@ plots; # dictionary of all the figures, for saving
 # ╟─222cdcae-5b51-4fdc-a794-11471449ebcd
 # ╟─8ae351eb-c1b8-4934-aa48-023f8feba75c
 # ╟─ebe190e6-da7a-4c88-bd31-b5dc53f6a3e1
+# ╟─3de53132-5b89-483a-872e-4cf1142fc90b
+# ╟─4360ca84-c0bd-4c7a-afbc-edfef5a5f976
 # ╟─af7119a0-2470-4bf0-8b30-59b38ddd8d5d
+# ╟─dbdf1da5-67fd-47ea-b363-f03e1e0cdeb0
+# ╟─0b3e16bd-032b-4630-8cb3-57c63bc44572
+# ╟─05152721-dbb5-4e26-86ba-2fc16c03dac8
+# ╟─adbb17b4-56d2-49ca-8bdb-ecd2d3f418cd
 # ╟─4290b2c6-1f5f-4780-9f32-08ae949b666c
 # ╟─07949347-3e7b-499f-9ca6-c62c131e2a65
 # ╟─8e7fa947-480d-4037-88a9-652ed7cc2cbd
@@ -1129,5 +1198,7 @@ plots; # dictionary of all the figures, for saving
 # ╟─1ad364c5-b65d-48d7-a829-e284c5e8eebc
 # ╠═5614c4b1-2c78-4fee-a480-3998a8e1ce6e
 # ╠═efd7bcba-f393-4659-ac5b-006740085144
+# ╠═0b9060d0-9c5a-4806-8d68-20e4ffd8f864
+# ╠═7d71303b-defc-4e5f-beee-2bf684674ecf
 # ╠═57052ba3-151c-4dda-904a-dac9c421241c
 # ╠═a9a8f40f-da04-475b-aeaa-07add585ad9c
