@@ -7,8 +7,8 @@ fontscale = 1.5
 
 
 notebooks = Dict(
-     "modelling_distributions.jl" => "probmod",
-    "MCMC.jl" => "MCMC",
+    #"modelling_distributions.jl" => "probmod",
+    #"MCMC.jl" => "MCMC",
     "simulation_tools.jl" => "simulation_tools",
     "modelling_ODEs.jl" => "ODEs",
     #"optimization.jl" => "optimization",
