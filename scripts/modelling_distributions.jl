@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.42
 
 using Markdown
 using InteractiveUtils
@@ -90,13 +90,14 @@ Outcomes of random variables are assigned probabilities via probability function
 $$p_X(x) = P(X=x)\,,$$
 
 which should satisfy that for every $x$ it holds that  $p_X(x)\ge 0$ (probabilities are non-zero) and $\sum_x p_X(x) = 1$ (probabilities should be normalized). For example, for a simple fair die, the outcomes $x$ are $\{1,2,3,4,5,6\}$ with respective probabilities $\{1/6,1/6,1/6,1/6,1/6,1/6\}$.
+"""
 
-Much of our work will however deal with continuous variables, which are characterized using *probability density functions* (PDF) $f_X(x)$, which likewise are non-negative and normalized:
+# ╔═╡ 12df460c-a547-410f-ac1c-90d41c8a37f1
+md"Much of our work will however deal with continuous variables, which are characterized using *probability density functions* (PDF) $f_X(x)$, which likewise are non-negative and normalized:
 
 $$\int_{-\infty}^\infty f_X(x) \mathrm{d}x = 1\,.$$
 
-For example, we take a Weibull distribution:
-"""
+For example, we take a Weibull distribution:"
 
 # ╔═╡ c0677edb-29a4-4c4d-8ca7-9d81eac05c85
 dist = Weibull(2, 7)
@@ -173,6 +174,9 @@ $$E[g(x)] = \int_{-\infty}^\infty g(x)f_X(x) \mathrm{d}x\,.$$
 
 The above identity is sometimes called the *Law of the Unconscious Statistician*. For example, if $X$ represents the distribution of the radii of particles in an emulsion, we might compute the average area or volume. However, $g(\cdot)$ might be much more complex! It could represent a simulator described by a large system of ordinary differential equations, for example, a complex, multi-step industrial process in food industry to process particles into delicious foods. The reader might already feel that in this case it becomes rather hard to compute this integral analytically.
 """
+
+# ╔═╡ 36db4c41-6132-4082-a9e3-18b5560b69d4
+sum(x->4pi * x^2 * pdf(dist, x) * 0.01, 0:0.01:100)
 
 # ╔═╡ 85e08b91-10f9-4808-ac53-195f90387688
 md"""
@@ -329,6 +333,32 @@ In addition to inverse transform sampling, there exist a plethora of specialized
 $$Z_1=\sqrt{-2\log U_1}\cos(2\pi U_2)$$
 $$Z_2=\sqrt{-2\log U_2}\sin(2\pi U_1)$$
 """
+
+# ╔═╡ 03b2b204-5e4b-4d25-8c32-453a5c51926f
+md"$$P(F^{-1}_X(U)\le x) = P(U\le F_X(x))=F_X(x)\,.$$
+Libraries to work with probability distributions usually implement optimized methods for sampling from the standard distributions. 
+
+In addition to inverse transform sampling, there exist a plethora of specialized sampling methods. Consider the normal distribution as an important special case. The *Box–Muller transform* generates two standard normally distributed values from two independent samples $U_1$ and $U_2$ from $\text{Unif}(0,1)$:
+
+$$Z_1=\sqrt{-2\log U_1}\cos(2\pi U_2)$$
+$$Z_2=\sqrt{-2\log U_2}\sin(2\pi U_1)$$"
+
+# ╔═╡ 6167f6cd-547d-4046-b1b2-600e5fc5ac0e
+let
+	n = 20
+	
+	u1 = rand(n)
+	u2 = rand(n)
+	p = plot(title="Box-Muller transform", aspect_ratio=:equal, xlims=[-3, 3], ylims=[-3, 3])
+	
+	z1 = @. √(-2log(u1)) * cos(2π*u2)
+	z2 = @. √(-2log(u2)) * sin(2π*u1)
+	for i in 1:n
+		plot!([u1[i], z1[i]], [u2[i], z2[i]], label="", color=:red, alpha=0.6, ls=:dash, lw=2)
+	end
+	scatter!(u1, u2, xlab=L"x", ylab=L"y", color="gold", label=L"u_1,u_2")
+	scatter!(z1, z2, m=:^, label=L"z_1,z_2")
+end
 
 # ╔═╡ dc7eb2b3-b160-4943-84e9-8cf20d687d93
 md"Standard normal numbers are available in Base julia:"
@@ -739,11 +769,23 @@ plots = Dict()  # storing all the figures
 
 # ╔═╡ 41967e5b-9068-4318-acb6-d958b608c8f7
 let
-	p = plot(x->sqrt(1-x^2), 0, 1, aspect_ratio=:equal, xlim=[0,1], ylim=[0, 1], lw=2, fillrange=zero, fillalpha=0.3, xlab=L"x", ylab=L"y", label="circle", title="Monte Carlo for estimating π/4")
+	p = plot(x->sqrt(1-x^2), 0, 1, aspect_ratio=:equal, xlim=[0,1], ylim=[0, 1], lw=2, fillrange=zero, fillalpha=0.3, xlab=L"x", ylab=L"y", label="circle", title="Monte Carlo \nfor estimating π/4")
 	scatter!(x_unif[in_circle], y_unif[in_circle], ms=0.8, markercolor="orange", markerstrokewidth=0, label="in circle")
 	scatter!(x_unif[.!in_circle], y_unif[.!in_circle], ms=0.8, markercolor="green", markerstrokewidth=0, label="out of circle")
 	plots["pi_sample"] = p
 	p
+end
+
+# ╔═╡ 47924cdc-b5bc-4612-949b-d0d23c8c47d9
+let
+	p = [1, 2, 1, 4, 3, 6]
+	p /= sum(p)
+	
+	pl = scatter(p, xlab=L"x", label="PMF", ylab=L"p_X(x)", title="PMF loaded die")
+	for i in 1:6
+		plot!(pl, [i, i], [0, p[i]], label="", ls=:dash, color=:red, lw=2, alpha=0.6)
+	end
+	plots["PMF"] = pl
 end
 
 # ╔═╡ b9be819e-2db9-4952-9453-98bf815b00e8
@@ -758,6 +800,9 @@ let
 	plots["cdf"] = pFx
 	p
 end
+
+# ╔═╡ d45fbe7b-168f-4c1e-8ab2-f17665b96938
+plots["area_weibull"]=histogram(g.(rand(dist, 100_000)), xlab=L"x", label=L"4\pi r^2", title="Sampled areas of a Weibull distribution")
 
 # ╔═╡ 7779254a-83b9-4849-957c-af4b62c3916a
 let
@@ -783,6 +828,24 @@ let
 	#ylims!(8, 10)
 	plots["llm_conv"] = p
 	p
+end
+
+# ╔═╡ 4415cdd0-481b-4e14-bda9-d118c0acead5
+let
+	n = 10
+	u = rand(n)
+	p = plot(x->cdf(dist, x), 0, 20, xlab=L"x", label=L"F_X(x)", xlim=(0,20), lw=2)
+	
+	title!("Inverse transform sampling")
+	x = Float64[]
+	for ui in u
+		xi = invlogcdf(dist, log(ui))
+		plot!([0, xi, xi], [ui, ui, 0], label="", color=:red, alpha=0.6, ls=:dash, lw=2)
+		push!(x, xi)
+	end
+	scatter!(zeros(n), u, label="draws from U(0,1)", color="gold")
+	scatter!(x, zeros(n), label="draws from X", m=:^)
+	plots["inverse_transform_sampling"] = p
 end
 
 # ╔═╡ d7e88a1a-73e9-48ff-bb51-2292346f88e0
@@ -981,10 +1044,13 @@ let
 end
 
 # ╔═╡ 4bd5e387-ac06-4f4b-822f-cbc89e7509f9
-plots["prod_cond_y"] = plot(y->pdf(distY, y), -2:0.01:2, label="Y | X=$xslice", color="orange", lw=2, xlabel="y", )
+plots["prod_cond_y"] = plot(y->pdf(distY, y), -2:0.01:2, label="Y | X=$xslice", color="orange", lw=2, xlabel="y", title="Marginal of Y")
 
 # ╔═╡ c7b2fc1e-9dd3-42e9-aa55-f9aea4781784
-plots["prod_cond_x"] = plot(x->pdf(distX, x), -10:0.05:25, label="f_{X | Y=$yslice}", color="blue", ls=:dash, lw=2, xlabel="x", )
+plots["prod_cond_x"] = plot(x->pdf(distX, x), -10:0.05:25, label="X | Y=$yslice", color="blue", ls=:dash, lw=2, xlabel="x", title="Marginal of X")
+
+# ╔═╡ 6f9f8748-d07b-41fe-a59e-12896b37ec98
+plots["plot_prod_margs"] = plot(plots["prod_cond_y"], plots["prod_cond_x"]);
 
 # ╔═╡ 94dd1214-e63c-44d5-b5c3-9ca834a89ebf
 let
@@ -1063,6 +1129,8 @@ plots # dictionary of all the figures, for saving
 # ╠═7c244dc0-6c7b-451e-b7c0-da25a77da657
 # ╠═fe471a6a-5c29-49f6-afba-83be7ab5d770
 # ╟─e0f96ed2-bc51-467e-be3e-8617293e33e2
+# ╟─47924cdc-b5bc-4612-949b-d0d23c8c47d9
+# ╟─12df460c-a547-410f-ac1c-90d41c8a37f1
 # ╠═c0677edb-29a4-4c4d-8ca7-9d81eac05c85
 # ╠═d786da44-5cfc-4c36-ae41-af6f623d5a4e
 # ╠═bce61d18-767d-4ae4-a211-759ef3e4da44
@@ -1077,6 +1145,7 @@ plots # dictionary of all the figures, for saving
 # ╟─6ae427c7-a65e-4f9b-b5a7-8cb523fcd382
 # ╠═090d0c6f-de9f-4ce8-befa-4ae9dbe1b38e
 # ╟─70cfc225-dd83-472c-b745-5266026c3bfc
+# ╠═36db4c41-6132-4082-a9e3-18b5560b69d4
 # ╟─85e08b91-10f9-4808-ac53-195f90387688
 # ╠═36b475e9-a16b-464f-a423-a4fbfbf21ef0
 # ╟─f1ee69eb-d8e5-4a6b-b408-a52d33a09e52
@@ -1095,9 +1164,13 @@ plots # dictionary of all the figures, for saving
 # ╠═64e0265f-a621-495f-b73a-0af23b0ef1ac
 # ╠═18a1b129-eac5-4080-8af9-7d9fbf800107
 # ╠═5a1522f7-411d-40f5-92e8-b5a154b8d735
+# ╟─d45fbe7b-168f-4c1e-8ab2-f17665b96938
 # ╟─7779254a-83b9-4849-957c-af4b62c3916a
 # ╟─73898b6c-d8bd-49a9-ba36-a068e62a7ec3
 # ╟─8a493f5e-1f1b-4cf5-91e1-5504593cee9d
+# ╟─4415cdd0-481b-4e14-bda9-d118c0acead5
+# ╟─03b2b204-5e4b-4d25-8c32-453a5c51926f
+# ╠═6167f6cd-547d-4046-b1b2-600e5fc5ac0e
 # ╟─dc7eb2b3-b160-4943-84e9-8cf20d687d93
 # ╠═2d3e09ff-3766-46d5-abdd-4132c4fa06b9
 # ╠═3ecfb175-0c26-419e-9770-d406cd1dd2dc
@@ -1136,6 +1209,7 @@ plots # dictionary of all the figures, for saving
 # ╟─4bd5e387-ac06-4f4b-822f-cbc89e7509f9
 # ╟─46b4ef15-bd34-4b59-aef5-5dc4e1193ec3
 # ╟─c7b2fc1e-9dd3-42e9-aa55-f9aea4781784
+# ╟─6f9f8748-d07b-41fe-a59e-12896b37ec98
 # ╟─ffa84522-dd02-47f8-ac3b-b1db08806b2d
 # ╟─0252887f-b133-426e-82fc-43ac091a7de6
 # ╟─8bfd6e24-27ce-4caf-b68c-b13d89f08337
