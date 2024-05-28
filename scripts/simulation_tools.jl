@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.42
 
 using Markdown
 using InteractiveUtils
@@ -19,65 +19,41 @@ using Plots, PlutoUI, LaTeXStrings
 # ╔═╡ fd2f6fb4-d6da-4b07-8044-d3e2a09a6b4d
 using Catalyst, DifferentialEquations
 
-# ╔═╡ 0b52aede-1a71-4034-9921-2ffc9120c0ae
-using Latexify
+# ╔═╡ 6e94632a-cad9-49ea-8cdc-e4ec55871682
+using Distributions
 
 # ╔═╡ eb30d4b4-ced7-473a-a5df-5ebed6a1c357
 using Symbolics
 
-# ╔═╡ 6e94632a-cad9-49ea-8cdc-e4ec55871682
-using Distributions
+# ╔═╡ 0b52aede-1a71-4034-9921-2ffc9120c0ae
+using Latexify
 
-# ╔═╡ aec510c8-6f67-4bad-ac60-db8081dfc7f2
-md"## Getting derivatives"
+# ╔═╡ ff86545c-64a2-4c6f-8c36-9066b270aa6b
+md"""
+## Events and callbacks
+"""
 
-# ╔═╡ 615370c3-4986-454e-85c5-11d447b51ff1
-@variables x
+# ╔═╡ 018d215a-41f4-4d21-b57f-fca3ac3a755d
+md"### Bouncing ball"
 
-# ╔═╡ 1e7c7e9c-b286-48a2-920b-4ac2fe7e9533
-f(x) = log(x) + sin(x)^2 / x
+# ╔═╡ 992d2b4f-6521-4368-910d-3e7ef07fb6df
+function ball!(du, u, g, t)
+	y, v = u
+	du[1] = v
+	du[2] = -g
+	return du
+end
 
-# ╔═╡ 52082e32-8c8f-4699-a44a-2fbe99b96319
-a = 2
+# ╔═╡ 17683127-b550-4368-9e3e-3054bd5aa208
 
-# ╔═╡ 77e9ad42-87fb-4292-bb89-3b0cb271f1a2
-f(x)
 
-# ╔═╡ 5bbf9db9-4537-416d-9edc-6487961b1690
-Dx = Differential(x) 
-
-# ╔═╡ a99a342d-5c69-411d-8bd6-55ed6f14f438
-Dx(f(x))
-
-# ╔═╡ 8b36f54a-420a-40ae-b655-d25c99fe7182
-df_sym = expand_derivatives(Dx(f(x)))  # this expands the derviatve operator
-
-# ╔═╡ 856890fb-a420-4ae0-8f6d-c40763d11cc2
-df = build_function(df_sym, x) |> eval  #builds an expression and turns it into a function
-
-# ╔═╡ 9d84b996-a3e2-48c1-ae51-2bfc343bff0f
-df(a)
-
-# ╔═╡ e0f9312f-dae9-49ea-9618-e786de59921f
-diff_fordiff(f, x; h=1e-10) = (f(x+h) - f(x)) / h
-
-# ╔═╡ 05bd415e-09db-4a19-8ccb-922096f218fc
-diff_centrdiff(f, x; h=1e-10) = (f(x+h) - f(x-h)) / 2h
-
-# ╔═╡ 459fe27d-bc53-469d-919d-724a5df98fe9
-diff_complstep(f, x; h=1e-10) = imag(f(x+im*h)) / h
-
-# ╔═╡ f61a7f2d-faa2-4a54-bd4a-c2fac6da888f
-g(x) = sin(cos(exp(x)) + x^2)
-
-# ╔═╡ 6ae135a1-72b5-434c-89e6-a0df76338d46
-g(x)
-
-# ╔═╡ 4aa42d80-81b5-4144-8b4a-6c3ebf29d84b
-dgdt = Dx(g(x)) |> expand_derivatives |> simplify
-
-# ╔═╡ 9be6aa61-46fe-4d53-941b-6cb0b21133a0
-d2gdt2 = Dx(Dx(g(x))) |> expand_derivatives |> simplify
+# ╔═╡ 21e810e7-0879-4ffb-84f9-d67dafb900d6
+bacterial_growth = @reaction_network begin
+	@species X(t)=10 G(t)=8
+	@parameters r=0.2 m=0.8
+	r, X + G --> 2X
+	m, X --> 0
+end
 
 # ╔═╡ 4c420cd0-975a-4d3b-a6cc-9eca35490c62
 md"## Stiff ODEs"
@@ -160,7 +136,7 @@ oprob_comp = ODEProblem(competition_model, [], (0., 50.))
 sprob_comp = SDEProblem(competition_model, [], (0., 50.))
 
 # ╔═╡ 23f1da8d-7a67-4dab-8928-f1f5480fadd0
-sol_ode = solve(oprob_comp);
+sol_ode = solve(oprob_comp)
 
 # ╔═╡ a72a568b-17c8-4350-b719-d72abbb10e84
 sol_sde = solve(sprob_comp);
@@ -243,11 +219,8 @@ sir_dprob = DiscreteProblem(sir_model, u0_sir, (0.0, 100.0), pars_sir)
 # ╔═╡ 88a00ea8-9c7b-49fc-8771-2324576a0124
 sir_jprob = JumpProblem(sir_model, sir_dprob, Direct())
 
-# ╔═╡ 9265ba3b-5979-4755-a7b8-cd422040de8c
-
-
 # ╔═╡ 5c3c6af6-add6-4f1a-91ca-0251b43d5e1a
-plot(solve(sir_oprob))
+plot(solve(sir_oprob), lw=2)
 
 # ╔═╡ c9fb3ebb-e37a-42dc-85f4-87b4fc5ca492
 plot(solve(sir_jprob, SSAStepper()))
@@ -277,32 +250,130 @@ let
 	plot!(timesteps, R_gp, label="R")
 end
 
+# ╔═╡ aec510c8-6f67-4bad-ac60-db8081dfc7f2
+md"## Getting derivatives"
+
+# ╔═╡ 1e7c7e9c-b286-48a2-920b-4ac2fe7e9533
+# ╠═╡ skip_as_script = true
+#=╠═╡
+f(x) = log(x) + sin(x)^2 / x
+  ╠═╡ =#
+
+# ╔═╡ 459fe27d-bc53-469d-919d-724a5df98fe9
+diff_complstep(f, x; h=1e-10) = imag(f(x+im*h)) / h
+
+# ╔═╡ f61a7f2d-faa2-4a54-bd4a-c2fac6da888f
+# ╠═╡ skip_as_script = true
+#=╠═╡
+g(x) = sin(cos(exp(x)) + x^2)
+  ╠═╡ =#
+
+# ╔═╡ 615370c3-4986-454e-85c5-11d447b51ff1
+@variables x
+
+# ╔═╡ 6ae135a1-72b5-434c-89e6-a0df76338d46
+# ╠═╡ skip_as_script = true
+#=╠═╡
+g(x)
+  ╠═╡ =#
+
+# ╔═╡ 77e9ad42-87fb-4292-bb89-3b0cb271f1a2
+# ╠═╡ skip_as_script = true
+#=╠═╡
+f(x)
+  ╠═╡ =#
+
+# ╔═╡ e0f9312f-dae9-49ea-9618-e786de59921f
+# ╠═╡ skip_as_script = true
+#=╠═╡
+diff_fordiff(f, x; h=1e-10) = (f(x+h) - f(x)) / h
+  ╠═╡ =#
+
+# ╔═╡ 05bd415e-09db-4a19-8ccb-922096f218fc
+diff_centrdiff(f, x; h=1e-10) = (f(x+h) - f(x-h)) / 2h
+
+# ╔═╡ 52082e32-8c8f-4699-a44a-2fbe99b96319
+a = 2
+
+# ╔═╡ 5bbf9db9-4537-416d-9edc-6487961b1690
+Dx = Differential(x) 
+
+# ╔═╡ a99a342d-5c69-411d-8bd6-55ed6f14f438
+#=╠═╡
+Dx(f(x))
+  ╠═╡ =#
+
+# ╔═╡ 8b36f54a-420a-40ae-b655-d25c99fe7182
+# ╠═╡ skip_as_script = true
+#=╠═╡
+df_sym = expand_derivatives(Dx(f(x)))  # this expands the derviatve operator
+  ╠═╡ =#
+
+# ╔═╡ 856890fb-a420-4ae0-8f6d-c40763d11cc2
+# ╠═╡ skip_as_script = true
+#=╠═╡
+df = build_function(df_sym, x) |> eval  #builds an expression and turns it into a function
+  ╠═╡ =#
+
+# ╔═╡ 9d84b996-a3e2-48c1-ae51-2bfc343bff0f
+# ╠═╡ skip_as_script = true
+#=╠═╡
+df(a)
+  ╠═╡ =#
+
+# ╔═╡ 9be6aa61-46fe-4d53-941b-6cb0b21133a0
+#=╠═╡
+d2gdt2 = Dx(Dx(g(x))) |> expand_derivatives |> simplify
+  ╠═╡ =#
+
+# ╔═╡ 4aa42d80-81b5-4144-8b4a-6c3ebf29d84b
+# ╠═╡ skip_as_script = true
+#=╠═╡
+dgdt = Dx(g(x)) |> expand_derivatives |> simplify
+  ╠═╡ =#
+
+# ╔═╡ 6f6ba9c5-bc87-4b71-82a0-a4c64750a2ab
+md"## Appendix"
+
+# ╔═╡ 2bf198cd-4463-4f97-975e-f805a37fa780
+TableOfContents()
+
 # ╔═╡ 13036978-3008-4d7e-9661-a967381f4db6
 plots = Dict()
 
-# ╔═╡ 6e433b23-3915-466a-85ca-31948896e3cb
-plots["example_diff"] = plot(f, 1, 5, label=L"f(x)", lw=2, xlab=L"x")
-
-# ╔═╡ 525ae0f8-026a-43a3-a8b4-3a101c8ad6a7
-if !ismissing(f(a))
-plot(f, 1, 10, label="\$f(x)\$", xlabel="\$x\$", lw=2)
-plots["fdiff_example"] = plot!(df, 1, 10, label="\$f'(x)\$", lw=2)
+# ╔═╡ 0de4a715-89d6-403b-ac65-adaed6062371
+let
+	
+	function condition(u, t, integrator)
+		u[1]  # check when u[1] (i.e. x) == 0
+	end
+	
+	function affect!(integrator)
+		# nearly elastic collision
+		integrator.u[2] = -0.9integrator.u[2]
+	end
+	
+	cb = ContinuousCallback(condition, affect!)
+	
+	u0 = [50.0, 0.0]
+	tspan = (0.0, 15.0)
+	g = 9.81
+	prob = ODEProblem(ball!, u0, tspan, g)
+	sol = solve(prob, Tsit5(), callback = cb)
+	plots["bouncing_ball"] = plot(sol, lw=2, label=[L"x(t)" L"v(t)"], title="Bouncing ball with callbacks")
 end
 
-# ╔═╡ ae5be024-863d-46f1-b5d9-fc691b10e63b
+# ╔═╡ 7b3ca635-5a3c-43f2-9690-5cdbd9074ed2
 let
-	fexamp(x) = 64x*(1-x)*(1-2x)^2*(1-8x+8x^2)^2
-	#dfexamp = diff(fexamp(x), x)
-	dfexamp = build_function(expand_derivatives(Dx(fexamp(x))), x) |> eval
-	error(diff, h; x=1.0) = max(abs(Float64(dfexamp(x)) - diff(fexamp, x, h=h)), 1e-50)
-	stepsizes = map(t->10.0^t, -20:0.1:-1);
-	p = plot(stepsizes, error.(diff_fordiff, stepsizes), label="forward difference",
-    xscale=:log10, yscale=:log10, lw=2, legend=:bottomright)
-	plot!(stepsizes, error.(diff_centrdiff, stepsizes), label="central difference", 		lw=2)
-	plot!(stepsizes, error.(diff_complstep, stepsizes), label="complex step", lw=2)
-	xlabel!("\$h\$")
-	ylabel!("absolute error")
-	plots["numdiff_error"] = p
+	dosetimes = 5:5:20
+	affect!(integrator) = integrator.u[2] += 10
+	cb = PresetTimeCallback(dosetimes, affect!)
+	
+	prob = ODEProblem(bacterial_growth, [], (0, 20))
+	sol = solve(prob, Tsit5(), callback=cb)
+	plots["undosed bioreactor"] = plot(solve(prob, Tsit5()), lw=2,
+						title="Undosed bioreactor")
+	plots["dosed_bioreactor"] = plot(sol, lw=2, title="Dosed bioreactor")
 end
 
 # ╔═╡ e22ed4e6-6420-490c-9d55-fee19069f534
@@ -442,10 +513,52 @@ end
 # ╔═╡ bfbccda0-8648-435f-8b12-13957c574f54
 plots
 
+# ╔═╡ 6e433b23-3915-466a-85ca-31948896e3cb
+#=╠═╡
+plots["example_diff"] = plot(f, 1, 5, label=L"f(x)", lw=2, xlab=L"x")
+  ╠═╡ =#
+
+# ╔═╡ 525ae0f8-026a-43a3-a8b4-3a101c8ad6a7
+# ╠═╡ skip_as_script = true
+#=╠═╡
+if !ismissing(f(a))
+plot(f, 1, 10, label="\$f(x)\$", xlabel="\$x\$", lw=2)
+plots["fdiff_example"] = plot!(df, 1, 10, label="\$f'(x)\$", lw=2)
+end
+  ╠═╡ =#
+
+# ╔═╡ ae5be024-863d-46f1-b5d9-fc691b10e63b
+#=╠═╡
+let
+	fexamp(x) = 64x*(1-x)*(1-2x)^2*(1-8x+8x^2)^2
+	#dfexamp = diff(fexamp(x), x)
+	dfexamp = build_function(expand_derivatives(Dx(fexamp(x))), x) |> eval
+	error(diff, h; x=1.0) = max(abs(Float64(dfexamp(x)) - diff(fexamp, x, h=h)), 1e-50)
+	stepsizes = map(t->10.0^t, -20:0.1:-1);
+	p = plot(stepsizes, error.(diff_fordiff, stepsizes), label="forward difference",
+    xscale=:log10, yscale=:log10, lw=2, legend=:bottomright)
+	plot!(stepsizes, error.(diff_centrdiff, stepsizes), label="central difference", 		lw=2)
+	plot!(stepsizes, error.(diff_complstep, stepsizes), label="complex step", lw=2)
+	xlabel!("\$h\$")
+	ylabel!("absolute error")
+	plots["numdiff_error"] = p
+end
+  ╠═╡ =#
+
+# ╔═╡ 23c38172-8916-42e3-a186-5cdd16939b5b
+plots
+
 # ╔═╡ Cell order:
 # ╠═eb128248-dfbc-11ee-2efb-cb60fad76024
 # ╠═4f364a47-c45e-4264-9a00-fb705ff3f169
 # ╠═fd2f6fb4-d6da-4b07-8044-d3e2a09a6b4d
+# ╠═ff86545c-64a2-4c6f-8c36-9066b270aa6b
+# ╠═018d215a-41f4-4d21-b57f-fca3ac3a755d
+# ╠═992d2b4f-6521-4368-910d-3e7ef07fb6df
+# ╠═17683127-b550-4368-9e3e-3054bd5aa208
+# ╠═0de4a715-89d6-403b-ac65-adaed6062371
+# ╠═21e810e7-0879-4ffb-84f9-d67dafb900d6
+# ╠═7b3ca635-5a3c-43f2-9690-5cdbd9074ed2
 # ╟─4c420cd0-975a-4d3b-a6cc-9eca35490c62
 # ╠═081852cd-b589-4891-83c0-f19e4da2eb35
 # ╠═39ee1679-23ad-4448-ae20-b55345c950b4
@@ -500,7 +613,6 @@ plots
 # ╠═d0aa9ea8-38cb-4f00-92d2-58740ab2d32a
 # ╠═88a00ea8-9c7b-49fc-8771-2324576a0124
 # ╟─aa3056b8-7140-4271-885d-8392c3634af6
-# ╠═9265ba3b-5979-4755-a7b8-cd422040de8c
 # ╠═5c3c6af6-add6-4f1a-91ca-0251b43d5e1a
 # ╠═c9fb3ebb-e37a-42dc-85f4-87b4fc5ca492
 # ╠═3122f1ec-7c47-4873-bd6c-94f1a8616088
@@ -508,5 +620,30 @@ plots
 # ╠═26c3f4e0-dc66-43cc-9215-94e5c73531d8
 # ╠═04eeeae2-f525-4717-a397-39b895fa80eb
 # ╠═7055aa36-e4d8-42e6-a92c-f7d8ec5aa960
-# ╠═13036978-3008-4d7e-9661-a967381f4db6
 # ╠═bfbccda0-8648-435f-8b12-13957c574f54
+# ╠═6e433b23-3915-466a-85ca-31948896e3cb
+# ╠═a99a342d-5c69-411d-8bd6-55ed6f14f438
+# ╠═aec510c8-6f67-4bad-ac60-db8081dfc7f2
+# ╠═1e7c7e9c-b286-48a2-920b-4ac2fe7e9533
+# ╠═6ae135a1-72b5-434c-89e6-a0df76338d46
+# ╠═459fe27d-bc53-469d-919d-724a5df98fe9
+# ╠═77e9ad42-87fb-4292-bb89-3b0cb271f1a2
+# ╠═eb30d4b4-ced7-473a-a5df-5ebed6a1c357
+# ╠═525ae0f8-026a-43a3-a8b4-3a101c8ad6a7
+# ╠═f61a7f2d-faa2-4a54-bd4a-c2fac6da888f
+# ╠═615370c3-4986-454e-85c5-11d447b51ff1
+# ╠═e0f9312f-dae9-49ea-9618-e786de59921f
+# ╠═8b36f54a-420a-40ae-b655-d25c99fe7182
+# ╠═9be6aa61-46fe-4d53-941b-6cb0b21133a0
+# ╠═856890fb-a420-4ae0-8f6d-c40763d11cc2
+# ╠═05bd415e-09db-4a19-8ccb-922096f218fc
+# ╠═0b52aede-1a71-4034-9921-2ffc9120c0ae
+# ╠═9d84b996-a3e2-48c1-ae51-2bfc343bff0f
+# ╠═4aa42d80-81b5-4144-8b4a-6c3ebf29d84b
+# ╠═ae5be024-863d-46f1-b5d9-fc691b10e63b
+# ╠═52082e32-8c8f-4699-a44a-2fbe99b96319
+# ╠═5bbf9db9-4537-416d-9edc-6487961b1690
+# ╠═6f6ba9c5-bc87-4b71-82a0-a4c64750a2ab
+# ╠═2bf198cd-4463-4f97-975e-f805a37fa780
+# ╠═13036978-3008-4d7e-9661-a967381f4db6
+# ╠═23c38172-8916-42e3-a186-5cdd16939b5b
