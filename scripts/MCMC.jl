@@ -33,8 +33,7 @@ using Plots, PlutoUI, LaTeXStrings, LinearAlgebra, Random
 md"""
 # Bayesian reasoning and advanced sampling methods
 
-ADD INTRODUCTION HERE
-
+In the previous chapter, we explored how one can build joint probability distributions and generate samples from them. This chapter explores inference: we will fix one or multiple variables, which represents observing them, and will sample from the conditional distribution. 
 """
 
 # ╔═╡ 0f6cf892-b218-4740-a298-43f47e51acae
@@ -470,6 +469,9 @@ quantile(chain_MH)
 # ╔═╡ 1b92c00e-8b2a-4cc8-b6f2-23d91cf4f989
 chain_MH2 = sample(MersenneTwister(1), uncertain_normal(y), my_MH, 1_000);
 
+# ╔═╡ 37986301-c9d2-42e3-8b73-7c833bf7ae17
+summarize(chain_MH2)
+
 # ╔═╡ 138bf97c-9295-440d-99f4-24f7fe58b774
 Σ = [σ₁^2 σ₁*σ₂*ρ;
 	 σ₁*σ₂*ρ σ₂^2]
@@ -482,9 +484,6 @@ chain_Gibbs = sample(uncertain_normal(y), Gibbs(MH(:μ), MH(:σ)), 1000)
 
 # ╔═╡ a9bd2d76-16e6-4084-b65d-0645ec94aa9c
 sample(uncertain_normal(y), Gibbs(HMC(0.2, 3, :μ), PG(20, :σ)), 1000)
-
-# ╔═╡ ddf796f3-a951-426f-a0f3-9b43f3ff6aef
-
 
 # ╔═╡ 9b4d67dc-9c75-45ee-9328-d229c527fdc6
 summarize(chain_Gibbs)
@@ -553,12 +552,50 @@ Making HMC behave well requires carefully tuning the parameters $\epsilon$ and $
 # ╔═╡ aa022156-efb4-4b2b-ac22-9b4228ee2578
 chain_NUTS = sample(MersenneTwister(1), uncertain_normal(y), NUTS(), 1000);
 
+# ╔═╡ 5f41a9e3-70e0-40d5-bdff-d90555130817
+summarize(chain_NUTS)
+
 # ╔═╡ e6201f93-d5fc-4f33-9e3c-f7d8eb0146b5
 md"""
-## Analysing chains and diagnostics
+## MCMC in practice
 
-TO BE COMPLETED
+Sampling from probability distributions is more complex than numerically solving differential equations. For both, using existing, tested, high-quality software is strongly advised. Picking the right sampling algorithm and making it work well requires insight into the model, choosing hood proposal distributions, and some experience.
+
+Rather than looking at the number of pseudo samples generated, it usually makes more sense to consider the [[effective number of samples]]. This metric is corrected for autocorrelation, i.e., samples close in a chain are not completely independent. There is no definitive answer to how many samples one needs. If the goal is pinpointing the posterior mean, a couple hundred could suffice. When one wants to characterize the exact shape of the posterior or analyse the tails, for example, 1% or 99% quantiles, many more might be required.
+
+Every chain needs some warm-up time to reach the stationary distribution. For this reason, the first fraction of the chain is usually discarded. One often runs several Markov chains in parallel, often on different computer threads or different nodes on a computer cluster. This might be valuable for diagnostic purposes, to see if the chains converge. However, note that every one of these chains will likely need a burn-in time, so a large part of the computational efforts will be wasted. Some authors advise trying several short chains for debugging and a very long chain for the final sampling.
+
+To check if a chain is converging nicely, trace plots are usually the most informative. Remember, a trace plot shows the value of the variable throughout the steps of the chain. An ideal trace plot should look somewhat like a hairy caterpillar, with fluctuations around a mean and no systematic trends. When the chain is behaving badly, expect to see sharp peaks, flat lines where the chain is stuck and systematic trends.
+
+> When you have a computational problem, there is often a problem with your model.
+
+The best way to have a chain that works well is to have a model that describes the data well. Here, there is ideally a single peak that corresponds to the optimal parameter configurations. When you see that the chain is not progressing well, this can usually be improved by adding some informative priors, even if they are very weak ones. This will often tamper with erratic behaviour.
 """
+
+# ╔═╡ 1b2a38dc-0caf-4c86-9910-8574fe10c48f
+@model function diffuse_prior(y1, y2)
+	μ ~ Flat()
+	σ ~ FlatPos(0.0)
+	y1 ~ Normal(μ, σ)
+	y2 ~ Normal(μ, σ)
+end
+
+# ╔═╡ 9e1c4bc8-882f-45bf-b437-38c369867dac
+y1, y2 = 7.8, 9.8
+
+# ╔═╡ 15c7c5ed-5bcf-4336-aecb-22fd3ef38d05
+chain_diff = sample(diffuse_prior(y1, y2), NUTS(), 10_000)
+
+# ╔═╡ cde76a39-51a0-4398-ba2c-81170e395a07
+@model function weak_prior(y1, y2)
+	μ ~ Normal(0, 1000)
+	σ ~ Exponential(10) #Uniform(0, 100)
+	y1 ~ Normal(μ, σ)
+	y2 ~ Normal(μ, σ)
+end
+
+# ╔═╡ 42a81a70-f8a1-4a11-a475-c4adddefde73
+chain_weak = sample(weak_prior(y1, y2), NUTS(), 10_000)
 
 # ╔═╡ 96f05537-6fb3-45ce-8d75-28efdfa03279
 @model function donut(R=5, σ=1.5)
@@ -848,6 +885,12 @@ let
 	plots["NUTS_sampling"] = p
 end
 
+# ╔═╡ 8de88cd0-e326-4926-bfe9-776e3516d6e2
+plots["uninformative_prior"] = plot(chain_diff)
+
+# ╔═╡ 0969b685-e9c5-44d5-8698-a141dd01dca7
+plots["weak_diffusive_prior"] = plot(chain_weak)
+
 # ╔═╡ 262879f7-9441-4305-899a-b7c2881958fe
 plots
 
@@ -943,6 +986,7 @@ plots
 # ╟─f97d0f4c-8b3c-4ea7-bcd2-6019ab831734
 # ╠═2cf4022e-1b68-4a69-b6d0-669c3e5ac230
 # ╠═1b92c00e-8b2a-4cc8-b6f2-23d91cf4f989
+# ╠═37986301-c9d2-42e3-8b73-7c833bf7ae17
 # ╠═35bc2b8f-716d-4a85-8e60-7242709448c3
 # ╟─0c652efb-0edb-4a4e-a14c-7d5ac6eb5ffa
 # ╠═ab09925c-4689-4f87-be44-f8eca12a5c9c
@@ -955,7 +999,6 @@ plots
 # ╟─76b0886a-fc91-40ef-89d5-dcf5d261907f
 # ╠═06e83a23-fa3a-49f7-8f43-d46f3285e943
 # ╠═a9bd2d76-16e6-4084-b65d-0645ec94aa9c
-# ╠═ddf796f3-a951-426f-a0f3-9b43f3ff6aef
 # ╠═444a89d1-a8c1-4df8-945d-6e8dd32ae204
 # ╠═9b4d67dc-9c75-45ee-9328-d229c527fdc6
 # ╠═4d8fd482-11cb-4f2e-8c47-2428ee7e66c6
@@ -969,9 +1012,17 @@ plots
 # ╟─786c8319-806c-461d-af08-f082d6f12339
 # ╟─81863647-168f-46b1-87f1-cc1169b7c6ff
 # ╠═aa022156-efb4-4b2b-ac22-9b4228ee2578
+# ╠═5f41a9e3-70e0-40d5-bdff-d90555130817
 # ╠═575ad310-8cbd-4b05-aee0-d84fb55ad6ed
 # ╟─4a86bf84-434a-4ef3-a9c6-4c72df5068e0
-# ╠═e6201f93-d5fc-4f33-9e3c-f7d8eb0146b5
+# ╟─e6201f93-d5fc-4f33-9e3c-f7d8eb0146b5
+# ╠═1b2a38dc-0caf-4c86-9910-8574fe10c48f
+# ╠═9e1c4bc8-882f-45bf-b437-38c369867dac
+# ╠═15c7c5ed-5bcf-4336-aecb-22fd3ef38d05
+# ╠═8de88cd0-e326-4926-bfe9-776e3516d6e2
+# ╠═cde76a39-51a0-4398-ba2c-81170e395a07
+# ╠═42a81a70-f8a1-4a11-a475-c4adddefde73
+# ╠═0969b685-e9c5-44d5-8698-a141dd01dca7
 # ╠═96f05537-6fb3-45ce-8d75-28efdfa03279
 # ╠═3708eb56-53e4-43b8-8af4-e1f6e302a0cf
 # ╠═07da284a-8f21-4088-b936-244d11f517dd
