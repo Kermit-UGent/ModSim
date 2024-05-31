@@ -769,7 +769,7 @@ plots = Dict()  # storing all the figures
 
 # ╔═╡ 41967e5b-9068-4318-acb6-d958b608c8f7
 let
-	p = plot(x->sqrt(1-x^2), 0, 1, aspect_ratio=:equal, xlim=[0,1], ylim=[0, 1], lw=2, fillrange=zero, fillalpha=0.3, xlab=L"x", ylab=L"y", label="circle", title="Monte Carlo \nfor estimating π/4")
+	p = plot(x->sqrt(1-x^2), 0, 1, aspect_ratio=:equal, xlim=[0,1], ylim=[0, 1], lw=2, fillrange=zero, fillalpha=0.3, xlab=L"x", ylab=L"y", label="circle", title="Monte Carlo \nfor estimating π/4", legend=:outertopright)
 	scatter!(x_unif[in_circle], y_unif[in_circle], ms=0.8, markercolor="orange", markerstrokewidth=0, label="in circle")
 	scatter!(x_unif[.!in_circle], y_unif[.!in_circle], ms=0.8, markercolor="green", markerstrokewidth=0, label="out of circle")
 	plots["pi_sample"] = p
@@ -781,10 +781,11 @@ let
 	p = [1, 2, 1, 4, 3, 6]
 	p /= sum(p)
 	
-	pl = scatter(p, xlab=L"x", label="PMF", ylab=L"p_X(x)", title="PMF loaded die")
+	pl = plot()
 	for i in 1:6
 		plot!(pl, [i, i], [0, p[i]], label="", ls=:dash, color=:red, lw=2, alpha=0.6)
 	end
+	scatter!(p, xlab=L"x", label="PMF", ylab=L"p_X(x)", title="PMF loaded die", color=:blue)
 	plots["PMF"] = pl
 end
 
@@ -813,9 +814,12 @@ let
 		push!(ps, p)
 		plots["lln_$(n)"] = p
 	end
-	plots["lln_vert"] = plot(ps..., layout=(4,:))
+	plots["lln"] = plot(ps...)
 	plot(ps...)
 end
+
+# ╔═╡ 7676138b-d99f-4610-b522-ccd6ea625ed4
+savefig( plots["lln"], "lnn.pdf")
 
 # ╔═╡ 73898b6c-d8bd-49a9-ba36-a068e62a7ec3
 let
@@ -834,7 +838,7 @@ end
 let
 	n = 10
 	u = rand(n)
-	p = plot(x->cdf(dist, x), 0, 20, xlab=L"x", label=L"F_X(x)", xlim=(0,20), lw=2)
+	p = plot(x->cdf(dist, x), 0, 20, xlab=L"x", label=L"F_X(x)", xlim=(0,20), lw=2, legend=:bottomright)
 	
 	title!("Inverse transform sampling")
 	x = Float64[]
@@ -1165,8 +1169,9 @@ plots # dictionary of all the figures, for saving
 # ╠═18a1b129-eac5-4080-8af9-7d9fbf800107
 # ╠═5a1522f7-411d-40f5-92e8-b5a154b8d735
 # ╟─d45fbe7b-168f-4c1e-8ab2-f17665b96938
-# ╟─7779254a-83b9-4849-957c-af4b62c3916a
-# ╟─73898b6c-d8bd-49a9-ba36-a068e62a7ec3
+# ╠═7779254a-83b9-4849-957c-af4b62c3916a
+# ╠═7676138b-d99f-4610-b522-ccd6ea625ed4
+# ╠═73898b6c-d8bd-49a9-ba36-a068e62a7ec3
 # ╟─8a493f5e-1f1b-4cf5-91e1-5504593cee9d
 # ╟─4415cdd0-481b-4e14-bda9-d118c0acead5
 # ╟─03b2b204-5e4b-4d25-8c32-453a5c51926f

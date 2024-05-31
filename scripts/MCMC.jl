@@ -597,6 +597,9 @@ end
 # ╔═╡ 42a81a70-f8a1-4a11-a475-c4adddefde73
 chain_weak = sample(weak_prior(y1, y2), NUTS(), 10_000)
 
+# ╔═╡ 930902f1-5d0d-41a9-8c37-07e0d913aa6e
+quantile(chain_weak)
+
 # ╔═╡ 96f05537-6fb3-45ce-8d75-28efdfa03279
 @model function donut(R=5, σ=1.5)
 	θ ~ Uniform(0.0, 2pi)
@@ -737,7 +740,7 @@ plots["norm_muprior"] = plot(dist2pdf(Normal(0, 20)), -50, 50, xlabel=L"\mu", la
 plots["norm_sigmaprior"] = plot(dist2pdf(InverseGamma(.1)), 0, 20, xlabel=L"\sigma", label="InverseGamma(1)", title="Prior for σ", lw=2)
 
 # ╔═╡ 45e175bc-0eaa-4280-aaf6-c8b318a6c12d
-plots["norm_priors"] = plot(plots["norm_muprior"], plots["norm_sigmaprior"])
+plots["norm_priors"] = plot(plots["norm_muprior"], plots["norm_sigmaprior"],size=(800, 400))
 
 # ╔═╡ a09eda2e-0bb7-46c9-8d60-2b4447257772
 plots["norm_multiprior"] = heatmap(-15:0.1:15, 0.1:0.02:5, norm_prior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Prior")
@@ -762,7 +765,8 @@ begin
 	x_rejection_sampling = x_prop[acc]
 	acceptance_probability = length(x_rejection_sampling) / n_rejection_sampling
 	
-	prs = plot(x->pdf(p_univar, x), -1, 10, lw=2, label="target p(x)", xlabel=L"x", title="Rejection sampling\np(accept)=$(round(acceptance_probability, digits=2))")
+	prs = plot(x->pdf(p_univar, x), -1, 10, lw=2, label="target p(x)", xlabel=L"x", title="Rejection sampling\np(accept)=$(round(acceptance_probability, digits=2))",
+	legend=:outerbottom)
 	plot!(x->M*pdf(q, x), -1, 10, lw=2, label="proposal distribiton M * q(x)")
 	plot!(zero, -1:0.02:10, fillrange=x->pdf(p_univar, x), fillalpha=0.3, lw=2, label="acceptance region", linealpha=0)
 	plot!(x->pdf(p_univar, x), -1, 10, fillrange=x->M*pdf(q, x), fillalpha=0.3, lw=2, label="rejection region", linealpha=0)
@@ -781,10 +785,10 @@ length(x_rejection_sampling)  # number of accepted samples
 acceptance_probability
 
 # ╔═╡ ff813a28-5ab7-4b49-8b05-b4b6a73b94a5
-plots["MC_ss"] = bar(1:10, π_mc, xlab="state", ylab="PMF", label="", title="Stationary distribution birth-death process", xticks=1:10)
+plots["MC_ss"] = bar(1:10, π_mc, xlab="state", ylab="PMF", label="", title="Stationary distribution of the cycle", xticks=1:10)
 
 # ╔═╡ bfd58734-b396-4424-9343-4562932f70e3
-plots["MC_ss_conv"] = groupedbar(0:30, vcat([p₀' * T^i for i in 0:30]...), bar_position = :stack, xlab = L"t", ylab = "fraction in state i", xticks=0:30, label=reshape(["state $i" for i in 1:size(T,2)], 1, :), title="State evolution in a birth-death process")
+plots["MC_ss_conv"] = groupedbar(0:30, vcat([p₀' * T^i for i in 0:30]...), bar_position = :stack, xlab = L"t", ylab = "fraction in state i", xticks=0:30, label=reshape(["state $i" for i in 1:size(T,2)], 1, :), title="State evolution of the cycle", legend=:outertopright)
 
 # ╔═╡ ecfc2307-6926-42c1-b08d-6ff93502c5cd
 let
@@ -894,6 +898,9 @@ plots["weak_diffusive_prior"] = plot(chain_weak)
 # ╔═╡ 262879f7-9441-4305-899a-b7c2881958fe
 plots
 
+# ╔═╡ d2414490-d2a5-4862-81e8-8ae8ffc5213a
+length(plots)
+
 # ╔═╡ Cell order:
 # ╠═103e5ba0-cfdc-11ee-13b1-cf53dfdd9a3b
 # ╠═d778ce04-8df4-42ef-95f1-9cf4880e0420
@@ -957,8 +964,8 @@ plots
 # ╠═cf858c95-d2b9-4f53-af1a-d5a511f531ce
 # ╟─d77c1db1-925f-4134-a860-8a1683b3adee
 # ╠═cc92d39d-830f-451c-81b4-de00f74545bf
-# ╠═c37ea17f-57b5-4871-a4d9-5aa5e609c846
-# ╠═38a6bd5f-78ab-43be-a010-6fe4c209b1a7
+# ╟─c37ea17f-57b5-4871-a4d9-5aa5e609c846
+# ╟─38a6bd5f-78ab-43be-a010-6fe4c209b1a7
 # ╟─eab53e8a-b7cd-4c97-83f1-bcfd9c59cc4f
 # ╠═7915a972-df48-462c-bcc7-2ca94a98e441
 # ╟─53799772-c8a1-4055-a01e-42f147ffc253
@@ -966,7 +973,7 @@ plots
 # ╠═b2cbf023-a0ea-4714-b30b-b331a081c7fa
 # ╟─ff813a28-5ab7-4b49-8b05-b4b6a73b94a5
 # ╟─b3c45c85-d075-452a-a827-b7d1e00a17a1
-# ╟─bfd58734-b396-4424-9343-4562932f70e3
+# ╠═bfd58734-b396-4424-9343-4562932f70e3
 # ╟─45e848aa-3e6a-47b5-a0cc-fa09dd9a4ae3
 # ╟─ae080b48-87f8-4af6-b9d1-224080d4b787
 # ╟─0a4f1446-e49e-4281-be44-52d3ac4a7854
@@ -1023,6 +1030,7 @@ plots
 # ╠═cde76a39-51a0-4398-ba2c-81170e395a07
 # ╠═42a81a70-f8a1-4a11-a475-c4adddefde73
 # ╠═0969b685-e9c5-44d5-8698-a141dd01dca7
+# ╠═930902f1-5d0d-41a9-8c37-07e0d913aa6e
 # ╠═96f05537-6fb3-45ce-8d75-28efdfa03279
 # ╠═3708eb56-53e4-43b8-8af4-e1f6e302a0cf
 # ╠═07da284a-8f21-4088-b936-244d11f517dd
@@ -1040,3 +1048,4 @@ plots
 # ╠═f578aafc-318f-4dc4-a574-0843057b1204
 # ╠═efefaff1-e6c7-46fa-bfa7-b4e6dec67641
 # ╠═262879f7-9441-4305-899a-b7c2881958fe
+# ╠═d2414490-d2a5-4862-81e8-8ae8ffc5213a

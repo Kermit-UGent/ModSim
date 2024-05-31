@@ -577,6 +577,9 @@ plots["LMA_100_100"] = lma_illustration(100, 100)
 # ╔═╡ 7ac71bef-c7f8-4a07-bc1f-7416757e70ac
 plots["LMA_50_150"] = lma_illustration(50, 150)
 
+# ╔═╡ b9e5e0bf-01a4-4a77-aec9-a081b606c66a
+plots["LMA"] = plot(plots["LMA_50_50"], plots["LMA_10_10"], plots["LMA_100_100"], plots["LMA_50_150"], size=(800, 600))
+
 # ╔═╡ c8da6437-9981-4198-bcb3-9cd081181aa9
 plots["NO_H2"] = plot(solve(reactsyst_prob, Rosenbrock23()), lw=2, ylabel="concentration [mol/L]", ls=:auto, idxs=[1,2,3,4])
 
@@ -758,6 +761,7 @@ length(plots)
 # ╠═a4fb682e-0ae4-4d78-9f27-a3d0a4b6031e
 # ╠═e57db960-151e-4a49-9e0b-ab60b08a09f4
 # ╠═7ac71bef-c7f8-4a07-bc1f-7416757e70ac
+# ╠═b9e5e0bf-01a4-4a77-aec9-a081b606c66a
 # ╠═c01904be-7ee0-4b43-bd29-6fac1e38b3c6
 # ╠═689f9c80-5680-4cc5-a60d-bacd846f0925
 # ╠═ad511e07-230f-4405-9613-40f2e55676e6

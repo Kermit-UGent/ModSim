@@ -144,6 +144,9 @@ sol_sde = solve(sprob_comp);
 # ╔═╡ 4f671499-19b2-426c-a689-2ee4b084f3d0
 md"## Discrete stochastic differential equations"
 
+# ╔═╡ 2ee4fe85-feed-471d-86e2-53212fc05650
+0.1/log(2)
+
 # ╔═╡ ade6e868-48ff-4b54-88ca-d180f115ca39
 function gillespie_sir(S₀, I₀, R₀, α, β, t_end)
 	S, I, R = S₀, I₀, R₀
@@ -594,6 +597,7 @@ plots
 # ╠═4f671499-19b2-426c-a689-2ee4b084f3d0
 # ╠═6e94632a-cad9-49ea-8cdc-e4ec55871682
 # ╠═bb562e40-daaf-47be-a1d0-1938bc227fc0
+# ╠═2ee4fe85-feed-471d-86e2-53212fc05650
 # ╟─e2dd1f82-031b-46eb-ac8e-9d03172db770
 # ╠═38802384-48b0-4d29-aab3-2578527f995b
 # ╠═ade6e868-48ff-4b54-88ca-d180f115ca39
