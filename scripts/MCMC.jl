@@ -574,8 +574,8 @@ The best way to have a chain that works well is to have a model that describes t
 
 # ╔═╡ 1b2a38dc-0caf-4c86-9910-8574fe10c48f
 @model function diffuse_prior(y1, y2)
-	μ ~ Flat()
-	σ ~ FlatPos(0.0)
+	μ ~ Turing.Flat()
+	σ ~ Turing.FlatPos(0.0)
 	y1 ~ Normal(μ, σ)
 	y2 ~ Normal(μ, σ)
 end
