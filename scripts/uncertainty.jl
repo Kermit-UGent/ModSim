@@ -118,6 +118,15 @@ l = 3 ± 5e-4;
 # ╔═╡ 8cf4e046-c979-4633-b922-43a46c914f3c
 c = log10(I0 / I) / (l * ϵ)
 
+# ╔═╡ a3f82cf6-b25d-4de1-b264-93d6e047ec6d
+md"Radius of a circle"
+
+# ╔═╡ 090f89e0-d1e2-4363-830e-4d0635749890
+r = 12.5 ± 0.2
+
+# ╔═╡ 660c25d8-bcc5-4de3-9d04-013356acd22a
+area = pi * r^2
+
 # ╔═╡ 06929445-f0ac-430f-a09f-1743f2de6f91
 md"## Local sensitivity"
 
@@ -188,11 +197,14 @@ sens_mm_mumax_rel = x -> sens_mm_mumax(x) / mm(x, 1, Ks)
 
 # ╔═╡ 415cbdec-71f3-4ac7-8479-14d0c7f6481c
 sir_summary = function(p)
+	stepsize = 0.1
     # beta, gamma = pars
     prob_new_pars = remake(sirprob; p = p)
-    sol = solve(prob_new_pars, Tsit5(); saveat = 0.1)
+    sol = solve(prob_new_pars, Tsit5(); saveat = stepsize)
     # effect on total and maximum of infected
-    return [0.1sum(sol[2, :]), maximum(sol[2, :])]
+	tot_infected = stepsize * sum(sol[2, :])
+	max_infected = maximum(sol[2, :])
+    return [tot_infected, max_infected]
 end
 
 # ╔═╡ 95b84eb0-d3e2-4cc3-882b-d3a4e82c1c4f
@@ -200,14 +212,6 @@ end
 
 # ╔═╡ 0ac6b303-183b-4256-8436-052071d989cd
 γ_vals = 1e-5:0.01:1
-
-# ╔═╡ 71e3de0e-03d6-491b-9a1d-071e03f1f6ef
-contourf(β_vals, γ_vals, (g, l)->sir_summary((g, l))[1], color=:speed,
-	xlab="β", ylab="γ", title="Cumulative number of infected")
-
-# ╔═╡ 164e1b01-18c8-4c23-b5a9-20c6c8d74ea8
-contourf(β_vals, γ_vals, (g, l)->sir_summary((g, l))[2], color=:speed,
-		xlab="β", ylab="γ", title="Cumulative number of infected")
 
 # ╔═╡ 3f6491cf-d9d2-4be0-a341-db1a1e891029
 md"## Sobol sensitivity"
@@ -341,6 +345,17 @@ plots["mm_sens_vmax_rel"] = plot(sens_mm_mumax_rel, 0, 100, lw=2, title="Michael
 # ╔═╡ 7e7956b5-43fc-48fb-92ff-67d0fdb875b1
 plots["mm_sens"] = plot(plots["mm_sens_Ks"], plots["mm_sens_Ks_rel"], plots["mm_sens_Ks_rel"], plots["mm_sens_vmax"], size=(1000, 800))
 
+# ╔═╡ 71e3de0e-03d6-491b-9a1d-071e03f1f6ef
+plots["cuminf"] = contourf(β_vals, γ_vals, (g, l)->sir_summary((g, l))[1], color=:speed,
+	xlab="β", ylab="γ", title="Cumulative number of infected")
+
+# ╔═╡ 164e1b01-18c8-4c23-b5a9-20c6c8d74ea8
+plots["maxinf"] = contourf(β_vals, γ_vals, (g, l)->sir_summary((g, l))[2], color=:speed,
+		xlab="β", ylab="γ", title="Maximum number of infected")
+
+# ╔═╡ 2a10a3cc-cc24-4a62-9090-7ba424024706
+plots["sir_heatmaps"] = plot(plots["cuminf"], plots["maxinf"], size=(800, 400))
+
 # ╔═╡ b964e1e9-1dd2-4029-a4b9-66944d2c39ba
 plots["sobol_sir_fo"] = groupedbar(["cumulative I", "maximum I"], sobol.S1, label=["β" "γ"], title="Sobol SIR first order", ylab="variance")
 
@@ -395,6 +410,9 @@ plots
 # ╠═ae807e33-3e05-4a3d-a591-2b0e04c9d6d8
 # ╠═260ba845-ae2f-4e9f-a2d0-f43c64648461
 # ╠═8cf4e046-c979-4633-b922-43a46c914f3c
+# ╠═a3f82cf6-b25d-4de1-b264-93d6e047ec6d
+# ╠═090f89e0-d1e2-4363-830e-4d0635749890
+# ╠═660c25d8-bcc5-4de3-9d04-013356acd22a
 # ╠═06929445-f0ac-430f-a09f-1743f2de6f91
 # ╠═11c32674-9817-4b0c-bcb2-235c431a5519
 # ╠═1ed87d81-4b19-4de3-9735-fc36894b64c7
@@ -432,6 +450,7 @@ plots
 # ╠═0ac6b303-183b-4256-8436-052071d989cd
 # ╠═71e3de0e-03d6-491b-9a1d-071e03f1f6ef
 # ╠═164e1b01-18c8-4c23-b5a9-20c6c8d74ea8
+# ╠═2a10a3cc-cc24-4a62-9090-7ba424024706
 # ╠═d8818694-9270-4882-bc50-2eff71ea1c7a
 # ╠═3f6491cf-d9d2-4be0-a341-db1a1e891029
 # ╠═6d1e0bc0-4b28-4353-8389-c5ff4d156b05
