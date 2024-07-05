@@ -275,6 +275,7 @@ begin
 		println("\tAIC : $aic")
 		println("\tBIC : $bic")
 		println("\tsigma : $(sqrt(last(mle.values)))")
+		println("\tk : $k")
 
 		aics[name] = aic
 		bics[name] = bic
