@@ -10,7 +10,8 @@ notebooks = Dict(
     #"simulation_tools.jl" => "simulation_tools",
     #"modelling_ODEs.jl" => "ODEs",
     #"optimization.jl" => "optimization",
-    "calibration.jl" => "calibration",  # LV very unstable, might need to rerun several times
+    #"calibration.jl" => "calibration",  # LV very unstable, might need to rerun several times
+    "uncertainty.jl" => "uncertainty",
 )
 
 
