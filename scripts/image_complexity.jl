@@ -10,6 +10,9 @@ using Colors, Images, Plots, PlutoUI, ColorSchemes, ImageIO
 # ╔═╡ a0622b2b-b9fe-4805-90d9-d5d9b860c0c6
 dims = 266, 266
 
+# ╔═╡ a9845cb8-ef04-48dc-a4a4-ba8c613d8145
+figures = Dict()
+
 # ╔═╡ aab37f4c-4c1a-4be2-ae66-c4aa67e16c3d
 n, m = dims
 
@@ -17,10 +20,10 @@ n, m = dims
 randc() = RGB(rand(), rand(), rand())
 
 # ╔═╡ 3747275a-dfed-47e3-a4f8-d0067605e816
-imgrand = [randc() for i in 1:n, j in 1:m]
+figures["random"] = imgrand = [randc() for i in 1:n, j in 1:m]
 
 # ╔═╡ 322d6e4b-999a-4658-a191-6b7ac1ae403d
-imgrows = repeat([randc() for i in 1:n], 1, m)
+figures["randomrows"] = imgrows = repeat([randc() for i in 1:n], 1, m)
 
 # ╔═╡ 7641560f-23c9-44e3-b4de-84bec08dd388
 function mandelbrot(c, maxiter=80)
@@ -50,7 +53,7 @@ end
 get(cs, 0.7)
 
 # ╔═╡ b3faeee5-9d51-418b-b70b-a394a76dc25e
-imgmandelbrot = compute_mandelbrot()
+figures["mandelbrod1"] = imgmandelbrot = compute_mandelbrot()
 
 # ╔═╡ 4c3aa5c2-088a-492f-a612-a3ba515515bd
 # ╠═╡ disabled = true
@@ -70,10 +73,7 @@ imgmandelbrot2 = compute_mandelbrot(-0.75-0.01, -0.75+0.01, + 0.11 - 0.01, 0.11+
 imgmandelbrot3 = compute_mandelbrot(-0.09-0.01, -0.09+0.01, + 0.651 - 0.01, 0.651+0.01)
 
 # ╔═╡ 48f19828-8ba4-4e5f-a676-37e65b2bbb58
-imgmandelbrot4 = compute_mandelbrot(-0.088-0.01, -0.088+0.01, + 0.654 - 0.01, 0.654+0.01)
-
-# ╔═╡ e602efbf-0370-4edf-8e2b-25312d250800
-rule=UInt8(30)
+figures["mandlebrot2"] = imgmandelbrot4 = compute_mandelbrot(-0.088-0.01, -0.088+0.01, + 0.654 - 0.01, 0.654+0.01)
 
 # ╔═╡ eb8e90a4-29e8-4c9a-b9c9-32d9eb694e37
 getbinarydigit(rule, i) = isodd(rule >> i)
@@ -107,7 +107,7 @@ function simulate(x0, rule::UInt8; nsteps=100)
 	n = length(x0)
 	X = zeros(Bool, nsteps+1, n)
 	X[1,:] = x0
-	for t in 1:nsteps
+	for t in 1:nsteps-1
 		x = @view X[t,:]
 		xnew = @view X[t+1,:]
 		update1dca!(xnew, x, rule)
@@ -118,6 +118,9 @@ end
 # ╔═╡ 17400d22-22fc-43fc-894b-029252b2eb4a
 #x0 = [i==m÷2 for i in 1:m]
 x0 = rand(Bool, m)
+
+# ╔═╡ e602efbf-0370-4edf-8e2b-25312d250800
+rule=UInt8(89)
 
 # ╔═╡ 31c4d521-76c7-4e4f-bfbb-726da1fa0d5a
 CA = simulate(x0, rule; nsteps=n)
@@ -132,7 +135,15 @@ c1 = colorant"#1e66f5"
 c2 = colorant"#df8e1d"
 
 # ╔═╡ 084bf722-c287-4821-a402-dbe2969daa04
-imca = ifelse.(CA, Ref(c1), Ref(c2))
+figures["CA"] = imca = ifelse.(CA, Ref(c1), Ref(c2))
+
+# ╔═╡ 433d0b84-0570-47c1-921f-384b2ded3c95
+for (n, img) in figures
+	save("../" * n *".png", img)
+end
+
+# ╔═╡ 0726e0df-96c7-47b9-ad4a-50cf28c6d31e
+
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1974,6 +1985,7 @@ version = "1.4.1+1"
 # ╔═╡ Cell order:
 # ╠═f913ef2c-3097-11ef-1c5c-b37475ff1d33
 # ╠═a0622b2b-b9fe-4805-90d9-d5d9b860c0c6
+# ╠═a9845cb8-ef04-48dc-a4a4-ba8c613d8145
 # ╠═aab37f4c-4c1a-4be2-ae66-c4aa67e16c3d
 # ╠═1267030a-70b2-41b3-9d3e-813a14a0cb8f
 # ╠═3747275a-dfed-47e3-a4f8-d0067605e816
@@ -1988,7 +2000,6 @@ version = "1.4.1+1"
 # ╠═009bbf67-ed83-4be9-9e86-c989ca804a3a
 # ╠═ca0146f6-8ac8-4167-b9ba-135c08bedd14
 # ╠═48f19828-8ba4-4e5f-a676-37e65b2bbb58
-# ╠═e602efbf-0370-4edf-8e2b-25312d250800
 # ╠═eb8e90a4-29e8-4c9a-b9c9-32d9eb694e37
 # ╠═1180704b-b144-496e-8b2d-eb78facb2c2e
 # ╠═40e75117-6d94-487f-9096-051ef9627cdc
@@ -1997,8 +2008,11 @@ version = "1.4.1+1"
 # ╠═17400d22-22fc-43fc-894b-029252b2eb4a
 # ╠═31c4d521-76c7-4e4f-bfbb-726da1fa0d5a
 # ╠═c9e944c1-4bca-4938-8276-ddc36c6ec505
+# ╠═e602efbf-0370-4edf-8e2b-25312d250800
 # ╠═36ffa0e5-48b2-4ef2-ab25-3460039a1aae
 # ╠═92a3caec-16b9-45b8-851b-bff90ada9e6b
 # ╠═084bf722-c287-4821-a402-dbe2969daa04
+# ╠═433d0b84-0570-47c1-921f-384b2ded3c95
+# ╠═0726e0df-96c7-47b9-ad4a-50cf28c6d31e
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
