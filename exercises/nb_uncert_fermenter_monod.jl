@@ -49,7 +49,7 @@ The *reaction network object* for this model could be set-up as:
 # ╔═╡ c551c33e-95b0-4ea8-85d4-6c68db72b8bc
 fermenter_monod = @reaction_network begin
     X * mm(S, μmax, Ks), S --> Y*X
-    Q/V, (S, X) --> ∅
+    Q/V, (S, X) --> 0
     Q/V*Sin, ∅ --> S
 end
 
@@ -86,7 +86,7 @@ Initialize a vector `u₀` with the initial conditions, and set the timespan:
 
 # ╔═╡ 6afb23f2-3da7-43e0-8a3b-fc4bb5eb9bde
 # u₀ = missing                 # Uncomment and complete the instruction
-u₀ = [:S => 0.0, :X => 0.01]
+u0 = [:S => 0.0, :X => 0.01]
 
 # ╔═╡ 1b09c8cb-d3b7-4a15-b6ed-d03019c5f57b
 # tspan = missing              # Uncomment and complete the instruction
@@ -111,7 +111,7 @@ We create the corresponding ODE problem and store it in `oprob_uncert`:
 
 # ╔═╡ 3cad11d6-c2eb-4865-858a-d407aa25d780
 # oprob_uncert = missing        # Uncomment and complete the instruction
-oprob_uncert = ODEProblem(fermenter_monod, u₀, tspan, params_uncert, combinatoric_ratelaws=false)
+oprob_uncert = ODEProblem(fermenter_monod, u0, tspan, params_uncert, combinatoric_ratelaws=false)
 
 # ╔═╡ a7b3b68f-d34e-4e9a-aa44-224919c44fec
 md"

@@ -195,7 +195,7 @@ To illustrate the simulation based on the Gillespie-algorithm, we will use the s
 
 # ╔═╡ a2349455-5850-4950-bb10-221ae813b26f
 md"
-Assume in this example that there are $50$ people on the territory, and that initially 1 person are infected. Hence, $I_0 = 1$, $S_0 = 50-I_0 = 49$, $D_0 = 0$ and $R_0 = 0$.\
+Assume in this example that there are $50$ people on the territory, and that initially 1 person is infected. Hence, $I_0 = 1$, $S_0 = 50-I_0 = 49$, $D_0 = 0$ and $R_0 = 0$.\
 Furthermore, we take the following values for the parameters: $\alpha = 0.15\;person/contact$, $\beta = 0.1\;contact/(person^2\,day)$, $r = 0.2\;day^{-1}$ (i.e. a person is contagious for an average of $5\;days$) and $m=0.6$.\
 Finally, we want to run our simulation from day $0$ till day $60$.
 "
@@ -208,7 +208,7 @@ The vector holding the initial conditions for $S$, $I$, $D$ and $R$ is:
 "
 
 # ╔═╡ bca8459b-8f05-4e4e-92f1-43659ef652ba
-u0 = [:S => 50, :I => 1, :D => 0, :R => 0]
+u0 = [:S => 49, :I => 1, :D => 0, :R => 0]
 
 # ╔═╡ ad8215f6-676e-4352-b0c9-8e9701da3bc6
 md"

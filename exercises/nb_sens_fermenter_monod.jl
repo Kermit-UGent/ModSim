@@ -81,11 +81,14 @@ parameters(fermenter_monod)
 
 # ╔═╡ 55f1d688-0c53-481b-9965-5e92ca87ad83
 md"
-The parameter values are $\mu_{max} = 0.30$, $K_s = 0.15$, $Y = 0.80$, $Q = 2.0$, $V = 40.0$ and $S_{in} = 2.2\;g/L$. Suppose that at $t$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of $0.01\;g/L$. Compute and plot the following in a timespan of $[0, 100]\,h$:
+The parameter values are $\mu_{max} = 0.30$, $K_s = 0.15$, $Y = 0.80$, $Q = 2.0$, $V = 40.0$ and $S_{in} = 2.2\;g/L$. Suppose that at $t$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of $0.01\;g/L$. Compute the following in a timespan of $[0, 100]\,h$:
 
-- The sensitivity of $S$ and $X$ to $\mu_{max}$.
-- The sensitivity of $S$ and $X$ to $K_s$.
-- The sensitivity of $S$ and $X$ to $S_{in}$.
+- The sensitivities of $S$ and $X$ on $\mu_{max}$, $K_s$ and $S_{in}$.
+
+Plot the following:
+- A figure with the sensitivity functions of $S$ and $X$ on $S_{in}$.
+- A figure with the sensitivity functions of $S$ on $\mu_{max}$, $K_s$ and $S_{in}$.
+- A figure with the sensitivity functions of $X$ on $\mu_{max}$, $K_s$ and $S_{in}$.
 
 Interpret your results.
 "
@@ -153,52 +156,91 @@ u, dp = extract_local_sensitivities(osol_sens)
 
 # ╔═╡ 97c3b8e7-31d5-4bad-8fc8-9c29641c449b
 md"
-Select by indexing and assigment the sensitivities of $S$ and $X$ to $\mu_{max}$, $K_s$ and $S_{in}$, to the variables `sens_μmax`, `sens_Ks` and `sens_Sin` respectively. Don't forget to transpose where necessary.
+Select by indexing and assign the normalized sensitivities of $S$ and $X$ on $\mu_{max}$, $K_s$ and $S_{in}$, to the variables `sens_μmax`, `sens_Ks` and `sens_Sin` respectively. Don't forget to transpose where necessary.
 
 **Remark:**
-- each of the elements `pd[i]` will contain two sensitivity functions (one of $S$ and one of $X$) to the `i`-th parameter. You can find the parameter indices of $\mu_{max}$, $K_s$ and $S_{in}$ by calling the function `parameters` in conjunction with the *reaction network* model name.
+- The variable `u` contains the outputs of $S$ and $X$.
+- The variable `dp` contains six elements (equal to the number of parameters).
+- Each of the elements `dp[i]` will contain two sensitivity functions (one of $S$ and one of $X$) on the `i`-th parameter. You can find the parameter indices of $\mu_{max}$, $K_s$ and $S_{in}$ by calling the function `parameters` in conjunction with the *reaction network* model name.
 "
 
 # ╔═╡ 2579de54-85d0-450e-8bbf-d116ea0b4ea0
-# Absolute sensitivity of S and X to μmax
+# Normalized sensitivity of S and X on μmax
 # sens_μmax = missing              # Uncomment and complete the instruction
-sens_μmax = dp[1]'
+sens_μmax = dp[1]'./u'.*0.30
 
 # ╔═╡ ea539e22-2c83-4032-805f-d75e04939ce9
-# Absolute sensitivity of S and X to Ks
+# Normalized sensitivity of S and X on Ks
 # sens_Ks   = missing              # Uncomment and complete the instruction
-sens_Ks   = dp[2]'
+sens_Ks   = dp[2]'./u'.*0.15
 
 # ╔═╡ 53bae966-90db-47d5-86ba-6664b4dfbc5f
-# Absolute sensitivity of S and X to Sin
+# Normalized sensitivity of S and X on Sin
 # sens_Sin  = missing              # Uncomment and complete the instruction
-sens_Sin  = dp[6]'
+sens_Sin  = dp[6]'./u'.*2.2
 
-# ╔═╡ 2fdbbd60-c2ca-4d29-935f-252dee50ca4f
+# ╔═╡ 940327a1-d5f7-4cbf-8640-08d58d6145ff
+sens_Sin[:,1]
+
+# ╔═╡ 980d84ea-e9dc-4491-bd6d-c5120a0ad88d
 md"
-Plot both sensitivity functions in separate notebook cells (with appropriate title and label):
+Plot the sensitivity functions of $S$ and $X$ on $S_{in}$.
+"
+
+# ╔═╡ cf885a1d-2ff5-4f62-bbbf-49d910a23779
+# Sensitivities of S and X on Sin
+# missing                          # Uncomment and complete the instruction
+plot(osol_sens.t, sens_Sin, title="Normalized sensitivities for S and X on Sin", label=["S on Sin" "X on Sin"])
+
+# ╔═╡ d41375ef-6958-4705-a417-4c6a491232ee
+md"
+Interpret your results. Try to answer the following question(s):
+- Which output variable $S$ or $X$ is most sensitive on $S_{in}$ in steady state?
+- Why is the sensitivity function of $S$ on $S_{in}$ at first positive but then becomes negative?
+"
+
+# ╔═╡ be89600a-4927-4afc-9813-d8a70adb2852
+md"
+Plot the sensitivity functions of $S$ on $\mu_{max}$, $K_s$ and $S_{in}$.
 "
 
 # ╔═╡ 0144d423-cd18-4604-bf61-3bbf479717b4
-# Absolute sensitivity of S and X to μmax
+# Sensitivity of S on μmax, Ks and Sin
 #  missing                         # Uncomment and complete the instruction
-plot(osol_sens.t, sens_μmax, title="Absolute sensitivity of S and X to μmax", label=["dS/dμmax" "dX/dμmax"])
+begin
+plot(osol_sens.t, sens_μmax[:,1], title="Normalized sensitivities", label="S on μmax")
+plot!(osol_sens.t, sens_Ks[:,1], label="S on Ks")
+plot!(osol_sens.t, sens_Sin[:,1], label="S on Sin")
+end
 
-# ╔═╡ 98100622-9d84-413a-8e4b-49e69a07f5c0
-# Absolute sensitivity of S and X to Ks
-# missing                          # Uncomment and complete the instruction
-plot(osol_sens.t, sens_Ks, title="Absolute sensitivity of S and X to Ks", label=["dS/dKs" "dX/dKs"])
-
-
-# ╔═╡ 85519f77-b106-4e22-bbd8-438fb2b8eb7c
-# Absolute sensitivity of S and X to Sin
-# missing                          # Uncomment and complete the instruction
-plot(osol_sens.t, sens_Sin, title="Absolute sensitivity for S and X on Ks", label=["dS/dSin" "dX/dSin"])
-
-
-# ╔═╡ 5aaecc5b-6303-4050-813e-d2185b6e686b
+# ╔═╡ ff86a29f-9308-473b-aa1c-dfd4af8179c7
 md"
-Draw your conclusions.
+Interpret your results. Try to answer the following question(s):
+- Which parameter $\mu_{max}$, $K_s$ or $S_{in}$ affects the output $S$ the most in steady state?
+- Why is the sensitivity function of $S$ on $K_s$ positive?
+- Why is the sensitivity function of $S$ on $\mu_{max}$ negative?
+"
+
+# ╔═╡ 16a84fdb-8ce2-45b9-bfb7-7f4e1284a1d7
+md"
+Plot the sensitivity functions of $X$ on $\mu_{max}$, $K_s$ and $S_{in}$.
+"
+
+# ╔═╡ 4af10995-d570-4d68-87ae-6958af5bf1ad
+# Sensitivity of X on μmax, Ks and Sin
+#  missing                         # Uncomment and complete the instruction
+begin
+plot(osol_sens.t, sens_μmax[:,2], title="Normalized sensitivities", label="X on μmax")
+plot!(osol_sens.t, sens_Ks[:,2], label="X on Ks")
+plot!(osol_sens.t, sens_Sin[:,2], label="X on Sin")
+end
+
+# ╔═╡ 355ca6a7-466b-4969-ab48-28e2257f9810
+md"
+Interpret your results. Try to answer the following question(s):
+- Which parameter $\mu_{max}$, $K_s$ or $S_{in}$ affects the output $X$ the most in steady state?
+- Why is the sensitivity function of $X$ on $K_s$ negative?
+- Why is the sensitivity function of $X$ on $\mu_{max}$ positive?
 "
 
 # ╔═╡ Cell order:
@@ -235,8 +277,13 @@ Draw your conclusions.
 # ╠═2579de54-85d0-450e-8bbf-d116ea0b4ea0
 # ╠═ea539e22-2c83-4032-805f-d75e04939ce9
 # ╠═53bae966-90db-47d5-86ba-6664b4dfbc5f
-# ╠═2fdbbd60-c2ca-4d29-935f-252dee50ca4f
+# ╠═940327a1-d5f7-4cbf-8640-08d58d6145ff
+# ╠═980d84ea-e9dc-4491-bd6d-c5120a0ad88d
+# ╠═cf885a1d-2ff5-4f62-bbbf-49d910a23779
+# ╠═d41375ef-6958-4705-a417-4c6a491232ee
+# ╠═be89600a-4927-4afc-9813-d8a70adb2852
 # ╠═0144d423-cd18-4604-bf61-3bbf479717b4
-# ╠═98100622-9d84-413a-8e4b-49e69a07f5c0
-# ╠═85519f77-b106-4e22-bbd8-438fb2b8eb7c
-# ╠═5aaecc5b-6303-4050-813e-d2185b6e686b
+# ╠═ff86a29f-9308-473b-aa1c-dfd4af8179c7
+# ╠═16a84fdb-8ce2-45b9-bfb7-7f4e1284a1d7
+# ╠═4af10995-d570-4d68-87ae-6958af5bf1ad
+# ╠═355ca6a7-466b-4969-ab48-28e2257f9810

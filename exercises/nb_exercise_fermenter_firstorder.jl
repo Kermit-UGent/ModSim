@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.40
 
 using Markdown
 using InteractiveUtils
@@ -47,10 +47,11 @@ Create a *reaction network object* model for the aforementioned problem in order
 
 
 # ╔═╡ 331a34f4-89d4-4193-896c-c14ab0bf04e7
+# Uncomment and complete the instruction
 # fermenter_firstorder = @reaction_network begin
-#     ...        # Y*X is created from one S at a rate β
-#     ...        # S is created at a rate Q/V*Sin
-#     ...        # S and X are degraded at a rate Q/V*S
+#     missing        # Y*X is created from one S at a rate β
+#     missing        # S is created at a rate Q/V*Sin
+#     missing        # S and X are degraded at a rate Q/V*S
 # end
 fermenter_firstorder = @reaction_network begin
     β, S --> Y*X        # Y*X is created from one S at a rate β
@@ -64,7 +65,7 @@ Convert the system to a symbolic differential equation model and verify, by anal
 "
 
 # ╔═╡ ec9cb3bd-f5ed-4ab0-9b3d-b875692227ac
-# osys = ...
+# osys = missing           # Uncomment and complete the instruction
 osys = convert(ODESystem, fermenter_firstorder)
 
 # ╔═╡ 67117a27-dcea-4b43-b962-9ad9fd07f4f4
@@ -79,7 +80,7 @@ Initialize a vector `u₀` with the initial conditions:
 "
 
 # ╔═╡ 4b556cf0-8fad-434d-be56-dc1848d898ae
-# u0 = ...            # Uncomment and complete the instruction
+# u0 = missing            # Uncomment and complete the instruction
 u0 = [:S => 0.1068, :X => 1.6746]
 
 # ╔═╡ ea55d648-7575-43c3-a385-5f4979996ef2
@@ -88,16 +89,16 @@ Set the timespan for the simulation:
 "
 
 # ╔═╡ 1365c12e-e662-4858-983b-02ba94cd9f0d
-# tspan = ...         # Uncomment and complete the instruction
+# tspan = missing         # Uncomment and complete the instruction
 tspan = (0.0, 120.0)
 
 # ╔═╡ 3941bd60-a83c-4f72-84b3-28e28cb845d0
 md"
-Initialize a vector `param` with the parameter values:
+Initialize a vector `params` with the parameter values:
 "
 
 # ╔═╡ d6c1316a-cf96-43d1-854a-f25925cf4a55
-# params = ...         # Uncomment and complete the instruction
+# params = missing         # Uncomment and complete the instruction
 params = [:β => 0.98, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2]
 
 # ╔═╡ 4926b941-c3b6-4804-b4a4-11e13e5186f2
@@ -115,7 +116,7 @@ Create the *condition* that contains the timepoint for the sudden change in $S_{
 "
 
 # ╔═╡ 1e6a4e2f-044a-4797-b8ab-6a3756a0fea0
-# condition = ...           # Uncomment and complete the instruction
+# condition = missing           # Uncomment and complete the instruction
 condition = [20.0]
 
 # ╔═╡ 772bcf35-0308-4106-9268-d844850db3a3
@@ -124,7 +125,7 @@ Determine the index number of the relevant parameter that needs to be modified i
 "
 
 # ╔═╡ c5e0c018-c586-445c-bb15-083e2e059cb3
-# ...                       # Uncomment and complete the instruction
+# missing                       # Uncomment and complete the instruction
 parameters(fermenter_firstorder)
 
 # ╔═╡ 0e8fb79d-4655-4a57-9b76-f151f4098fdb
@@ -135,7 +136,7 @@ Create a function called `affect!`, that will be called by the solver at the tim
 # ╔═╡ 589bdea5-673a-46fd-861b-f4fef40aea62
 # Uncomment and complete the instruction
 # function affect!(integrator)
-#     ...
+#     missing
 # end
 function affect!(integrator)
     integrator.p[5] = 3.4
@@ -147,7 +148,7 @@ Create the callback function using `condition` and `affect!`. Store it in `cb`:
 "
 
 # ╔═╡ f688a7a0-1b2b-4e60-9d1a-444f09576176
-# cb = ...           # Uncomment and complete the instruction
+# cb = missing           # Uncomment and complete the instruction
 cb = PresetTimeCallback(condition, affect!)
 
 # ╔═╡ 1fcb6283-eefa-4aa4-a7a5-1e90e8d6d814
@@ -156,7 +157,7 @@ Solve the ODE problem. Use `Tsit5()` and `saveat=0.5`. Store the solution in `os
 "
 
 # ╔═╡ 03eadcc9-29f4-4141-bf20-94a5d62f8655
-# osol = ...         # Uncomment and complete the instruction
+# osol = missing         # Uncomment and complete the instruction
 osol = solve(deepcopy(oprob), Tsit5(), saveat=0.5, callback=cb)
 
 # ╔═╡ 39ef225d-3222-4998-bfd4-5ff88f74a0f9
@@ -165,7 +166,7 @@ Plot the results:
 "
 
 # ╔═╡ 76849cf5-170b-452b-acdd-c4017feaad18
-# ...
+# missing
 plot(osol)
 
 # ╔═╡ 040f040f-aa28-442e-9f44-2a897e22ed4f
@@ -173,9 +174,9 @@ md"
 Interpret the results. Ask yourself the following questions:
 
 1. Can you clearly see the effect of the increase in $S_{in}$?
-- Answer: ...
+- Answer: missing
 2. Can you argue, by means of reasoning or by determining and analyzing the operating point, why the increase of $X$ is larger than the increase of $S$?
-- Answer: ...
+- Answer: missing
 "
 
 

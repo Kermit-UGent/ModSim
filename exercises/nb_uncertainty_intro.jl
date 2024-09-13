@@ -97,9 +97,18 @@ Implementation of the system:
 
 # ╔═╡ 460d98ef-2177-49bf-87a4-35412f4183ed
 growth_mod_log = @reaction_network begin
-    μ*W, ∅ --> W
-    μ/Wf*W, W --> ∅
+    #μ*W, 0 --> W
+    #μ/Wf*W, W --> 0
+	μ*(1-W/Wf), W --> 2W
 end
+
+# ╔═╡ 38e0f746-1d04-46ba-81cc-21522b9ce6a4
+md"
+Convert the *reaction model* to check that we work with the correct differential equation:
+"
+
+# ╔═╡ 2538bd6e-027f-47fe-813c-db0a02586d2c
+osys_log  = convert(ODESystem, growth_mod_log)
 
 # ╔═╡ 72b53ba6-dd05-4f2d-a65e-52783e76a1e9
 md"
@@ -112,7 +121,7 @@ Setting initial conditions:
 "
 
 # ╔═╡ 048112b0-10f1-47c5-834f-c3851d3078e8
-u₀_log = [:W => 2.0]
+u0_log = [:W => 2.0]
 
 # ╔═╡ 037cbf2b-dc0c-4b62-879b-aa702c964877
 md"
@@ -152,7 +161,7 @@ We create the corresponding ODE problem and store it in `oprob1_uncert_log`:
 "
 
 # ╔═╡ 2fc91add-8468-4402-bcd8-42da5544f612
-oprob1_uncert_log = ODEProblem(growth_mod_log, u₀_log, tspan, params1_uncert_log)
+oprob1_uncert_log = ODEProblem(growth_mod_log, u0_log, tspan, params1_uncert_log)
 
 # ╔═╡ 5fa951d3-23ee-4510-873c-8158df4f2faf
 md"
@@ -194,7 +203,7 @@ We create the corresponding ODE problem and store it in `oprob2_uncert_log`:
 "
 
 # ╔═╡ 50cc4ee1-6601-442c-bac7-4d23b07db87e
-oprob2_uncert_log = ODEProblem(growth_mod_log, u₀_log, tspan, params2_uncert_log)
+oprob2_uncert_log = ODEProblem(growth_mod_log, u0_log, tspan, params2_uncert_log)
 
 # ╔═╡ 6d69f64e-8e3a-46e5-bb2d-bfb6f55e129e
 md"
@@ -236,7 +245,7 @@ We create the corresponding ODE problem and store it in `oprob_uncert_log`:
 "
 
 # ╔═╡ f209f4fb-985c-4a9b-b4dd-d50cc3fae1cf
-oprob_uncert_log = ODEProblem(growth_mod_log, u₀_log, tspan, params_uncert_log)
+oprob_uncert_log = ODEProblem(growth_mod_log, u0_log, tspan, params_uncert_log)
 
 # ╔═╡ de96646b-b752-4f72-ac78-2a503478bf50
 md"
@@ -278,8 +287,8 @@ A possible *reaction network object* for the exponential growth model can be imp
 
 # ╔═╡ 97bdfce1-a670-469a-b8a9-34e1d1964409
 growth_exp = @reaction_network begin
-    μ*Wf, ∅ --> W
-    μ, W --> ∅
+    μ*Wf, 0 --> W
+    μ, W --> 0
 end
 
 # ╔═╡ 52991cca-0365-48fb-b157-62a71c5573ee
@@ -288,7 +297,7 @@ The vector `u₀_exp` with the initial condition is:
 "
 
 # ╔═╡ f7241453-755e-466c-a963-a504bc9ea446
-u₀_exp = [:W => 2.0]
+u0_exp = [:W => 2.0]
 
 # ╔═╡ 11b81610-90b1-4d71-aeba-0bf33709dbda
 md"
@@ -307,7 +316,7 @@ Create the corresponding ODE problem and store it in `oprob_uncert_exp`:
 
 # ╔═╡ 7fcec514-192b-4694-b149-14f5f87bae17
 # oprob_uncert_exp = missing       # Uncomment and complete the instruction
-oprob_uncert_exp = ODEProblem(growth_exp, u₀_exp, tspan, params_uncert_exp)
+oprob_uncert_exp = ODEProblem(growth_exp, u0_exp, tspan, params_uncert_exp)
 
 # ╔═╡ bd120dbc-827a-499a-a11c-25423ec5f397
 md"
@@ -348,8 +357,9 @@ A possible *reaction network object* for the Gompertz growth model can be implem
 
 # ╔═╡ 3e16bd3a-898a-49f9-9ed1-8998be7dc045
 growth_gom = @reaction_network begin
-    -μ, W --> ∅
-    D*log(W), W --> ∅
+#    -μ, W --> ∅
+#    D*log(W), W --> ∅
+	μ-D*log(W), W --> 2W
 end
 
 # ╔═╡ db2f002f-20b7-4b5c-8d59-85b089fb3e59
@@ -358,7 +368,7 @@ The vector `u₀_gom` with the initial condition is:
 "
 
 # ╔═╡ 22a0013b-04f9-4148-9344-10bee1def0cf
-u₀_gom = [:W => 2.0]
+u0_gom = [:W => 2.0]
 
 # ╔═╡ f4fff573-6533-4ac3-897d-840a9aaf55f1
 md"
@@ -377,7 +387,7 @@ Create the corresponding ODE problem and store it in `oprob_uncert_log`:
 
 # ╔═╡ 1aed2273-7b3e-4a49-a8d0-91251c58b700
 # oprob_uncert_gom = missing      # Uncomment and complete the instruction
-oprob_uncert_gom = ODEProblem(growth_gom, u₀_gom, tspan, params_uncert_gom)
+oprob_uncert_gom = ODEProblem(growth_gom, u0_gom, tspan, params_uncert_gom)
 
 # ╔═╡ 76da6edd-9e9f-4f5b-8673-b737c8f9c5f8
 md"
@@ -421,6 +431,8 @@ Draw your conclusions:
 # ╠═9d3192bc-ee69-44a1-9273-06b8a55c60ef
 # ╠═8acb7ea2-54ef-428b-bb4f-364377d2c38d
 # ╠═460d98ef-2177-49bf-87a4-35412f4183ed
+# ╠═38e0f746-1d04-46ba-81cc-21522b9ce6a4
+# ╠═2538bd6e-027f-47fe-813c-db0a02586d2c
 # ╠═72b53ba6-dd05-4f2d-a65e-52783e76a1e9
 # ╠═5185d0eb-7392-4775-9336-3e0f9e1449ce
 # ╠═1a67db96-6973-446d-aa5b-253dd0008a73

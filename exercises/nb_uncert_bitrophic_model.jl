@@ -48,9 +48,9 @@ The *reaction network object* for this model could be set-up as:
 
 # ╔═╡ 90e9da81-7576-43bb-b4ce-1293a48bf3ec
 bitrophic_model = @reaction_network begin
-    θ*(1-C/k)*C, ∅ --> C
-    f*A, C --> ϕ*A
-    (1+p)*μ, A --> ∅
+	θ*(1-C/k), C --> 2C
+	f, C+A --> (1+ϕ)*A
+    (1+p)*μ, A --> 0
 end
 
 # ╔═╡ 465e4ea9-7066-4929-98c4-e5c378ef34d8
@@ -74,7 +74,7 @@ Initialize a vector `u₀` with the initial conditions, and set the timespan:
 
 # ╔═╡ 79802166-efbd-4944-ae58-fb26a5d9ad4b
 # u₀ = missing               # Uncomment and complete the instruction
-u₀ = [:C => 100, :A => 0.5]
+u0 = [:C => 100, :A => 0.5]
 
 # ╔═╡ 146855a0-5cda-4783-89af-7918c067e952
 # tspan = missing
@@ -96,7 +96,7 @@ We create the corresponding ODE problem and store it in `oprob_uncert`:
 
 # ╔═╡ 60a6fb20-93d2-47d3-8ee1-3087d48c569d
 # oprob_uncert = missing       # Uncomment and complete the instruction
-oprob_uncert = ODEProblem(bitrophic_model, u₀, tspan, params_uncert, combinatoric_ratelaws=false)
+oprob_uncert = ODEProblem(bitrophic_model, u0, tspan, params_uncert, combinatoric_ratelaws=false)
 
 # ╔═╡ 0739d816-0456-4cc2-beb7-2e926cf2e229
 md"

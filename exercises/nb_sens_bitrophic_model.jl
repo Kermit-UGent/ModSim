@@ -56,9 +56,9 @@ Set up a *reaction network* model by analysing the terms in the above differenti
 md"
 Set up a *reaction network* model and name it `bitrophic_model`.\
 Hints:
--  $C$ is being created at a rate $\theta C \left(1-\frac{C}{k}\right)$
--  $C$ is being converted into a fraction $\phi$ of $A$ at a rate $f A$
--  $A$ is being degraded at a rate $(1 + p)\, \mu A$
+-  $C$ is growing (i.e., $C \rightarrow 2C$) at a rate $\theta \left(1-\frac{C}{k}\right)$.
+-  The insects $A$ eat crops $C$ (i.e., $C + A$) at a rate $f$ resulting in an increase of a factor of $\phi$ more insects (i.e., $(1+\phi)A$).
+-  The insects $A$ are dying (i.e., $A \rightarrow 0$) at a rate $(1 + p)\, \mu$.
 "
 
 # ╔═╡ 0b902d89-f0c2-4621-998e-7013931315ae
@@ -68,9 +68,9 @@ Hints:
 #     missing        # Uncomment and complete the instruction
 # end
 bitrophic_model = @reaction_network begin
-    θ*(1-C/k)*C, ∅ --> C
-    f*A, C --> ϕ*A
-    (1+p)*μ, A --> ∅
+	θ*(1-C/k), C --> 2C
+	f, C+A --> (1+ϕ)*A
+    (1+p)*μ, A --> 0
 end
 
 # ╔═╡ 92027dcf-9765-4fad-a0a4-f19967ce6bce
@@ -98,7 +98,7 @@ Initialize a vector `u₀` with the initial conditions, define the timespan in `
 
 # ╔═╡ 7769c7a5-5f19-4e1a-8721-41ee03c2024e
 # u₀ = missing         # Uncomment and complete the instruction
-u₀ = [:C => 100, :A => 0.5]
+u0 = [:C => 100, :A => 0.5]
 
 # ╔═╡ 00453a3c-88d1-4cc4-a8f2-d4fa2eed0b66
 # tspan = missing      # Uncomment and complete the instruction
@@ -115,7 +115,7 @@ Create the ODE problem and store it in `oprob`. Next, solve the ODE problem usin
 
 # ╔═╡ 1c185585-7c7a-4073-85f5-8300d3fe19e4
 # oprob = missing       # Uncomment and complete the instruction
-oprob = ODEProblem(bitrophic_model, u₀, tspan, params)
+oprob = ODEProblem(bitrophic_model, u0, tspan, params)
 
 # ╔═╡ 2f1b4426-7235-4caf-84ed-ec6e04eaa34a
 # osol = missing        # Uncomment and complete the instruction
@@ -166,54 +166,96 @@ u, dp = extract_local_sensitivities(osol_sens)
 
 # ╔═╡ 8b39af5a-2d86-48bd-abf0-8fd00a371c83
 md"
-Select by indexing and assigment the sensitivities of $C$ and $A$ to $\theta$, $\phi$ and $p$, to the variables `sens_theta`, `sens_phi` and `sens_p` respectively. Don't forget to transpose where necessary.
+Select by indexing and assign the normalized sensitivities of $C$ and $A$ on $\theta$, $\phi$ and $p$, to the variables `sens_theta`, `sens_phi` and `sens_p` respectively. Don't forget to transpose where necessary.
 
 **Remark:**
-- each of the elements `pd[i]` will contain two sensitivity functions (one of $C$ and one of $A$) to the `i`-th parameter. You can find the parameter indices of $\theta$, $\phi$ and $p$ by calling the function `parameters` in conjunction with the *reaction network* model name.
+- The variable `u` contains the outputs of $C$ and $A$.
+- The variable `dp` contains six elements (equal to the number of parameters).
+- Each of the elements `pd[i]` will contain two sensitivity functions (one of $C$ and one of $A$) to the `i`-th parameter. You can find the parameter indices of $\theta$, $\phi$ and $p$ by calling the function `parameters` in conjunction with the *reaction network* model name.
 "
 
 # ╔═╡ 6397e7a3-6265-4e84-9025-4617736c0ded
-# Select sensitivity of C and A to θ
+# Normalized sensitivity of C and A on θ
 # sens_theta = missing             # Uncomment and complete the instruction
-sens_theta = dp[1]'
+sens_theta = dp[1]'./u'.*0.2
 
 # ╔═╡ ca36a17c-978a-43f1-ab19-06785ed6963f
-# Select sensitivity of C and A to ϕ
+# Normalized sensitivity of C and A on ϕ
 # sens_phi   = missing             # Uncomment and complete the instruction
-sens_phi   = dp[4]'
+sens_phi   = dp[4]'./u'.*0.2
 
 # ╔═╡ 17726224-7bf7-48f3-8763-e636de3b6775
-# Select sensitivity of C and A to p
+# Normalized sensitivity of C and A on p
 # sens_p     = missing             # Uncomment and complete the instruction
-sens_p     = dp[5]'
+sens_p     = dp[5]'./u'.*3.0
 
 # ╔═╡ 3814640e-ed0b-48a1-b4ac-6b7f04d899f3
 md"
-Plot both sensitivity functions in separate notebook cells (with appropriate title and label):
+Plot the sensitivity functions of $C$ and $A$ on $\theta$.
 "
 
 # ╔═╡ cda325f3-7086-4503-94d7-a954a0cbd90d
-# Plot sensitivity of C and A to θ
+# Plot sensitivity of C and A on θ
 # missing
-plot(osol_sens.t, sens_theta, title="Absolute sensitivity of C and A to θ", label=["dC/dθ" "dA/dθ"])
+plot(osol_sens.t, sens_theta, title="Normalized sensitivity of C and A on θ", label=["C on θ" "A on θ"])
+
+# ╔═╡ a8257414-2d6a-4913-9f05-6369c62189e8
+md"
+Interpret your results. Try to answer the following question(s):
+
+- In steady state, does $\theta$ have any influence on $C$? Explain why this could be.
+    - Answer: missing
+- In steady state, why does $\theta$ have a positive effect on $A$? Explain why this could be.
+    - Answer: missing
+"
+
+# ╔═╡ 882f2f6b-eb58-4c8f-877e-76e460900c0c
+md"
+Plot the sensitivity functions of $C$ and $A$ on $\phi$.
+"
 
 # ╔═╡ 83903533-f8c1-4217-a930-4fddb885ff61
-# Plot sensitivity of C and A to ϕ
+# Plot sensitivity of C and A on ϕ
 # missing
-plot(osol_sens.t, sens_phi, title="Absolute sensitivity of C and A to ϕ", label=["dC/dϕ" "dA/dϕ"])
+plot(osol_sens.t, sens_phi, title="Normalized sensitivity of C and A to ϕ", label=["C on ϕ" "A on ϕ"])
+
+# ╔═╡ 0bd84cf5-c0a2-4bb2-b5f4-f16da6eaab04
+md"
+Plot the sensitivity functions of $C$ and $A$ on $p$.
+"
 
 # ╔═╡ 3eeb967d-ea9b-44da-af4c-d829a861c803
-# Plot sensitivity of C and A to p
+# Plot sensitivity of C and A on p
 # missing
-plot(osol_sens.t, sens_p, title="Absolute sensitivity of C and A to p", label=["dC/dp" "dA/dp"])
+plot(osol_sens.t, sens_p, title="Normalized sensitivity of C and A to p", label=["C on p" "A on p"])
 
-# ╔═╡ 3a4be902-38ec-412f-9d25-1472f1371b5f
+# ╔═╡ 869a9dc3-8227-4c6e-8901-198cafb489e2
 md"
-Analyse the sensitivity functions. Ask yourself the following questions:
+Interpret your results. Try to answer the following question(s):
 
 1. In steady state, does $\phi$ have a positive or negative effect on $C$? Explain why this could be.
     - Answer: missing
 2. In steady state, does $p$ have a positive or negative effect on $C$? Explain why this could be.
+    - Answer: missing
+"
+
+# ╔═╡ 51d02232-16a1-4c9b-8687-a4f01c95d6a8
+md"
+Plot the sensitivity functions of $C$ on $\theta$, $\phi$ and $p$.
+"
+
+# ╔═╡ 9b798f10-f198-4318-a9dc-f3df4cfa334f
+begin
+plot(osol_sens.t, sens_theta[:,1], title="Normalized sensitivities", label="C on θ")
+plot!(osol_sens.t, sens_phi[:,1], label="C on ϕ")
+plot!(osol_sens.t, sens_p[:,1], label="C on p")
+end
+
+# ╔═╡ 69ab3441-220d-46d0-95cd-080249d403d8
+md"
+Interpret your results. Try to answer the following question(s):
+
+- In steady state, which of the three parameters do significantly influence $C$? Explain why this could be.
     - Answer: missing
 "
 
@@ -254,6 +296,12 @@ Analyse the sensitivity functions. Ask yourself the following questions:
 # ╠═17726224-7bf7-48f3-8763-e636de3b6775
 # ╠═3814640e-ed0b-48a1-b4ac-6b7f04d899f3
 # ╠═cda325f3-7086-4503-94d7-a954a0cbd90d
+# ╠═a8257414-2d6a-4913-9f05-6369c62189e8
+# ╠═882f2f6b-eb58-4c8f-877e-76e460900c0c
 # ╠═83903533-f8c1-4217-a930-4fddb885ff61
+# ╠═0bd84cf5-c0a2-4bb2-b5f4-f16da6eaab04
 # ╠═3eeb967d-ea9b-44da-af4c-d829a861c803
-# ╠═3a4be902-38ec-412f-9d25-1472f1371b5f
+# ╠═869a9dc3-8227-4c6e-8901-198cafb489e2
+# ╠═51d02232-16a1-4c9b-8687-a4f01c95d6a8
+# ╠═9b798f10-f198-4318-a9dc-f3df4cfa334f
+# ╠═69ab3441-220d-46d0-95cd-080249d403d8

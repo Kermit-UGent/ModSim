@@ -42,26 +42,24 @@ md"
 ## Goal of this practicum
 "
 
-# ╔═╡ 89b3701a-dc0c-4e8d-ba6b-b02e218ff79b
-md"
+# ╔═╡ 3cb0a166-ac53-4c3f-9832-e93742040cfb
+md"""
 In the models discussed in the previous sessions, we always knew the values of all parameters. In reality, the value of a parameter has to be calibrated, hence, estimated from experimental data. During this parameter estimation one attempts to find the set of parameter values for which the model predictions are as close as possible to the collected experimental data.
+"""
 
-The search involves an objective function $J(\boldsymbol{\theta})$. This represents a measure for the distance (i.e. a single number, a scaler) between the model predictions and the data, as measured by the **S**um of **S**quared **R**esiduals (SSR):
+# ╔═╡ 9319f77e-8d2a-4965-8f72-3892b01e6dfa
+# https://stats.stackexchange.com/questions/514232/differences-between-mle-and-map-estimators
 
-$$\begin{equation}
-J(\boldsymbol{\theta})=\frac{1}{\sigma^{2}_{1}}\sum_{j=1}^{N_1}\left(y_{1,j}-\hat{y}_{1,j}(\boldsymbol{\theta})\right)^{2}+\frac{1}{\sigma^{2}_{2}}\sum_{j=1}^{N_2}\left(y_{2,j}-\hat{y}_{2,j}(\boldsymbol{\theta})\right)^{2}+\ldots + \frac{1}{\sigma^{2}_{v}}\sum_{j=1}^{N_v}\left(y_{v, j}-\hat{y}_{v,j}(\boldsymbol{\theta})\right)^{2}.
-\end{equation}$$
+# ╔═╡ 987f0a4d-e416-4ceb-adbe-3dcdca9d0996
+md"""
+The search of optimal parameter values usually involves a function, such as a loss function, a (log) likelihood function or a posterior distribution function. In this session we will be (mainly) using the MLE (Maximum Likelihood Estimation) and MAP (Maximum A Posteriori estimation) methods.
 
-Here $y_{i,j}$ represents the $j$-th experimental data point for the $i$-th output variable; $\hat{y}_{i,j}(\boldsymbol{\theta})$ represents the model prediction associated with this data point, evaluated with the parameter values $\boldsymbol{\theta}$. The difference $(y_{i,j}-\hat{y}_{i,j}(\boldsymbol{\theta}))$ is called a *residual*. The number of data points collected for the $i$-th output variable is $N_i$, and the measurement error associated with the data collected for the $i$-th output variable is $\sigma_i$. The terms $1/\sigma_i^2$ thus ensure that the contribution of the different output variables to the objective function is weighted by the precision with which these output variables can be measured.
+In the MLE method, a likelihood function of a given probability density function is maximized during the search of optimal parameter values of a model in order to fit experimental data. The parameter values are considered unknown but viewed as fixed points.
 
-Thus, the estimation of the parameters is reduced to finding the set of parameter values $\hat{\boldsymbol{\theta}}$ for which the objective function is minimized, or mathematically:
+In the MAP method, a posterior distribution function is maximized. Instead of viewing the parameter values as fixed points, they are now treated as random variables in the model which follow a prior distribution. In other words, we have prior belief in which distribution these parameters come from (Normal, Beta, etc). Once new data comes in, we update our prior belief, leading to a posterior belief. Hence, we now have a better idea from which distribution these parameters come.
 
-$$\begin{equation*}
-\hat{\boldsymbol{\theta}} = \textrm{argmin}_{\boldsymbol{\theta}} J(\boldsymbol{\theta}).
-\end{equation*}$$
-
-meaning that $\hat{\boldsymbol{\theta}}$ is the argument $\boldsymbol{\theta}$ that minimizes the objective function $J(\boldsymbol{\theta})$.
-"
+One caveat with the MAP method is that it only considers the most likely point without taking into account other values of parameters from posterior distribution, which leads to a huge loss of useful information in posterior distribution. A better, yet computationally exhaustive method is using the MCMC (Markov chain Monte Carlo) sampling methods. Here we will use the NUTS sampler in this session. 
+"""
 
 # ╔═╡ 75efff36-8da7-4d04-afa2-a2f8324bc103
 md"
@@ -97,6 +95,9 @@ md"
 In each of the three models we will use the following timespan:
 "
 
+# ╔═╡ 5b320989-3e0b-447b-bc9a-25fb221ce609
+tspan = (0.0, 100.0)   # this will be the same for the three models
+
 # ╔═╡ 2481cd4f-0efc-4450-ab3d-4a5492597f36
 md"
 Variables containing the initial condition and parameters values will be defined later in the objective function.
@@ -111,8 +112,7 @@ We will illustrate the calibration with the logistic growth model:
 
 # ╔═╡ ba56adb1-9405-40d5-be48-4273b42ab145
 growth_log = @reaction_network begin
-    μ*W, ∅ --> W
-    μ/Wf*W, W --> ∅
+	μ*(1-W/Wf), W --> 2W
 end
 
 # ╔═╡ f4748167-b635-47a1-9015-32e1258c0afa
@@ -129,13 +129,19 @@ Next, we will need to create an `ODEProblem` in advance before we can optimize s
 "
 
 # ╔═╡ e54ea8d1-0854-44fa-aed8-45d106e921e4
-u₀_log = [:W => 2.0]
+u0_log = [:W => 2.0]
+
+# ╔═╡ 5f9005c7-5574-4717-81c8-d725a0fb2692
+# ╠═╡ disabled = true
+#=╠═╡
+tspan = (0.0, 100.0)
+  ╠═╡ =#
 
 # ╔═╡ 8d96eb17-ce19-4523-916f-3cd0441a16ca
 params_log = [:μ => 0.07, :Wf => 10.0]
 
 # ╔═╡ 5c9db9df-0cbd-41ac-afe9-fb5616c967be
-oprob_log = ODEProblem(growth_log, u₀_log, tspan, params_log)
+oprob_log = ODEProblem(growth_log, u0_log, tspan, params_log)
 
 # ╔═╡ 1aa44f2b-6f33-437f-b9dd-89762d9f28ea
 md"
@@ -188,17 +194,17 @@ We will thereby take an Inverse Gamma prior distribution for $\sigma_W$ and Unif
 # ╔═╡ 8a9115eb-4044-4cab-a7db-39b5dd86c70d
 @model function growth_log_inference(t_meas, W)
     σ_W ~ InverseGamma()
-    W₀ ~ Uniform(0, 10)
+    W0 ~ Uniform(0, 10)
     μ ~ Uniform(0, 1)
     Wf ~ Uniform(0, 100)
-    osol_log = solve(remake(oprob_log; u0=[W₀]), Tsit5(), saveat=t_meas, p=[μ, Wf])
+    osol_log = solve(remake(oprob_log; u0=[W0]), Tsit5(), saveat=t_meas, p=[μ, Wf])
     W ~ MvNormal(osol_log[:W], σ_W^2 * I)
 end
 
 # ╔═╡ 48c9f616-d298-40da-b917-225abd39b3d9
 md"
 Some remarks:
-- If one want to optimize the initial condition(s), the optimization algorithm will need to overwrite the initial condition, therefore, we use `remake(oprob_log; u0=[W₀])`. Note the **semi colon** between both arguments! If the initial condition is not being optimized you can just write `oprob_log`.
+- If one want to optimize the initial condition(s), the optimization algorithm will need to overwrite the initial condition, therefore, we use `remake(oprob_log; u0=[W0])`. Note the **semi colon** between both arguments! If the initial condition is not being optimized you can just write `oprob_log`.
 - The time points are the ones from the measurements, therefore, we set: `saveat=t_meas`.
 - The same here, the optimization algorithm will need to overwrite the parameters, therefore we need to place all parameters in the option `p=[...]` in the `solve` function in the same order as in the reaction network model.
 "
@@ -243,13 +249,13 @@ You can obtain the actual optimized values using the function `coef` on the resu
 "
 
 # ╔═╡ 30399b9a-1d77-4140-9ad3-5eed636a5b99
-W₀_opt = coef(results_log_mle)[:W₀]
+W0_opt1_log = coef(results_log_mle)[:W0]
 
 # ╔═╡ e1b8e4ba-c1f1-48d5-87a2-edce19c9fe7a
-μ_opt = coef(results_log_mle)[:μ]
+μ_opt1_log = coef(results_log_mle)[:μ]
 
 # ╔═╡ a943e0fe-1376-4ef1-9c45-25c6f95e3b96
-Wf_opt = coef(results_log_mle)[:Wf]
+Wf_opt1_log = coef(results_log_mle)[:Wf]
 
 # ╔═╡ 72e065d4-7b1b-4f46-b373-935be8d801fc
 md"
@@ -262,7 +268,7 @@ Setting up initial condition with optimized initial condition:
 "
 
 # ╔═╡ 590b1006-0e37-4668-9b4a-3588fab45696
-u₀_opt_log = [:W => W₀_opt]
+u0_opt1_log = [:W => W0_opt1_log]
 
 # ╔═╡ 8ff28a2e-185d-4dca-ad3b-a0b1507646d6
 md"
@@ -270,7 +276,7 @@ Setting up parameter values with optimized parameter values:
 "
 
 # ╔═╡ 14d24cbd-3259-41bb-9013-b4fe25a3be4c
-params_opt_log = [:μ => μ_opt, :Wf => Wf_opt]
+params_opt1_log = [:μ => μ_opt1_log, :Wf => Wf_opt1_log]
 
 # ╔═╡ 6c134677-3ec1-4e0a-88b5-01341a096675
 md"
@@ -278,10 +284,10 @@ Next, we create an ODEProblem and solve it:
 "
 
 # ╔═╡ 7a81f4a0-8f7c-4e05-9c3f-2438eab9b691
-oprob_opt_log = ODEProblem(growth_log, u₀_opt_log, tspan, params_opt_log)
+oprob_opt1_log = ODEProblem(growth_log, u0_opt1_log, tspan, params_opt1_log)
 
 # ╔═╡ ac80099b-d8f0-4eba-809d-d482bd354d35
-osol_opt_log = solve(oprob_opt_log, Tsit5(), saveat=0.5)
+osol_opt1_log = solve(oprob_opt1_log, Tsit5(), saveat=0.5)
 
 # ╔═╡ b58f2c24-e0ea-48a8-b0b7-d0faf9642340
 md"
@@ -290,7 +296,7 @@ Finally, we plot $W$ simulated with the optimized initial value and parameter va
 
 # ╔═╡ 55eba435-6ca4-4f4f-b08a-be700d5bda91
 begin
-plot(osol_opt_log, label="Logistic growth", xlabel="t", xlims=(0, 100), ylims=(0, 14))
+plot(osol_opt1_log, label="Logistic growth", xlabel="t", xlims=(0, 100), ylims=(0, 14))
 scatter!(t_meas, W_meas, label="Yield")
 end
 
@@ -301,18 +307,144 @@ md"
 
 # ╔═╡ 6f0e91d0-6b99-4cf1-8145-523589a21e89
 md"
-To be continued.
+We will use the MAP (Maximum A Posterior) method here and store the optimization results in `results_log_map`.
 "
+
+# ╔═╡ 209742ca-36bb-42a5-bf8a-291a40c47757
+results_log_map = optimize(growth_log_inf, MAP(), NelderMead())
+
+# ╔═╡ 07efb21a-0dac-46d5-b9e1-8f4757c6cedf
+md"
+You can visualize a summary of the optimized parameters by piping them to `coeftable`:
+"
+
+# ╔═╡ a93a7eeb-aad1-49f3-a05f-1512adb08b6b
+results_log_map |> coeftable
+
+# ╔═╡ ccc66805-efce-4f25-b76b-7cff23901ba4
+md"
+You can obtain the actual optimized values using the function `coef` on the results object in conjunction by calling the parameters by name preceded by a colon. Here we assign the optimized parameter values to some suitable variable names:
+"
+
+# ╔═╡ 57ef7d03-a6dc-40da-858d-5f9b9be613cd
+W0_opt2_log = coef(results_log_map)[:W0]
+
+# ╔═╡ 62bd2e58-343a-4155-a65e-cf326d0975f4
+μ_opt2_log = coef(results_log_map)[:μ]
+
+# ╔═╡ 4d6cba88-be68-412d-aeec-28300c26a9da
+Wf_opt2_log = coef(results_log_map)[:Wf]
+
+# ╔═╡ 4bc97af7-debc-4170-a2d5-4e6c928e5183
+md"
+Now we can make a plot of $W$ simulated with the optimized initial condition and parameter values.
+"
+
+# ╔═╡ a0033986-4946-45a2-a53e-29c38f35ed5c
+md"
+Setting up initial condition with optimized initial condition:
+"
+
+# ╔═╡ a570ebab-64de-4934-b887-77a8e2fb42e8
+u0_opt2_log = [:W => W0_opt2_log]
+
+# ╔═╡ feee9cc1-ebe2-4c77-a11e-53ca00864ccf
+md"
+Setting up parameter values with optimized parameter values:
+"
+
+# ╔═╡ 73e86176-f314-463c-8821-51c0f3cc1a56
+params_opt2_log = [:μ => μ_opt2_log, :Wf => Wf_opt2_log]
+
+# ╔═╡ c17c4e00-8688-4f9c-b0ae-741d70601aba
+md"
+Next, we create an ODEProblem and solve it:
+"
+
+# ╔═╡ f751b962-1810-429c-b34b-658b63fa9ba0
+oprob_opt2_log = ODEProblem(growth_log, u0_opt2_log, tspan, params_opt2_log)
+
+# ╔═╡ 0fd058cc-9bd8-4e12-b5dd-79818519165b
+osol_opt2_log = solve(oprob_opt2_log, Tsit5(), saveat=0.5)
+
+# ╔═╡ 57c95382-69cc-47e7-aa94-4767136bb23b
+md"
+Finally, we plot $W$ simulated with the optimized initial value and parameter values together with the measured data that was used to find the optimized values.
+"
+
+# ╔═╡ 4e07c39b-502d-4b38-ae7f-f103cb4bae16
+begin
+plot(osol_opt2_log, label="Logistic growth", xlabel="t", xlims=(0, 100), ylims=(0, 14))
+scatter!(t_meas, W_meas, label="Yield")
+end
 
 # ╔═╡ 29170e2a-9916-438e-92ca-9f4783397b5e
 md"
-#### Method - No-U-Turn Sampler
+#### Method - MCMC with NUTS
 "
 
 # ╔═╡ 7ff9fe52-156b-4a92-9058-781670de3abb
 md"
-To be continued.
+We will use Markov chain Monte Carlo (MCMC) method in combination with the No U-Turn Sampler (NUTS) here and store the optimization results in `results_log_nuts`.
 "
+
+# ╔═╡ 0c047043-3284-422a-9c88-2f4f4c170edf
+results_log_nuts = sample(growth_log_inf, NUTS(), 10000)
+
+# ╔═╡ 19c362cb-2764-41c9-a571-2e8e2bfcde93
+summarize(results_log_nuts)
+
+# ╔═╡ 93db47b2-34e8-43b4-beac-b5620fd444e7
+W0_opt3_log = summarize(results_log_nuts)[:W0, :mean]
+
+# ╔═╡ 68c71cd2-6cdc-4b80-b6e7-75bfea344295
+μ_opt3_log = summarize(results_log_nuts)[:μ ,:mean]
+
+# ╔═╡ d6b9eaba-1d43-4e56-8fa1-bb2f87f6fe79
+Wf_opt3_log = summarize(results_log_nuts)[:Wf ,:mean]
+
+# ╔═╡ b843ee5e-9618-4b50-93db-77e19b4be366
+md"
+Now we can make a plot of $W$ simulated with the optimized initial condition and parameter values.
+"
+
+# ╔═╡ 58014411-128c-41f4-b192-b815a3a8cc60
+md"
+Setting up initial condition with optimized initial condition:
+"
+
+# ╔═╡ ecf4b951-9b5f-441a-89f5-b0ccd040ba02
+u0_opt3_log = [:W => W0_opt3_log]
+
+# ╔═╡ b92bf532-5610-4ce8-b469-154b20cc5956
+md"
+Setting up parameter values with optimized parameter values:
+"
+
+# ╔═╡ e629fbd1-a7c7-4dc3-8b7d-bdca380fe5ad
+params_opt3_log = [:μ => μ_opt3_log, :Wf => Wf_opt3_log]
+
+# ╔═╡ a48df980-4847-418e-813d-1875d032ffd9
+md"
+Next, we create an ODEProblem and solve it:
+"
+
+# ╔═╡ 348e7454-c6dc-4d1e-b18b-6b34bc2fc0fc
+oprob_opt3_log = ODEProblem(growth_log, u0_opt3_log, tspan, params_opt3_log)
+
+# ╔═╡ f71f0cf4-b63e-452c-b971-f30d7503f1e5
+osol_opt3_log = solve(oprob_opt3_log, Tsit5(), saveat=0.5)
+
+# ╔═╡ 7346a003-aa05-41e3-a420-c97c1994cf3c
+md"
+Finally, we plot $W$ simulated with the optimized initial value and parameter values together with the measured data that was used to find the optimized values.
+"
+
+# ╔═╡ 20a6f165-449a-42cc-9565-f342a7535422
+begin
+plot(osol_opt3_log, label="Logistic growth", xlabel="t", xlims=(0, 100), ylims=(0, 14))
+scatter!(t_meas, W_meas, label="Yield")
+end
 
 # ╔═╡ 137bde23-76f2-4ebf-8bc2-ea8640001436
 md"
@@ -333,8 +465,8 @@ We have seen before that a possible *reaction network object* for the exponentia
 
 # ╔═╡ cf1a144e-09e9-42a3-b2a3-b8676a200a39
 growth_exp = @reaction_network begin
-    μ*Wf, ∅ --> W
-    μ, W --> ∅
+    μ*Wf, 0 --> W
+    μ, W --> 0
 end
 
 # ╔═╡ c6d373f4-f13c-4135-823d-ee8fbeb71b56
@@ -344,7 +476,7 @@ Create an `ODEProblem`. Use the values in the aforementioned table as initial va
 
 # ╔═╡ a97abaa7-b642-4201-86f1-5c8995b07536
 # u₀_exp = missing        # Uncomment and complete the instruction
-u₀_exp = [:W => 2.0]
+u0_exp = [:W => 2.0]
 
 # ╔═╡ 387730b4-bd06-492f-94e6-231bd68b3436
 # params_exp = missing    # Uncomment and complete the instruction
@@ -352,7 +484,7 @@ params_exp = [:μ => 0.02, :Wf => 10.0]
 
 # ╔═╡ 290a7fe8-3b1e-423f-8b30-9bd8903d2e8f
 # oprob_exp = missing     # Uncomment and complete the instruction
-oprob_exp = ODEProblem(growth_exp, u₀_exp, tspan, params_exp)
+oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, params_exp)
 
 # ╔═╡ febe2b67-2a8f-4575-946d-30877bd5f2d4
 md"
@@ -368,7 +500,7 @@ Declare the Turing model. Take the same priors (and distributions) as before.
 # Uncomment and complete the instruction
 # @model function growth_exp_inference(t_meas, W)
 #     σ_W ~ missing
-#     W₀ ~ missing
+#     W0 ~ missing
 #     μ ~ missing
 #     Wf ~ missing
 #     osol_exp = missing
@@ -376,10 +508,10 @@ Declare the Turing model. Take the same priors (and distributions) as before.
 # end
 @model function growth_exp_inference(t_meas, W)
     σ_W ~ InverseGamma()
-    W₀ ~ Uniform(0, 10)
+    W0 ~ Uniform(0, 10)
     μ ~ Uniform(0, 1)
     Wf ~ Uniform(0, 100)
-    osol_exp = solve(remake(oprob_exp; u0=[W₀]), Tsit5(), saveat=t_meas, p=[μ, Wf])
+    osol_exp = solve(remake(oprob_exp; u0=[W0]), Tsit5(), saveat=t_meas, p=[μ, Wf])
     W ~ MvNormal(osol_exp[:W], σ_W^2 * I)
 end
 
@@ -412,12 +544,12 @@ results_exp_mle |> coeftable
 
 # ╔═╡ b10c2ce4-d363-429c-a64c-ec29652137a5
 md"
-Get the optimized values and assign them to `W₀_opt_exp`, `μ_opt_exp` and `Wf_opt_exp`.
+Get the optimized values and assign them to `W0_opt_exp`, `μ_opt_exp` and `Wf_opt_exp`.
 "
 
 # ╔═╡ 23b629a6-6866-416a-a768-9617ce6301db
 # W₀_opt_exp = missing            # Uncomment and complete the instruction
-W₀_opt_exp = coef(results_exp_mle)[:W₀]
+W0_opt_exp = coef(results_exp_mle)[:W0]
 
 # ╔═╡ 8788082d-f5d1-4385-8037-a0d360a841c7
 # μ_opt_exp = missing             # Uncomment and complete the instruction
@@ -439,7 +571,7 @@ Set up initial condition with optimized initial condition:
 
 # ╔═╡ 30602ff1-041b-4fca-bf8e-55ff57df9e37
 # u₀_opt_exp = missing                 # Uncomment and complete the instruction
-u₀_opt_exp = [:W => W₀_opt_exp]
+u0_opt_exp = [:W => W0_opt_exp]
 
 # ╔═╡ 881011be-6434-416f-915b-3333e8dea32f
 md"
@@ -457,7 +589,7 @@ Create an ODEProblem and solve it:
 
 # ╔═╡ 36e8a174-d526-45ee-b3c6-88d698ad5d5f
 # oprob_opt_exp = missing        # Uncomment and complete the instruction
-oprob_opt_exp = ODEProblem(growth_exp, u₀_opt_exp, tspan, params_opt_exp)
+oprob_opt_exp = ODEProblem(growth_exp, u0_opt_exp, tspan, params_opt_exp)
 
 # ╔═╡ 7594147d-b3da-4e0d-896d-41baacb6d7be
 # osol_opt_exp = missing       # Uncomment and complete the instruction
@@ -493,8 +625,7 @@ We have seen before that a possible *reaction network object* for the Gompertz g
 
 # ╔═╡ bc1edcbe-46eb-4531-9c5f-dee8d5dc2ff9
 growth_gom = @reaction_network begin
-    -μ, W --> ∅
-    D*log(W), W --> ∅
+	μ-D*log(W), W --> 2W
 end
 
 # ╔═╡ 47fb9e4c-df6a-4811-9980-99d595a34908
@@ -504,7 +635,7 @@ Create an `ODEProblem`. Use the values in the aforementioned table as initial va
 
 # ╔═╡ bbd150de-ff9a-4127-a0dd-2f9762f92b07
 # u₀_gom = missing           # Uncomment and complete the instruction
-u₀_gom = [:W => 2.0]
+u0_gom = [:W => 2.0]
 
 # ╔═╡ da5a0cbb-b033-46f1-a300-3954de138835
 # params_gom = missing       # Uncomment and complete the instruction
@@ -512,7 +643,7 @@ params_gom = [:μ => 0.09, :D => 0.04]
 
 # ╔═╡ 73da8f53-c3af-43b0-9b23-60471f1e3587
 # oprob_gom = missing        # Uncomment and complete the instruction
-oprob_gom = ODEProblem(growth_gom, u₀_gom, tspan, params_gom)
+oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, params_gom)
 
 # ╔═╡ b0e67564-efe8-4fb2-bcf2-a711b770244e
 md"
@@ -528,7 +659,7 @@ Declare the Turing model. Take for $\sigma_W$ and $W_0$ the same priors (and dis
 # Uncomment and complete the instruction
 # @model function growth_gom_inference(t_meas, W)
 #     σ_W ~ missing
-#     W₀ ~ missing
+#     W0 ~ missing
 #     μ ~ missing
 #     D ~ missing
 #     osol_gom = missing
@@ -536,10 +667,10 @@ Declare the Turing model. Take for $\sigma_W$ and $W_0$ the same priors (and dis
 # end
 @model function growth_gom_inference(t_meas, W)
     σ_W ~ InverseGamma()
-    W₀ ~ Uniform(0, 10)
+    W0 ~ Uniform(0, 10)
     μ ~ Uniform(0, 2)
     D ~ Uniform(0, 1)
-    osol_gom = solve(remake(oprob_gom; u0=[W₀]), Tsit5(), saveat=t_meas, p=[μ, D])
+    osol_gom = solve(remake(oprob_gom; u0=[W0]), Tsit5(), saveat=t_meas, p=[μ, D])
     W ~ MvNormal(osol_gom[:W], σ_W^2 * I)
 end
 
@@ -572,12 +703,12 @@ results_gom_mle |> coeftable
 
 # ╔═╡ dede17f2-655d-4871-b6de-5a32804947dd
 md"
-Get the optimized values and assign them to `W₀_opt_gom`, `μ_opt_gom` and `D_opt_gom`.
+Get the optimized values and assign them to `W0_opt_gom`, `μ_opt_gom` and `D_opt_gom`.
 "
 
 # ╔═╡ e8c3f042-6058-4040-a67e-18563c04ee93
 # W₀_opt_gom = missing          # Uncomment and complete the instruction
-W₀_opt_gom = coef(results_gom_mle)[:W₀]
+W0_opt_gom = coef(results_gom_mle)[:W0]
 
 # ╔═╡ 665f4d03-3521-475a-a195-f861fd26bb69
 # μ_opt_gom = missing           # Uncomment and complete the instruction
@@ -599,7 +730,7 @@ Set up initial condition with optimized initial condition:
 
 # ╔═╡ 23fd9fd9-a13c-4c56-a0b4-daec6f1d2cd8
 # u₀_opt_gom = missing          # Uncomment and complete the instruction
-u₀_opt_gom = [:W => W₀_opt_gom]
+u0_opt_gom = [:W => W0_opt_gom]
 
 # ╔═╡ 6f414d15-af0a-452a-98a1-dc0b7e54d617
 md"
@@ -617,7 +748,7 @@ Create an ODEProblem and solve it:
 
 # ╔═╡ 5b9b2e5b-9deb-4ff6-a923-b15b8b08f0c9
 # oprob_opt_gom = missing      # Uncomment and complete the instruction
-oprob_opt_gom = ODEProblem(growth_gom, u₀_opt_gom, tspan, params_opt_gom)
+oprob_opt_gom = ODEProblem(growth_gom, u0_opt_gom, tspan, params_opt_gom)
 
 # ╔═╡ 66ee9655-a006-4c0f-b1f1-5576efa8f896
 # osol_opt_gom = missing        # Uncomment and complete the instruction
@@ -645,15 +776,6 @@ Which grass growth model fits best these data? How can you prove this numericall
 - Answer: missing
 "
 
-# ╔═╡ 5b320989-3e0b-447b-bc9a-25fb221ce609
-# ╠═╡ disabled = true
-#=╠═╡
-tspan = (0.0, 100.0)   # this will be the same for the three models
-  ╠═╡ =#
-
-# ╔═╡ 5f9005c7-5574-4717-81c8-d725a0fb2692
-tspan = (0.0, 100.0)
-
 # ╔═╡ Cell order:
 # ╠═a09f814a-0c6a-11ef-0e79-a50b01287d63
 # ╠═7f521435-63ac-4178-a4aa-93d9c45fe820
@@ -665,7 +787,9 @@ tspan = (0.0, 100.0)
 # ╠═9f20022f-d74b-42ce-a751-4ea94eb896fe
 # ╠═37da8786-fea0-4c2f-a76f-6e6c68325a78
 # ╠═4623369d-8c5a-422d-9e40-0f1dd7586260
-# ╠═89b3701a-dc0c-4e8d-ba6b-b02e218ff79b
+# ╠═3cb0a166-ac53-4c3f-9832-e93742040cfb
+# ╠═9319f77e-8d2a-4965-8f72-3892b01e6dfa
+# ╠═987f0a4d-e416-4ceb-adbe-3dcdca9d0996
 # ╠═75efff36-8da7-4d04-afa2-a2f8324bc103
 # ╠═3dcb9c9d-370b-4031-b7c0-cee80742557a
 # ╠═7a14aa59-6e6f-4266-a0b3-84ab55f2efc5
@@ -716,8 +840,40 @@ tspan = (0.0, 100.0)
 # ╠═55eba435-6ca4-4f4f-b08a-be700d5bda91
 # ╠═5d386b00-93b5-4a88-b4e3-e5c3eebd6dd5
 # ╠═6f0e91d0-6b99-4cf1-8145-523589a21e89
+# ╠═209742ca-36bb-42a5-bf8a-291a40c47757
+# ╠═07efb21a-0dac-46d5-b9e1-8f4757c6cedf
+# ╠═a93a7eeb-aad1-49f3-a05f-1512adb08b6b
+# ╠═ccc66805-efce-4f25-b76b-7cff23901ba4
+# ╠═57ef7d03-a6dc-40da-858d-5f9b9be613cd
+# ╠═62bd2e58-343a-4155-a65e-cf326d0975f4
+# ╠═4d6cba88-be68-412d-aeec-28300c26a9da
+# ╠═4bc97af7-debc-4170-a2d5-4e6c928e5183
+# ╠═a0033986-4946-45a2-a53e-29c38f35ed5c
+# ╠═a570ebab-64de-4934-b887-77a8e2fb42e8
+# ╠═feee9cc1-ebe2-4c77-a11e-53ca00864ccf
+# ╠═73e86176-f314-463c-8821-51c0f3cc1a56
+# ╠═c17c4e00-8688-4f9c-b0ae-741d70601aba
+# ╠═f751b962-1810-429c-b34b-658b63fa9ba0
+# ╠═0fd058cc-9bd8-4e12-b5dd-79818519165b
+# ╠═57c95382-69cc-47e7-aa94-4767136bb23b
+# ╠═4e07c39b-502d-4b38-ae7f-f103cb4bae16
 # ╠═29170e2a-9916-438e-92ca-9f4783397b5e
 # ╠═7ff9fe52-156b-4a92-9058-781670de3abb
+# ╠═0c047043-3284-422a-9c88-2f4f4c170edf
+# ╠═19c362cb-2764-41c9-a571-2e8e2bfcde93
+# ╠═93db47b2-34e8-43b4-beac-b5620fd444e7
+# ╠═68c71cd2-6cdc-4b80-b6e7-75bfea344295
+# ╠═d6b9eaba-1d43-4e56-8fa1-bb2f87f6fe79
+# ╠═b843ee5e-9618-4b50-93db-77e19b4be366
+# ╠═58014411-128c-41f4-b192-b815a3a8cc60
+# ╠═ecf4b951-9b5f-441a-89f5-b0ccd040ba02
+# ╠═b92bf532-5610-4ce8-b469-154b20cc5956
+# ╠═e629fbd1-a7c7-4dc3-8b7d-bdca380fe5ad
+# ╠═a48df980-4847-418e-813d-1875d032ffd9
+# ╠═348e7454-c6dc-4d1e-b18b-6b34bc2fc0fc
+# ╠═f71f0cf4-b63e-452c-b971-f30d7503f1e5
+# ╠═7346a003-aa05-41e3-a420-c97c1994cf3c
+# ╠═20a6f165-449a-42cc-9565-f342a7535422
 # ╠═137bde23-76f2-4ebf-8bc2-ea8640001436
 # ╠═4aa71200-006b-4a15-ae75-67e36aa81522
 # ╠═cdab3079-04b0-4a44-b770-468c20e321e4

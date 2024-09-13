@@ -65,7 +65,7 @@ md"
 | ``S``    | *persons* | number of susceptible persons             |
 | ``I``    | *persons* | number of infected persons             |
 | ``D``    | *persons* | number of deceased persons             |
-| ``R``    | *persons* | number of recovered persons             |
+| ``R``    | *persons* | number of resistant persons             |
 "
 
 # ╔═╡ 97d34ab6-a1c6-404d-af1f-7da85287757f
@@ -95,7 +95,7 @@ Our infection model has three reaction events:
 
 - Infection, where a susceptible persons meets an infected persons and also becomes infected.
 - Deceasing, where an infected person die.
-- Recovery, where an infected person recovers.
+- Recovery, where an infected person recovers and becomes resitant.
 "
 
 # ╔═╡ bf2b06d8-884b-4a35-b308-83a2f3d6696f

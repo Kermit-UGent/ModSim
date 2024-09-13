@@ -45,7 +45,7 @@ Sensitivity functions indicate how sensitive the model output is to a change in 
 md"
 The sensitivity function that measures how sensitive output $y_j$ is to changes in parameter $\theta_i$ is given by the partial derivative
 
-$$\cfrac{\partial y_j}{\partial \theta_i}\tag{1}$$
+$$\cfrac{\partial \hat{y}_i(\theta)}{\partial \theta_j}\tag{1}$$
 "
 
 # ╔═╡ abd70f04-1bf8-454f-869a-0d8082d68453
@@ -62,12 +62,23 @@ Answer:
 md"
 Sometimes expression $(1)$ can be evaluated analytically. Usually, however, we will have to approximate the partial derivative numerically. Expression $(1)$ can be made more specific:
 
-$$\cfrac{\partial y_j}{\partial \theta_i} \approx \cfrac{y_j(\theta_i+\Delta\theta_i)-y_j(\theta_i)}{\Delta\theta_i} \tag{2}$$
+$$\cfrac{\partial \hat{y}_i(\theta)}{\partial \theta_j} \approx \cfrac{\hat{y}_i(\theta_j+\Delta\theta_j)-\hat{y}_i(\theta_j)}{\Delta\theta_j}$$
 "
 
 # ╔═╡ 25d3ef62-382c-455c-92bb-fadfc650c5a6
 md"
 Thus, to calculate the sensitivity function numerically, the model is evaluated for the parameter values $\theta_i$ and $\theta_i+\Delta\theta_i$ and the difference between these evaluations is taken.
+"
+
+# ╔═╡ 2a544bef-d7fe-4300-bc59-69e6f7429304
+md"
+Since quantity $(1)$ is dependent on the units, a normalized variant is often used:
+
+$$\cfrac{\partial \hat{y}_i(\theta)}{\partial \theta_j} \cdot \cfrac{\theta_j}{\hat{y}_i} \tag{2}$$
+
+The interpretation of $(2)$ is how much the output changes per cent if the parameter is increased by one per cent. It assumes positive model outputs and parameters, which is often the case for biochemical models.
+
+Using the normalized variant allows you to compare all possible sensitivity functions with each other.
 "
 
 # ╔═╡ 7107a3a9-15ef-488e-8709-52a6444d0e1c
@@ -121,8 +132,11 @@ Implementation of the system:
 
 # ╔═╡ 18eece66-46fa-4458-aaed-f4c8fa002c20
 growth_mod_log = @reaction_network begin
-    μ*W, ∅ --> W
-    μ/Wf*W, W --> ∅
+	@species W(t)=2.0            # default initial condition
+	@parameters μ=0.07 Wf=10.0   # default parameter values
+    #μ*W, 0 --> W
+    #μ/Wf*W, W --> 0
+	μ*(1-W/Wf), W --> 2W
 end
 
 # ╔═╡ 8bb0b24b-6cce-49cd-a625-5f375b92d9b7
@@ -139,7 +153,7 @@ Setting initial conditions, timespan and parameter values:
 "
 
 # ╔═╡ cbb2ca49-b019-495b-9310-83fcc00cad26
-u₀_log = [:W => 2.0]
+u0_log = [:W => 2.0]
 
 # ╔═╡ 0b3d35bb-c5b0-44b7-94b3-06fa571d339e
 tspan = (0.0, 100.0)   # this will be the same for the three models
@@ -153,7 +167,9 @@ Creating and solving the ODEProblem and plotting results:
 "
 
 # ╔═╡ 270647d2-1371-4272-8bc1-3a6ad77bc716
-oprob_log = ODEProblem(growth_mod_log, u₀_log, tspan, params_log)
+oprob_log = ODEProblem(growth_mod_log, u0_log, tspan, params_log)
+# Also possible:
+# oprob_log = ODEProblem(growth_mod_log, [], tspan, [])
 
 # ╔═╡ ac235d86-1d93-4944-aa89-1b4fd38f0e6e
 osol_log = solve(oprob_log, Tsit5(), saveat=0.5)
@@ -163,7 +179,7 @@ plot(osol_log)
 
 # ╔═╡ 3d81d3b8-41f4-4d92-b7d5-3cf165c827d7
 md"
-### Local sensitivity analysis
+### Local Sensitivity Analysis (LSA)
 
 In order to compute the local sensitivity functions, we will need to load the `SciMLSensitivity` package:
 "
@@ -204,39 +220,46 @@ Finally, the local sensitivities are preferably *extracted* from the solution by
 # ╔═╡ 1bd6ed0b-b463-4f0f-8d32-c67479a70c30
 u_log, dp_log = extract_local_sensitivities(osol_sens_log)
 
+# ╔═╡ bbaa2ca8-f566-48b0-ab8e-36a2319395cb
+u_log'
+
 # ╔═╡ 8a8074c0-0f6d-4907-8907-cdb2b147d1a0
 md"
 The `extract_local_sensitivities` returns both the simulation results (here: `u_log`) as well as the local sensitivies (here: `dp_log`).
 
 To get the sensitivities of $W$ to $\mu$, of $W$ and $W_f$, you need to use indexing with `dp_log`:
-- `dp_log[1]` gives the sensitivity of $W$ to $\mu$.
-- `dp_log[2]` gives the sensitivity of $W$ to $W_f$.
+- `dp_log[1]` gives the (absolute) sensitivity of $W$ to $\mu$.
+- `dp_log[2]` gives the (absolute) sensitivity of $W$ to $W_f$.
 
-Beware that `dp_log[i]` is a row vector. If you want to plot the sensitivities we will need to transpose this into a column vector!
+Beware that `u_log` and `dp_log[i]` are row vectors. If later you want to plot the sensitivities you will need to transpose these into a column vectors! Futhermore, we will compute the normalized sensitivities.
+
+Beware that all element wise operations need a dot in front of the operator, e.g. as in `./` and `.*`.
 "
 
 # ╔═╡ f2eff54d-b19d-4e96-ba98-a54072f49118
-sens_μ_log  = dp_log[1]'  # sensitivity for W on μ
+sens_μ_log  = dp_log[1]'./u_log'.*0.07  # sensitivity for W on μ
 
 # ╔═╡ 21a8558a-a048-40be-8a04-358ac6fa4f61
-sens_Wf_log = dp_log[2]'  # sensitivity for W on Wf
+sens_Wf_log = dp_log[2]'./u_log'.*10.0  # sensitivity for W on Wf
 
 # ╔═╡ d1d3645f-15dd-4b62-b149-79339cae8636
 md"
-We are now ready to plot the two sensitivity functions. For each plot command we need to provide the time vector (first argument) and the column vector with the local sensitivity (second argument). Additionally, you can provide a title, one or more (legend) labels and a x- and/or y-label.
+We are now ready to plot the two sensitivity functions. For each plot command we need to provide the time vector (first argument) and the column vector with the local sensitivity (second argument). Additionally, you can provide a title, a (legend) label and a x- and/or y-label.
+
+Beware that if you want to execute multiple commands (here: `plot`) in a single cell, you need to put them in a `begin`-and-`end` block. Also if you want to visualize subsequent graphs in the same plot, the forthcoming plot command names should be followed by a `!`, as in `plot!(...)`.
 "
 
-# ╔═╡ 2b971396-37c3-4bf7-acb1-794229809c41
-plot(osol_sens_log.t, sens_μ_log, title="Absolute sensitivity of W to μ", label=["dW/dμ"], xlabel="Time (day)")
-
-# ╔═╡ f10e4e08-4be8-46bb-8f8b-fdc3891d5c64
-plot(osol_sens_log.t, sens_Wf_log, title="Absolute sensitivity of W to Wf", label=["dW/dWf"], xlabel="Time (day)")
+# ╔═╡ e2b40912-20f9-4ab9-8696-11a202c5aa74
+begin
+plot(osol_sens_log.t, sens_μ_log, title="Normalized sensitivities", label="W on μ", xlabel="Time (day)")
+plot!(osol_sens_log.t, sens_Wf_log, label="W on Wf")
+end
 
 # ╔═╡ 04a1d1ad-53a9-4146-be09-65aa422e3730
 md"
 Conclusions:
-- From the sensitivity plot of $dW/d\mu$ it can be seen that $W$ is most sensitive to $\mu$ in the time region around day $33$. The latter corresponds to the region where the yield rate is largest (i.e., when the growth is largest). This makes sense because when looking at the differential equation, $\mu$ is approximately the growth rate for relatively small $W$ values.
-- From the sensitivity plot of $dW/dW_f$ it can be seen that $W$ is most sensitive to $W_f$ in the region where time values are large. The latter corresponds to the region where the yield rate stagnates (i.e., when the yield reaches a steady value). This makes sense because when looking at the differential equation, $W_f$ is the steady stae value.
+- From the sensitivity plot of $W$ on $\mu$ it can be seen that $W$ is most sensitive to $\mu$ in the time region $[0, 30]$. The latter corresponds to the region where the yield rate is largest (i.e., when the growth is largest). This makes sense because when looking at the differential equation, $\mu$ is approximately the growth rate for relatively small $W$ values.
+- From the sensitivity plot of $W$ on $W_f$ it can be seen that $W$ is most sensitive to $W_f$ in the region where time values are large (cf. operating point). The latter corresponds to the region where the yield rate stagnates (i.e., when the yield reaches a steady value). This makes sense because when looking at the differential equation, $W_f$ is the steady state value.
 "
 
 # ╔═╡ 79f0f1dd-850f-4dfd-b895-ff41a2d8adb8
@@ -260,6 +283,8 @@ Create a *reaction network object* for the exponential growth model. Name it `gr
 #     missing
 # end
 growth_exp = @reaction_network begin
+	@species W(t)=2.0
+	@parameters μ=0.02 Wf=10.0
     μ*Wf, ∅ --> W
     μ, W --> ∅
 end
@@ -275,12 +300,12 @@ osys_exp = convert(ODESystem, growth_exp)
 
 # ╔═╡ 63952c54-3304-4500-9536-b375c5c8f280
 md"
-Initialize a vector `u₀_exp` with the initial condition:
+Initialize a vector `u0_exp` with the initial condition:
 "
 
 # ╔═╡ 7dc013f7-7b35-42e4-aa77-0dca3755f389
 # u₀_exp = missing           # Uncomment and complete the instruction
-u₀_exp = [:W => 2.0]
+u0_exp = [:W => 2.0]
 
 # ╔═╡ 86785c55-b567-449c-ae76-bc15a16223bc
 md"
@@ -303,7 +328,7 @@ Create the ODE problem and store it in `oprob_exp`:
 
 # ╔═╡ 025c1154-b2ae-4e1c-af1b-277b24d648a4
 # oprob_exp = missing         # Uncomment and complete the instruction
-oprob_exp = ODEProblem(growth_exp, u₀_exp, tspan, params_exp)
+oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, params_exp)
 
 # ╔═╡ f58825d2-55fc-43f1-b164-9555bf9f5b84
 md"
@@ -352,29 +377,32 @@ u_exp, dp_exp = extract_local_sensitivities(osol_sens_exp)
 
 # ╔═╡ 6737df04-7ba9-4439-a5c6-39c89d111924
 md"
-Convert the sensitivities of both $W$ to $\mu$ and $W$ to $W_f$ into column vectors and name them `sens_μ_exp` and `sens_Wf_exp` respectively:
+Convert the output $W$ and the (absolute) sensitivities of both $W$ on $\mu$ and $W$ on $W_f$ into column vectors, compute the normalized sensitivities and name them `sens_μ_exp` and `sens_Wf_exp` respectively:
 "
 
 # ╔═╡ b5527e15-8b30-4253-82eb-8597086a591c
 # sens_μ_exp  = missing         # Uncomment and complete the instruction
-sens_μ_exp  = dp_exp[1]'
+sens_μ_exp  = dp_exp[1]'./u_exp'.*0.02
 
 # ╔═╡ b9235039-dba8-425c-afc5-016465f93f9f
 # sens_Wf_exp = missing         # Uncomment and complete the instruction
-sens_Wf_exp = dp_exp[2]'
+sens_Wf_exp = dp_exp[2]'./u_exp'.*10.0
 
 # ╔═╡ 0524a976-9d4d-4ef9-b088-bdd9102415e6
 md"
-Plot both sensitivity functions in separate notebook cells (with appropriate title and label):
+Plot both normalized sensitivity functions (with appropriate title and label):
 "
 
 # ╔═╡ 2d51b318-8f5f-4328-973e-c6f4ae33a6ab
+# Uncomment and complete the instruction
+# begin
 # missing
-plot(osol_sens_exp.t, sens_μ_exp, title="Absolute sensitivity of W to μ", label=["dW/dμ"], xlabel="Time (day)")
-
-# ╔═╡ 1f328143-80d2-4584-8180-2f3402ad45bc
 # missing
-plot(osol_sens_exp.t, sens_Wf_exp, title="Absolute sensitivity of W to Wf", label=["dW/dWf"], xlabel="Time (day)")
+# end
+begin
+plot(osol_sens_exp.t, sens_μ_exp, title="Normalized sensitivities", label="W on μ")
+plot!(osol_sens_exp.t, sens_Wf_exp, label="W on Wf", xlabel="Time (day)")
+end
 
 # ╔═╡ 22b58c97-1aa2-49c4-8a0a-488c63014a90
 md"
@@ -400,8 +428,10 @@ Create a *reaction network object* for the exponential growth model. Name it `gr
 #     missing
 # end
 growth_gom = @reaction_network begin
-    -μ, W --> ∅
-    D*log(W), W --> ∅
+	@species W(t)=2.0
+	@parameters μ=0.09 D=0.04
+    μ, W --> 2*W
+    D*log(W), W --> 0
 end
 
 # ╔═╡ e190ceca-30b1-49e2-baf5-ceb62929f4c0
@@ -415,12 +445,12 @@ osys_gom = convert(ODESystem, growth_gom)
 
 # ╔═╡ ed1150f1-9c75-4867-b7f5-535d605810f4
 md"
-Initialize a vector `u₀_gom` with the initial condition:
+Initialize a vector `u0_gom` with the initial condition:
 "
 
 # ╔═╡ d35ef155-61aa-4b19-872f-d6e621f96572
 # u₀_gom = missing                    # Uncomment and complete the instruction
-u₀_gom = [:W => 2.0]
+u0_gom = [:W => 2.0]
 
 # ╔═╡ 3f546d58-15ff-442d-a4e8-7c0783ed2fe0
 md"
@@ -443,7 +473,7 @@ Create the ODE problem and store it in `oprob_gom`:
 
 # ╔═╡ 3aab9073-cf4d-4ee5-9e8a-e3db586d9f68
 # oprob_gom = missing                 # Uncomment and complete the instruction
-oprob_gom = ODEProblem(growth_gom, u₀_gom, tspan, params_gom)
+oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, params_gom)
 
 # ╔═╡ 30c35371-d106-4673-8569-d07b39edbdfe
 md"
@@ -492,29 +522,32 @@ u_gom, dp_gom = extract_local_sensitivities(osol_sens_gom)
 
 # ╔═╡ 48443235-b69f-47c0-8135-bec03a4b7013
 md"
-Convert the sensitivities of both $W$ to $\mu$ and $W$ to $D$ into column vectors and name them `sens_μ_gom` and `sens_D_gom` respectively:
+Convert the output $W$ and the sensitivities of both $W$ to $\mu$ and $W$ to $D$ into column vectors, compute the normalized sensitivities and name them `sens_μ_gom` and `sens_D_gom` respectively:
 "
 
 # ╔═╡ b14a4dfb-dba5-40c7-b7b4-e192b2aadb3a
 # sens_μ_gom  = missing                # Uncomment and complete the instruction
-sens_μ_gom = dp_gom[1]'
+sens_μ_gom = dp_gom[1]'./u_gom'.*0.09
 
 # ╔═╡ 6ec3f325-9b75-49cb-bba1-bafd000d2fe5
 # sens_D_gom = missing                 # Uncomment and complete the instruction
-sens_D_gom = dp_gom[2]'
+sens_D_gom = dp_gom[2]'./u_gom'.*0.04
 
 # ╔═╡ 7593a4bf-ad0f-4fd3-aa3c-8b6a5073cb02
 md"
-Plot both sensitivity functions in separate notebook cells (with appropriate title and label):
+Plot both sensitivity functions (with appropriate title and label):
 "
 
 # ╔═╡ 25ed859b-bb0e-4c72-8770-16a592bc63f1
+# Uncomment and complete the instruction
+# begin
 # missing
-plot(osol_sens_gom.t, sens_μ_gom, title="Absolute sensitivity of W to μ", label=["dW/dμ"], xlabel="Time (day)")
-
-# ╔═╡ ca5fa292-a6af-4ce1-9478-afb7bc56ceed
 # missing
-plot(osol_sens_gom.t, sens_D_gom, title="Absolute sensitivity of W to D", label=["dW/dD"], xlabel="Time (day)")
+# end
+begin
+plot(osol_sens_gom.t, sens_μ_gom, title="Normalized sensitivities", label="W on μ", xlabel="Time (day)")
+plot!(osol_sens_gom.t, sens_D_gom, label="W on D")
+end
 
 # ╔═╡ 12f64333-36d0-4e2a-9061-e3dcc7a4ae96
 md"
@@ -536,6 +569,7 @@ Draw your conclusions:
 # ╠═e76aedec-69f2-4301-b015-6960e4503c42
 # ╠═a6a97279-0b64-45c3-8312-c22b1a8425d0
 # ╠═25d3ef62-382c-455c-92bb-fadfc650c5a6
+# ╠═2a544bef-d7fe-4300-bc59-69e6f7429304
 # ╠═7107a3a9-15ef-488e-8709-52a6444d0e1c
 # ╠═04e95855-7c4a-4d2c-b836-c5dde291adad
 # ╠═4673bfdf-8f4a-42bd-a026-21a66d800f2b
@@ -564,12 +598,12 @@ Draw your conclusions:
 # ╠═5203ad2c-9d43-4f91-8840-3468ec8a8dc9
 # ╠═137c0fc9-4aad-4a66-9214-c6edc4e04747
 # ╠═1bd6ed0b-b463-4f0f-8d32-c67479a70c30
+# ╠═bbaa2ca8-f566-48b0-ab8e-36a2319395cb
 # ╠═8a8074c0-0f6d-4907-8907-cdb2b147d1a0
 # ╠═f2eff54d-b19d-4e96-ba98-a54072f49118
 # ╠═21a8558a-a048-40be-8a04-358ac6fa4f61
 # ╠═d1d3645f-15dd-4b62-b149-79339cae8636
-# ╠═2b971396-37c3-4bf7-acb1-794229809c41
-# ╠═f10e4e08-4be8-46bb-8f8b-fdc3891d5c64
+# ╠═e2b40912-20f9-4ab9-8696-11a202c5aa74
 # ╠═04a1d1ad-53a9-4146-be09-65aa422e3730
 # ╠═79f0f1dd-850f-4dfd-b895-ff41a2d8adb8
 # ╠═fa2270d0-2548-409c-a23f-4369d8bce8ec
@@ -599,7 +633,6 @@ Draw your conclusions:
 # ╠═b9235039-dba8-425c-afc5-016465f93f9f
 # ╠═0524a976-9d4d-4ef9-b088-bdd9102415e6
 # ╠═2d51b318-8f5f-4328-973e-c6f4ae33a6ab
-# ╠═1f328143-80d2-4584-8180-2f3402ad45bc
 # ╠═22b58c97-1aa2-49c4-8a0a-488c63014a90
 # ╠═41abf8c4-e67e-4f66-a38a-7204a878d98d
 # ╠═f311e943-c96b-4af3-8757-c662fd302a88
@@ -628,5 +661,4 @@ Draw your conclusions:
 # ╠═6ec3f325-9b75-49cb-bba1-bafd000d2fe5
 # ╠═7593a4bf-ad0f-4fd3-aa3c-8b6a5073cb02
 # ╠═25ed859b-bb0e-4c72-8770-16a592bc63f1
-# ╠═ca5fa292-a6af-4ce1-9478-afb7bc56ceed
 # ╠═12f64333-36d0-4e2a-9061-e3dcc7a4ae96
