@@ -37,7 +37,7 @@ probability q = 1 − p.
 =#
 
 rand(Bernoulli(p), 10)       # returns a vector of length 10 with random 0's and 1's
-println(rand(Bernoulli(p), 10))
+println(rand(Bernoulli(p), 100))
 # Bool[0, 1, 1, 0, 0, 1, 0, 1, 1, 1]
 
 
@@ -58,6 +58,7 @@ println(rand(Bernoulli(p), 10))
 end
 
 outcome = [0, 1, 1, 0, 1, 0, 0, 1, 1, 1]
+# outcome = [0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1]
 
 # Settings of the Hamiltonian Monte Carlo (HMC) sampler.
 iterations = 1000

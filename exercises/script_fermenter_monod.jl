@@ -291,44 +291,48 @@ using StatsBase
 
 u₀ = [:S => 0.0, :X => 0.01]
 tspan = (0.0, 100)
-params = [:μmax => 0.30, :Ks => 0.15, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2]
+params = [:μmax => 0.36, :Ks => 0.18, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.32]
 oprob = ODEProblem(fermenter_monod, u₀, tspan, params)
 
 osol = solve(oprob, Tsit5(), saveat=5)
 plot(osol)
 
 σ_S, σ_X = 0.02, 0.04
-
 N = length(osol)
-
-# Sobs = abs.(osol[:S] .+ σ_S .* randn(length(osol)))
-# Xobs = abs.(osol[:X] .+ σ_X .* randn(length(osol)))
-
+Sobs = abs.(osol[:S] .+ σ_S .* randn(length(osol)))
+Xobs = abs.(osol[:X] .+ σ_X .* randn(length(osol)))
 let
 	scatter(osol.t, Sobs)
 	scatter!(osol.t, Xobs)
 end
+println(round.(Sobs, digits=3))
+println(round.(Xobs, digits=3))
 
-println(round.(Sobs, digits=4))
-println(round.(Xobs, digits=4))
-S_meas = [0.0133, 0.5252, 0.864, 1.1218, 1.2865, 1.2405, 0.8459, 0.5288, 0.4028, 0.393, 0.325, 0.3536, 0.3346, 0.2992, 0.2944, 0.3495, 0.3236, 0.3259, 0.3147, 0.3216, 0.3021]
-X_meas = [0.0673, 0.0283, 0.0219, 0.0897, 0.1282, 0.2227, 0.6763, 0.9794, 1.201, 1.18, 1.3214, 1.4004, 1.4115, 1.3927, 1.4711, 1.5209, 1.4962, 1.5648, 1.4552, 1.4781, 1.5051]
+S_meas = [0.01, 0.472, 0.931, 1.175, 1.277, 0.922, 0.51, 0.393, 0.341, 0.325, 0.299, 0.266, 0.302, 0.293, 0.272, 0.289, 0.277, 0.267, 0.297, 0.331, 0.289]
+X_meas = [0.006, 0.032, 0.006, 0.076, 0.2, 0.588, 0.963, 1.215, 1.28, 1.379, 1.436, 1.429, 1.544, 1.543, 1.581, 1.577, 1.556, 1.564, 1.599, 1.6, 1.604]
 t_meas = 0:5:100
 # tsteps = osol.t
 
-@model function biomass_inference(t_meas, S, X)
+let
+  scatter(t_meas, S_meas, label="S meas", color=:blue)
+  scatter!(t_meas, X_meas, label="X meas", color=:red)
+end
+
+
+@model function fermenter_inference(t_meas, S, X)
 	σ_S ~ InverseGamma()
 	σ_X ~ InverseGamma()
   μmax ~ LogNormal()
 	Ks ~ LogNormal()
+  Sin ~ LogNormal()
   # IMPORTANT: place all parameters in the option p=[...] in the same order
   # as in the reaction network model.
-	osol = solve(oprob, Tsit5(), saveat=t_meas, p=[μmax, Ks, 0.80, 2, 40, 2.2])
+	osol = solve(oprob, Tsit5(), saveat=t_meas, p=[μmax, Ks, 0.80, 2, 40, Sin])
 	S ~ MvNormal(osol[:S], σ_S^2 * I)
 	X ~ MvNormal(osol[:X], σ_X^2 * I)
 end
 
-biomass_mod = biomass_inference(t_meas, S_meas, X_meas)
+fermenter_inf = fermenter_inference(t_meas, S_meas, X_meas)
 
 #=
 Information about MLE and MAP:
@@ -341,35 +345,79 @@ https://roger010620.medium.com/maximum-likelihood-estimation-mle-and-maximum-a-p
 # MLE = Maximum Likelihood Estimation
 ##########################################################################
 
-results_mle = optimize(biomass_mod, MLE(), NelderMead())
-# ModeResult with maximized lp of 89.32
-# [0.018749286626397788, 0.04439754303721986, 0.3063384375324556, 0.17030119660821036]
+results_mle = optimize(fermenter_inf, MLE(), NelderMead())
+# ModeResult with maximized lp of 98.00
+# [0.02251054148306689, 0.024461743941403595, 0.36927814149777555, 0.19873466480693824, 2.300105122767074]
 results_mle |> coeftable
-# ────────────────────────────────────────────────────────────────────────
-#           Coef.  Std. Error         z     Pr(>|z|)  Lower 95%  Upper 95%
-# ────────────────────────────────────────────────────────────────────────
-# σ_S   0.0187493  0.00290906   6.44514  1.15493e-10  0.0130476  0.0244509
-# σ_X   0.0443975  0.00688693   6.44664  1.1436e-10   0.0308994  0.0578957
-# μmax  0.306338   0.00593128  51.648    0.0          0.294713   0.317964
-# Ks    0.170301   0.0186784    9.11754  7.68472e-20  0.133692   0.20691
-# ────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────
+#           Coef.  Std. Error          z     Pr(>|z|)  Lower 95%  Upper 95%
+# ─────────────────────────────────────────────────────────────────────────
+# σ_S   0.0225105  0.00352129    6.3927   1.62984e-10  0.0156089  0.0294121
+# σ_X   0.0244617  0.0038361     6.37672  1.80923e-10  0.0169431  0.0319804
+# μmax  0.369278   0.0084683    43.6071   0.0          0.352681   0.385876
+# Ks    0.198735   0.023464      8.46976  2.45891e-17  0.152746   0.244723
+# Sin   2.30011    0.00968248  237.553    0.0          2.28113    2.31908
+# ─────────────────────────────────────────────────────────────────────────
+
+coefnames(results_mle)
+# :σ_S
+# :σ_X
+# :μmax
+# :Ks
+# :Sin
+
+coef(results_mle)
+# 5-element Named Vector{Float64}
+# A    │ 
+# ─────┼──────────
+# σ_S  │ 0.0225105
+# σ_X  │ 0.0244617
+# μmax │  0.369278
+# Ks   │  0.198735
+# Sin  │   2.30011
+
+stderror(results_mle)
+# 5-element Named Vector{Float64}
+# A    │ 
+# ─────┼───────────
+# σ_S  │ 0.00352129
+# σ_X  │  0.0038361
+# μmax │  0.0084683
+# Ks   │   0.023464
+# Sin  │ 0.00968248
+
+μmax_opt = coef(results_mle)[:μmax]
+Ks_opt = coef(results_mle)[:Ks]
+Sin_opt = coef(results_mle)[:Sin]
+
+params_opt = [:μmax => μmax_opt, :Ks => Ks_opt, :Y => 0.80, :Q => 2, :V => 40, :Sin => Sin_opt]
+oprob_opt = ODEProblem(fermenter_monod, u₀, tspan, params_opt)
+
+osol_opt = solve(oprob_opt, Tsit5(), saveat=0.5)
+
+begin
+  plot(osol_opt, labels=["S sim" "X sim"], xlabel="t")   # , xlims=(0, 80), ylims=(0, 10)
+  scatter!(t_meas, S_meas, label="S meas", color=:blue)
+  scatter!(t_meas, X_meas, label="X meas", color=:red)
+end
 
 
 ##########################################################################
 # MAP = Maximum A Posterior
 ##########################################################################
 
-results_map = optimize(biomass_mod, MAP(), NelderMead())
-# ModeResult with maximized lp of 50.36
-# [0.05005592910567663, 0.06922016251253287, 0.3070229211180945, 0.17563313150439827]
+results_map = optimize(fermenter_inf, MAP(), NelderMead())
+# ModeResult with maximized lp of 51.55
+# [0.05240925821025978, 0.05362798338117281, 0.3727346109978736, 0.20861425610149611, 2.301015914514106]
 results_map |> coeftable
 # ─────────────────────────────────────────────────────────────────────────
-#           Coef.  Std. Error         z      Pr(>|z|)  Lower 95%  Upper 95%
+#           Coef.  Std. Error          z     Pr(>|z|)  Lower 95%  Upper 95%
 # ─────────────────────────────────────────────────────────────────────────
-# σ_S   0.0500559  0.00986625   5.07345  3.90666e-7    0.0307184  0.0693934
-# σ_X   0.0692202  0.0123952    5.58444  2.34455e-8    0.044926   0.0935143
-# μmax  0.307023   0.0141115   21.757    5.93219e-105  0.279365   0.334681
-# Ks    0.175633   0.0445641    3.94114  8.10961e-5    0.0882892  0.262977
+# σ_S   0.0524093   0.0101498    5.16359  2.42255e-7   0.0325161  0.0723024
+# σ_X   0.053628    0.0102995    5.20683  1.92096e-7   0.0334412  0.0738147
+# μmax  0.372735    0.0193625   19.2503   1.40262e-82  0.334785   0.410684
+# Ks    0.208614    0.054004     3.86294  0.00011203   0.102768   0.31446
+# Sin   2.30102     0.0213233  107.911    0.0          2.25922    2.34281
 # ─────────────────────────────────────────────────────────────────────────
 
 
@@ -378,37 +426,39 @@ results_map |> coeftable
 ##########################################################################
 
 iterations = 5000;
-chain_biomass_nuts = sample(biomass_mod, NUTS(), iterations)    # MCMCThreads()
+chain_fermenter_nuts = sample(fermenter_inf, NUTS(), iterations)    # MCMCThreads()
 # ┌ Info: Found initial step size
 # └   ϵ = 0.4
-# Chains MCMC chain (5000×16×1 Array{Float64, 3}):
-
+# Chains MCMC chain (5000×17×1 Array{Float64, 3}):
 # Iterations        = 1001:1:6000
 # Number of chains  = 1
 # Samples per chain = 5000
-# Wall duration     = 17.43 seconds
-# Compute duration  = 17.43 seconds
-# parameters        = σ_S, σ_X, μmax, Ks
+# Wall duration     = 13.05 seconds
+# Compute duration  = 13.05 seconds
+# parameters        = σ_S, σ_X, μmax, Ks, Sin
 # internals         = lp, n_steps, is_accept, acceptance_rate, log_density, hamiltonian_energy, hamiltonian_energy_error, max_hamiltonian_energy_error, tree_depth, numerical_error, step_size, nom_step_size
 # Summary Statistics
 #   parameters      mean       std      mcse    ess_bulk    ess_tail      rhat   ess_per_sec 
 #       Symbol   Float64   Float64   Float64     Float64     Float64   Float64       Float64 
-#          σ_S    0.0582    0.0129    0.0002   3392.6984   2741.4693    1.0000      194.6024
-#          σ_X    0.0764    0.0149    0.0003   3760.6838   2805.2152    1.0006      215.7097
-#         μmax    0.3132    0.0171    0.0003   2724.8752   2708.5298    0.9999      156.2966
-#           Ks    0.1962    0.0548    0.0011   2514.5185   2573.0328    1.0003      144.2307
+#          σ_S    0.0615    0.0133    0.0002   3271.3402   2080.1297    0.9999      250.7543
+#          σ_X    0.0613    0.0129    0.0002   3075.3864   1991.8175    1.0000      235.7340
+#         μmax    0.3827    0.0256    0.0005   2442.0973   2475.3360    1.0002      187.1913
+#           Ks    0.2389    0.0740    0.0016   2162.3405   2247.3712    1.0002      165.7474
+#          Sin    2.3045    0.0253    0.0004   3311.1431   3066.3818    1.0009      253.8052
 # Quantiles
 #   parameters      2.5%     25.0%     50.0%     75.0%     97.5% 
 #       Symbol   Float64   Float64   Float64   Float64   Float64 
-#          σ_S    0.0390    0.0491    0.0562    0.0653    0.0883
-#          σ_X    0.0528    0.0659    0.0745    0.0847    0.1110
-#         μmax    0.2849    0.3012    0.3114    0.3230    0.3525
-#           Ks    0.1085    0.1574    0.1903    0.2273    0.3189
+#          σ_S    0.0408    0.0522    0.0595    0.0688    0.0927
+#          σ_X    0.0408    0.0522    0.0597    0.0687    0.0917
+#         μmax    0.3420    0.3649    0.3793    0.3966    0.4424
+#           Ks    0.1247    0.1877    0.2282    0.2774    0.4182
+#          Sin    2.2558    2.2873    2.3042    2.3211    2.3555
 
-summarize(chain_biomass_nuts)
+summarize(chain_fermenter_nuts)
 # parameters      mean       std      mcse    ess_bulk    ess_tail      rhat   ess_per_sec 
 # Symbol   Float64   Float64   Float64     Float64     Float64   Float64       Float64 
-#    σ_S    0.0582    0.0129    0.0002   3392.6984   2741.4693    1.0000      194.6024
-#    σ_X    0.0764    0.0149    0.0003   3760.6838   2805.2152    1.0006      215.7097
-#   μmax    0.3132    0.0171    0.0003   2724.8752   2708.5298    0.9999      156.2966
-#     Ks    0.1962    0.0548    0.0011   2514.5185   2573.0328    1.0003      144.2307
+#    σ_S    0.0615    0.0133    0.0002   3271.3402   2080.1297    0.9999      250.7543
+#    σ_X    0.0613    0.0129    0.0002   3075.3864   1991.8175    1.0000      235.7340
+#   μmax    0.3827    0.0256    0.0005   2442.0973   2475.3360    1.0002      187.1913
+#     Ks    0.2389    0.0740    0.0016   2162.3405   2247.3712    1.0002      165.7474
+#    Sin    2.3045    0.0253    0.0004   3311.1431   3066.3818    1.0009      253.8052
