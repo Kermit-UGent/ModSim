@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -173,12 +173,15 @@ Hint: you will need to use `remake(oprob; u0=[missing, missing])` to set the ini
 	σ_S2 ~ InverseGamma()
 	k ~ Uniform(0, 10)
 	Smax ~ Uniform(100, 200)
-	osol1 = solve(remake(oprob; u0=[0.0, 0.0]), Tsit5(), saveat=t_meas,
-		p=[k, Smax, 1e-3, 5, 10])
+	params = [:k => k, :Smax => Smax, :v => 1e-3, :R => 5.0, :S1res => 10.0]
+	u0 = [:S1 => 0.0, :S2 => 0.0]
+	oprob = ODEProblem(irrigation_mod, u0, tspan, params)
+	osol1 = solve(oprob, Tsit5(), saveat=t_meas)
 	S1_meas1 ~ MvNormal(osol1[:S1], σ_S1^2 * I)
 	S2_meas1 ~ MvNormal(osol1[:S2], σ_S2^2 * I)
-	osol2 = solve(remake(oprob; u0=[140.0, 135.0]), Tsit5(), saveat=t_meas,
-		p=[k, Smax, 1e-3, 5, 10])
+	u0 = [:S1 => 140.0, :S2 => 135.0]
+	oprob = ODEProblem(irrigation_mod, u0, tspan, params)
+	osol2 = solve(oprob, Tsit5(), saveat=t_meas)
 	S1_meas2 ~ MvNormal(osol2[:S1], σ_S1^2 * I)
 	S2_meas2 ~ MvNormal(osol2[:S2], σ_S2^2 * I)
 end

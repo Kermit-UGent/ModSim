@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -115,6 +115,9 @@ growth_log = @reaction_network begin
 	μ*(1-W/Wf), W --> 2W
 end
 
+# ╔═╡ 6e3e53ea-4fe7-4a34-8b00-cbf8d63a3203
+osys_log  = convert(ODESystem, growth_log)
+
 # ╔═╡ f4748167-b635-47a1-9015-32e1258c0afa
 md"
 Check the order of the parameters:
@@ -130,12 +133,6 @@ Next, we will need to create an `ODEProblem` in advance before we can optimize s
 
 # ╔═╡ e54ea8d1-0854-44fa-aed8-45d106e921e4
 u0_log = [:W => 2.0]
-
-# ╔═╡ 5f9005c7-5574-4717-81c8-d725a0fb2692
-# ╠═╡ disabled = true
-#=╠═╡
-tspan = (0.0, 100.0)
-  ╠═╡ =#
 
 # ╔═╡ 8d96eb17-ce19-4523-916f-3cd0441a16ca
 params_log = [:μ => 0.07, :Wf => 10.0]
@@ -194,10 +191,13 @@ We will thereby take an Inverse Gamma prior distribution for $\sigma_W$ and Unif
 # ╔═╡ 8a9115eb-4044-4cab-a7db-39b5dd86c70d
 @model function growth_log_inference(t_meas, W)
     σ_W ~ InverseGamma()
-    W0 ~ Uniform(0, 10)
-    μ ~ Uniform(0, 1)
-    Wf ~ Uniform(0, 100)
-    osol_log = solve(remake(oprob_log; u0=[W0]), Tsit5(), saveat=t_meas, p=[μ, Wf])
+    W0 ~ LogNormal()
+    μ ~ LogNormal()
+    Wf ~ LogNormal()
+	u0_log = [:W => W0]
+	params_log = [:μ => μ, :Wf => Wf]
+	oprob_log = ODEProblem(growth_log, u0_log, tspan, params_log)
+    osol_log = solve(oprob_log, Tsit5(), saveat=t_meas)
     W ~ MvNormal(osol_log[:W], σ_W^2 * I)
 end
 
@@ -469,6 +469,9 @@ growth_exp = @reaction_network begin
     μ, W --> 0
 end
 
+# ╔═╡ 85c57cd3-bf00-437e-937b-f0c3b62f74ff
+parameters(growth_exp)
+
 # ╔═╡ c6d373f4-f13c-4135-823d-ee8fbeb71b56
 md"
 Create an `ODEProblem`. Use the values in the aforementioned table as initial values for the problem. Use the same `tspan` as before.
@@ -503,15 +506,22 @@ Declare the Turing model. Take the same priors (and distributions) as before.
 #     W0 ~ missing
 #     μ ~ missing
 #     Wf ~ missing
+#     u0_exp = missing
+#     params_exp = missing
+#     oprob_exp = missing
 #     osol_exp = missing
 #     W ~ missing
 # end
 @model function growth_exp_inference(t_meas, W)
     σ_W ~ InverseGamma()
-    W0 ~ Uniform(0, 10)
-    μ ~ Uniform(0, 1)
-    Wf ~ Uniform(0, 100)
-    osol_exp = solve(remake(oprob_exp; u0=[W0]), Tsit5(), saveat=t_meas, p=[μ, Wf])
+    W0 ~ LogNormal()
+    μ ~ LogNormal()
+    Wf ~ LogNormal()
+	u0_exp = [:W => W0]
+	params_exp = [:μ => μ, :Wf => Wf]
+	oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, params_exp)
+    osol_exp = solve(oprob_exp, Tsit5(), saveat=t_meas)
+	# osol_exp = solve(remake(oprob_exp; u0=[W0]), Tsit5(), saveat=t_meas)
     W ~ MvNormal(osol_exp[:W], σ_W^2 * I)
 end
 
@@ -667,10 +677,13 @@ Declare the Turing model. Take for $\sigma_W$ and $W_0$ the same priors (and dis
 # end
 @model function growth_gom_inference(t_meas, W)
     σ_W ~ InverseGamma()
-    W0 ~ Uniform(0, 10)
-    μ ~ Uniform(0, 2)
-    D ~ Uniform(0, 1)
-    osol_gom = solve(remake(oprob_gom; u0=[W0]), Tsit5(), saveat=t_meas, p=[μ, D])
+    W0 ~ LogNormal()
+    μ ~ LogNormal()
+    D ~ LogNormal()
+	u0_gom = [:W => W0]
+	params_gom = [:μ => μ, :D => D]
+	oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, params_gom)
+    osol_gom = solve(oprob_gom, Tsit5(), saveat=t_meas)
     W ~ MvNormal(osol_gom[:W], σ_W^2 * I)
 end
 
@@ -798,11 +811,11 @@ Which grass growth model fits best these data? How can you prove this numericall
 # ╠═2481cd4f-0efc-4450-ab3d-4a5492597f36
 # ╠═9a5bc72b-346d-4e95-a873-783037ed98bc
 # ╠═ba56adb1-9405-40d5-be48-4273b42ab145
+# ╠═6e3e53ea-4fe7-4a34-8b00-cbf8d63a3203
 # ╠═f4748167-b635-47a1-9015-32e1258c0afa
 # ╠═a022b2ab-68a0-40ca-b914-7a2adcf4ae39
 # ╠═acccb2fa-12b2-4fc7-91e3-58a4b1a02892
 # ╠═e54ea8d1-0854-44fa-aed8-45d106e921e4
-# ╠═5f9005c7-5574-4717-81c8-d725a0fb2692
 # ╠═8d96eb17-ce19-4523-916f-3cd0441a16ca
 # ╠═5c9db9df-0cbd-41ac-afe9-fb5616c967be
 # ╠═1aa44f2b-6f33-437f-b9dd-89762d9f28ea
@@ -878,6 +891,7 @@ Which grass growth model fits best these data? How can you prove this numericall
 # ╠═4aa71200-006b-4a15-ae75-67e36aa81522
 # ╠═cdab3079-04b0-4a44-b770-468c20e321e4
 # ╠═cf1a144e-09e9-42a3-b2a3-b8676a200a39
+# ╠═85c57cd3-bf00-437e-937b-f0c3b62f74ff
 # ╠═c6d373f4-f13c-4135-823d-ee8fbeb71b56
 # ╠═a97abaa7-b642-4201-86f1-5c8995b07536
 # ╠═387730b4-bd06-492f-94e6-231bd68b3436

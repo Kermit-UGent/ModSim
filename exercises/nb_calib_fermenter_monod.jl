@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -58,6 +58,9 @@ fermenter_monod = @reaction_network begin
     Q/V, (S, X) --> ∅
     Q/V*Sin, ∅ --> S
 end
+
+# ╔═╡ 68f9ecb3-15b0-4a53-8864-5dac13a89e95
+parameters(fermenter_monod)
 
 # ╔═╡ de8ddc14-8f82-403d-8f42-29673ef2a722
 md"
@@ -147,6 +150,8 @@ Declare the Turing model.
     # μmax ~ missing
     # Ks ~ missing
     # Sin ~ missing
+	# params = missing
+	# oprob = missing
     # osol = missing
     # S ~ missing
     # X ~ missing
@@ -157,7 +162,9 @@ Declare the Turing model.
     μmax ~ LogNormal()
 	Ks ~ LogNormal()
     Sin ~ LogNormal()
-    osol = solve(oprob, Tsit5(), saveat=t_meas, p=[μmax, Ks, 0.80, 2, 40, Sin])
+	params = [:μmax => μmax, :Ks => Ks, :Y => 0.80, :Q => 2, :V => 40, :Sin => Sin]
+	oprob = ODEProblem(fermenter_monod, u₀, tspan, params)
+    osol = solve(oprob, Tsit5(), saveat=t_meas)
 	S ~ MvNormal(osol[:S], σ_S^2 * I)
 	X ~ MvNormal(osol[:X], σ_X^2 * I)
 end
@@ -264,6 +271,7 @@ end
 # ╠═595ea8ee-bc67-4696-9232-982612fb554d
 # ╠═824db995-7a66-4719-a534-7e0f6dec90b5
 # ╠═245c2636-95da-4c76-8b03-c4d20bbabb48
+# ╠═68f9ecb3-15b0-4a53-8864-5dac13a89e95
 # ╠═de8ddc14-8f82-403d-8f42-29673ef2a722
 # ╠═b7b7d58f-d406-4596-b834-ced6d8fada83
 # ╠═99c6f31a-0968-4804-9980-71fcc1af1f49
