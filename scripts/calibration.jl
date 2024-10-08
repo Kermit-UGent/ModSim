@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.19.43
 
 using Markdown
 using InteractiveUtils
@@ -512,6 +512,12 @@ parameters(yeast_ode)
 # ╔═╡ 0a461157-58f1-4478-9700-65bf5fb80ebe
 prob_yeast = ODEProblem(yeast, [:X=>10.1, :G=>180], (0, 50), [:μ=>0.3, :K=>250, :m=>0.03])
 
+# ╔═╡ 67c24c30-1416-4947-b8cd-685099f3001b
+remake(prob_yeast, parameters=[:μ=>0.2])
+
+# ╔═╡ 5c349b88-5789-4bda-a8d9-4a5d9af22e93
+solve(prob_yeast, Tsit5(), saveat=5)
+
 # ╔═╡ 25ac2424-170c-463d-9a5e-c900f3ed8674
 sol_yeast = solve(prob_yeast, Tsit5(), saveat=5)
 
@@ -974,6 +980,8 @@ plots
 # ╠═f241d041-34a1-4399-a724-8be968ed4677
 # ╠═0a283dff-c28e-4349-ad3f-a07b16bf274b
 # ╠═0a461157-58f1-4478-9700-65bf5fb80ebe
+# ╠═67c24c30-1416-4947-b8cd-685099f3001b
+# ╠═5c349b88-5789-4bda-a8d9-4a5d9af22e93
 # ╠═25ac2424-170c-463d-9a5e-c900f3ed8674
 # ╠═0e6ba65b-067c-42f4-90b7-8b8c387a2fa9
 # ╠═0c9c49af-59cc-4f2a-9de2-6095d379e18b
