@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -126,7 +126,7 @@ Getting a list of the differential equations, the state variables and the parame
 equations(osys)
 
 # ╔═╡ 0707b599-c1ca-459b-b87b-956f8f49564b
-states(osys)
+unknowns(osys)
 
 # ╔═╡ 113ff67e-6dc8-45cb-9617-7768e132f6e9
 parameters(osys)
@@ -205,7 +205,7 @@ condition2 = [14.0]
 
 # ╔═╡ efd74885-c25c-42e5-bef5-c9654329c220
 function affect2!(integrator)
-	integrator.p[2] = 0.5e-6     # β is the 2-nd parameter
+	integrator.ps[:β] = 0.5e-6     # β is the 2-nd parameter
 end
 
 # ╔═╡ ecf20050-12d3-48e7-84f1-6919a9aab865
@@ -521,7 +521,7 @@ Set-up the affect function and name it `affect_ex3`:
 # 	integrator.p[...] = ...
 # end
 function affect_ex3!(integrator)
-	integrator.p[7] = 0.055     # v is the 7-th parameter
+	integrator.ps[:v] = 0.055     # v is the 7-th parameter
 end
 
 # ╔═╡ 6e767e36-f54e-4472-881a-ab04ad9c9d09

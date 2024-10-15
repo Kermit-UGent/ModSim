@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -122,17 +122,18 @@ The following code creates a so called *reaction network object*, that we have n
 
 # ╔═╡ d1e14521-3365-43a5-b730-9b51ca359e12
 infection_sde_model = @reaction_network begin
-	@parameters η1 η2 η3
-	α * β, S + I --> 2I
+	@parameters η=50
+	@default_noise_scaling η
+	α * β, S + I --> 2I, [noise_scaling = 80.0]
 	r * m, I --> D
 	r * (1 - m), I --> R
 end
 
 # ╔═╡ f2b28b56-1369-4972-b771-7684397ad2ce
 md"
-Note that we have now introducted three **new parameters** (cf. `@parameters η1 η2 η3`). These parameters represent **noise scaling** parameters. The number of noise scaling parameters should always be equal to the number of *reactions*! Futhermore, the order matters, the first parameters relates to the first reaction, the second parameter to the second reaction, etc.\
+Note that we have now introducted a **new parameter** (cf. `@parameters η` and `@default_noise_scaling η`). This parameter represent a default **noise scaling** parameter applying to all reactions. You can overwrite this default value for specific reactions by specifying `[noise_scaling = ...]` on the same line.\
 They are in principle not necessary to solve the problem as a SDE problem but they can in many cases be very useful (see later).\
-When solving SDE problems, some random noise will be introduced upon the reaction rates of all reactions. With the noise scaling parameters we can scale the noise for each separate reaction.
+When solving SDE problems, some random noise will be introduced upon the reaction rates of all reactions.
 "
 
 # ╔═╡ 2a1afc01-5707-4368-ab69-cf2ffb8aa956
@@ -145,7 +146,7 @@ parameters(infection_sde_model)
 
 # ╔═╡ 619b6dc1-7486-4561-ab48-8daee7299734
 md"
-Note that the parameters $\eta1$, $\eta2$ and $\eta3$ also are present in the list.
+Note that the parameter $\eta$ also is present in the list.
 "
 
 # ╔═╡ 59c69709-f058-4312-9158-1de975ed20cd
@@ -190,11 +191,11 @@ tspan = (0.0, 90.0)
 md"
 ##### Setting parameter values
 
-In the parameter list, you should also mention the value of each noise scaling parameter. Here we will use $\eta1=100$, $\eta2=20$ and $\eta3=20$.
+In the parameter list, you could also mention another default value for the default noise scaling parameter.
 "
 
 # ╔═╡ 38e28866-8c09-4675-a9c1-d9ba4012070b
-params = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4, :η1 => 50, :η2 => 20, :η3 => 20]
+params = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4, :η => 50]
 
 # ╔═╡ 5ef6414d-943c-4a1e-a528-af0fb61d4f9a
 md"
@@ -204,7 +205,8 @@ When creating the SDE problem you should literally state that the parameters `η
 "
 
 # ╔═╡ 1d5c6ff5-6a63-4491-981e-9c1ab5d37d60
-sprob = SDEProblem(infection_sde_model, u0, tspan, params; noise_scaling = @parameters η1 η2 η3)
+# sprob = SDEProblem(infection_sde_model, u0, tspan, params, noise_scaling = @parameters η1 η2 η3)
+sprob = SDEProblem(infection_sde_model, u0, tspan, params)
 
 # ╔═╡ 0da84898-6170-4d71-acaf-23d97bfd7be9
 md"

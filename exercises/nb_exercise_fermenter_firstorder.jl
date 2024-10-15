@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -139,7 +139,7 @@ Create a function called `affect!`, that will be called by the solver at the tim
 #     missing
 # end
 function affect!(integrator)
-    integrator.p[5] = 3.4
+    integrator.ps[:Sin] = 3.4
 end
 
 # ╔═╡ a6024052-df1b-4bff-abb4-b9cda5a4c08e

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -200,11 +200,11 @@ equations(osys)
 
 # ╔═╡ 3f6f38a3-12ec-4b5b-8ebb-9e48190d3f7e
 md"
-To get a list of the state variables, you can use the command `states`:
+To get a list of the state variables, you can use the command `unknowns`:
 "
 
 # ╔═╡ 72f7f870-b2fc-4df1-9325-3c587be7e014
-states(osys)
+unknowns(osys)
 
 # ╔═╡ da5cfd6e-b57a-4235-b79d-a1c2f148328b
 md"
@@ -431,7 +431,7 @@ Next, we create a function that we will call `affect2!` (note the exclamation ma
 
 # ╔═╡ 182a46a9-5dce-4144-81cb-aa71a73c4ea0
 function affect2!(integrator)
-	integrator.p[2] = 0.5e-6     # β is the 2-nd parameter
+	integrator.ps[:β] = 0.5e-6     # β is the 2-nd parameter
 end
 
 # ╔═╡ 6dcd4258-d3b5-46a5-ad36-e4c7094e3fdb

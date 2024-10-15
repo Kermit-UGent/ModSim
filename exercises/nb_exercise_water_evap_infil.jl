@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -80,8 +80,8 @@ Initialize a vector `u₀` with the initial conditions:
 "
 
 # ╔═╡ 733bdb56-fb4f-4bc6-b50c-e3245fd59730
-# u₀ = ...
-u₀ = [:W => 6.75, :G => 6.75]
+# u0 = ...
+u0 = [:W => 6.75, :G => 6.75]
 
 # ╔═╡ 521fcca5-3c88-463b-9395-e5871b9fc5a3
 md"
@@ -106,7 +106,7 @@ Create the ODE problem and store it in `oprob`:
 "
 
 # ╔═╡ dec48829-0f6e-48c7-bb96-ee285065e6f9
-oprob = ODEProblem(water_evap_infil, u₀, tspan, params)
+oprob = ODEProblem(water_evap_infil, u0, tspan, params)
 
 # ╔═╡ f31f4636-3077-4454-94c5-67b19850712e
 md"
@@ -144,7 +144,7 @@ Create the function called `affect!`, that will be called by the solver when the
 #   ...
 # end
 function affect!(integrator)
-  integrator.p[2] = 0.0
+  integrator.ps[:O] = 0.0
 end
 
 # ╔═╡ daea3af6-1ce8-4550-9ee0-609ea990488e

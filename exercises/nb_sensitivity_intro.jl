@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -222,6 +222,9 @@ u_log, dp_log = extract_local_sensitivities(osol_sens_log)
 
 # ╔═╡ bbaa2ca8-f566-48b0-ab8e-36a2319395cb
 u_log'
+
+# ╔═╡ 2b13495a-993f-4f26-a1c7-05545d986052
+dp_log[1]'
 
 # ╔═╡ 8a8074c0-0f6d-4907-8907-cdb2b147d1a0
 md"
@@ -599,6 +602,7 @@ Draw your conclusions:
 # ╠═137c0fc9-4aad-4a66-9214-c6edc4e04747
 # ╠═1bd6ed0b-b463-4f0f-8d32-c67479a70c30
 # ╠═bbaa2ca8-f566-48b0-ab8e-36a2319395cb
+# ╠═2b13495a-993f-4f26-a1c7-05545d986052
 # ╠═8a8074c0-0f6d-4907-8907-cdb2b147d1a0
 # ╠═f2eff54d-b19d-4e96-ba98-a54072f49118
 # ╠═21a8558a-a048-40be-8a04-358ac6fa4f61

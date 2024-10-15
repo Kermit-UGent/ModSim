@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -55,11 +55,12 @@ Hint: pay attention to how many net *reactions* there are, this corresponds to t
 #   missing
 # end
 fermenter_sde_secondorder = @reaction_network begin
-  @parameters η1 η2 η3 η4
+  @parameters η=0.10
+  @default_noise_scaling η
   k*X, S --> Y*X
-  Q/V*Sin, 0 --> S
-  Q/V, S --> 0
-  Q/V, X --> 0
+  Q/V*Sin, 0 --> S, [noise_scaling = 0.05]
+  Q/V, S --> 0, [noise_scaling = 0.00]
+  Q/V, X --> 0, [noise_scaling = 0.00]
 end
 
 # ╔═╡ 47ca3573-691c-4127-85b9-d5b5a1a23fbb
@@ -100,7 +101,7 @@ Assign the following noise scaling values:
 
 # ╔═╡ a4d28c40-e315-4bb9-87a5-2b45dd633e5f
 # params = missing    # Uncomment and complete the instruction
-params = [:k => 0.2, :Y => 0.76, :Q => 2, :V => 40, :Sin => 2.2, :η1 => 0.10, :η2 => 0.05, :η3 => 0.0, :η4 => 0.0]
+params = [:k => 0.2, :Y => 0.76, :Q => 2, :V => 40, :Sin => 2.2, :η => 0.10]
 
 # ╔═╡ b2973e86-d89f-476a-8c41-de25a9e5c69d
 md"
@@ -112,7 +113,7 @@ Hints:
 
 # ╔═╡ aeddc31e-9de2-4792-a2d8-59a14dfc8173
 # sprob = missing      # Uncomment and complete the instruction
-sprob = SDEProblem(fermenter_sde_secondorder, u0, tspan, params, combinatoric_ratelaws=false; noise_scaling = @parameters η1 η2 η3 η4)
+sprob = SDEProblem(fermenter_sde_secondorder, u0, tspan, params, combinatoric_ratelaws=false)
 
 # ╔═╡ 3a981326-2031-4c63-ad31-c44ddd7a88d5
 md"

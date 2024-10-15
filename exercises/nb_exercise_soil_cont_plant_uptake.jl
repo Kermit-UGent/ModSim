@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -80,12 +80,12 @@ Suppose that we start an experiment in which we simulate the evoluation of the p
 
 # ╔═╡ 340328cc-78ed-4c6c-a0bf-73fd1be21d21
 md"
-Initialize a vector `u₀` with the initial conditions:
+Initialize a vector `u0` with the initial conditions:
 "
 
 # ╔═╡ 9d4fc31d-32b4-49c7-9e4c-577530199513
-# u₀ = ...         # Uncomment and complete the instruction
-u₀ = [:C => 0.001, :P => 0.001]
+# u0 = ...         # Uncomment and complete the instruction
+u0 = [:C => 0.001, :P => 0.001]
 
 # ╔═╡ 51ffec7c-6033-47a9-b65a-5f9a7ab96fb9
 md"
@@ -111,7 +111,7 @@ Create the ODE problem and store it in `oprob`:
 
 # ╔═╡ 6f84b532-a718-4d42-9829-91366693b51c
 # oprob = ...        # Uncomment and complete the instruction
-oprob = ODEProblem(soil_cont_plant_uptake, u₀, tspan, params)
+oprob = ODEProblem(soil_cont_plant_uptake, u0, tspan, params)
 
 # ╔═╡ ca65797f-a1dd-42dd-992c-ba067932a018
 md"

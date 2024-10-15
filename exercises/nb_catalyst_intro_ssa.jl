@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -158,11 +158,11 @@ equations(osys)
 
 # ╔═╡ 1d6f5b69-ab47-4344-985f-3e9c9430fddd
 md"
-To get a list of the state variables, you can use the command `states`:
+To get a list of the state variables, you can use the command `unknowns`:
 "
 
 # ╔═╡ 6bc9574c-0f04-45c0-a457-6601f1333c0e
-states(osys)
+unknowns(osys)
 
 # ╔═╡ b3584f8c-50f4-4800-96aa-776cfc2b8db3
 md"

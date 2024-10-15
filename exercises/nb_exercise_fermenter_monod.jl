@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -54,13 +54,15 @@ Tip: The specific growth rate $\mu = \mu_{max} \, \cfrac{S}{S + K_s}$ can be imp
 
 # ╔═╡ 331a34f4-89d4-4193-896c-c14ab0bf04e7
 # fermenter_monod = @reaction_network begin
-#     ...        # Y*X is created from one S at a rate β
+#     ...        # Y*X is created from one S at a rate mm(S, μmax, Ks)
 #     ...        # S is created at a rate Q/V*Sin
 #     ...        # S and X are degraded at a rate Q/V*S
 # end
 fermenter_monod = @reaction_network begin
 	# Y*X is created from one S at a rate X * mm(S, μmax, Ks)
-    X * mm(S, μmax, Ks), S --> Y*X
+	# or, when S and X meet, this results in Y*X and X
+    # X * mm(S, μmax, Ks), S --> Y*X
+	mm(S, μmax, Ks), S + X --> Y*X + X
     Q/V, (S, X) --> 0               # S and X are degraded at a rate Q/V*S
     Q/V*Sin, 0 --> S                # S is created at a rate Q/V*Sin 
 end
@@ -189,7 +191,7 @@ Create a function called `affect2!`, that will be called by the solver at the ti
 #     ...
 # end
 function affect2!(integrator)
-    integrator.p[6] = 2.8
+    integrator.ps[:Sin]=2.8
 end
 
 # ╔═╡ 407eadc6-410a-48f2-ac61-c5e4d8ad7789
@@ -286,7 +288,7 @@ Create a function called `affect3!`, that will be called by the solver at the ti
 #     ...
 # end
 function affect3!(integrator)
-    integrator.p[4] *= 2.0
+    integrator.ps[:Q] *= 2.0
 end
 
 # ╔═╡ a6024052-df1b-4bff-abb4-b9cda5a4c08e
