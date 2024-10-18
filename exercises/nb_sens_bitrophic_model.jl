@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -24,7 +24,7 @@ using Catalyst
 using DifferentialEquations, Plots
 
 # ╔═╡ ddc035a2-3b03-4a54-807c-05a271384ca7
-using SciMLSensitivity
+using ForwardDiff
 
 # ╔═╡ ceec287b-5622-48d2-9fe1-26b3e84e3f45
 md"
@@ -75,8 +75,11 @@ end
 
 # ╔═╡ 92027dcf-9765-4fad-a0a4-f19967ce6bce
 md"
-Check out the order of the parameters. This will be important later for selecting the right sensitivity functions.
+Check out the species and the parameters.
 "
+
+# ╔═╡ 15dbf491-c5ae-4682-a21d-1a815a957993
+species(bitrophic_model)
 
 # ╔═╡ 051f1b87-34ec-4e3f-8d4e-c4e42430be8f
 # missing             # Uncomment and complete the instruction
@@ -104,9 +107,23 @@ u0 = [:C => 100, :A => 0.5]
 # tspan = missing      # Uncomment and complete the instruction
 tspan = (0.0, 200.0)
 
+# ╔═╡ 4e1acbdd-65ce-4f5e-b557-633af8a11aa9
+md"""
+For clarity, we will use the variables `μmax`, `Ks` and `Sin` to store the parameter values that are used for the calculation of the sensitivity functions.
+"""
+
+# ╔═╡ 9fda8191-e28d-4d10-b330-c386711a2a73
+θ = 0.2
+
+# ╔═╡ ae172c81-539c-4482-9cd2-ab74fd83c26a
+ϕ = 0.2
+
+# ╔═╡ 28417aea-9c05-4ba0-8b85-b8cccd808238
+p = 3
+
 # ╔═╡ 157eae84-9c8a-4d23-9ada-9d53ba520b0a
 # params = missing     # Uncomment and complete the instruction
-params = [:θ => 0.2, :k => 4000.0, :f => 0.001, :ϕ => 0.2, :p => 3, :μ => 0.1]
+params = [:θ => θ, :k => 4000.0, :f => 0.001, :ϕ => ϕ, :p => p, :μ => 0.1]
 
 # ╔═╡ eddc01fa-3ab0-4fd0-963f-5704f48778a7
 md"
@@ -137,67 +154,140 @@ Interpret the simulations results. Ask yourself the following questions:
     - Answer: missing
 "
 
-# ╔═╡ 18578789-f389-4d6e-a26b-9c8776f3d1a8
-md"
-Create the ODE forward sensitivity problem and store it in `oprob_sens`:
-"
+# ╔═╡ aa07ac11-1d6e-41ea-885d-1a6ae38bd58d
+md"""
+Write a solution function with as argument a vector of the parameters (that you want the sensitivity on), and that returns the outputs.
+"""
 
-# ╔═╡ d17247da-0aeb-4f18-a9f1-0b8255e2be9c
-# oprob_sens = missing         # Uncomment and complete the instruction
-oprob_sens = ODEForwardSensitivityProblem(oprob.f, [100, 0.5], tspan, [0.2, 4000.0, 0.001, 0.2, 3, 0.1])
+# ╔═╡ 2a858811-9ffd-4dc7-84ba-f7a59421753f
+# function bitrophic_model_sim(params)
+# 	missing
+# 	...
+# end
+function bitrophic_model_sim(params)
+	θ, ϕ, p = params
+    u0 = [:C => 100, :A => 0.5]
+    tspan = (0.0, 200.0)
+    params = [:θ => θ, :k => 4000.0, :f => 0.001, :ϕ => ϕ, :p => p, :μ => 0.1]
+    oprob = ODEProblem(bitrophic_model, u0, tspan, params,combinatoric_ratelaws=false)
+	osol = solve(oprob, Tsit5(), saveat=0.5)
+	return osol
+end
 
-# ╔═╡ 3254b7a9-bf50-4d34-ae64-0ac79035db4b
-md"
-Solve the *ODE forward sensitivity problem* using `Tsit5()` and `saveat=0.5`, and store the solution in `osol_sens`:
-"
+# ╔═╡ e911dc09-c56a-42ed-9a09-9c4bba1aa5f6
+md"""
+Make two functions based on the solution function that each returns a single output, hence, one function that returns the output $C$, and another function that returns the output $A$.
+"""
 
-# ╔═╡ c31fc27c-ca6f-45b7-9348-b16e05c44dfa
-# osol_sens = missing           # Uncomment and complete the instruction
-osol_sens = solve(oprob_sens, Tsit5(), saveat=0.5)
+# ╔═╡ 2e43110a-d948-4e6f-9ed9-a35101ba223a
+# bitrophic_model_sim_C(params) = missing
+bitrophic_model_sim_C(params) = bitrophic_model_sim(params)[:C]
 
-# ╔═╡ 45c00c7c-c57f-4727-8d5c-af599a1c5674
-md"
-Extract the sensitivity functions. Store the simulation results in the variable `u` and the sensitivities in the variable `dp`:
-"
+# ╔═╡ 298604da-3207-40db-8535-f628d17a0f39
+# bitrophic_model_sim_A(params) = missing
+bitrophic_model_sim_A(params) = bitrophic_model_sim(params)[:A]
 
-# ╔═╡ 2afbc8b2-e49e-40ca-ac14-d01d8d5b32bb
-# u, dp = missing                 # Uncomment and complete the instruction
-u, dp = extract_local_sensitivities(osol_sens)
+# ╔═╡ 76b256dc-bdec-4fb8-95c7-b32df03ba8b1
+md"""
+Make the time vector.
+"""
 
-# ╔═╡ 8b39af5a-2d86-48bd-abf0-8fd00a371c83
-md"
-Select by indexing and assign the normalized sensitivities of $C$ and $A$ on $\theta$, $\phi$ and $p$, to the variables `sens_theta`, `sens_phi` and `sens_p` respectively. Don't forget to transpose where necessary.
+# ╔═╡ 3d1f2c90-2e4e-4fa1-af41-9d44d00e5090
+# t_vals = missing
+t_vals = 0:0.5:200.0
 
-**Remark:**
-- The variable `u` contains the outputs of $C$ and $A$.
-- The variable `dp` contains six elements (equal to the number of parameters).
-- Each of the elements `pd[i]` will contain two sensitivity functions (one of $C$ and one of $A$) to the `i`-th parameter. You can find the parameter indices of $\theta$, $\phi$ and $p$ by calling the function `parameters` in conjunction with the *reaction network* model name.
-"
+# ╔═╡ c2ca4b68-39a6-45f7-a2a1-0f5c4903ed07
+md"""
+Compute the two outputs $C$ and $A$ for the given parameter values.
+"""
 
-# ╔═╡ 6397e7a3-6265-4e84-9025-4617736c0ded
-# Normalized sensitivity of C and A on θ
-# sens_theta = missing             # Uncomment and complete the instruction
-sens_theta = dp[1]'./u'.*0.2
+# ╔═╡ 7bc637be-8238-43f4-b190-b46833fc9d34
+# C_sim =  missing
+C_sim = bitrophic_model_sim_C([θ, ϕ, p])
 
-# ╔═╡ ca36a17c-978a-43f1-ab19-06785ed6963f
-# Normalized sensitivity of C and A on ϕ
-# sens_phi   = missing             # Uncomment and complete the instruction
-sens_phi   = dp[4]'./u'.*0.2
+# ╔═╡ 127d8761-97d6-4fcb-b633-98ee30ebc617
+# A_sim = missing
+A_sim = bitrophic_model_sim_A([θ, ϕ, p])
 
-# ╔═╡ 17726224-7bf7-48f3-8763-e636de3b6775
-# Normalized sensitivity of C and A on p
-# sens_p     = missing             # Uncomment and complete the instruction
-sens_p     = dp[5]'./u'.*3.0
+# ╔═╡ cda34ccc-e018-4e2c-a4d3-8ed3d0c1624b
+md"""
+Using `ForwardDiff.jacobian` to compute the sensitivities for the single ouputs $C$ and $A$. Hence, you need to call `ForwardDiff.jacobian` twice.
+"""
+
+# ╔═╡ 55f00963-bfb0-420f-ae6f-d20f93f01b1e
+# sens_C = missing
+sens_C = ForwardDiff.jacobian(bitrophic_model_sim_C, [θ, ϕ, p])
+
+# ╔═╡ 4d2c77f2-1a5f-437c-adb6-232155f2cafb
+# sens_A = missing
+sens_A = ForwardDiff.jacobian(bitrophic_model_sim_A, [θ, ϕ, p])
+
+# ╔═╡ c261b580-2cc7-4aba-af15-1778f9293278
+md"""
+Extract the (absolute) sensitivities of the outputs on the different parameters.
+"""
+
+# ╔═╡ 730de2d2-104b-4f4a-96da-4f96b0445f95
+# begin
+# 	sens_C_on_θ = missing
+# 	sens_C_on_ϕ = missing
+# 	sens_C_on_p = missing
+# end
+begin
+	sens_C_on_θ = sens_C[:, 1]
+	sens_C_on_ϕ = sens_C[:, 2]
+	sens_C_on_p = sens_C[:, 3]
+end
+
+# ╔═╡ 2d8df796-c362-49d9-b938-26f1917e800b
+# begin
+# 	sens_A_on_θ = missing
+# 	sens_A_on_ϕ = missing
+# 	sens_A_on_p = missing
+# end
+begin
+	sens_A_on_θ = sens_A[:, 1]
+	sens_A_on_ϕ = sens_A[:, 2]
+	sens_A_on_p = sens_A[:, 3]
+end
+
+# ╔═╡ 6b3ee543-e3e2-4fe6-925d-1f201243d014
+md"""
+Compute the normalized sensitivities.
+"""
+
+# ╔═╡ 89830894-4481-480b-954d-b24971590eaf
+# begin
+# 	sens_C_on_θ_rel = missing
+# 	sens_C_on_ϕ_rel = missing
+# 	sens_C_on_p_rel = missing
+# end
+begin
+	sens_C_on_θ_rel = sens_C_on_θ .* θ ./ C_sim
+	sens_C_on_ϕ_rel = sens_C_on_ϕ .* ϕ ./ C_sim
+	sens_C_on_p_rel = sens_C_on_p .* p ./ C_sim
+end
+
+# ╔═╡ c2b5c2c4-3aa6-466d-b106-d0d7aef43bdf
+# begin
+# 	sens_A_on_θ_rel = missing
+# 	sens_A_on_ϕ_rel = missing
+# 	sens_A_on_p_rel = missing
+# end
+begin
+	sens_A_on_θ_rel = sens_A_on_θ .* θ ./ A_sim
+	sens_A_on_ϕ_rel = sens_A_on_ϕ .* ϕ ./ A_sim
+	sens_A_on_p_rel = sens_A_on_p .* p ./ A_sim
+end
 
 # ╔═╡ 3814640e-ed0b-48a1-b4ac-6b7f04d899f3
 md"
 Plot the sensitivity functions of $C$ and $A$ on $\theta$.
 "
 
-# ╔═╡ cda325f3-7086-4503-94d7-a954a0cbd90d
-# Plot sensitivity of C and A on θ
+# ╔═╡ bbe8980e-441d-4ac6-abc5-88ff77de9f24
 # missing
-plot(osol_sens.t, sens_theta, title="Normalized sensitivity of C and A on θ", label=["C on θ" "A on θ"])
+plot(t_vals, [sens_C_on_θ_rel, sens_A_on_θ_rel], title="Normaized sensitivities", label=["C on θ" "A on θ"], xlabel="Time (days)")
 
 # ╔═╡ a8257414-2d6a-4913-9f05-6369c62189e8
 md"
@@ -214,20 +304,18 @@ md"
 Plot the sensitivity functions of $C$ and $A$ on $\phi$.
 "
 
-# ╔═╡ 83903533-f8c1-4217-a930-4fddb885ff61
-# Plot sensitivity of C and A on ϕ
+# ╔═╡ f76e5c58-12fc-4b2d-8718-e15144fbef98
 # missing
-plot(osol_sens.t, sens_phi, title="Normalized sensitivity of C and A to ϕ", label=["C on ϕ" "A on ϕ"])
+plot(t_vals, [sens_C_on_ϕ_rel, sens_A_on_ϕ_rel], title="Normaized sensitivities", label=["C on ϕ" "A on ϕ"], xlabel="Time (days)")
 
 # ╔═╡ 0bd84cf5-c0a2-4bb2-b5f4-f16da6eaab04
 md"
 Plot the sensitivity functions of $C$ and $A$ on $p$.
 "
 
-# ╔═╡ 3eeb967d-ea9b-44da-af4c-d829a861c803
-# Plot sensitivity of C and A on p
+# ╔═╡ cb02ebf8-aee5-47a2-9496-6f63fc123147
 # missing
-plot(osol_sens.t, sens_p, title="Normalized sensitivity of C and A to p", label=["C on p" "A on p"])
+plot(t_vals, [sens_C_on_p_rel, sens_A_on_p_rel], title="Normaized sensitivities", label=["C on p" "A on p"], xlabel="Time (days)")
 
 # ╔═╡ 869a9dc3-8227-4c6e-8901-198cafb489e2
 md"
@@ -236,26 +324,6 @@ Interpret your results. Try to answer the following question(s):
 1. In steady state, does $\phi$ have a positive or negative effect on $C$? Explain why this could be.
     - Answer: missing
 2. In steady state, does $p$ have a positive or negative effect on $C$? Explain why this could be.
-    - Answer: missing
-"
-
-# ╔═╡ 51d02232-16a1-4c9b-8687-a4f01c95d6a8
-md"
-Plot the sensitivity functions of $C$ on $\theta$, $\phi$ and $p$.
-"
-
-# ╔═╡ 9b798f10-f198-4318-a9dc-f3df4cfa334f
-begin
-plot(osol_sens.t, sens_theta[:,1], title="Normalized sensitivities", label="C on θ")
-plot!(osol_sens.t, sens_phi[:,1], label="C on ϕ")
-plot!(osol_sens.t, sens_p[:,1], label="C on p")
-end
-
-# ╔═╡ 69ab3441-220d-46d0-95cd-080249d403d8
-md"
-Interpret your results. Try to answer the following question(s):
-
-- In steady state, which of the three parameters do significantly influence $C$? Explain why this could be.
     - Answer: missing
 "
 
@@ -272,36 +340,47 @@ Interpret your results. Try to answer the following question(s):
 # ╠═eeb52e5e-f57b-4746-bbfc-7f043fc50e96
 # ╠═0b902d89-f0c2-4621-998e-7013931315ae
 # ╠═92027dcf-9765-4fad-a0a4-f19967ce6bce
+# ╠═15dbf491-c5ae-4682-a21d-1a815a957993
 # ╠═051f1b87-34ec-4e3f-8d4e-c4e42430be8f
 # ╠═f11bae81-a855-48ec-90a7-16b4ea1fc30b
 # ╠═1a19c02c-5d0f-4271-b0e7-7da873030d7e
 # ╠═55eba88f-d4cf-4ccf-b061-51feb3a4290c
 # ╠═7769c7a5-5f19-4e1a-8721-41ee03c2024e
 # ╠═00453a3c-88d1-4cc4-a8f2-d4fa2eed0b66
+# ╠═4e1acbdd-65ce-4f5e-b557-633af8a11aa9
+# ╠═9fda8191-e28d-4d10-b330-c386711a2a73
+# ╠═ae172c81-539c-4482-9cd2-ab74fd83c26a
+# ╠═28417aea-9c05-4ba0-8b85-b8cccd808238
 # ╠═157eae84-9c8a-4d23-9ada-9d53ba520b0a
 # ╠═eddc01fa-3ab0-4fd0-963f-5704f48778a7
 # ╠═1c185585-7c7a-4073-85f5-8300d3fe19e4
 # ╠═2f1b4426-7235-4caf-84ed-ec6e04eaa34a
 # ╠═63b33638-b967-43a7-b6ff-f6912f9a12e3
 # ╠═81c6198f-5f69-4d78-b67c-b6e283a6c3b1
-# ╠═18578789-f389-4d6e-a26b-9c8776f3d1a8
-# ╠═d17247da-0aeb-4f18-a9f1-0b8255e2be9c
-# ╠═3254b7a9-bf50-4d34-ae64-0ac79035db4b
-# ╠═c31fc27c-ca6f-45b7-9348-b16e05c44dfa
-# ╠═45c00c7c-c57f-4727-8d5c-af599a1c5674
-# ╠═2afbc8b2-e49e-40ca-ac14-d01d8d5b32bb
-# ╠═8b39af5a-2d86-48bd-abf0-8fd00a371c83
-# ╠═6397e7a3-6265-4e84-9025-4617736c0ded
-# ╠═ca36a17c-978a-43f1-ab19-06785ed6963f
-# ╠═17726224-7bf7-48f3-8763-e636de3b6775
+# ╠═aa07ac11-1d6e-41ea-885d-1a6ae38bd58d
+# ╠═2a858811-9ffd-4dc7-84ba-f7a59421753f
+# ╠═e911dc09-c56a-42ed-9a09-9c4bba1aa5f6
+# ╠═2e43110a-d948-4e6f-9ed9-a35101ba223a
+# ╠═298604da-3207-40db-8535-f628d17a0f39
+# ╠═76b256dc-bdec-4fb8-95c7-b32df03ba8b1
+# ╠═3d1f2c90-2e4e-4fa1-af41-9d44d00e5090
+# ╠═c2ca4b68-39a6-45f7-a2a1-0f5c4903ed07
+# ╠═7bc637be-8238-43f4-b190-b46833fc9d34
+# ╠═127d8761-97d6-4fcb-b633-98ee30ebc617
+# ╠═cda34ccc-e018-4e2c-a4d3-8ed3d0c1624b
+# ╠═55f00963-bfb0-420f-ae6f-d20f93f01b1e
+# ╠═4d2c77f2-1a5f-437c-adb6-232155f2cafb
+# ╠═c261b580-2cc7-4aba-af15-1778f9293278
+# ╠═730de2d2-104b-4f4a-96da-4f96b0445f95
+# ╠═2d8df796-c362-49d9-b938-26f1917e800b
+# ╠═6b3ee543-e3e2-4fe6-925d-1f201243d014
+# ╠═89830894-4481-480b-954d-b24971590eaf
+# ╠═c2b5c2c4-3aa6-466d-b106-d0d7aef43bdf
 # ╠═3814640e-ed0b-48a1-b4ac-6b7f04d899f3
-# ╠═cda325f3-7086-4503-94d7-a954a0cbd90d
+# ╠═bbe8980e-441d-4ac6-abc5-88ff77de9f24
 # ╠═a8257414-2d6a-4913-9f05-6369c62189e8
 # ╠═882f2f6b-eb58-4c8f-877e-76e460900c0c
-# ╠═83903533-f8c1-4217-a930-4fddb885ff61
+# ╠═f76e5c58-12fc-4b2d-8718-e15144fbef98
 # ╠═0bd84cf5-c0a2-4bb2-b5f4-f16da6eaab04
-# ╠═3eeb967d-ea9b-44da-af4c-d829a861c803
+# ╠═cb02ebf8-aee5-47a2-9496-6f63fc123147
 # ╠═869a9dc3-8227-4c6e-8901-198cafb489e2
-# ╠═51d02232-16a1-4c9b-8687-a4f01c95d6a8
-# ╠═9b798f10-f198-4318-a9dc-f3df4cfa334f
-# ╠═69ab3441-220d-46d0-95cd-080249d403d8
