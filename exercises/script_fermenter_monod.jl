@@ -43,7 +43,7 @@ equations(osys)
 #  Differential(t)(S(t)) ~ (Q*Sin) / V + (-Q*S(t)) / V - X(t)*S(t)*Catalyst.mm(S(t), μmax, Ks)
 #  Differential(t)(X(t)) ~ (-Q*X(t)) / V + Y*X(t)*S(t)*Catalyst.mm(S(t), μmax, Ks)
 # Check out the states
-states(osys)
+unknowns(osys)
 # 2-element Vector{SymbolicUtils.BasicSymbolic{Real}}:
 #  S(t)
 #  X(t)
@@ -58,13 +58,13 @@ parameters(osys)
 #  Sin
 
 # Set initial condition for ODE problem
-u₀ = [:S => 0.0, :X => 0.01]
+u0 = [:S => 0.0, :X => 0.01]
 # Set time span for simulation
 tspan = (0.0, 200)
 # Set parameters for ODE problem
 params = [:μmax => 0.30, :Ks => 0.15, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2]
 # Create ODE problem
-oprob = ODEProblem(fermenter_monod, u₀, tspan, params)
+oprob = ODEProblem(fermenter_monod, u0, tspan, params, combinatoric_ratelaws=false)
 
 
 
@@ -83,7 +83,7 @@ Seq, Xeq = solve(SteadyStateProblem(ODEProblem(fermenter_monod, u_guess, tspan, 
 # Double the Sin at t=100
 condition2 = [100.0]
 function affect2!(integrator)
-    integrator.p[6] = 2.8
+    integrator.ps[:Sin] = 2.8
 end
 cb2 = PresetTimeCallback(condition2, affect2!)
 osol2 = solve(deepcopy(oprob), Tsit5(), saveat=0.5, callback=cb2)
@@ -102,7 +102,7 @@ Seq, Xeq = solve(SteadyStateProblem(ODEProblem(fermenter_monod, u_guess, tspan, 
 # Double the flow Q at t=100
 condition3 = [100.0]
 function affect3!(integrator)
-    integrator.p[4] *= 2.0
+    integrator.ps[:Q] *= 2.0
 end
 cb3 = PresetTimeCallback(condition3, affect3!)
 osol3 = solve(deepcopy(oprob), Tsit5(), saveat=0.5, callback=cb3)
@@ -122,55 +122,122 @@ Seq, Xeq = solve(SteadyStateProblem(ODEProblem(fermenter_monod, u_guess, tspan, 
 ## Sensitivity analysis
 ################################################################
 
-using SciMLSensitivity
+using ForwardDiff
 
-# u₀ = [:S => 0.0, :X => 0.01]
-# # Set time span for simulation
-# tspan = (0.0, 200)
-# # Set parameters for ODE problem
-# params = [:μmax => 0.30, :Ks => 0.15, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2]
+function fermenter_monod_sim(params)
+	  μmax, Ks, Sin = params
+    u0 = [:S => 0.0, :X => 0.01]
+    tspan = (0.0, 100.0)
+    params = [:μmax => μmax, :Ks => Ks, :Y => 0.80, :Q => 2, :V => 40, :Sin => Sin]
+    oprob = ODEProblem(fermenter_monod, u0, tspan, params, combinatoric_ratelaws=false)
+	  osol = solve(oprob, Tsit5(), saveat=0.5)
+	  return osol
+end
 
-tspan = (0.0, 100)
+fermenter_monod_sim_S(params) = fermenter_monod_sim(params)[:S]
+fermenter_monod_sim_X(params) = fermenter_monod_sim(params)[:X]
 
-oprob_sens = ODEForwardSensitivityProblem(oprob.f, [0.0, 0.01], tspan, [0.3, 0.15, 0.80, 2.0, 40.0, 2.2])
-# oprob.f        : the ODE function
-# [0.02, 5.0e-5] : initial conditions, the order is [S, X], see species(fermenter_monod)
-# tspan          : the time span
-# [0.39, 0.48, 0.77, 2, 40, 2.2] : the parameter values, the order is [μmax, Ks, Y, Q, V Sin], see parameters(fermenter_monod)
+t_vals = 0:0.5:100.0
+μmax = 0.30
+Ks = 0.15
+Sin = 2.2
 
-osol_sens = solve(oprob_sens, Tsit5(), saveat=0.5)
-u, dp = extract_local_sensitivities(osol_sens)
+S_sim = fermenter_monod_sim_S([μmax, Ks, Sin])
+X_sim = fermenter_monod_sim_X([μmax, Ks, Sin])
 
-sol_S = u[1,:]     # solution for S
-sol_X = u[2,:]     # solution for X
+sens_S = ForwardDiff.jacobian(fermenter_monod_sim_S, [μmax, Ks, Sin])
+sens_X = ForwardDiff.jacobian(fermenter_monod_sim_X, [μmax, Ks, Sin])
 
-sens_μmax = dp[1]'  # sensitivity for S and X on μmax  
-sens_Ks   = dp[2]'  # sensitivity for S and X on Ks
-sens_Sin  = dp[6]'  # sensitivity for S and X on Sin
+sens_S_on_μmax = sens_S[:, 1]
+sens_S_on_Ks   = sens_S[:, 2]
+sens_S_on_Sin  = sens_S[:, 3]
+
+sens_X_on_μmax = sens_X[:, 1]
+sens_X_on_Ks   = sens_X[:, 2]
+sens_X_on_Sin  = sens_X[:, 3]
+
+sens_S_on_μmax_rel = sens_S_on_μmax .* μmax ./ S_sim
+sens_S_on_Ks_rel   = sens_S_on_Ks .* Ks ./ S_sim
+sens_S_on_Sin_rel  = sens_S_on_Sin .* Sin ./ S_sim
+
+sens_X_on_μmax_rel = sens_X_on_μmax .* μmax ./ X_sim
+sens_X_on_Ks_rel   = sens_X_on_Ks .* Ks ./ X_sim
+sens_X_on_Sin_rel  = sens_X_on_Sin .* Sin ./ X_sim
+
+plot(t_vals, [sens_S_on_Sin_rel, sens_X_on_Sin_rel], title="Normalized sensitivities", label=["S on Sin" "X on Sin"], xlabel="Time (hours)")
+plot(t_vals, [sens_S_on_μmax_rel, sens_S_on_Ks_rel, sens_S_on_Sin_rel], title="Normalized sensitivities", label=["S on μmax" "S on Ks" "S on Sin"], xlabel="Time (hours)")
+plot(t_vals, [sens_X_on_μmax_rel, sens_X_on_Ks_rel, sens_X_on_Sin_rel], title="Normalized sensitivities", label=["X on μmax" "X on Ks" "X on Sin"], xlabel="Time (hours)")
+
+"""
+In the beginning the substrate S is positively affected by Sin because
+S enters the tank through Sin and only little biomass X is present,
+so the biomass cannot consume the substrate very fast.
+In steady state, the biomass consumes the substrate at a steady rate,
+so that S isn't sensitive on Sin anymore.
+In steady state, the biomass is positively affected by Sin, because
+the biomass X grows on S from Sin.
+In steady state μmax has a negative effect on S, because μmax is the maximum
+consumation rate by the biomass X.
+In steady state Ks has a positive effect on S, because the larger Ks,
+the less substrate S will be consumed by biomass X because increase in Ks
+will decrease the consumation rate.
+"""
+
+a = 5
+
+# ################################################################
+# ## Sensitivity analysis
+# ################################################################
+
+# using SciMLSensitivity
+
+# # u₀ = [:S => 0.0, :X => 0.01]
+# # # Set time span for simulation
+# # tspan = (0.0, 200)
+# # # Set parameters for ODE problem
+# # params = [:μmax => 0.30, :Ks => 0.15, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2]
+
+# tspan = (0.0, 100)
+
+# oprob_sens = ODEForwardSensitivityProblem(oprob.f, [0.0, 0.01], tspan, [0.3, 0.15, 0.80, 2.0, 40.0, 2.2])
+# # oprob.f        : the ODE function
+# # [0.02, 5.0e-5] : initial conditions, the order is [S, X], see species(fermenter_monod)
+# # tspan          : the time span
+# # [0.39, 0.48, 0.77, 2, 40, 2.2] : the parameter values, the order is [μmax, Ks, Y, Q, V Sin], see parameters(fermenter_monod)
+
+# osol_sens = solve(oprob_sens, Tsit5(), saveat=0.5)
+# u, dp = extract_local_sensitivities(osol_sens)
+
+# sol_S = u[1,:]     # solution for S
+# sol_X = u[2,:]     # solution for X
+
+# sens_μmax = dp[1]'  # sensitivity for S and X on μmax  
+# sens_Ks   = dp[2]'  # sensitivity for S and X on Ks
+# sens_Sin  = dp[6]'  # sensitivity for S and X on Sin
 
 
-# Absolute sensitivity of S and X to μmax
-plot(osol_sens.t, sens_μmax, title="Absolute sensitivity of S and X to μmax", label=["dS/dμmax" "dX/dμmax"])
+# # Absolute sensitivity of S and X to μmax
+# plot(osol_sens.t, sens_μmax, title="Absolute sensitivity of S and X to μmax", label=["dS/dμmax" "dX/dμmax"])
 
-# Absolute sensitivity of S and X to Ks
-plot(osol_sens.t, sens_Ks, title="Absolute sensitivity of S and X to Ks", label=["dS/dKs" "dX/dKs"])
+# # Absolute sensitivity of S and X to Ks
+# plot(osol_sens.t, sens_Ks, title="Absolute sensitivity of S and X to Ks", label=["dS/dKs" "dX/dKs"])
 
-# Absolute sensitivity of S and X to Sin
-plot(osol_sens.t, sens_Sin, title="Absolute sensitivity for S and X on Sin", label=["dS/dSin" "dX/dSin"])
+# # Absolute sensitivity of S and X to Sin
+# plot(osol_sens.t, sens_Sin, title="Absolute sensitivity for S and X on Sin", label=["dS/dSin" "dX/dSin"])
 
 
-# trsens_μmax = sens_μmax.*0.3./[sol_S sol_X]
-# trsens_Ks   = sens_Ks.*0.15./[sol_S sol_X]
-# trsens_Sin  = sens_Sin.*2.2./[sol_S sol_X]
+# # trsens_μmax = sens_μmax.*0.3./[sol_S sol_X]
+# # trsens_Ks   = sens_Ks.*0.15./[sol_S sol_X]
+# # trsens_Sin  = sens_Sin.*2.2./[sol_S sol_X]
 
-# # Total relative sensitivity of S and X to μmax
-# plot(osol_sens.t, trsens_μmax, title="Total relative sensitivity of S and X to μmax", label=["dS/dμmax" "dX/dμmax"])
+# # # Total relative sensitivity of S and X to μmax
+# # plot(osol_sens.t, trsens_μmax, title="Total relative sensitivity of S and X to μmax", label=["dS/dμmax" "dX/dμmax"])
 
-# # Total relative sensitivity of S and X to Ks
-# plot(osol_sens.t, trsens_Ks, title="Total relative sensitivity of S and X to Ks", label=["dS/dKs" "dX/dKs"])
+# # # Total relative sensitivity of S and X to Ks
+# # plot(osol_sens.t, trsens_Ks, title="Total relative sensitivity of S and X to Ks", label=["dS/dKs" "dX/dKs"])
 
-# # Total relative sensitivity of S and X to Sin
-# plot(osol_sens.t, trsens_Sin, title="Total relative sensitivity for S and X on Ks", label=["dS/dSin" "dX/dSin"])
+# # # Total relative sensitivity of S and X to Sin
+# # plot(osol_sens.t, trsens_Sin, title="Total relative sensitivity for S and X on Ks", label=["dS/dSin" "dX/dSin"])
 
 
 ################################################################

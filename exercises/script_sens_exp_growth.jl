@@ -7,6 +7,8 @@ using DifferentialEquations, Plots
 ################################################################
 
 growth_exp = @reaction_network begin
+	@species W(t)=2.0
+	@parameters μ=0.02 Wf=10.0
     μ*Wf, ∅ --> W
     μ, W --> ∅
 end
@@ -26,13 +28,13 @@ equations(osys_exp)
 # Wf = 10.0
 
 # Set initial condition for ODE problem
-u₀_exp = [:W => 2.0]
+u0_exp = [:W => 2.0]
 # Set time span for simulation
 tspan = (0.0, 100.0)
 # Set parameters for ODE problem
 params_exp = [:μ => 0.02, :Wf => 10.0]
 # Create ODE problem
-oprob_exp = ODEProblem(growth_exp, u₀_exp, tspan, params_exp)
+oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, params_exp)
 
 osol_exp = solve(oprob_exp, Tsit5(), saveat=0.5)
 plot(osol_exp)
@@ -42,26 +44,60 @@ plot(osol_exp)
 ## Sensitivity analysis
 ################################################################
 
-using SciMLSensitivity
+using ForwardDiff
 
-oprob_sens_exp = ODEForwardSensitivityProblem(oprob_exp.f, [2.0], tspan, [0.02, 10.0])
+function growth_exp_sim(params)
+	μ, Wf = params
+    u0_exp = [:W => 2.0]
+    tspan = (0.0, 100.0)
+    oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, [:μ=>μ, :Wf=>Wf])
+	osol_exp = solve(oprob_exp, Tsit5(), saveat=0.5)
+	return osol_exp
+end
 
-osol_sens_exp = solve(oprob_sens_exp, Tsit5(), saveat=0.5)
-u_exp, dp_exp = extract_local_sensitivities(osol_sens_exp)
+growth_exp_sim([0.02, 10])
 
-size(u_exp)
-size(dp_exp)
+growth_exp_sim_W(params) = growth_exp_sim(params)[:W]
 
-W_sol_exp = u_exp[1,:]     # solution for W
+t_vals = 0:0.5:100.0
 
-sens_μ_exp  = dp_exp[1]'  # sensitivity of W to μ
-sens_Wf_exp = dp_exp[2]'  # sensitivity of W to Wf
+W_exp = growth_exp_sim_W([0.02, 10.0])
 
-# Absolute sensitivity for W on μ
-plot(osol_sens_exp.t, sens_μ_exp, title="Absolute sensitivity of W to μ", label=["dW/dμ"], xlabel="Time (day)")
+sens_W_exp = ForwardDiff.jacobian(growth_exp_sim_W, [0.02, 10.0])
 
-# Absolute sensitivity for W on Wf
-plot(osol_sens_exp.t, sens_Wf_exp, title="Absolute sensitivity of W to Wf", label=["dW/dWf"], xlabel="Time (day)")
+sens_W_on_μ_exp = sens_W_exp[:,1]
+sens_W_on_Wf_exp = sens_W_exp[:,2]
+
+sens_W_on_μ_rel_exp = sens_W_on_μ_exp .* 0.02 ./ W_exp
+sens_W_on_Wf_rel_exp = sens_W_on_Wf_exp .* 10.0 ./ W_exp
+
+plot(t_vals, [sens_W_on_μ_rel_exp, sens_W_on_Wf_rel_exp], title="Normalized sensitivities", label=["W on μ" "W on Wf"], xlabel="Time (day)")
+
+
+# ################################################################
+# ## Sensitivity analysis
+# ################################################################
+
+# using SciMLSensitivity
+
+# oprob_sens_exp = ODEForwardSensitivityProblem(oprob_exp.f, [2.0], tspan, [0.02, 10.0])
+
+# osol_sens_exp = solve(oprob_sens_exp, Tsit5(), saveat=0.5)
+# u_exp, dp_exp = extract_local_sensitivities(osol_sens_exp)
+
+# size(u_exp)
+# size(dp_exp)
+
+# W_sol_exp = u_exp[1,:]     # solution for W
+
+# sens_μ_exp  = dp_exp[1]'  # sensitivity of W to μ
+# sens_Wf_exp = dp_exp[2]'  # sensitivity of W to Wf
+
+# # Absolute sensitivity for W on μ
+# plot(osol_sens_exp.t, sens_μ_exp, title="Absolute sensitivity of W to μ", label=["dW/dμ"], xlabel="Time (day)")
+
+# # Absolute sensitivity for W on Wf
+# plot(osol_sens_exp.t, sens_Wf_exp, title="Absolute sensitivity of W to Wf", label=["dW/dWf"], xlabel="Time (day)")
 
 
 ################################################################

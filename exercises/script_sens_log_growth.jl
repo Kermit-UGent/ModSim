@@ -10,23 +10,22 @@ https://discourse.julialang.org/t/get-mle-parameters-e-g-p-value-confidence-inte
 ## Modelling Logistic growth
 ################################################################
 
-# growth_mod_log = @reaction_network begin
-#     -μ*(1 - W/Wf), W --> ∅
-# end
-
 growth_log = @reaction_network begin
-    μ*W, ∅ --> W
-    μ/Wf*W, W --> ∅
+	@species W(t)=2.0            # default initial condition
+	@parameters μ=0.07 Wf=10.0   # default parameter values
+    # μ*W, ∅ --> W
+    # μ/Wf*W, W --> ∅
+	μ*(1-W/Wf), W --> 2W
 end
 
-osys_log  = convert(ODESystem, growth_mod_log)
+osys_log  = convert(ODESystem, growth_log)
 equations(osys_log)
 
-parameters(growth_mod_log)
+parameters(growth_log)
 # μ
 # Wf
 
-osys_log  = convert(ODESystem, growth_mod_log)
+osys_log  = convert(ODESystem, growth_log)
 
 # Check out the diff. eqns. equations
 equations(osys_log)
@@ -35,13 +34,13 @@ equations(osys_log)
 # 2.0 0.07 10.0
 
 # Set initial condition for ODE problem
-u₀_log = [:W => 2.0]
+u0_log = [:W => 2.0]
 # Set time span for simulation
 tspan = (0.0, 100.0)
 # Set parameters for ODE problem
 params_log = [:μ => 0.07, :Wf => 10.0]
 # Create ODE problem
-oprob_log = ODEProblem(growth_log, u₀_log, tspan, params_log)
+oprob_log = ODEProblem(growth_log, u0_log, tspan, params_log)
 # oprob_log = remake(oprob_log; u0=[4.0])
 
 osol_log = solve(oprob_log, Tsit5(), saveat=0.5)
@@ -52,39 +51,74 @@ plot(osol_log)
 ## Sensitivity analysis
 ################################################################
 
-using SciMLSensitivity
+using ForwardDiff
 
-# 2.0 0.065 9.8
+function growth_sim_log(params)
+	μ, Wf = params
+    u0_log = [:W => 2.0]
+    tspan = (0.0, 100.0)
+    oprob_log = ODEProblem(growth_log, u0_log, tspan, [:μ=>μ, :Wf=>Wf])
+	osol_log = solve(oprob_log, Tsit5(), saveat=0.5)
+	return osol_log
+end
 
-oprob_sens_log = ODEForwardSensitivityProblem(oprob_log.f, [2.0], tspan, [0.07, 10.0])
+growth_sim_log([0.07, 10]).t
 
-osol_sens_log = solve(oprob_sens_log, Tsit5(), saveat=0.5)
-u_log, dp_log = extract_local_sensitivities(osol_sens_log)
+growth_sim_W_log(params) = growth_sim_log(params)[:W]
 
-size(u_log)
-size(dp_log)
+t_vals = 0:0.5:100.0
 
-W_sol_log = u_log[1,:]     # solution for W
+W_log = growth_sim_W_log([0.07, 10.0])
 
-sens_μ_log  = dp_log[1]'  # sensitivity for W on μ
-sens_Wf_log = dp_log[2]'  # sensitivity for W on Wf
+sens_W_log = ForwardDiff.jacobian(growth_sim_W_log, [0.07, 10.0])
 
-sens_μ_log[5]
+sens_W_on_μ_log = sens_W_log[:,1]
+sens_W_on_Wf_log = sens_W_log[:,2]
 
-size(osol_sens_log.t)
-size(sens_μ_log)
+sens_W_on_μ_rel_log = sens_W_on_μ_log .* 0.07 ./ W_log
+sens_W_on_Wf_rel_log = sens_W_on_Wf_log .* 10.0 ./ W_log
 
-maximum(sens_μ_log)
-max_val, index = findmax(sens_μ_log)
-osol_sens_log.t[index]
+plot(t_vals, [sens_W_on_μ_rel_log, sens_W_on_Wf_rel_log], title="Normalized sensitivities", label=["W on μ" "W on Wf"], xlabel="Time (day)")
 
-findmax(sens_Wf_log)
 
-# Absolute sensitivity for W on μ
-plot(osol_sens_log.t, sens_μ_log, title="Absolute sensitivity of W to μ", label=["dW/dμ"], xlabel="Time (day)")
+# ################################################################
+# ## Sensitivity analysis
+# ################################################################
 
-# Absolute sensitivity for W on Wf
-plot(osol_sens_log.t, sens_Wf_log, title="Absolute sensitivity of W to Wf", label=["dW/dWf"], xlabel="Time (day)")
+# using SciMLSensitivity
+
+# # 2.0 0.065 9.8
+# u0 = [2.0;]
+# p = [0.07, 10.0,]
+# oprob_sens_log = ODEForwardSensitivityProblem(oprob_log.f, u0, tspan, p)
+
+# osol_sens_log = solve(oprob_sens_log, Tsit5(), saveat=0.5)
+# u_log, dp_log = extract_local_sensitivities(osol_sens_log)
+
+# size(u_log)
+# size(dp_log)
+
+# W_sol_log = u_log[1,:]     # solution for W
+
+# sens_μ_log  = dp_log[1]'  # sensitivity for W on μ
+# sens_Wf_log = dp_log[2]'  # sensitivity for W on Wf
+
+# sens_μ_log[5]
+
+# size(osol_sens_log.t)
+# size(sens_μ_log)
+
+# maximum(sens_μ_log)
+# max_val, index = findmax(sens_μ_log)
+# osol_sens_log.t[index]
+
+# findmax(sens_Wf_log)
+
+# # Absolute sensitivity for W on μ
+# plot(osol_sens_log.t, sens_μ_log, title="Absolute sensitivity of W to μ", label=["dW/dμ"], xlabel="Time (day)")
+
+# # Absolute sensitivity for W on Wf
+# plot(osol_sens_log.t, sens_Wf_log, title="Absolute sensitivity of W to Wf", label=["dW/dWf"], xlabel="Time (day)")
 
 
 ################################################################

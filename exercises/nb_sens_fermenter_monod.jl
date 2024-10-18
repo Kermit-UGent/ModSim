@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -24,7 +24,7 @@ using Catalyst
 using DifferentialEquations, Plots
 
 # ╔═╡ 7ae714c4-d25d-4f9f-ab3d-cc067db9c156
-using SciMLSensitivity
+using ForwardDiff
 
 # ╔═╡ 31d294d1-3a1f-41db-abff-54f2a67c7ed9
 md"
@@ -52,7 +52,7 @@ The *reaction network object* model for this problem could be defined as:
 
 # ╔═╡ 935ca610-7a7a-4692-8908-fc26abb880b4
 fermenter_monod = @reaction_network begin
-    X * mm(S, μmax, Ks), S --> Y*X
+    mm(S, μmax, Ks), S + X --> Y*X + X
     Q/V, (S, X) --> ∅
     Q/V*Sin, ∅ --> S
 end
@@ -100,15 +100,29 @@ Initialize a vector `u₀` with the initial conditions, set the timespan and ini
 
 # ╔═╡ 2ee277e5-ce4a-4ade-be0e-9bba7a4dc08c
 # u₀ = missing                 # Uncomment and complete the instruction
-u₀ = [:S => 0.0, :X => 0.01]
+u0 = [:S => 0.0, :X => 0.01]
 
 # ╔═╡ 3fdc6b17-cdeb-4dc5-8886-9d3a62caac8d
 # tspan = missing              # Uncomment and complete the instruction
 tspan = (0.0, 100.0)
 
+# ╔═╡ 0139da85-02e3-4021-9b39-84af7e68d428
+md"""
+For the sake of clarity, we will use the variables `μmax`, `Ks` and `Sin` to store the parameter values that are used for the calculation of the sensitivity functions.
+"""
+
+# ╔═╡ 0f995929-4d2b-4a7a-8da1-04e4d501385f
+μmax = 0.30
+
+# ╔═╡ 262e8346-df6d-49bf-9186-92f5afb421e0
+Ks = 0.15
+
+# ╔═╡ baa777d2-abb8-45f8-87aa-b3b17c8dc07c
+Sin = 2.2
+
 # ╔═╡ 79b0eb65-5a0f-40b3-aa97-4088421c562e
 # params = missing             # Uncomment and complete the instruction
-params = [:μmax => 0.30, :Ks => 0.15, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2]
+params = [:μmax => μmax, :Ks => Ks, :Y => 0.80, :Q => 2, :V => 40, :Sin => Sin]
 
 # ╔═╡ f0f4fa14-6f99-4f21-a743-be61e08444a7
 md"
@@ -117,7 +131,7 @@ Create the ODE problem and store it in `oprob`. Next, solve the ODE problem usin
 
 # ╔═╡ 8b2f23f6-80b2-4e63-942e-e5cd17d8ba72
 # oprob = missing              # Uncomment and complete the instruction
-oprob = ODEProblem(fermenter_monod, u₀, tspan, params)
+oprob = ODEProblem(fermenter_monod, u0, tspan, params)
 
 # ╔═╡ 89a31c32-88a4-479f-a688-ffcb75ee8e91
 # osol = missing                # Uncomment and complete the instruction
@@ -127,70 +141,108 @@ osol = solve(oprob, Tsit5(), saveat=0.5)
 # missing                        # Uncomment and complete the instruction
 plot(osol)
 
-# ╔═╡ cb484c24-501d-4e8c-81e5-6deb259ee948
-md"
-Create the ODE forward sensitivity problem and store it in `oprob_sens`:
-"
+# ╔═╡ 693844d0-3858-4861-bae0-b47e78809f17
+md"""
+Write a solution function with as argument a vector of the parameters (that you want the sensitivity on), and that returns the outputs.
+"""
 
-# ╔═╡ 6567e6de-0067-4b7a-96f4-8ff773163b9c
-# oprob_sens = missing           # Uncomment and complete the instruction
-oprob_sens = ODEForwardSensitivityProblem(oprob.f, [0.0, 0.01], tspan, [0.3, 0.15, 0.80, 2.0, 40.0, 2.2])
+# ╔═╡ 9622f7ca-f71a-4ad9-a309-d7d10a1c3e3b
+function fermenter_monod_sim(params)
+	μmax, Ks, Sin = params
+	u0 = [:S => 0.0, :X => 0.01]
+	tspan = (0.0, 100.0)
+	params = [:μmax => μmax, :Ks => Ks, :Y => 0.80, :Q => 2, :V => 40, :Sin => Sin]
+	oprob = ODEProblem(fermenter_monod, u0, tspan, params, combinatoric_ratelaws=false)
+	osol = solve(oprob, Tsit5(), saveat=0.5)
+	return osol
+end
 
-# ╔═╡ 57052e7c-a93a-4cb3-a1d7-c8edcb2d438a
-md"
-Solve the *ODE forward sensitivity problem* using `Tsit5()` and `saveat=0.5`, and store the solution in `osol_sens`:
-"
+# ╔═╡ 4a5971b1-f4d0-43b6-805f-e17f5052ae92
+md"""
+Make two functions based on the solution function that each returns a single output, hence, one function that returns the output $S$, and another function that returns the output $X$.
+"""
 
-# ╔═╡ b4fa0025-b8a0-427d-ab96-39bb7833e67b
-# osol_sens = missing            # Uncomment and complete the instruction
-osol_sens = solve(oprob_sens, Tsit5(), saveat=0.5)
+# ╔═╡ f40c6402-3c28-4a7d-b629-83507a9f29bd
+fermenter_monod_sim_S(params) = fermenter_monod_sim(params)[:S]
 
-# ╔═╡ cf48664e-8e99-4c6d-8a92-8ac1f6e0b499
-md"
-Extract the sensitivity functions. Store the simulation results in the variable `u` and the sensitivities in the variable `dp`:
-"
+# ╔═╡ 3ae5bd00-2e06-4789-aab3-d897824d5e29
+fermenter_monod_sim_X(params) = fermenter_monod_sim(params)[:X]
 
-# ╔═╡ 0e66bf05-5924-4cff-bf11-ffc137ef4592
-# u, dp = missing                # Uncomment and complete the instruction
-u, dp = extract_local_sensitivities(osol_sens)
+# ╔═╡ 4bd2bcca-9c42-4333-b062-2aaa9f7be3fe
+md"""
+Make the time vector.
+"""
 
-# ╔═╡ 97c3b8e7-31d5-4bad-8fc8-9c29641c449b
-md"
-Select by indexing and assign the normalized sensitivities of $S$ and $X$ on $\mu_{max}$, $K_s$ and $S_{in}$, to the variables `sens_μmax`, `sens_Ks` and `sens_Sin` respectively. Don't forget to transpose where necessary.
+# ╔═╡ fbd98975-aa32-46ae-8db0-0e65cdf48309
+t_vals = 0:0.5:100.0
 
-**Remark:**
-- The variable `u` contains the outputs of $S$ and $X$.
-- The variable `dp` contains six elements (equal to the number of parameters).
-- Each of the elements `dp[i]` will contain two sensitivity functions (one of $S$ and one of $X$) on the `i`-th parameter. You can find the parameter indices of $\mu_{max}$, $K_s$ and $S_{in}$ by calling the function `parameters` in conjunction with the *reaction network* model name.
-"
+# ╔═╡ 93791eb3-1eaa-4146-90b5-c4811fb3485b
+md"""
+Compute the two outputs $S$ and $X$ for the given parameter values.
+"""
 
-# ╔═╡ 2579de54-85d0-450e-8bbf-d116ea0b4ea0
-# Normalized sensitivity of S and X on μmax
-# sens_μmax = missing              # Uncomment and complete the instruction
-sens_μmax = dp[1]'./u'.*0.30
+# ╔═╡ dc0557d6-81b9-4759-8ed7-3129f60c6dc3
+S_sim = fermenter_monod_sim_S([μmax, Ks, Sin])
 
-# ╔═╡ ea539e22-2c83-4032-805f-d75e04939ce9
-# Normalized sensitivity of S and X on Ks
-# sens_Ks   = missing              # Uncomment and complete the instruction
-sens_Ks   = dp[2]'./u'.*0.15
+# ╔═╡ 95bc683c-f6e6-4b42-b90b-b5a863edd4d5
+X_sim = fermenter_monod_sim_X([μmax, Ks, Sin])
 
-# ╔═╡ 53bae966-90db-47d5-86ba-6664b4dfbc5f
-# Normalized sensitivity of S and X on Sin
-# sens_Sin  = missing              # Uncomment and complete the instruction
-sens_Sin  = dp[6]'./u'.*2.2
+# ╔═╡ fa970c0e-fb3b-486f-bbc1-345d44f8f0da
+md"""
+Using `ForwardDiff.jacobian` to compute the sensitivities for the single ouputs $S$ and $X$. Hence, you need to call `ForwardDiff.jacobian` twice.
+"""
 
-# ╔═╡ 940327a1-d5f7-4cbf-8640-08d58d6145ff
-sens_Sin[:,1]
+# ╔═╡ 64354302-f4cc-4592-9302-5db0f5bccb2e
+sens_S = ForwardDiff.jacobian(fermenter_monod_sim_S, [μmax, Ks, Sin])
 
-# ╔═╡ 980d84ea-e9dc-4491-bd6d-c5120a0ad88d
+# ╔═╡ 49a94b9a-a543-495e-b4f1-c8579e59304d
+sens_X = ForwardDiff.jacobian(fermenter_monod_sim_X, [μmax, Ks, Sin])
+
+# ╔═╡ 9cace6c1-e678-4dd7-8705-92a55eb32fa9
+md"""
+Extract the (absolute) sensitivities of the outputs on the different parameters.
+"""
+
+# ╔═╡ a6dc2b60-6a0a-4140-892e-02cde8dc79d3
+begin
+	sens_S_on_μmax = sens_S[:, 1]
+	sens_S_on_Ks   = sens_S[:, 2]
+	sens_S_on_Sin  = sens_S[:, 3]
+end
+
+# ╔═╡ f806c243-9032-46b7-add3-4714344691c7
+begin
+	sens_X_on_μmax = sens_X[:, 1]
+	sens_X_on_Ks   = sens_X[:, 2]
+	sens_X_on_Sin  = sens_X[:, 3]
+end
+
+# ╔═╡ 5bf3a62d-d2aa-4653-8ee8-e90caa9504e8
+md"""
+Compute the normalized sensitivities.
+"""
+
+# ╔═╡ 76846731-929c-408f-a3de-970581c497e9
+begin
+	sens_S_on_μmax_rel = sens_S_on_μmax .* μmax ./ S_sim
+	sens_S_on_Ks_rel   = sens_S_on_Ks .* Ks ./ S_sim
+	sens_S_on_Sin_rel  = sens_S_on_Sin .* Sin ./ S_sim
+end
+
+# ╔═╡ b6c57444-547c-4e82-8526-6a30566e07c5
+begin
+	sens_X_on_μmax_rel = sens_X_on_μmax .* μmax ./ X_sim
+	sens_X_on_Ks_rel   = sens_X_on_Ks .* Ks ./ X_sim
+	sens_X_on_Sin_rel  = sens_X_on_Sin .* Sin ./ X_sim
+end
+
+# ╔═╡ 5388c2a7-5a11-4da8-be09-46045cde8a4e
 md"
 Plot the sensitivity functions of $S$ and $X$ on $S_{in}$.
 "
 
-# ╔═╡ cf885a1d-2ff5-4f62-bbbf-49d910a23779
-# Sensitivities of S and X on Sin
-# missing                          # Uncomment and complete the instruction
-plot(osol_sens.t, sens_Sin, title="Normalized sensitivities for S and X on Sin", label=["S on Sin" "X on Sin"])
+# ╔═╡ db840c76-a6c6-49fb-a0bb-d9149f947bc0
+plot(t_vals, [sens_S_on_Sin_rel, sens_X_on_Sin_rel], title="Normalized sensitivities", label=["S on Sin" "X on Sin"], xlabel="Time (hours)")
 
 # ╔═╡ d41375ef-6958-4705-a417-4c6a491232ee
 md"
@@ -204,14 +256,8 @@ md"
 Plot the sensitivity functions of $S$ on $\mu_{max}$, $K_s$ and $S_{in}$.
 "
 
-# ╔═╡ 0144d423-cd18-4604-bf61-3bbf479717b4
-# Sensitivity of S on μmax, Ks and Sin
-#  missing                         # Uncomment and complete the instruction
-begin
-plot(osol_sens.t, sens_μmax[:,1], title="Normalized sensitivities", label="S on μmax")
-plot!(osol_sens.t, sens_Ks[:,1], label="S on Ks")
-plot!(osol_sens.t, sens_Sin[:,1], label="S on Sin")
-end
+# ╔═╡ c0223da4-9959-48d0-b607-633b2e82986c
+plot(t_vals, [sens_S_on_μmax_rel, sens_S_on_Ks_rel, sens_S_on_Sin_rel], title="Normalized sensitivities", label=["S on μmax" "S on Ks" "S on Sin"], xlabel="Time (hours)")
 
 # ╔═╡ ff86a29f-9308-473b-aa1c-dfd4af8179c7
 md"
@@ -226,14 +272,8 @@ md"
 Plot the sensitivity functions of $X$ on $\mu_{max}$, $K_s$ and $S_{in}$.
 "
 
-# ╔═╡ 4af10995-d570-4d68-87ae-6958af5bf1ad
-# Sensitivity of X on μmax, Ks and Sin
-#  missing                         # Uncomment and complete the instruction
-begin
-plot(osol_sens.t, sens_μmax[:,2], title="Normalized sensitivities", label="X on μmax")
-plot!(osol_sens.t, sens_Ks[:,2], label="X on Ks")
-plot!(osol_sens.t, sens_Sin[:,2], label="X on Sin")
-end
+# ╔═╡ 53134149-0bf7-41c1-9b35-e5037744211f
+plot(t_vals, [sens_X_on_μmax_rel, sens_X_on_Ks_rel, sens_X_on_Sin_rel], title="Normalized sensitivities", label=["X on μmax" "X on Ks" "X on Sin"], xlabel="Time (hours)")
 
 # ╔═╡ 355ca6a7-466b-4969-ab48-28e2257f9810
 md"
@@ -262,28 +302,40 @@ Interpret your results. Try to answer the following question(s):
 # ╠═6c4e3c09-4b84-4f5c-8739-2ac18e6f2af6
 # ╠═2ee277e5-ce4a-4ade-be0e-9bba7a4dc08c
 # ╠═3fdc6b17-cdeb-4dc5-8886-9d3a62caac8d
+# ╠═0139da85-02e3-4021-9b39-84af7e68d428
+# ╠═0f995929-4d2b-4a7a-8da1-04e4d501385f
+# ╠═262e8346-df6d-49bf-9186-92f5afb421e0
+# ╠═baa777d2-abb8-45f8-87aa-b3b17c8dc07c
 # ╠═79b0eb65-5a0f-40b3-aa97-4088421c562e
 # ╠═f0f4fa14-6f99-4f21-a743-be61e08444a7
 # ╠═8b2f23f6-80b2-4e63-942e-e5cd17d8ba72
 # ╠═89a31c32-88a4-479f-a688-ffcb75ee8e91
 # ╠═51a9b7e6-8ad9-477d-9596-ffd614df2c79
-# ╠═cb484c24-501d-4e8c-81e5-6deb259ee948
-# ╠═6567e6de-0067-4b7a-96f4-8ff773163b9c
-# ╠═57052e7c-a93a-4cb3-a1d7-c8edcb2d438a
-# ╠═b4fa0025-b8a0-427d-ab96-39bb7833e67b
-# ╠═cf48664e-8e99-4c6d-8a92-8ac1f6e0b499
-# ╠═0e66bf05-5924-4cff-bf11-ffc137ef4592
-# ╠═97c3b8e7-31d5-4bad-8fc8-9c29641c449b
-# ╠═2579de54-85d0-450e-8bbf-d116ea0b4ea0
-# ╠═ea539e22-2c83-4032-805f-d75e04939ce9
-# ╠═53bae966-90db-47d5-86ba-6664b4dfbc5f
-# ╠═940327a1-d5f7-4cbf-8640-08d58d6145ff
-# ╠═980d84ea-e9dc-4491-bd6d-c5120a0ad88d
-# ╠═cf885a1d-2ff5-4f62-bbbf-49d910a23779
+# ╠═693844d0-3858-4861-bae0-b47e78809f17
+# ╠═9622f7ca-f71a-4ad9-a309-d7d10a1c3e3b
+# ╠═4a5971b1-f4d0-43b6-805f-e17f5052ae92
+# ╠═f40c6402-3c28-4a7d-b629-83507a9f29bd
+# ╠═3ae5bd00-2e06-4789-aab3-d897824d5e29
+# ╠═4bd2bcca-9c42-4333-b062-2aaa9f7be3fe
+# ╠═fbd98975-aa32-46ae-8db0-0e65cdf48309
+# ╠═93791eb3-1eaa-4146-90b5-c4811fb3485b
+# ╠═dc0557d6-81b9-4759-8ed7-3129f60c6dc3
+# ╠═95bc683c-f6e6-4b42-b90b-b5a863edd4d5
+# ╠═fa970c0e-fb3b-486f-bbc1-345d44f8f0da
+# ╠═64354302-f4cc-4592-9302-5db0f5bccb2e
+# ╠═49a94b9a-a543-495e-b4f1-c8579e59304d
+# ╠═9cace6c1-e678-4dd7-8705-92a55eb32fa9
+# ╠═a6dc2b60-6a0a-4140-892e-02cde8dc79d3
+# ╠═f806c243-9032-46b7-add3-4714344691c7
+# ╠═5bf3a62d-d2aa-4653-8ee8-e90caa9504e8
+# ╠═76846731-929c-408f-a3de-970581c497e9
+# ╠═b6c57444-547c-4e82-8526-6a30566e07c5
+# ╠═5388c2a7-5a11-4da8-be09-46045cde8a4e
+# ╠═db840c76-a6c6-49fb-a0bb-d9149f947bc0
 # ╠═d41375ef-6958-4705-a417-4c6a491232ee
 # ╠═be89600a-4927-4afc-9813-d8a70adb2852
-# ╠═0144d423-cd18-4604-bf61-3bbf479717b4
+# ╠═c0223da4-9959-48d0-b607-633b2e82986c
 # ╠═ff86a29f-9308-473b-aa1c-dfd4af8179c7
 # ╠═16a84fdb-8ce2-45b9-bfb7-7f4e1284a1d7
-# ╠═4af10995-d570-4d68-87ae-6958af5bf1ad
+# ╠═53134149-0bf7-41c1-9b35-e5037744211f
 # ╠═355ca6a7-466b-4969-ab48-28e2257f9810
