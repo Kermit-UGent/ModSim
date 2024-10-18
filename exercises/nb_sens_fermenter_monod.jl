@@ -52,7 +52,7 @@ The *reaction network object* model for this problem could be defined as:
 
 # ╔═╡ 935ca610-7a7a-4692-8908-fc26abb880b4
 fermenter_monod = @reaction_network begin
-    mm(S, μmax, Ks), S + X --> Y*X + X
+    mm(S, μmax, Ks), S + X --> (1 + Y)*X
     Q/V, (S, X) --> ∅
     Q/V*Sin, ∅ --> S
 end
@@ -112,12 +112,15 @@ For the sake of clarity, we will use the variables `μmax`, `Ks` and `Sin` to st
 """
 
 # ╔═╡ 0f995929-4d2b-4a7a-8da1-04e4d501385f
+# μmax = missing
 μmax = 0.30
 
 # ╔═╡ 262e8346-df6d-49bf-9186-92f5afb421e0
+# Ks = missing
 Ks = 0.15
 
 # ╔═╡ baa777d2-abb8-45f8-87aa-b3b17c8dc07c
+# Sin = missing
 Sin = 2.2
 
 # ╔═╡ 79b0eb65-5a0f-40b3-aa97-4088421c562e
@@ -147,6 +150,10 @@ Write a solution function with as argument a vector of the parameters (that you 
 """
 
 # ╔═╡ 9622f7ca-f71a-4ad9-a309-d7d10a1c3e3b
+# function fermenter_monod_sim(params)
+# 	missing
+# 	...
+# end
 function fermenter_monod_sim(params)
 	μmax, Ks, Sin = params
 	u0 = [:S => 0.0, :X => 0.01]
@@ -163,9 +170,11 @@ Make two functions based on the solution function that each returns a single out
 """
 
 # ╔═╡ f40c6402-3c28-4a7d-b629-83507a9f29bd
+# fermenter_monod_sim_S(params) = missing
 fermenter_monod_sim_S(params) = fermenter_monod_sim(params)[:S]
 
 # ╔═╡ 3ae5bd00-2e06-4789-aab3-d897824d5e29
+# fermenter_monod_sim_X(params) = missing
 fermenter_monod_sim_X(params) = fermenter_monod_sim(params)[:X]
 
 # ╔═╡ 4bd2bcca-9c42-4333-b062-2aaa9f7be3fe
@@ -174,6 +183,7 @@ Make the time vector.
 """
 
 # ╔═╡ fbd98975-aa32-46ae-8db0-0e65cdf48309
+# t_vals = missing
 t_vals = 0:0.5:100.0
 
 # ╔═╡ 93791eb3-1eaa-4146-90b5-c4811fb3485b
@@ -182,9 +192,11 @@ Compute the two outputs $S$ and $X$ for the given parameter values.
 """
 
 # ╔═╡ dc0557d6-81b9-4759-8ed7-3129f60c6dc3
+# S_sim = missing
 S_sim = fermenter_monod_sim_S([μmax, Ks, Sin])
 
 # ╔═╡ 95bc683c-f6e6-4b42-b90b-b5a863edd4d5
+# X_sim = missing
 X_sim = fermenter_monod_sim_X([μmax, Ks, Sin])
 
 # ╔═╡ fa970c0e-fb3b-486f-bbc1-345d44f8f0da
@@ -193,9 +205,11 @@ Using `ForwardDiff.jacobian` to compute the sensitivities for the single ouputs 
 """
 
 # ╔═╡ 64354302-f4cc-4592-9302-5db0f5bccb2e
+# sens_S = missing
 sens_S = ForwardDiff.jacobian(fermenter_monod_sim_S, [μmax, Ks, Sin])
 
 # ╔═╡ 49a94b9a-a543-495e-b4f1-c8579e59304d
+# sens_X = missing
 sens_X = ForwardDiff.jacobian(fermenter_monod_sim_X, [μmax, Ks, Sin])
 
 # ╔═╡ 9cace6c1-e678-4dd7-8705-92a55eb32fa9
@@ -204,6 +218,11 @@ Extract the (absolute) sensitivities of the outputs on the different parameters.
 """
 
 # ╔═╡ a6dc2b60-6a0a-4140-892e-02cde8dc79d3
+# begin
+# 	sens_S_on_μmax = missing
+# 	sens_S_on_Ks   = missing
+# 	sens_S_on_Sin  = missing
+# end
 begin
 	sens_S_on_μmax = sens_S[:, 1]
 	sens_S_on_Ks   = sens_S[:, 2]
@@ -211,6 +230,11 @@ begin
 end
 
 # ╔═╡ f806c243-9032-46b7-add3-4714344691c7
+# begin
+# 	sens_X_on_μmax = missing
+# 	sens_X_on_Ks   = missing
+# 	sens_X_on_Sin  = missing
+# end
 begin
 	sens_X_on_μmax = sens_X[:, 1]
 	sens_X_on_Ks   = sens_X[:, 2]
@@ -223,6 +247,11 @@ Compute the normalized sensitivities.
 """
 
 # ╔═╡ 76846731-929c-408f-a3de-970581c497e9
+# begin
+# 	sens_S_on_μmax_rel = missing
+# 	sens_S_on_Ks_rel   = missing
+# 	sens_S_on_Sin_rel  = missing
+# end
 begin
 	sens_S_on_μmax_rel = sens_S_on_μmax .* μmax ./ S_sim
 	sens_S_on_Ks_rel   = sens_S_on_Ks .* Ks ./ S_sim
@@ -230,6 +259,11 @@ begin
 end
 
 # ╔═╡ b6c57444-547c-4e82-8526-6a30566e07c5
+# begin
+# 	sens_X_on_μmax_rel = missing
+# 	sens_X_on_Ks_rel   = missing
+# 	sens_X_on_Sin_rel  = missing
+# end
 begin
 	sens_X_on_μmax_rel = sens_X_on_μmax .* μmax ./ X_sim
 	sens_X_on_Ks_rel   = sens_X_on_Ks .* Ks ./ X_sim
@@ -242,13 +276,16 @@ Plot the sensitivity functions of $S$ and $X$ on $S_{in}$.
 "
 
 # ╔═╡ db840c76-a6c6-49fb-a0bb-d9149f947bc0
+# missing
 plot(t_vals, [sens_S_on_Sin_rel, sens_X_on_Sin_rel], title="Normalized sensitivities", label=["S on Sin" "X on Sin"], xlabel="Time (hours)")
 
 # ╔═╡ d41375ef-6958-4705-a417-4c6a491232ee
 md"
 Interpret your results. Try to answer the following question(s):
 - Which output variable $S$ or $X$ is most sensitive on $S_{in}$ in steady state?
+    - Answer: missing
 - Why is the sensitivity function of $S$ on $S_{in}$ at first positive but then becomes negative?
+    - Answer: missing
 "
 
 # ╔═╡ be89600a-4927-4afc-9813-d8a70adb2852
@@ -257,14 +294,18 @@ Plot the sensitivity functions of $S$ on $\mu_{max}$, $K_s$ and $S_{in}$.
 "
 
 # ╔═╡ c0223da4-9959-48d0-b607-633b2e82986c
+# missing
 plot(t_vals, [sens_S_on_μmax_rel, sens_S_on_Ks_rel, sens_S_on_Sin_rel], title="Normalized sensitivities", label=["S on μmax" "S on Ks" "S on Sin"], xlabel="Time (hours)")
 
 # ╔═╡ ff86a29f-9308-473b-aa1c-dfd4af8179c7
 md"
 Interpret your results. Try to answer the following question(s):
 - Which parameter $\mu_{max}$, $K_s$ or $S_{in}$ affects the output $S$ the most in steady state?
+    - Answer: missing
 - Why is the sensitivity function of $S$ on $K_s$ positive?
+    - Answer: missing
 - Why is the sensitivity function of $S$ on $\mu_{max}$ negative?
+    - Answer: missing
 "
 
 # ╔═╡ 16a84fdb-8ce2-45b9-bfb7-7f4e1284a1d7
@@ -273,14 +314,18 @@ Plot the sensitivity functions of $X$ on $\mu_{max}$, $K_s$ and $S_{in}$.
 "
 
 # ╔═╡ 53134149-0bf7-41c1-9b35-e5037744211f
+# missing
 plot(t_vals, [sens_X_on_μmax_rel, sens_X_on_Ks_rel, sens_X_on_Sin_rel], title="Normalized sensitivities", label=["X on μmax" "X on Ks" "X on Sin"], xlabel="Time (hours)")
 
 # ╔═╡ 355ca6a7-466b-4969-ab48-28e2257f9810
 md"
 Interpret your results. Try to answer the following question(s):
 - Which parameter $\mu_{max}$, $K_s$ or $S_{in}$ affects the output $X$ the most in steady state?
+    - Answer: missing
 - Why is the sensitivity function of $X$ on $K_s$ negative?
+    - Answer: missing
 - Why is the sensitivity function of $X$ on $\mu_{max}$ positive?
+    - Answer: missing
 "
 
 # ╔═╡ Cell order:
