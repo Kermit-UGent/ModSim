@@ -33,48 +33,23 @@ reactions(birth_death)
 osys  = convert(ODESystem, birth_death)   # convert rn to a ODESystem
 equations(osys)
 # Differential(t)(X(t)) ~ b - d*X(t)
+unknowns(osys)
+# X(t)
+parameters(osys)
+# b
+# d
 
 u0 = [:X => 2.0]
+
 tspan = (0.0, 520.0)
 params = [:b => 3.0, :d => 0.015]
 
-oprob = ODEProblem(birth_death, u0, tspan, params)
-osol = solve(oprob, Tsit5(), saveat=1.0)
+dprob = DiscreteProblem(birth_death, u0, tspan, params)
 
-plot(osol)
+jdprob = JumpProblem(birth_death, dprob, Direct())
 
+jdsol = solve(jdprob, SSAStepper())
 
-#=
-Suppose that at t = 250 the death rate of the mice population increases by 30 % due
-to a new predator species in the area.
-=#
+plot(jdsol)
 
-condition2 = [250.0]
-function affect2!(integrator)
-    integrator.ps[:d] *= (1 + 30/100)      # Qin is the 3rd parameter !!!
-end
-cb2 = PresetTimeCallback(condition2, affect2!)
-osol2 = solve(deepcopy(oprob), Tsit5(), saveat=1.0, callback=cb2)
-plot(osol2)
-
-
-#=
-In overcrowded environments, female mice may experience decreased reproductive success
-due to factors such as limited access to nesting sites and increased competition for mates.
-Suppose that when the mice population reaches 150, the birth rate decreases by 20 %.
-=#
-
-function condition(u, t, integrator)
-    u[1] - 150
-end
-function affect!(integrator)
-    integrator.ps[:b] *= (1 - 20/100)
-end
-# function affect!(integrator)
-#     integrator.p[1] *= (1 - 20/100)
-#     integrator.p[2] *= (1 + 20/100)
-# end
-ps_cb = ContinuousCallback(condition, affect!)
-osol = solve(deepcopy(oprob), Tsit5(), saveat=1.0, callback=ps_cb)
-plot(osol)
-
+# Events in time or states don't seem to work with Jump processes... (SSA)

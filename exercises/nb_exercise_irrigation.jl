@@ -97,7 +97,7 @@ tspan = (0.0, 150.0)
 
 # ╔═╡ 0ceef9b8-4647-43a4-b9c3-11959834305b
 md"
-Initialize a vector `param` with the parameter values:
+Initialize a vector `params` with the parameter values:
 "
 
 # ╔═╡ d172fc24-0fbe-46b4-a030-1ba44b4b57cd

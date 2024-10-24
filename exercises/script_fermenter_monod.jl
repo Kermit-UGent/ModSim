@@ -22,7 +22,7 @@ using DifferentialEquations, Plots
 
 # Define all reactions
 fermenter_monod = @reaction_network begin
-    X * mm(S, μmax, Ks), S --> Y*X     # Y*X is created from one S at a rate X * mm(S, μmax, Ks)
+    mm(S, μmax, Ks), S + X --> Y*X + X # Y*X + X is created from S and X at a rate mm(S, μmax, Ks)
     Q/V, (S, X) --> 0                  # S and X are degraded at a rate Q/V*S
     Q/V*Sin, 0 --> S                   # S is created at a rate Q/V*Sin 
 end

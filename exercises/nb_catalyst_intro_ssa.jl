@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.19.47
 
 using Markdown
 using InteractiveUtils
@@ -162,7 +162,7 @@ To get a list of the state variables, you can use the command `unknowns`:
 "
 
 # ╔═╡ 6bc9574c-0f04-45c0-a457-6601f1333c0e
-unknowns(osys)
+#unknowns(osys)
 
 # ╔═╡ b3584f8c-50f4-4800-96aa-776cfc2b8db3
 md"

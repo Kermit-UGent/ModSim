@@ -5,6 +5,8 @@ using Catalyst
 using DifferentialEquations, Plots
 
 infection_model = @reaction_network begin
+	@parameters α=0.08 β=1.0e-6 r=0.2 m=0.4
+	@species S(t)=9999000 I(t)=1000 D(t)=0 R(t)=0
 	α * β, S + I --> 2I
 	r * m, I --> D
 	r * (1 - m), I --> R
@@ -27,7 +29,7 @@ reactions(infection_model)
 
 osys  = convert(ODESystem, infection_model)
 equations(osys)
-states(osys)
+unknowns(osys)
 parameters(osys)
 
 # u0 = [:S => 50, :I => 1, :D => 0, :R => 0]
@@ -37,6 +39,7 @@ tspan = (0.0, 90.0)
 params = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4]
 
 oprob = ODEProblem(infection_model, u0, tspan, params)
+# oprob = ODEProblem(infection_model, [], tspan, [])
 
 osol = solve(oprob, Tsit5(), saveat=0.5)
 
@@ -86,9 +89,11 @@ plot(osol)
 params = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4]
 oprob = ODEProblem(infection_model, u0, tspan, params)
 condition2 = [14.0]
-affect2!(integrator) = integrator.p[2] = 0.5e-6     # β is the 2-nd parameter !!!
+function affect2!(integrator)
+	integrator.ps[:β] = 0.5e-6     # β 
+end
 cb2 = PresetTimeCallback(condition2, affect2!)
-osol2 = solve(deepcopy(oprob), Tsit5(), saveat=0.5, callback=ps_cb)
+osol2 = solve(deepcopy(oprob), Tsit5(), saveat=0.5, callback=cb2)
 plot(osol2)
 round((osol2.u[end][3] / 1e7)*100, digits=2)
 
@@ -185,6 +190,8 @@ plot(osol_ex1)
 
 # Set-up a reaction model. Base yourself on infection_model
 infection_med = @reaction_network begin
+	@parameters α=0.08 β=1.0e-6 b=0.0 m=0.4 r=0.2 rb=0.5
+	@species S(t)=9999000 I(t)=1000 D(t)=0 R(t)=0
 	α * β, S + I --> 2I
 	(1 - b) * m * r, I --> D
 	((1 - b) * (1 - m) * r, b * rb), I --> R
@@ -208,7 +215,7 @@ equations(osys_ex2)
 #  Differential(t)(I(t)) ~ -b*rb*I(t) + (-1 + b)*(1 - m)*r*I(t) + (-1 + b)*m*r*I(t) + S(t)*I(t)*α*β
 #  Differential(t)(D(t)) ~ (1 - b)*m*r*I(t)
 #  Differential(t)(R(t)) ~ b*rb*I(t) + (1 - b)*(1 - m)*r*I(t)
-states(osys_ex2)
+unknowns(osys_ex2)
 parameters(osys_ex2)
 
 # u0 = [:S => 50, :I => 1, :D => 0, :R => 0]
@@ -256,6 +263,8 @@ plot(osol)
 # - The vaccinated persons become resistant.
 
 infection_med_vac = @reaction_network begin
+	@parameters α=0.08 β=1.0e-6 b=0.0 m=0.4 r=0.2 rb=0.5 pvac=0.00
+	@species S(t)=9999000 I(t)=1000 D(t)=0 R(t)=0
 	α * β, S + I --> 2I
 	(1 - b) * m * r, I --> D
 	(1 - b) * (1 - m) * r, I --> R
@@ -281,7 +290,7 @@ equations(osys)
 #  Differential(t)(I(t)) ~ -b*rb*I(t) + (-1 + b)*(1 - m)*r*I(t) + (-1 + b)*m*r*I(t) + S(t)*I(t)*α*β
 #  Differential(t)(D(t)) ~ (1 - b)*m*r*I(t)
 #  Differential(t)(R(t)) ~ pvac*S(t) + b*rb*I(t) + (1 - b)*(1 - m)*r*I(t)
-states(osys)
+unknowns(osys)
 parameters(osys)
 
 u0 = [:S => 9999000, :I => 1000, :D => 0, :R => 0]
@@ -298,9 +307,11 @@ osol.u[end]
 
 # Vaccination only from day 7 on.
 
-condition = [7.0]
-affect!(integrator) = integrator.p[7] = 0.05     # pvac is the 7-th parameter !!!
-ps_cb = PresetTimeCallback(condition, affect!)
+condition4 = [7.0]
+function affect4!(integrator)
+	integrator.ps[:pvac] = 0.05     # pvac is the 7-th parameter !!!
+end
+ps_cb = PresetTimeCallback(condition4, affect4!)
 osol = solve(deepcopy(oprob), Tsit5(), saveat=0.5, callback=ps_cb)
 plot(osol)
 

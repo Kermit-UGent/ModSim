@@ -16,32 +16,39 @@ to shape the population dynamics of mice in their natural habitat.
 Denote the number of mice by X, de birth rate by b, and the death rate by d.
 =#
 
-birth_death = @reaction_network begin
+t = default_t()
+# @parameters b=3.0 d=0.015 switch_time=250
+# @species X(t)=2.0
+
+birth_death_rn = @reaction_network begin
+    @parameters b=3.0 d=0.015 switch_time=250
+    @species X(t)=2.0
     b, 0 --> X
     d, X --> 0
 end
 
-species(birth_death)
-# X(t)
-parameters(birth_death)
-# b
-# d
-reactions(birth_death)
-# b, ∅ --> X
-# d, X --> ∅
+rxs = reactions(birth_death_rn)
+u = species(birth_death_rn)
+p = parameters(birth_death_rn)
+# rxs = [(@reaction b, 0 --> X), (@reaction d, X --> 0)]
 
-osys  = convert(ODESystem, birth_death)   # convert rn to a ODESystem
-equations(osys)
-# Differential(t)(X(t)) ~ b - d*X(t)
-
-u0 = [:X => 2.0]
+# u0 = [:X => 2.0]
 tspan = (0.0, 520.0)
-params = [:b => 3.0, :d => 0.015]
+# params = [:b => 3.0, :d => 0.015, :switch_time=>250]
 
-oprob = ODEProblem(birth_death, u0, tspan, params)
-osol = solve(oprob, Tsit5(), saveat=1.0)
+discrete_events = (t == switch_time) => [d ~ d*(1 + 30/100)]
+
+# @named birth_death_ext = ReactionSystem(rxs, t, [X], [b, d, switch_time]; discrete_events)
+@named birth_death_ext = ReactionSystem(rxs, t, u, p; discrete_events)
+birth_death_ext = complete(birth_death_ext)
+
+oprob = ODEProblem(birth_death_ext, [], tspan, [])
+switch_time_val = oprob.ps[:switch_time]
+
+osol = solve(oprob, Tsit5(), saveat=1.0; tstops=switch_time_val)
 
 plot(osol)
+
 
 
 #=
