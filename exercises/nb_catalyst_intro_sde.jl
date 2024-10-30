@@ -201,7 +201,7 @@ params = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4, :η => 50]
 md"
 ##### Creating a SDEProblem
 
-When creating the SDE problem you should literally state that the parameters `η1 η2 η3` are noise scaling parameters.
+Create the SDE problem.
 "
 
 # ╔═╡ 1d5c6ff5-6a63-4491-981e-9c1ab5d37d60

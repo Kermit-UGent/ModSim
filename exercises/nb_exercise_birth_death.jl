@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -167,7 +167,7 @@ Create the function called `affect2!`, that will be called by the solver at the 
 #     ...
 # end
 function affect2!(integrator)
-    integrator.p[2] *= (1 + 30/100)      # death rate d is the 2nd parameter
+    integrator.ps[:d] *= (1 + 30/100)      # death rate is d
 end
 
 # ╔═╡ 92b47c79-9336-437e-82d3-d72f26078d64
