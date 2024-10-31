@@ -11,8 +11,9 @@ using Catalyst
 using DifferentialEquations, Plots
 
 infection_sde_model = @reaction_network begin
-	@parameters η1 η2 η3
-	α * β, S + I --> 2I
+	@parameters η=40
+	@default_noise_scaling η
+	α * β, S + I --> 2I, [noise_scaling = 60]
 	r * m, I --> D
 	r * (1 - m), I --> R
 end
@@ -29,7 +30,7 @@ equations(osys)
 
 u0 = [:S => 9999000, :I => 1000, :D => 0, :R => 0]
 tspan = (0.0, 90.0)
-params = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4, :η1 => 50, :η2 => 20, :η3 => 20]
+params = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4]
 
 
 # https://docs.sciml.ai/DiffEqDocs/stable/tutorials/sde_example/
@@ -39,7 +40,7 @@ params = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4, :η1 => 50, :η2 => 
 # https://docs.sciml.ai/DiffEqDocs/stable/solvers/sde_solve/
 # https://docs.sciml.ai/DiffEqDocs/stable/solvers/sde_solve/#Full-List-of-Methods
 
-sprob = SDEProblem(infection_sde_model, u0, tspan, params; noise_scaling = @parameters η1 η2 η3)
+sprob = SDEProblem(infection_sde_model, u0, tspan, params)
 
 # EM - The Euler-Maruyama method. Fixed time step only.
 # ssol = solve(sprob, EM(), dt=0.1)
@@ -70,12 +71,12 @@ cb = DiscreteCallback(condition,affect!;save_positions=(false,true))
 # save_positions: Boolean tuple for whether to save before and after the affect!.
 #     This saving will occur just before and after the event, only at event times,
 #     and does not depend on options like saveat,
-ssol = solve(sprob, EM(), dt=0.1, callback=cb, save_everystep=false)
+ssol = solve(sprob, EM(), dt=0.1, callback=cb, save_everystep=true)
 plot(ssol)
 
 esprob = EnsembleProblem(sprob)
-essol = solve(esprob, EM(), dt=0.1, callback=cb, save_everystep=false; trajectories=100)
-plot(essol; linealpha = 0.5)
+essol = solve(esprob, EM(), dt=0.1, callback=cb, save_everystep=true, trajectories=100)
+plot(essol)
 
 
 

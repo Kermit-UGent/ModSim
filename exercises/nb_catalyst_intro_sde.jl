@@ -122,9 +122,9 @@ The following code creates a so called *reaction network object*, that we have n
 
 # ╔═╡ d1e14521-3365-43a5-b730-9b51ca359e12
 infection_sde_model = @reaction_network begin
-	@parameters η=50
+	@parameters η=40
 	@default_noise_scaling η
-	α * β, S + I --> 2I, [noise_scaling = 80.0]
+	α * β, S + I --> 2I, [noise_scaling = 60.0]
 	r * m, I --> D
 	r * (1 - m), I --> R
 end
@@ -231,6 +231,85 @@ md"
 You might notice that is you run the above instruction `ssol = solve(sprob, EM(), dt=0.1)` subsequent times, you will each time get different solutions (plots) due to the randomness introduced by treating the problem as SDE problem.
 "
 
+# ╔═╡ 4ed7affa-249b-4a7e-be37-ae7f42c7f36b
+md"""
+#### Simulating the system as an EnsembleProblem.
+
+In order to see to have an idea of the extend of the stochastic effect on the solutions, we can create a so-called *EnsembleProblem*. This allows us to plot many possible solutions in one plot.
+
+In order to create an *EnsembleProblem*, you need to create an *SDEProblem* first. Since we already have our *SDEProblem* called `sprob`, we can readily create an *EnsembleProblem* from this. All you need to do is call the function `EnsembleProblem` with `sprob` as argument.
+"""
+
+# ╔═╡ 8da9bc41-83d5-4404-a195-0fc0430b231b
+md"
+##### Creating a EnsembleProblem
+
+Create the ensemble problem.
+"
+
+# ╔═╡ 9adb42be-ed67-4c14-9dbe-b1377c8d7b9a
+esprob = EnsembleProblem(sprob)
+
+# ╔═╡ cc62cf4a-6fab-4ead-82e1-46faef12bf9b
+md"""
+##### Solving the EnsembleProblem
+
+Solving the ensemble problem can be done with our, yet familiar, function `solve` as we did when solving the SDE problem, but now we need to provide a few more arguments. The first additional argument and value that we will provide is `save_everystep=true`, this will ensure that every simulation will be saved. The second argument indicates how many trajectories (simulations) you want to make. If you want an ensemble of 100 simulations, you can put `trajectories=100`. Hence, the function call would look like this:
+
+`essol_try = solve(esprob, EM(), dt=0.1, save_everystep=true, trajectories=100)`
+
+You can try this by uncommenting the instruction below and run the cell.
+"""
+
+# ╔═╡ f0d159eb-2e57-43f3-8c49-5173cc7465f3
+# essol_try = solve(esprob, EM(), dt=0.1, save_everystep=true, trajectories=100)
+
+# ╔═╡ 5b91a7c2-64a3-4987-a9c6-6b1432d9b226
+md"""
+You will have noticed the detection of instabilities and the abortions. This is because of the stochastic effects that can cause calculations to become unstable. In order to cope with that, we will make sure that at every step the states $S$, $I$, $R$ and $D$ always remain within their boundaries. Here this is in the interval $[0, 10000000]$. To realize this we can create a so-called `DisceteCallback` function using the functions below, namely, `condition` and `affect!`. Both put in a `DisceteCallback` function they basically will make sure that at each (integration) step, the states (cf. `integrator.u[i]`) will not go below $0$ or above $10000000$.
+"""
+
+# ╔═╡ 3aebcf0b-717b-49bd-ae6b-ca7fffd9b75b
+function condition(u, t, integrator)
+	true
+end
+
+# ╔═╡ 05d2136d-7b20-4bd7-8081-a3d4889afd52
+function affect!(integrator)
+	for i = 1:4
+		if integrator.u[i] > 10000000
+			integrator.u[i] = 10000000
+		end
+		if integrator.u[i] < 0
+			integrator.u[i] = 0
+		end
+	end
+end
+
+# ╔═╡ 3f8937da-730c-49a8-b0ee-41ba84e7e0e9
+md"""
+Combining them in a `DiscreteCallback` function:
+"""
+
+# ╔═╡ a819d032-f9c4-475d-b749-d3da4c93aa1f
+cb = DiscreteCallback(condition, affect!, save_positions=(false,true))
+
+# ╔═╡ a66adae7-c5c9-4453-82ca-c7555083f695
+md"""
+The option `save_positions=(false,true)` serves to save only the states *after* the `affect!` function was called, and not the states before.
+"""
+
+# ╔═╡ 094d7363-7918-4bd5-ae2b-52f283468317
+md"""
+Now we can solve the ensemble problem while including the callback function.
+"""
+
+# ╔═╡ 3f57d613-0042-4df9-9892-edaa90c0f52e
+essol = solve(esprob, EM(), dt=0.1, callback=cb, save_everystep=true, trajectories=100)
+
+# ╔═╡ 72770915-e1f5-41c5-84d2-9e6cbc0c24ff
+plot(essol)
+
 # ╔═╡ Cell order:
 # ╠═71118b72-1db2-11ef-1f5b-a163b0b7c390
 # ╠═dbf68cf4-7a18-4bf2-90a3-e36216a41a70
@@ -273,3 +352,17 @@ You might notice that is you run the above instruction `ssol = solve(sprob, EM()
 # ╠═4fe4f1f8-b6a4-4e4a-b966-58bcdc2b2435
 # ╠═b0253973-1a98-499d-a4b9-5db402a878bf
 # ╠═96547ac1-d353-4a90-a6dd-38124d59294c
+# ╠═4ed7affa-249b-4a7e-be37-ae7f42c7f36b
+# ╠═8da9bc41-83d5-4404-a195-0fc0430b231b
+# ╠═9adb42be-ed67-4c14-9dbe-b1377c8d7b9a
+# ╠═cc62cf4a-6fab-4ead-82e1-46faef12bf9b
+# ╠═f0d159eb-2e57-43f3-8c49-5173cc7465f3
+# ╠═5b91a7c2-64a3-4987-a9c6-6b1432d9b226
+# ╠═3aebcf0b-717b-49bd-ae6b-ca7fffd9b75b
+# ╠═05d2136d-7b20-4bd7-8081-a3d4889afd52
+# ╠═3f8937da-730c-49a8-b0ee-41ba84e7e0e9
+# ╠═a819d032-f9c4-475d-b749-d3da4c93aa1f
+# ╠═a66adae7-c5c9-4453-82ca-c7555083f695
+# ╠═094d7363-7918-4bd5-ae2b-52f283468317
+# ╠═3f57d613-0042-4df9-9892-edaa90c0f52e
+# ╠═72770915-e1f5-41c5-84d2-9e6cbc0c24ff
