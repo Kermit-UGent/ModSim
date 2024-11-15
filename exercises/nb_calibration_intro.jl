@@ -521,7 +521,6 @@ Declare the Turing model. Take the same priors (and distributions) as before.
 	params_exp = [:μ => μ, :Wf => Wf]
 	oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, params_exp)
     osol_exp = solve(oprob_exp, Tsit5(), saveat=t_meas)
-	# osol_exp = solve(remake(oprob_exp; u0=[W0]), Tsit5(), saveat=t_meas)
     W ~ MvNormal(osol_exp[:W], σ_W^2 * I)
 end
 

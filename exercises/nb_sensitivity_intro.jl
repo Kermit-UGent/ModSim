@@ -249,7 +249,7 @@ sens_W_log = ForwardDiff.jacobian(growth_sim_W_log, [μ_log, Wf_log])
 md"
 To get the sensitivities of $W$ on $\mu$, and of $W$ on $W_f$, you need to use indexing with `sens_W_log`:
 - `sens_W_log[:,1]` gives the (absolute) sensitivity of $W$ on $\mu$.
-- `sens_W_log:,[2]` gives the (absolute) sensitivity of $W$ on $W_f$.
+- `sens_W_log[:,2]` gives the (absolute) sensitivity of $W$ on $W_f$.
 "
 
 # ╔═╡ 6600d28e-2522-4069-a5e0-643be43f6117
@@ -518,8 +518,9 @@ Create a *reaction network object* for the exponential growth model. Name it `gr
 growth_gom = @reaction_network begin
 	@species W(t)=2.0
 	@parameters μ=0.09 D=0.04
-    μ, W --> 2*W
-    D*log(W), W --> 0
+    # μ, W --> 2*W
+    # D*log(W), W --> 0
+	μ-D*log(W), W --> 2*W
 end
 
 # ╔═╡ e190ceca-30b1-49e2-baf5-ceb62929f4c0

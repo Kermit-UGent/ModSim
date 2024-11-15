@@ -318,7 +318,7 @@ Plot the sensitivity functions of $X$ on $\mu_{max}$, $K_s$ and $S_{in}$.
 plot(t_vals, [sens_X_on_μmax_rel, sens_X_on_Ks_rel, sens_X_on_Sin_rel], title="Normalized sensitivities", label=["X on μmax" "X on Ks" "X on Sin"], xlabel="Time (hours)")
 
 # ╔═╡ 355ca6a7-466b-4969-ab48-28e2257f9810
-md"
+md"""
 Interpret your results. Try to answer the following question(s):
 - Which parameter $\mu_{max}$, $K_s$ or $S_{in}$ affects the output $X$ the most in steady state?
     - Answer: missing
@@ -326,7 +326,21 @@ Interpret your results. Try to answer the following question(s):
     - Answer: missing
 - Why is the sensitivity function of $X$ on $\mu_{max}$ positive?
     - Answer: missing
-"
+"""
+
+# ╔═╡ 2f73af13-829b-4c2b-92f7-563a3f2d236b
+# In the beginning the substrate S is positively affected by Sin because
+# S enters the tank through Sin and only little biomass X is present,
+# so the biomass cannot consume the substrate very fast.
+# In steady state, the biomass consumes the substrate at a steady rate,
+# so that S isn't sensitive on Sin anymore.
+# In steady state, the biomass is positively affected by Sin, because
+# the biomass X grows on S from Sin.
+# In steady state μmax has a negative effect on S, because μmax is the maximum
+# consumation rate by the biomass X.
+# In steady state Ks has a positive effect on S, because the larger Ks,
+# the less substrate S will be consumed by biomass X because increase in Ks
+# will decrease the consumation rate.
 
 # ╔═╡ Cell order:
 # ╠═55cdebd2-0881-11ef-2722-91de1447877a
@@ -384,3 +398,4 @@ Interpret your results. Try to answer the following question(s):
 # ╠═16a84fdb-8ce2-45b9-bfb7-7f4e1284a1d7
 # ╠═53134149-0bf7-41c1-9b35-e5037744211f
 # ╠═355ca6a7-466b-4969-ab48-28e2257f9810
+# ╠═2f73af13-829b-4c2b-92f7-563a3f2d236b

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -357,8 +357,8 @@ A possible *reaction network object* for the Gompertz growth model can be implem
 
 # ╔═╡ 3e16bd3a-898a-49f9-9ed1-8998be7dc045
 growth_gom = @reaction_network begin
-#    -μ, W --> ∅
-#    D*log(W), W --> ∅
+ #   -μ, W --> ∅
+ #   D*log(W), W --> ∅
 	μ-D*log(W), W --> 2W
 end
 
