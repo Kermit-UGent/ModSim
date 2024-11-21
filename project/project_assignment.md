@@ -17,6 +17,11 @@ These aspects can be extended or limited, as you choose. For example, you use yo
 
 You must submit the project as a PDF, HTML, and Julia (.jl) file through UFORA. Between submitting and the final exam, you will be asked to evaluate three other projects in a (limited) manner.
 
+Each project should also end with a small attribution who did what parts according to the [CRediT](https://en.wikipedia.org/wiki/Contributor_Roles_Taxonomy) (Contribution Roles Taxonomy) classification. For example:
+
+> MS: Conceptualization, Methodology, Writing – Review & Editing; BP: Software, visualization, Formal Analysis; DG: Writing – Original Draft Preparation.
+
+
 ## Rubric for grading
 
 | Category | 0-1 Points (Unsatisfactory) | 2 Points (Developing) | 3 Points (Satisfactory) | 4 Points (Good) | 5 Points (Excellent) |
