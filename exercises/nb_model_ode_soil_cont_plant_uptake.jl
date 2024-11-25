@@ -55,7 +55,7 @@ Model the aforementioned system of differential equations using a *reaction netw
 # ╔═╡ ba6c2c9b-6ba9-48b8-9137-6b43813815ec
 # Uncomment and complete the instruction
 # soil_cont_plant_uptake = @reaction_network begin
-# ...
+#     missing
 # end
 soil_cont_plant_uptake = @reaction_network begin
     Cin, ∅ --> C
@@ -70,7 +70,7 @@ Convert the system to a symbolic differential equation model and verify that you
 "
 
 # ╔═╡ 1a7c3080-5773-44b9-a5c5-bb16f25048a3
-# osys = ...         # Uncomment and complete the instruction
+# osys = missing         # Uncomment and complete the instruction
 osys = convert(ODESystem, soil_cont_plant_uptake)
 
 # ╔═╡ 7c4767ac-ee72-4f46-8699-68f4bfb15d92
@@ -84,7 +84,7 @@ Initialize a vector `u0` with the initial conditions:
 "
 
 # ╔═╡ 9d4fc31d-32b4-49c7-9e4c-577530199513
-# u0 = ...         # Uncomment and complete the instruction
+# u0 = missing         # Uncomment and complete the instruction
 u0 = [:C => 0.001, :P => 0.001]
 
 # ╔═╡ 51ffec7c-6033-47a9-b65a-5f9a7ab96fb9
@@ -93,7 +93,7 @@ Set the timespan for the simulation:
 "
 
 # ╔═╡ 20b43337-58fd-4b23-8e4d-c4fd8234bb5f
-# tspan =  ...      # Uncomment and complete the instruction
+# tspan =  missing      # Uncomment and complete the instruction
 tspan = (0.0, 400)
 
 # ╔═╡ ad63f799-bc65-4f2c-ba6c-461fa10139d0
@@ -102,6 +102,7 @@ Initialize a vector `param` with the parameter values:
 "
 
 # ╔═╡ 01e33f75-fdfe-4983-a3bd-4cf074152390
+# params = missing
 params = [:Cin => 0.06, :k₁ => 4.1e-3, :k₂ => 1.9e-2, :k₃ => 2.2e-2]
 
 # ╔═╡ 0f326aa7-044c-4c6f-be71-acf5c032f796
@@ -110,7 +111,7 @@ Create the ODE problem and store it in `oprob`:
 "
 
 # ╔═╡ 6f84b532-a718-4d42-9829-91366693b51c
-# oprob = ...        # Uncomment and complete the instruction
+# oprob = missing        # Uncomment and complete the instruction
 oprob = ODEProblem(soil_cont_plant_uptake, u0, tspan, params)
 
 # ╔═╡ ca65797f-a1dd-42dd-992c-ba067932a018
@@ -119,7 +120,7 @@ Solve the ODE problem and store the solution in `osol`:
 "
 
 # ╔═╡ 3d66d40f-f627-4268-890f-ab662c0efdd6
-# osol = ...         # Uncomment and complete the instruction
+# osol = missing         # Uncomment and complete the instruction
 osol = solve(oprob)
 
 # ╔═╡ 22dc63ad-47d5-45c4-8902-e9d7abc0a4f6
@@ -128,7 +129,7 @@ Plot the solutions:
 "
 
 # ╔═╡ 0f920caa-5993-448c-a449-6449feea121a
-# ...              # Uncomment and complete the instruction
+# missing              # Uncomment and complete the instruction
 plot(osol)
 
 # ╔═╡ 62c66f8a-6561-4d50-b6d9-4dfc43cef0a8
@@ -138,7 +139,7 @@ Interprate the simulation results in terms of the used parameter values.
 
 # ╔═╡ ab191e99-43b8-4f5e-ac4b-e7b3f61e47a8
 md"
-...
+missing
 "
 
 # ╔═╡ Cell order:

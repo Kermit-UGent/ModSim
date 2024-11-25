@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -48,7 +48,7 @@ The *reaction network object* for this model could be set-up as:
 
 # ╔═╡ c551c33e-95b0-4ea8-85d4-6c68db72b8bc
 fermenter_monod = @reaction_network begin
-    X * mm(S, μmax, Ks), S --> Y*X
+    X * mm(S, μmax, Ks), S => Y*X
     Q/V, (S, X) --> 0
     Q/V*Sin, ∅ --> S
 end
@@ -65,6 +65,10 @@ $$\begin{eqnarray*}
 \cfrac{dX}{dt} &=& -\cfrac{Q}{V} X + Y \mu_{max}\cfrac{S}{S + K_s} X
 \end{eqnarray*}$$
 "
+
+# ╔═╡ 5d6a881d-421e-4dea-9668-38b3f3378bf1
+# osys = ...
+osys = convert(ODESystem, fermenter_monod)
 
 # ╔═╡ 5802078d-12bc-489e-8566-15f77a11e8ba
 md"
@@ -86,7 +90,8 @@ Initialize a vector `u₀` with the initial conditions, and set the timespan:
 
 # ╔═╡ 6afb23f2-3da7-43e0-8a3b-fc4bb5eb9bde
 # u₀ = missing                 # Uncomment and complete the instruction
-u0 = [:S => 0.0, :X => 0.01]
+# u0 = [:S => 0.0, :X => 0.01]
+u0 = [:S => 0.0, :X => 0.0005]
 
 # ╔═╡ 1b09c8cb-d3b7-4a15-b6ed-d03019c5f57b
 # tspan = missing              # Uncomment and complete the instruction
@@ -99,10 +104,15 @@ We initialize a vector `params_uncert` with the parameter values and their corre
 
 # ╔═╡ 62f4049b-617f-4268-beba-b2c634b46642
 # params_uncert = missing       # Uncomment and complete the instruction
-params_uncert = [:μmax => 0.30±0.06, :Ks => 0.15±0.03, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2±0.4]
+# params_uncert = [:μmax => 0.30±0.06, :Ks => 0.15±0.03, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2±0.4]
 # params_uncert = [:μmax => 0.30±0.06, :Ks => 0.15, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2]
 # params_uncert = [:μmax => 0.30, :Ks => 0.15±0.03, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2]
 # params_uncert = [:μmax => 0.30, :Ks => 0.15, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2±0.4]
+# Use these:
+params_uncert = [:μmax => 0.40±0.06, :Ks => 0.015±0.003, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.022±0.004]
+# params_uncert = [:μmax => 0.40±0.06, :Ks => 0.015, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.022]
+# params_uncert = [:μmax => 0.40, :Ks => 0.015±0.003, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.022]
+# params_uncert = [:μmax => 0.40, :Ks => 0.015, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.022±0.004]
 
 # ╔═╡ 0e4c73d3-1630-463b-994d-073170c1a6c3
 md"
@@ -156,6 +166,7 @@ Draw your conclusions:
 # ╠═c551c33e-95b0-4ea8-85d4-6c68db72b8bc
 # ╠═69f8c265-fe91-4e4b-971b-395325d4474e
 # ╠═2806654f-7a24-4f8e-8b5a-3129b2431c95
+# ╠═5d6a881d-421e-4dea-9668-38b3f3378bf1
 # ╠═5802078d-12bc-489e-8566-15f77a11e8ba
 # ╠═562e0006-bb79-4895-98b4-c376ea6ce856
 # ╠═6afb23f2-3da7-43e0-8a3b-fc4bb5eb9bde

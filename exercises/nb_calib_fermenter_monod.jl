@@ -54,7 +54,8 @@ The *reaction network object* for this model could be set-up as:
 
 # ╔═╡ 245c2636-95da-4c76-8b03-c4d20bbabb48
 fermenter_monod = @reaction_network begin
-    X * mm(S, μmax, Ks), S --> Y*X
+    # X * mm(S, μmax, Ks), S --> Y*X
+	X * mm(S, μmax, Ks), S => Y*X
     Q/V, (S, X) --> ∅
     Q/V*Sin, ∅ --> S
 end
@@ -78,10 +79,12 @@ Suppose that during an experiment measurement data has been collected of the sub
 "
 
 # ╔═╡ 99c6f31a-0968-4804-9980-71fcc1af1f49
-S_meas = [0.01, 0.472, 0.931, 1.175, 1.277, 0.922, 0.51, 0.393, 0.341, 0.325, 0.299, 0.266, 0.302, 0.293, 0.272, 0.289, 0.277, 0.267, 0.297, 0.331, 0.289]
+# S_meas = [0.01, 0.472, 0.931, 1.175, 1.277, 0.922, 0.51, 0.393, 0.341, 0.325, 0.299, 0.266, 0.302, 0.293, 0.272, 0.289, 0.277, 0.267, 0.297, 0.331, 0.289]
+S_meas = [1.0e-5, 0.0047, 0.00796, 0.01056, 0.01214, 0.01325, 0.01344, 0.01338, 0.0115, 0.00917, 0.00604, 0.00458, 0.00438, 0.00342, 0.00323, 0.00329, 0.00312, 0.00314, 0.00319, 0.00299, 0.00311]
 
 # ╔═╡ bf4ad873-e0fe-415c-9e78-fe0b5ac1414e
-X_meas = [0.006, 0.032, 0.006, 0.076, 0.2, 0.588, 0.963, 1.215, 1.28, 1.379, 1.436, 1.429, 1.544, 1.543, 1.581, 1.577, 1.556, 1.564, 1.599, 1.6, 1.604]
+# X_meas = [0.006, 0.032, 0.006, 0.076, 0.2, 0.588, 0.963, 1.215, 1.28, 1.379, 1.436, 1.429, 1.544, 1.543, 1.581, 1.577, 1.556, 1.564, 1.599, 1.6, 1.604]
+X_meas = [0.00052, 0.00042, 0.00074, 0.00078, 0.00122, 0.00159, 0.00242, 0.00372, 0.00534, 0.0077, 0.00935, 0.00997, 0.01114, 0.01144, 0.01264, 0.01276, 0.01183, 0.01319, 0.01256, 0.01277, 0.01377]
 
 # ╔═╡ 1dae5875-f405-4ecb-8b7b-3c3f22b549bb
 t_meas = 0.0:5.0:100.0
@@ -113,7 +116,7 @@ We have previously used the following parameter values:
 
 Furthermore, suppose that at $t = 0\;h$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of $0.01\;g/L$.
 
-Calibrate the parameter values for $\mu_{max}$, $K_s$ and $S_{in}$ using the aforementioned measurement data for $S$ and $X$ in a timespan of $[0, 100]\,h$. Take the values above as initial values for $\mu_{max}$, $K_s$ and $S_{in}$.
+Calibrate the parameter values for $\mu_{max}$ and $K_s$ using the aforementioned measurement data for $S$ and $X$ in a timespan of $[0, 100]\,h$. Take the values above as initial values for $\mu_{max}$ and $K_s$.
 "
 
 # ╔═╡ 7a227eaf-18d0-44f4-ac4b-f529e81c7471
@@ -123,7 +126,8 @@ Create an `ODEProblem`. Use the aforementioned values as initial values for the 
 
 # ╔═╡ 6375478f-1af9-4fd2-b6f3-101a6f796f2d
 # u₀ = missing      # Uncomment and complete the instruction
-u₀ = [:S => 0.0, :X => 0.01]
+# u₀ = [:S => 0.0, :X => 0.01]
+u₀ = [:S => 0.0, :X => 0.0005]
 
 # ╔═╡ 38fe8304-af61-40a7-ac86-480dfb892185
 # tspan = missing   # Uncomment and complete the instruction
@@ -131,11 +135,12 @@ tspan = (0.0, 100)
 
 # ╔═╡ 87482f88-8413-4820-9613-7941f3d61bd7
 # params = missing  # Uncomment and complete the instruction
-params = [:μmax => 0.30, :Ks => 0.15, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2]
+# params = [:μmax => 0.30, :Ks => 0.15, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2]
+params = [:μmax => 0.40, :Ks => 0.015, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.022]
 
 # ╔═╡ 94f3bd7b-5c2c-4661-a0ab-2cdaf2cd6743
 # oprob = missing   # Uncomment and complete the instruction
-oprob = ODEProblem(fermenter_monod, u₀, tspan, params)
+oprob = ODEProblem(fermenter_monod, u₀, tspan, params, combinatoric_ratelaws=false)
 
 # ╔═╡ f6a8f134-6db0-4d74-8af5-82826347d8f0
 md"
@@ -159,11 +164,13 @@ Declare the Turing model.
 @model function fermenter_inference(t_meas, S, X)
 	σ_S ~ InverseGamma()
 	σ_X ~ InverseGamma()
-    μmax ~ LogNormal()
-	Ks ~ LogNormal()
-    Sin ~ LogNormal()
-	params = [:μmax => μmax, :Ks => Ks, :Y => 0.80, :Q => 2, :V => 40, :Sin => Sin]
-	oprob = ODEProblem(fermenter_monod, u₀, tspan, params)
+    # μmax ~ LogNormal()
+	# Ks ~ LogNormal()
+    # Sin ~ LogNormal()
+    μmax ~ Normal(0.40, 0.1)
+	Ks ~ Normal(0.015, 0.01)
+    params = [:μmax => μmax, :Ks => Ks, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.022]
+	oprob = ODEProblem(fermenter_monod, u₀, tspan, params, combinatoric_ratelaws=false)
     osol = solve(oprob, Tsit5(), saveat=t_meas)
 	S ~ MvNormal(osol[:S], σ_S^2 * I)
 	X ~ MvNormal(osol[:X], σ_X^2 * I)
@@ -180,12 +187,12 @@ fermenter_inf = fermenter_inference(t_meas, S_meas, X_meas)
 
 # ╔═╡ 63420055-55f8-4def-8b0e-11ea61483010
 md"
-Optimize the priors ($\sigma_S$, $\sigma_X$, $\mu_{max}$, $K_s$ and $S_{in}$). Do this with `MAP` method and Nelder-Mead. Store the optimization results in `results_map`.
+Optimize the priors ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$). Do this with `MLE` method and Nelder-Mead. Store the optimization results in `results_mle`.
 "
 
 # ╔═╡ d52c9da8-d8a4-4db0-ac6d-6d16ccf4775c
 # results_map = missing           # Uncomment and complete the instruction
-results_map = optimize(fermenter_inf, MAP(), NelderMead())
+results_mle = optimize(fermenter_inf, MLE(), NelderMead())
 
 # ╔═╡ e1b0ee01-f16c-40e9-a0f9-80072d690936
 md"
@@ -194,7 +201,7 @@ Visualize a summary of the optimized parameters.
 
 # ╔═╡ f2d7daf8-8218-446d-b1d2-e9e05aeadfd9
 # missing        # Uncomment and complete the instruction
-results_map |> coeftable
+results_mle |> coeftable
 
 # ╔═╡ 23d58bb1-d077-402e-8bee-3866c68e069a
 md"
@@ -203,15 +210,15 @@ Get the optimized values and assign them to `μmax_opt`, `Ks_opt` and `Sin_opt`.
 
 # ╔═╡ 7b3a3677-b251-43c1-b125-6d6ff1a11ea3
 # μmax_opt = missing              # Uncomment and complete the instruction
-μmax_opt = coef(results_map)[:μmax]
+μmax_opt = coef(results_mle)[:μmax]
 
 # ╔═╡ fa77bcbe-2ddc-4113-8f6a-4a18d219da9e
 # Ks_opt = missing                # Uncomment and complete the instruction
-Ks_opt = coef(results_map)[:Ks]
+Ks_opt = coef(results_mle)[:Ks]
 
 # ╔═╡ def211fd-b970-4c16-9fa4-e9fc4b5e2ac4
 # Sin_opt = missing               # Uncomment and complete the instruction
-Sin_opt = coef(results_map)[:Sin]
+# Sin_opt = coef(results_mle)[:Sin]
 
 # ╔═╡ 05d13a48-adc8-4e24-a6e4-be24af2c7a59
 md"
@@ -225,7 +232,8 @@ Set up parameter values with optimized parameter values:
 
 # ╔═╡ 75cf59ed-af8e-4e8a-8ed2-1f3bf4d386d0
 # params_opt = missing         # Uncomment and complete the instruction
-params_opt = [:μmax => μmax_opt, :Ks => Ks_opt, :Y => 0.80, :Q => 2, :V => 40, :Sin => Sin_opt]
+# params_opt = [:μmax => μmax_opt, :Ks => Ks_opt, :Y => 0.80, :Q => 2, :V => 40, :Sin => Sin_opt]
+params_opt = [:μmax => μmax_opt, :Ks => Ks_opt, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.022]
 
 # ╔═╡ 4e8870dc-2da6-4b80-82d6-26c7ceedad7d
 md"
@@ -234,7 +242,7 @@ Create an ODEProblem and solve it:
 
 # ╔═╡ 853c1a92-d50f-4b05-9ed3-d3ee1656665a
 # oprob_opt = missing         # Uncomment and complete the instruction
-oprob_opt = ODEProblem(fermenter_monod, u₀, tspan, params_opt)
+oprob_opt = ODEProblem(fermenter_monod, u₀, tspan, params_opt, combinatoric_ratelaws=false)
 
 # ╔═╡ f45e8124-e942-438e-99c5-3032ccc01454
 # osol_opt = missing          # Uncomment and complete the instruction

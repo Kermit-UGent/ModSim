@@ -30,11 +30,11 @@ md"
 
 # ╔═╡ 8500c35e-6bc3-4900-81bf-7705ddd61532
 md"
-In a fermenter reactor biomass grows on substrate. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. Inside the reactor, biomass, with a concentration of $X$ [$g/L$], is produced through first-order kinetics:
+In a fermenter reactor biomass $X$ grows on substrate $S$. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. Inside the reactor, biomass, with a concentration of $X$ [$g/L$], is produced through first-order kinetics (first-order in $S$):
 
 $$\begin{eqnarray*}
-S \xrightarrow[\quad\quad]{\beta} Y \, X
-%S \xrightarrow[\quad\quad]{\text{r}} Y \, X \quad\quad\quad\quad r = \beta \, S
+% S \xrightarrow[\quad\quad]{\beta} Y \, X
+S \xrightarrow[\quad\quad]{\text{r}} Y \, X \quad\quad\quad\quad r = \beta \, S
 \end{eqnarray*}$$
 
 with $\beta$ [$h^{-1}$] the reaction rate constant, and $Y$ [$gX/gS$] the yield coefficient which is defined here by the amount of produced biomass by consumption of one unit of substrate. Futhermore, the reactor is drained with an outlet flow $Q$ [$L/h$], which consist of the current concentrations of substrate $S$ [$g/L$] and biomass $X$ [$g/L$] inside the reactor. The volume $V$ [$L$] of the reactor content is kept constant by setting $Q_{in} = Q$.
@@ -55,6 +55,7 @@ Create a *reaction network object* model for the aforementioned problem in order
 # end
 fermenter_firstorder = @reaction_network begin
     β, S --> Y*X        # Y*X is created from one S at a rate β
+	# β*S, S => Y*X        # Y*X is created from one S at a rate β
     Q/V*Sin, 0 --> S    # S is created at a rate Q/V*Sin(t)
     Q/V, (S, X) --> 0   # S and X are degraded at a rate Q/V*S
 end

@@ -52,7 +52,8 @@ The *reaction network object* model for this problem could be defined as:
 
 # ╔═╡ 935ca610-7a7a-4692-8908-fc26abb880b4
 fermenter_monod = @reaction_network begin
-    mm(S, μmax, Ks), S + X --> (1 + Y)*X
+    # mm(S, μmax, Ks), S + X --> (1 + Y)*X
+	mm(S, μmax, Ks)*X, S => Y*X
     Q/V, (S, X) --> ∅
     Q/V*Sin, ∅ --> S
 end
@@ -69,6 +70,10 @@ $$\begin{eqnarray*}
 \cfrac{dX}{dt} &=& -\cfrac{Q}{V} X + Y \mu_{max}\cfrac{S}{S + K_s} X
 \end{eqnarray*}$$
 "
+
+# ╔═╡ 7f8b7a2e-bc65-4b51-ad59-bd7ac98604dd
+# osys = ...
+osys = convert(ODESystem, fermenter_monod)
 
 # ╔═╡ 911b22bf-4cec-455d-a7f7-967bb55afea9
 md"
@@ -100,7 +105,8 @@ Initialize a vector `u₀` with the initial conditions, set the timespan and ini
 
 # ╔═╡ 2ee277e5-ce4a-4ade-be0e-9bba7a4dc08c
 # u₀ = missing                 # Uncomment and complete the instruction
-u0 = [:S => 0.0, :X => 0.01]
+# u0 = [:S => 0.0, :X => 0.01]
+u0 = [:S => 0.0, :X => 0.0005]
 
 # ╔═╡ 3fdc6b17-cdeb-4dc5-8886-9d3a62caac8d
 # tspan = missing              # Uncomment and complete the instruction
@@ -113,19 +119,23 @@ For the sake of clarity, we will use the variables `μmax`, `Ks` and `Sin` to st
 
 # ╔═╡ 0f995929-4d2b-4a7a-8da1-04e4d501385f
 # μmax = missing
-μmax = 0.30
+# μmax = 0.30
+μmax = 0.40
 
 # ╔═╡ 262e8346-df6d-49bf-9186-92f5afb421e0
 # Ks = missing
-Ks = 0.15
+# Ks = 0.15
+Ks = 0.015
 
 # ╔═╡ baa777d2-abb8-45f8-87aa-b3b17c8dc07c
 # Sin = missing
-Sin = 2.2
+# Sin = 2.2
+Sin = 0.022
 
 # ╔═╡ 79b0eb65-5a0f-40b3-aa97-4088421c562e
 # params = missing             # Uncomment and complete the instruction
-params = [:μmax => μmax, :Ks => Ks, :Y => 0.80, :Q => 2, :V => 40, :Sin => Sin]
+# params = [:μmax => μmax, :Ks => Ks, :Y => 0.80, :Q => 2, :V => 40, :Sin => Sin]
+params = [:μmax => μmax, :Ks => Ks, :Y => 0.67, :Q => 2, :V => 40, :Sin => Sin]
 
 # ╔═╡ f0f4fa14-6f99-4f21-a743-be61e08444a7
 md"
@@ -277,14 +287,14 @@ Plot the sensitivity functions of $S$ and $X$ on $S_{in}$.
 
 # ╔═╡ db840c76-a6c6-49fb-a0bb-d9149f947bc0
 # missing
-plot(t_vals, [sens_S_on_Sin_rel, sens_X_on_Sin_rel], title="Normalized sensitivities", label=["S on Sin" "X on Sin"], xlabel="Time (hours)")
+plot(t_vals, [sens_S_on_Sin_rel, sens_X_on_Sin_rel], title="Normalized sensitivities", label=["S on Sin" "X on Sin"], xlabel="Time (hours)", linewidth=2)
 
 # ╔═╡ d41375ef-6958-4705-a417-4c6a491232ee
 md"
 Interpret your results. Try to answer the following question(s):
 - Which output variable $S$ or $X$ is most sensitive on $S_{in}$ in steady state?
     - Answer: missing
-- Why is the sensitivity function of $S$ on $S_{in}$ at first positive but then becomes negative?
+- Why is the sensitivity function of $S$ on $S_{in}$ at first positive but then becomes zero?
     - Answer: missing
 "
 
@@ -295,7 +305,7 @@ Plot the sensitivity functions of $S$ on $\mu_{max}$, $K_s$ and $S_{in}$.
 
 # ╔═╡ c0223da4-9959-48d0-b607-633b2e82986c
 # missing
-plot(t_vals, [sens_S_on_μmax_rel, sens_S_on_Ks_rel, sens_S_on_Sin_rel], title="Normalized sensitivities", label=["S on μmax" "S on Ks" "S on Sin"], xlabel="Time (hours)")
+plot(t_vals, [sens_S_on_μmax_rel, sens_S_on_Ks_rel, sens_S_on_Sin_rel], title="Normalized sensitivities", label=["S on μmax" "S on Ks" "S on Sin"], xlabel="Time (hours)", linewidth=2)
 
 # ╔═╡ ff86a29f-9308-473b-aa1c-dfd4af8179c7
 md"
@@ -315,7 +325,7 @@ Plot the sensitivity functions of $X$ on $\mu_{max}$, $K_s$ and $S_{in}$.
 
 # ╔═╡ 53134149-0bf7-41c1-9b35-e5037744211f
 # missing
-plot(t_vals, [sens_X_on_μmax_rel, sens_X_on_Ks_rel, sens_X_on_Sin_rel], title="Normalized sensitivities", label=["X on μmax" "X on Ks" "X on Sin"], xlabel="Time (hours)")
+plot(t_vals, [sens_X_on_μmax_rel, sens_X_on_Ks_rel, sens_X_on_Sin_rel], title="Normalized sensitivities", label=["X on μmax" "X on Ks" "X on Sin"], xlabel="Time (hours)", linewidth=2)
 
 # ╔═╡ 355ca6a7-466b-4969-ab48-28e2257f9810
 md"""
@@ -355,6 +365,7 @@ Interpret your results. Try to answer the following question(s):
 # ╠═935ca610-7a7a-4692-8908-fc26abb880b4
 # ╠═79e6056a-881c-442f-8989-5bc284d3d777
 # ╠═fa93e2c3-8b43-418e-ba24-406645b2e397
+# ╠═7f8b7a2e-bc65-4b51-ad59-bd7ac98604dd
 # ╠═911b22bf-4cec-455d-a7f7-967bb55afea9
 # ╠═be15ae00-163c-44e5-bc33-e939ec63ed05
 # ╠═55f1d688-0c53-481b-9965-5e92ca87ad83

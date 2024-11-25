@@ -59,9 +59,19 @@ Tips:
 # ╔═╡ e557a067-52a1-42d5-98ae-40a0c63a2611
 # Uncomment and complete the instruction
 # irrigation_mod = @reaction_network begin
-# 	...
+	# @observables begin
+	# 	runoff ~ R*(S₁ + S₁res)/Smax
+	# 	outflow ~ missing
+	# 	percolation ~ missing
+	# end
+# 	missing
 # end
 irrigation_mod = @reaction_network begin
+	@observables begin
+		runoff ~ R*(S₁ + S₁res)/Smax
+		outflow ~ v*(S₂)^2
+		percolation ~ k/Smax*S₁
+	end
     k/Smax, S₁ --> S₂
     v, 2S₂ --> ∅
     R * (1 - S₁res / Smax), ∅ --> S₁
@@ -74,7 +84,7 @@ Convert the system to a symbolic differential equation model and verify, by anal
 "
 
 # ╔═╡ 2f5b954b-1615-4b14-bc3b-3426c9296221
-# osys = ...         # Uncomment and complete the instruction
+# osys = missing         # Uncomment and complete the instruction
 osys = convert(ODESystem, irrigation_mod)
 
 # ╔═╡ c163afdb-9411-4879-945a-8ee722ddb15a
@@ -83,8 +93,8 @@ Initialize a vector `u₀` with the initial conditions:
 "
 
 # ╔═╡ 32dcda4d-2e05-4451-86c2-22c2ea1d9b63
-# u₀ = ...           # Uncomment and complete the instruction
-u₀ = [:S₁ => 30, :S₂ => 25]
+# u0 = missing           # Uncomment and complete the instruction
+u0 = [:S₁ => 30, :S₂ => 25]
 
 # ╔═╡ f974745b-5292-4bfa-aa8a-9836ae5870c3
 md"
@@ -92,7 +102,7 @@ Set the timespan for the simulation:
 "
 
 # ╔═╡ 97c84665-c6ff-4c7a-8dfb-772244aa4986
-# tspan = ...        # Uncomment and complete the instruction
+# tspan = missing        # Uncomment and complete the instruction
 tspan = (0.0, 150.0)
 
 # ╔═╡ 0ceef9b8-4647-43a4-b9c3-11959834305b
@@ -101,7 +111,7 @@ Initialize a vector `params` with the parameter values:
 "
 
 # ╔═╡ d172fc24-0fbe-46b4-a030-1ba44b4b57cd
-# params = ...       # Uncomment and complete the instruction
+# params = missing       # Uncomment and complete the instruction
 params = [:k => 3.0, :Smax => 150.0, :v => 1.0e-3, :R => 5.0, :S₁res => 10.0]
 
 # ╔═╡ 309fc7b7-ba9d-41ea-a834-e3b60eeb0226
@@ -111,7 +121,7 @@ Create the ODE problem and store it in `oprob`:
 
 # ╔═╡ d69a3772-a016-4555-88fe-cb5daf86e0ac
 # oprob = ...        # Uncomment and complete the instruction
-oprob = ODEProblem(irrigation_mod, u₀, tspan, params)
+oprob = ODEProblem(irrigation_mod, u0, tspan, params)
 
 # ╔═╡ 7793eb61-3a2a-471a-b283-20db4a059b70
 md"
@@ -119,7 +129,7 @@ Create the *condition* that contains the timepoint for the sudden change in $R$.
 "
 
 # ╔═╡ c2bb92b9-ad9e-4bbc-8914-822848aea552
-# condition = ...     # Uncomment and complete the instruction
+# condition = missing     # Uncomment and complete the instruction
 condition = [60]
 
 # ╔═╡ 0e469b9f-f825-4f64-8340-5047598197cd
@@ -128,7 +138,7 @@ Determine the index number of the relevant parameter that needs to be modified i
 "
 
 # ╔═╡ d6a89017-db51-4f19-a2fc-e919d4bc8815
-#  ...                 # Uncomment and complete the instruction
+# missing                 # Uncomment and complete the instruction
 parameters(irrigation_mod)
 
 # ╔═╡ 62ef97da-aedf-446d-ba2c-8c0ac72c9f05
@@ -138,7 +148,7 @@ Create a function called `affect!`, that will be called by the solver at the tim
 
 # ╔═╡ 596b411b-2e76-48af-b3ce-8b73aa6f8700
 # function affect!(integrator)
-#     ...
+#     missing
 # end
 function affect!(integrator)
     integrator.ps[:R] += 5.0      # R is the 4th parameter !!!
@@ -150,6 +160,7 @@ Create the callback function using `condition` and `affect!`. Store it in `cb`:
 "
 
 # ╔═╡ a376c25d-059c-4a39-8c71-c8eb4310df72
+# cb = missing
 cb = PresetTimeCallback(condition, affect!)
 
 # ╔═╡ 18717738-ae99-4b41-8414-4c1823307dde
@@ -158,6 +169,7 @@ Solve the ODE problem. Use `Tsit5()` and `saveat=0.5`. Store the solution in `os
 "
 
 # ╔═╡ dd5ffca7-4b39-4089-afee-dd73e4a9ac15
+# osol = missing
 osol = solve(deepcopy(oprob), Tsit5(), saveat=0.5, callback=cb)
 
 # ╔═╡ 64e02433-beea-4ca5-9b87-d118540d380e
@@ -165,23 +177,22 @@ md"
 Plot the three measurements (runoff, outflow, percolation) in one figure.
 
 Tips:
-- You can access the (vector) results of $S_1$ and $S_2$, by `osol[:S₁]` and `osol[:S₂]` respectively.
+- You can access the (vector) results of the observables runoff, outflow and percolation with `osol[:runoff]`, `osol[:outflow]` and `osol[:percolation]` respectively.
 - The time vector is accessible through `osol.t`
-- To calculate the three measurements, use element-wise operations (place a dot in front of all operators, e.g., `.+`, `./`, `.*`, `.^`)
 
 The `begin`-`end`-statement is used to execute multiple lines of code. With the exclamation mark `!` in `plot!` you can plot in the same figure.
 "
 
-# ╔═╡ 20442788-9c2f-4b0d-85bc-c380c6c839e4
+# ╔═╡ 53675e79-a8fe-4254-b1a3-ec27eaa9001b
 # begin
 # 	plot(osol.t, ..., xaxis="time [s]", label="runoff")
 # 	plot!(osol.t, ..., label="outflow")
 # 	plot!(osol.t, ..., label="percolation")
 # end
 begin
-	plot(osol.t, (osol[:S₁] .+ 10) ./ 150 .* 5, xaxis="time [s]", label="runoff")
-	plot!(osol.t, (osol[:S₂].^2) .* 1.0e-3, label="outflow")
-	plot!(osol.t, 3.0 .* osol[:S₁] ./ 150, label="percolation")
+	plot(osol.t, osol[:runoff], xaxis="time [s]", label="runoff")
+	plot!(osol.t, osol[:outflow], label="outflow")
+	plot!(osol.t, osol[:percolation], label="percolation")
 end
 
 # ╔═╡ d1a9c363-3ef6-4bbb-a150-63b44f9e7cf1
@@ -225,5 +236,5 @@ Interpret the results. Ask yourself the following questions:
 # ╠═18717738-ae99-4b41-8414-4c1823307dde
 # ╠═dd5ffca7-4b39-4089-afee-dd73e4a9ac15
 # ╠═64e02433-beea-4ca5-9b87-d118540d380e
-# ╠═20442788-9c2f-4b0d-85bc-c380c6c839e4
+# ╠═53675e79-a8fe-4254-b1a3-ec27eaa9001b
 # ╠═d1a9c363-3ef6-4bbb-a150-63b44f9e7cf1

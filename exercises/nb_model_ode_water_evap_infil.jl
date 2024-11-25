@@ -50,7 +50,7 @@ Model the aforementioned system of differential equations using a *reaction netw
 # ╔═╡ 3c275181-503e-4806-b0e6-1731ae881a30
 # Uncomment and complete the instruction
 # water_evap_infil = @reaction_network begin
-# ...
+#     missing
 # end
 water_evap_infil = @reaction_network begin
     I, ∅ --> W
@@ -66,7 +66,7 @@ Convert the system to a symbolic differential equation model and verify that you
 "
 
 # ╔═╡ 5647d122-5e8d-4ff9-a798-4076ee93b771
-# osys = ...         # Uncomment and complete the instruction
+# osys = missing         # Uncomment and complete the instruction
 osys = convert(ODESystem, water_evap_infil)
 
 # ╔═╡ acab2bf0-b792-4ccc-bee0-7611bedab23c
@@ -80,7 +80,7 @@ Initialize a vector `u₀` with the initial conditions:
 "
 
 # ╔═╡ 733bdb56-fb4f-4bc6-b50c-e3245fd59730
-# u0 = ...
+# u0 = missing
 u0 = [:W => 6.75, :G => 6.75]
 
 # ╔═╡ 521fcca5-3c88-463b-9395-e5871b9fc5a3
@@ -89,7 +89,7 @@ Set the timespan for the simulation:
 "
 
 # ╔═╡ f2267cc9-4bfd-44af-984c-cf54aa855f91
-# tspan =  ...      # Uncomment and complete the instruction
+# tspan =  missing      # Uncomment and complete the instruction
 tspan = (0.0, 20)
 
 # ╔═╡ e12840ed-d448-4f7c-893d-cfe974f62f9a
@@ -98,6 +98,7 @@ Initialize a vector `param` with the parameter values:
 "
 
 # ╔═╡ 5a3d520d-fd4f-485c-a8b0-63858eca4bfc
+# params = missing
 params = [:I => 2.7, :O => 20.0, :k₁ => 0.4, :k₂ => 1.0]
 
 # ╔═╡ 90c3b104-7a76-4986-9345-a544de0450d0
@@ -106,6 +107,7 @@ Create the ODE problem and store it in `oprob`:
 "
 
 # ╔═╡ dec48829-0f6e-48c7-bb96-ee285065e6f9
+# oprob = missing
 oprob = ODEProblem(water_evap_infil, u0, tspan, params)
 
 # ╔═╡ f31f4636-3077-4454-94c5-67b19850712e
@@ -114,11 +116,11 @@ Check the order of the state variables and parameters:
 "
 
 # ╔═╡ 48301c71-e9da-427d-b0de-d184a7199193
-# ...           # Uncomment and complete the instruction
+# missing           # Uncomment and complete the instruction
 species(water_evap_infil)
 
 # ╔═╡ d895157c-5ee4-4dab-b621-a00d713d6c8e
-# ...           # Uncomment and complete the instruction
+# missing           # Uncomment and complete the instruction
 parameters(water_evap_infil)
 
 # ╔═╡ 666c3aa1-26ef-4d77-bb81-f8830e66eea2
@@ -128,7 +130,7 @@ Set-up a the *condition function*, named `condition`, that contains the state va
 
 # ╔═╡ 575bcb78-adf4-418d-b674-acd4a6eb7b5a
 # function condition(u, t, integrator)
-#   ...
+#   missing
 # end
 function condition(u, t, integrator)
   u[1]
@@ -141,7 +143,7 @@ Create the function called `affect!`, that will be called by the solver when the
 
 # ╔═╡ 5ab50b97-ed1d-4403-8665-8af53e33f916
 # function affect!(integrator)
-#   ...
+#   missing
 # end
 function affect!(integrator)
   integrator.ps[:O] = 0.0
@@ -153,6 +155,7 @@ Combine both `condition` and `affect!` with the function `ContinuousCallback` in
 "
 
 # ╔═╡ 40512cf6-f9a5-4d9a-b475-dd550a9679bf
+# cb = missing
 cb = ContinuousCallback(condition, affect!)
 
 # ╔═╡ 9b6d4927-7502-4bdd-b711-d5145eb726d0
@@ -161,6 +164,7 @@ Solve the ODE problem using the callback function `cb`. Name the solution `osol`
 "
 
 # ╔═╡ c1c91323-a844-45be-b8b9-ec1e15c484dd
+# osol = missing
 osol = solve(deepcopy(oprob), Tsit5(), saveat=0.1, callback=cb)
 
 # ╔═╡ d01e7bab-4aa9-485c-9518-8f4d814491b7
@@ -169,6 +173,7 @@ Plot the results:
 "
 
 # ╔═╡ c6174712-65b4-4102-927f-9bf7a1dcd523
+# missing
 plot(osol)
 
 # ╔═╡ 0600244d-139f-4f37-b952-267d068dceb6
@@ -176,11 +181,11 @@ md"
 Interpret the results. Ask yourself the following questions:
 
 1. Can you clearly see the drop in $W$? To what value does $W$ drops?
-- Answer: ...
+- Answer: missing
 2. Why does $G$ also drop when $W$ drops? Explain.
-- Answer: ...
+- Answer: missing
 3. To what values are $W$ and $G$ tending to go? Was the system with the initial values for $W$ and $G$ and no outflow in equilibrium? Explain.
-- Answer: ...
+- Answer: missing
 "
 
 # ╔═╡ Cell order:

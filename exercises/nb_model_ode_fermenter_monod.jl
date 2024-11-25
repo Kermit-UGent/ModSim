@@ -54,15 +54,17 @@ Tip: The specific growth rate $\mu = \mu_{max} \, \cfrac{S}{S + K_s}$ can be imp
 
 # ╔═╡ 331a34f4-89d4-4193-896c-c14ab0bf04e7
 # fermenter_monod = @reaction_network begin
-#     ...        # Y*X is created from one S at a rate mm(S, μmax, Ks)
+#     ...        # Y*X is created from one S at a rate mm(S, μmax, Ks)*X
 #     ...        # S is created at a rate Q/V*Sin
 #     ...        # S and X are degraded at a rate Q/V*S
 # end
 fermenter_monod = @reaction_network begin
 	# Y*X is created from one S at a rate X * mm(S, μmax, Ks)
 	# or, when S and X meet, this results in Y*X and X
-    # X * mm(S, μmax, Ks), S --> Y*X
-	mm(S, μmax, Ks), S + X --> (1 + Y)*X
+	# mm(S, μmax, Ks)/S, S + X --> (1 + Y)*X
+	# mmr(S, μmax/Ks, Ks), S + X --> (1 + Y)*X
+	# μmax/(S + Ks), S + X --> (1 + Y)*X
+	mm(S, μmax, Ks)*X, S => Y*X
     Q/V, (S, X) --> 0               # S and X are degraded at a rate Q/V*S
     Q/V*Sin, 0 --> S                # S is created at a rate Q/V*Sin 
 end
@@ -93,7 +95,8 @@ Initialize a vector `u₀` with the initial conditions:
 
 # ╔═╡ 4b556cf0-8fad-434d-be56-dc1848d898ae
 # u0 = ...            # Uncomment and complete the instruction
-u0 = [:S => 0.0, :X => 0.01]
+# u0 = [:S => 0.0, :X => 0.01]
+u0 = [:S => 0.0, :X => 0.0005]
 
 # ╔═╡ ea55d648-7575-43c3-a385-5f4979996ef2
 md"
@@ -111,7 +114,8 @@ Initialize a vector `param` with the parameter values:
 
 # ╔═╡ d6c1316a-cf96-43d1-854a-f25925cf4a55
 # params = ...         # Uncomment and complete the instruction
-params = [:μmax => 0.30, :Ks => 0.15, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2]
+# params = [:μmax => 0.30, :Ks => 0.15, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2]
+params = [:μmax => 0.40, :Ks => 0.015, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.02]
 
 # ╔═╡ 4926b941-c3b6-4804-b4a4-11e13e5186f2
 md"
@@ -191,7 +195,8 @@ Create a function called `affect2!`, that will be called by the solver at the ti
 #     ...
 # end
 function affect2!(integrator)
-    integrator.ps[:Sin]=2.8
+    # integrator.ps[:Sin]=2.8
+	integrator.ps[:Sin]=0.022
 end
 
 # ╔═╡ 407eadc6-410a-48f2-ac61-c5e4d8ad7789
@@ -225,7 +230,8 @@ osol2[:S][end], osol2[:X][end]
 u_guess = [:S => osol2[:S][end], :X => osol2[:X][end]]
 
 # ╔═╡ f121efc5-4e64-4e82-8672-2765ad85443e
-params_mod = [:Y => 0.80, :Q => 2.0, :V => 40, :Sin => 2.8, :μmax => 0.30, :Ks => 0.15]
+# params_mod = [:Y => 0.80, :Q => 2.0, :V => 40, :Sin => 2.8, :μmax => 0.30, :Ks => 0.15]
+params_mod = [:μmax => 0.40, :Ks => 0.015, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.02]
 
 # ╔═╡ 0b992750-a446-447b-b2a1-26658c11c0bf
 Seq, Xeq = solve(SteadyStateProblem(ODEProblem(fermenter_monod, u_guess, tspan, params_mod, combinatoric_ratelaws=false)))

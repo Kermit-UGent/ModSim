@@ -68,7 +68,7 @@ Create a *reaction network object* model for the aforementioned problem in order
 
 Tips:
 - For the reaction with reaction rate $r_2$, in order to have a second-order reaction with respect to glucose, you need to double the stoichiometric coefficients, i.e., you reaction should be $2G \rightarrow 4E + 4CO_2$.
-- For the inhibition factor $\cfrac{K}{E+K}$ you can use the function `mm(..., ..., ...)` but mind the order especially of $E$ and $K$!
+- For the inhibition factor $\cfrac{K}{E+K}$ you can use the function `mmr(..., ..., ...)`!
 """
 
 # ╔═╡ 53c32175-4298-4450-ae85-132ea0cd6a9b
@@ -81,7 +81,8 @@ Tips:
 anaerobic_fermentation1 = @reaction_network begin
 	@species S(t)=0.04 I(t)=0.02 G(t)=0.0 E(t)=0.01 CO2(t)=0.0
     k1, S + I --> 2G
-	mm(K, k2, E), 2G --> 4E + 4CO2
+	# mm(K, k2, E), 2G --> 4E + 4CO2
+	mmr(E, k2, K), 2G --> 4E + 4CO2
 end
 
 # ╔═╡ 485c2b25-f281-4ee9-bcb8-7ca010205930
@@ -95,7 +96,7 @@ species(anaerobic_fermentation1)
 
 # ╔═╡ 579318a9-bad9-4392-9420-3f5474ccfff8
 md"""
-Convert the system to a symbolic differential equation model and inspect your differential equation.
+Convert the system to a symbolic differential equation model and inspect your differential equations.
 """
 
 # ╔═╡ bc56d0fb-db19-4f63-9f34-617308da6c8a
@@ -200,7 +201,8 @@ Make a copy of the content of the previous *reaction network object* and complem
 anaerobic_fermentation2 = @reaction_network begin
 	@species S(t)=0.04 I(t)=0.02 G(t)=0.0 E(t)=0.01 CO2(t)=0.0
     k1, S + I --> 2G
-	mm(K, k2, E), 2G --> 4E + 4CO2
+	# mm(K, k2, E), 2G --> 4E + 4CO2
+	mm(E, k2, K), 2G --> 4E + 4CO2
 	Q/V, (S, I, G, E, CO2) --> (0, 0, 0, 0, 0)
 	Q/V*Sin, 0 --> S
 	Q/V*Iin, 0 --> I
