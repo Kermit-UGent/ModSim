@@ -12,6 +12,7 @@ notebooks = Dict(
     #"optimization.jl" => "optimization",
     #"calibration.jl" => "calibration",  # LV very unstable, might need to rerun several times
     "uncertainty.jl" => "uncertainty",
+    "hiptobesquare.jl" => "model_selection",
 )
 
 
