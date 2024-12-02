@@ -55,6 +55,15 @@ bacterial_growth = @reaction_network begin
 	m, X --> 0
 end
 
+# ╔═╡ 4c7feb9f-a039-48a8-a7d0-3633f1a635fe
+dosetimes = 5:5:20
+
+# ╔═╡ 5ae78d7c-fc07-45f3-a59b-eb032ff2974d
+timed_feeding = [dosetimes] => [bacterial_growth.G ~ bacterial_growth.G + 10]
+
+# ╔═╡ 90a998c4-5fdd-42c3-9086-267a46fe3999
+@named reactor_dosed = ReactionSystem(equations(bacterial_growth); discrete_events=timed_feeding)
+
 # ╔═╡ 4c420cd0-975a-4d3b-a6cc-9eca35490c62
 md"## Stiff ODEs"
 
@@ -117,15 +126,6 @@ competition_model = @reaction_network begin
 	d, (A, B) --> ∅
 end
 
-# ╔═╡ 44142e83-1f6c-4644-996e-246817748b7e
-println(competition_model)
-
-# ╔═╡ 1924514f-0112-4ec8-830a-4eed54d81392
-latexify(competition_model, form=:ode) |> println
-
-# ╔═╡ a807b275-99fa-47c8-abc0-e9afcde445b8
-
-
 # ╔═╡ bc5adc9a-6f9c-4d55-ae8f-9bb8af5ff644
 convert(ODESystem, competition_model)
 
@@ -140,6 +140,15 @@ sol_ode = solve(oprob_comp)
 
 # ╔═╡ a72a568b-17c8-4350-b719-d72abbb10e84
 sol_sde = solve(sprob_comp);
+
+# ╔═╡ 6826363e-d807-4c52-a26a-018e5c6868c9
+eprob = EnsembleProblem(sprob_comp)
+
+# ╔═╡ 26f8a52c-3f8d-4928-9f33-a15995323cb5
+comp_ensemble = solve(eprob; trajectories = 20)
+
+# ╔═╡ 3604baf4-7623-4842-aeb8-74785417b398
+e_sumary = EnsembleAnalysis.EnsembleSummary(comp_ensemble)
 
 # ╔═╡ 4f671499-19b2-426c-a689-2ee4b084f3d0
 md"## Discrete stochastic differential equations"
@@ -476,6 +485,12 @@ let
 	p
 end
 
+# ╔═╡ ce7b1335-e43d-40dc-8ee8-d75b6df80dce
+plots["competition_ensemble"] = plot(plot(comp_ensemble, idxs=:A, title="Species A"), plot(comp_ensemble, idxs=:B , title="Species B"), layout=(2,1))
+
+# ╔═╡ 6286a56e-90c4-41b0-8b62-f7189fd5505d
+plots["competition_ensemble_summary"] = plot(e_sumary, xlab=:t, title="Competition ensemble summary")
+
 # ╔═╡ bb562e40-daaf-47be-a1d0-1938bc227fc0
 begin
 	n₀ = 20
@@ -562,6 +577,9 @@ plots
 # ╠═0de4a715-89d6-403b-ac65-adaed6062371
 # ╠═21e810e7-0879-4ffb-84f9-d67dafb900d6
 # ╠═7b3ca635-5a3c-43f2-9690-5cdbd9074ed2
+# ╠═4c7feb9f-a039-48a8-a7d0-3633f1a635fe
+# ╠═5ae78d7c-fc07-45f3-a59b-eb032ff2974d
+# ╠═90a998c4-5fdd-42c3-9086-267a46fe3999
 # ╟─4c420cd0-975a-4d3b-a6cc-9eca35490c62
 # ╠═081852cd-b589-4891-83c0-f19e4da2eb35
 # ╠═39ee1679-23ad-4448-ae20-b55345c950b4
@@ -582,9 +600,6 @@ plots
 # ╠═7d0a5294-6fc2-45d5-b04f-2824649f5d81
 # ╠═3d549763-2ba2-48b6-b486-2ddd462977dd
 # ╠═cba57c64-a43f-4a4c-a793-86358131ef70
-# ╠═44142e83-1f6c-4644-996e-246817748b7e
-# ╠═1924514f-0112-4ec8-830a-4eed54d81392
-# ╠═a807b275-99fa-47c8-abc0-e9afcde445b8
 # ╠═bc5adc9a-6f9c-4d55-ae8f-9bb8af5ff644
 # ╠═ffa88278-4f16-4f4a-9b12-9a475254dc63
 # ╟─98b16b2b-e792-41ef-a601-08289236af98
@@ -594,6 +609,11 @@ plots
 # ╟─b90e3157-3aed-4371-a396-283305a4d5b5
 # ╠═23f1da8d-7a67-4dab-8928-f1f5480fadd0
 # ╠═a72a568b-17c8-4350-b719-d72abbb10e84
+# ╠═6826363e-d807-4c52-a26a-018e5c6868c9
+# ╠═26f8a52c-3f8d-4928-9f33-a15995323cb5
+# ╠═ce7b1335-e43d-40dc-8ee8-d75b6df80dce
+# ╠═3604baf4-7623-4842-aeb8-74785417b398
+# ╠═6286a56e-90c4-41b0-8b62-f7189fd5505d
 # ╠═4f671499-19b2-426c-a689-2ee4b084f3d0
 # ╠═6e94632a-cad9-49ea-8cdc-e4ec55871682
 # ╠═bb562e40-daaf-47be-a1d0-1938bc227fc0

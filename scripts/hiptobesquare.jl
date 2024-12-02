@@ -65,7 +65,7 @@ md"For C, let us only use the first three points."
 end
 
 # ╔═╡ f23717b9-cdd8-45da-9d40-8df16a77bbb9
-@model function trapezium(;a=25, σ=1)
+@model function trapezoid(;a=25, σ=1)
 	x1 ~ Uniform(0, a)
 	y1 ~ Uniform(0, a)
 	x2 ~ Uniform(0, a)
@@ -136,7 +136,7 @@ for k in "ABCD"
 	println("Figure $k :")
 	points = examples[k]
 	for (fig, model) in [("Quadrangle", quadrangle(;a, σ)),
-							("Trapezium", trapezium(;a, σ)),
+							("Trapezoid", trapezoid(;a, σ)),
 							("Parallelogram", parallelogram(;a, σ)),
 							("Diamond", diamond(;a, σ)),
 							("Rectangle", rectangle(;a, σ)),
@@ -154,7 +154,7 @@ for k in "ABCD"
 	println("Figure $k :")
 	points = examples[k]
 	for (fig, model) in [("Quadrangle", quadrangle(;a, σ)),
-							("Trapezium", trapezium(;a, σ)),
+							("Trapezoid", trapezoid(;a, σ)),
 							("Parallelogram", parallelogram(;a, σ)),
 							("Diamond", diamond(;a, σ)),
 							("Rectangle", rectangle(;a, σ)),
@@ -239,7 +239,7 @@ begin
 	σ = 1/4
 	n = 8
 	for (fig, sampler) in [("Quadrangle", quadrangle(;a, σ)),
-							("Trapezium", trapezium(;a, σ)),
+							("Trapezoid", trapezoid(;a, σ)),
 							("Parallelogram", parallelogram(;a, σ)),
 							("Diamond", diamond(;a, σ)),
 							("Rectangle", rectangle(;a, σ)),
@@ -255,7 +255,7 @@ begin
 end
 
 # ╔═╡ 16a240f0-f8b6-445a-b28c-e8e04682121d
-plots["quadre_samples"] = plot(plots_samples["Quadrangle"], plots_samples["Trapezium"],plots_samples["Parallelogram"],plots_samples["Diamond"],plots_samples["Rectangle"],plots_samples["Square"],)
+plots["quadre_samples"] = plot(plots_samples["Quadrangle"], plots_samples["Trapezoid"],plots_samples["Parallelogram"],plots_samples["Diamond"],plots_samples["Rectangle"],plots_samples["Square"],)
 
 # ╔═╡ 2597d512-10ce-4dfb-a21e-33ac20a59442
 plots["quadre_data"] = plot([plots_examples[k] for k in "ABCD"]...)

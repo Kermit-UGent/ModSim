@@ -81,7 +81,7 @@ chain0 = sample(circle(), Prior(), 100);
 chain1 = sample(circle1, NUTS(), 100);
 
 # ╔═╡ f6e33488-7101-4c52-8263-2464b490024f
-chain2 = sample(circle2, NUTS(), 10000);
+chain2 = sample(circle2, NUTS(), 100);
 
 # ╔═╡ 2abc58cc-0122-4244-a406-d178b0dc4031
 chain3 = sample(circle3, NUTS(), 100);

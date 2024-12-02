@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.20.0
 
 using Markdown
 using InteractiveUtils
@@ -310,9 +310,12 @@ end
 plots
 
 # ╔═╡ 1eb4700c-20de-47a5-951d-3900d99461be
+# ╠═╡ disabled = true
+#=╠═╡
 for (n, p) in plots
 	savefig(p, "../figures/model_selection/$n.pdf")
 end
+  ╠═╡ =#
 
 # ╔═╡ Cell order:
 # ╠═04b15fa3-536f-4676-a41e-f1c8147a2c97
