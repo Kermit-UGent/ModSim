@@ -28,7 +28,7 @@ md"## Problem"
 
 # ╔═╡ 2e544855-16b8-4794-9ba7-70a1e7209dd2
 md"""
-To explain, let's go back to the circle throw example from the theory. 
+Let's go back to the circle throw example from the theory. 
 
 The idea is simple: a circle with radius 1 has an area of π. If you throw darts at the unit square [-1, 1] x [-1, 1] with uniform probability, the probability of a dart landing inside that circle is the area of the circle over the area of the square.
 
@@ -73,7 +73,7 @@ This, as one may guess, only gets worse for more complex problems. Which is why 
 
 # ╔═╡ 1724e4e4-18d2-430d-a8b0-11f5891b09a3
 md"""
-!!! question
+!!! note
 	Are you a real mathhead? Try computing the integral by hand! 
 	
 	Hint: there should be an inverse tangent function somewhere down the line.
@@ -85,7 +85,7 @@ md"## Copy-paste example"
 # ╔═╡ f3a73486-485a-4c69-b3db-2153b5a06bd8
 md"This section showcases the most essential code for the first practical. The next sections explain it in detail. 
 
-The variable names are prefaced with `_` since Pluto doesn't let you use the same name twice."
+The variable names are prefaced with `_` since Pluto doesn't let you use the same variable name twice."
 
 # ╔═╡ 6b554b3e-3fc8-4a20-9aac-a2b351dd7f9e
 _n_samples = 1000
@@ -123,7 +123,15 @@ Inside of them, you can define random variables with the "`var ~ Distribution(pa
 """
 
 # ╔═╡ 802e2769-613c-4ab6-b0e5-38173c220042
-md"Our circle problem can be defined as follows:"
+md"""
+Our circle problem can be defined as follows:
+- Sample the `x` and `y` coordinates of the dart uniformly between -1 and 1
+- Calculate the distance to the centre of the circle [0, 0]
+- The dart is within the circle if the distance is smaller than the radius 1
+"""
+
+# ╔═╡ 1ee1ca1b-93dc-4c5e-a1c5-79dc8b365226
+md"This translates to the following in Turing"
 
 # ╔═╡ 9ea69ca8-328d-4d37-b3f5-40206353d91c
 @model function distances()
@@ -154,6 +162,22 @@ md"We can use this to generate a large number of samples and make estimations ab
 # ╔═╡ 62952198-602c-49a3-81d5-890588b7262a
 n_samples = 1_000
 
+# ╔═╡ 80704d07-3c68-4109-9154-9bebf96e4624
+_dist_chain = sample(dist_model, Prior(), n_samples);
+
+# ╔═╡ c7b35352-adf5-406b-9de0-bf0d9c6a5bdc
+_sp_dists2 = generated_quantities(_dist_model, _dist_chain);
+
+# ╔═╡ 267663ea-627d-47ab-b627-5683048cd783
+_sp_x = _dist_chain[:x]
+
+# ╔═╡ bd66cb9c-cce7-4a8e-99f8-0bb09fffd5f1
+_sp_y = _dist_chain[:y]
+
+# ╔═╡ e8c4dbf1-7bb6-41e7-973b-6dd0227f5d78
+scatter(_sp_x, _sp_y, group = vec(_sp_dists2 .<= 1),
+	legend = false, aspect_ratio = :equal)
+
 # ╔═╡ 1012cee3-e574-43d9-b6ed-c9aa8a5ec552
 sp_dists = [dist_model() for sample_idx in 1:n_samples];
 
@@ -165,6 +189,14 @@ md"Currently, we have samples of the distance to the origin. We can easily trans
 
 # ╔═╡ 1df2ac6a-fa56-47e2-8c10-2a5d4da3a475
 sp_inside = sp_dists .<= 1; # the circle has a radius of 1
+
+# ╔═╡ 418e1de5-74ad-47d5-8500-4996a86c8e53
+md"""
+!!! note
+	We may as well have checked whether the distance was smaller than 1 **inside of the Turing function** and returned that instead. Calling the model would have then immediately given us `sp_inside`. 
+
+	While that approach is also perfectly fine, it would have made visualising the distribution of distances more difficult.
+"""
 
 # ╔═╡ 8c95747f-08dc-49e7-a9c7-9a5c5fef7a78
 begin
@@ -319,10 +351,16 @@ end
 # ╠═c6f18791-892d-4915-b4e4-f540fb770104
 # ╠═5c7cf0d6-2d6b-487e-9609-546464f730a1
 # ╠═c52c7639-c400-4093-a1e2-a0473059766c
+# ╠═80704d07-3c68-4109-9154-9bebf96e4624
+# ╠═c7b35352-adf5-406b-9de0-bf0d9c6a5bdc
+# ╠═267663ea-627d-47ab-b627-5683048cd783
+# ╠═bd66cb9c-cce7-4a8e-99f8-0bb09fffd5f1
+# ╠═e8c4dbf1-7bb6-41e7-973b-6dd0227f5d78
 # ╟─ccdcfa65-a02f-4110-a664-36090c3291d8
 # ╟─43e8f794-fec2-4ce4-9306-2fc8a9565343
 # ╟─ed788556-1627-4e9a-b901-e532272a8265
 # ╟─802e2769-613c-4ab6-b0e5-38173c220042
+# ╟─1ee1ca1b-93dc-4c5e-a1c5-79dc8b365226
 # ╠═9ea69ca8-328d-4d37-b3f5-40206353d91c
 # ╟─b61eb0af-5f0c-4267-8c02-ab14acb31ece
 # ╠═fbf3e659-2b59-4f97-8f88-dc783d384d75
@@ -335,6 +373,7 @@ end
 # ╟─4084cee7-1d2d-4fc0-8226-d9d416bb4eec
 # ╟─321c50fc-36ff-438c-b98e-a14910714bca
 # ╠═1df2ac6a-fa56-47e2-8c10-2a5d4da3a475
+# ╟─418e1de5-74ad-47d5-8500-4996a86c8e53
 # ╟─8c95747f-08dc-49e7-a9c7-9a5c5fef7a78
 # ╠═7d654226-04bd-4721-bc4b-26912fc87ba7
 # ╠═f2bb0f76-836c-40eb-8fa9-f4fcf8c03671
