@@ -5,7 +5,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ a2410616-5a17-403c-aa2f-dc93c2633c7f
-using Pkg; Pkg.activate("../..");
+using Pkg; Pkg.activate("..");
 
 # ╔═╡ 8307092d-368d-441d-8315-3dc312026534
 using Turing, StatsPlots

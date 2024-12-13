@@ -5,7 +5,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 7d4d4d20-b323-11ef-0926-b14785cb9ab5
-using Pkg; Pkg.activate("../..")
+using Pkg; Pkg.activate("..")
 
 # ╔═╡ 4cfd4721-e29a-4270-8d15-021bcc966eb1
 using Turing, StatsPlots
@@ -150,7 +150,7 @@ Living the microbiology master thesis life, your mornings consist of inoculating
 # ╔═╡ 6f0b6153-b0fc-4ac0-81f3-044bd1211010
 md"""
 Bacteria follow **logistic growth**, and you can use the following assumptions:
-- The initial population size $P_0$ has a 50-50 chance of originating from a small droplet or a big droplet
+- The initial population size $P_0$ has a 75% chance of originating from a small droplet and a 25% chance for a big droplet
   - Small droplets follow a `TriangularDist(1, 20, 5)`
   - Big droplets follow a `TriangularDist(10, 50, 20)`
 - The growth rate $r$ follows a `Normal(1.0, 0.2)`
@@ -160,6 +160,7 @@ Bacteria follow **logistic growth**, and you can use the following assumptions:
 # ╔═╡ 0c0a8f60-8a1f-4445-81d9-08343e6235a6
 md"""
 !!! questions
+	- Plot the prior distribution of P0.
 	- What is the probability of a petridish having over $10^5$ bacteria after 7, 8 and 9 hours of incubating?
 	- Plot 100 of the sampled logistic growth curves from 0 to 12 hours.
 """
@@ -177,13 +178,16 @@ logistic(t, P0, r, K) =  K / (1 + (K - P0)/P0 * exp(-r*t))
 @model function petrigrowth(t)
     smalldropdist = TriangularDist(1, 20, 5)
 	bigdropdist = TriangularDist(10, 50, 20)
-	P0 ~ MixtureModel([smalldropdist, bigdropdist])
+	P0 ~ MixtureModel([smalldropdist, bigdropdist], [0.75, 0.25])
     r ~ Normal(1.0, 0.2)
 	K ~ LogNormal(log(1e5), 0.3)
 
     Pt = logistic(t, P0, r, K)
     return Pt
 end
+
+# ╔═╡ 517577f2-9dc2-4b0f-aa3f-fd18f7f6fac3
+plot(MixtureModel([TriangularDist(1, 20, 5), TriangularDist(10, 50, 20)]))
 
 # ╔═╡ 06dc3fc4-08f7-4bac-82d9-b020a533eab6
 petri_model = petrigrowth(8);
@@ -259,6 +263,26 @@ sp_maxoccs = [bday_model() for i in 1:n_samples]
 # ╔═╡ cac00880-15fa-483a-a09f-9b6d1219b0cf
 mean(sp_maxoccs .>= 3)
 
+# ╔═╡ 8d66c150-4502-4501-980e-b2ce0eb79221
+md"""
+Using the party trick #!
+"""
+
+# ╔═╡ 0e5dba08-2bf2-4fd3-8179-cfb64410318f
+P_samebday = 1/365
+
+# ╔═╡ e1b2c14f-1da4-4f8b-bf14-cf731e42d110
+possible_events = binomial(150, 3)
+
+# ╔═╡ aa6723e5-a502-4a6c-8471-a6609a3ed944
+expected_events = possible_events * P_samebday^2
+
+# ╔═╡ 51a7f215-beff-4da0-861e-03326198ae3a
+1 - pdf(Poisson(expected_events), 0)
+
+# ╔═╡ 4e1a6396-2c20-4921-bf50-8a0fe446ccce
+1-exp(-expected_events)
+
 # ╔═╡ Cell order:
 # ╠═7d4d4d20-b323-11ef-0926-b14785cb9ab5
 # ╠═4cfd4721-e29a-4270-8d15-021bcc966eb1
@@ -297,6 +321,7 @@ mean(sp_maxoccs .>= 3)
 # ╟─67001598-27eb-4813-8465-3ffab01d84f4
 # ╠═57982520-9627-4a8a-911f-0d26f8fbf5f2
 # ╠═78c87e03-9ffc-4b27-a9c7-78172e045c1a
+# ╠═517577f2-9dc2-4b0f-aa3f-fd18f7f6fac3
 # ╠═06dc3fc4-08f7-4bac-82d9-b020a533eab6
 # ╠═465bd995-0d0c-4c68-bfb1-69cc9156c5d4
 # ╠═7da4a9f2-9df9-45da-a387-22804155d09f
@@ -313,3 +338,9 @@ mean(sp_maxoccs .>= 3)
 # ╠═44407741-8c74-4c00-a040-897c4713e6d7
 # ╠═b0443045-74a1-4b48-8f6c-a1b5e15eace4
 # ╠═cac00880-15fa-483a-a09f-9b6d1219b0cf
+# ╟─8d66c150-4502-4501-980e-b2ce0eb79221
+# ╠═0e5dba08-2bf2-4fd3-8179-cfb64410318f
+# ╠═e1b2c14f-1da4-4f8b-bf14-cf731e42d110
+# ╠═aa6723e5-a502-4a6c-8471-a6609a3ed944
+# ╠═51a7f215-beff-4da0-861e-03326198ae3a
+# ╠═4e1a6396-2c20-4921-bf50-8a0fe446ccce
