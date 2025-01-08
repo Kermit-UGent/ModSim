@@ -78,7 +78,7 @@ md"# 2: Attraction"
 md"""
 Following a course on electromagnetism will teach one that computing the net force between 2 arbitrary shapes can be a terrifying task. Tragedy has it then, that this is a very general problem with application from making fusion reactors to space travel. We can ease the pain by turning it into a sampling problem.
 
-We'll start in a humble manner and simulate **the gravitational force between 2 cubes**. You can do this by randomly sampling a point from both cubes and using the [formula for gravitational force](https://en.wikipedia.org/wiki/Gravity?variant=zh-tw#Newton's_theory_of_gravitation) with $m_1 = m_2 = 1$ and [$G = 1$](https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fqnn7guyqtug41.jpg%3Fauto%3Dwebp%26s%3Da1cd045d4f4704b8439fb70585fad1b1d39c79f6).
+We'll start in a humble manner and simulate **the gravitational force between 2 cubes**. You can do this by randomly sampling a point from both cubes and using the [formula for gravitational force](https://en.wikipedia.org/wiki/Gravity?variant=zh-tw#Newton's_theory_of_gravitation). You can simplify the problem with $m_1 = m_2 = 1$ and [$G = 1$](https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fqnn7guyqtug41.jpg%3Fauto%3Dwebp%26s%3Da1cd045d4f4704b8439fb70585fad1b1d39c79f6).
 """
 
 # ╔═╡ 058d2a08-7d40-46c5-8c5b-2b5ce9d2eb18
@@ -141,7 +141,7 @@ md"""
 The previous exercise promised the computation of forces between 2 arbitrary shapes. While cubes are a nice shape, they're not exactly exciting. This time, let's instead estimate the net force between a cube and a [torus](https://en.wikipedia.org/wiki/Torus), and use the estimation to animate the resulting movement of the cube.
 
 The function `movecube` written below will make the required animation. The only thing it still lacks is the correct implementation of the function `donutforce`. This is a **Turing model** which does the following:
-- It takes the centre of a cube as input, e.g. [3.0, 0.0, 1.4]
+- It takes the centre of a cube as input, e.g. `[3.0, 0.0, 1.4]`
 - It returns the force between a random point of this cube and that of a torus with centre [0.0, 0.0, 0.0], $R$ = 1, $r$ = 0.1, and rotated so a point moving along the x-axis does not touch it (see figure below)
 """
 
