@@ -228,7 +228,7 @@ Suppose that when the number of infected individuals reaches $1\,000\,000$, then
 "
 
 # ╔═╡ fee597e0-97cb-40bc-a5b9-166631e8b9f6
-proceed_with_condition = [1]
+proceed_with_condition = [true]
 
 # ╔═╡ 51363f3c-7aa9-48ed-808e-d1f7a4aadc0c
 function condition3(u, t, integrator)
@@ -238,14 +238,17 @@ end
 # ╔═╡ cd060e93-7a92-4824-b812-080391fbf554
 function affect3!(integrator, param=proceed_with_condition)
 	integrator.u[2] -= 0.999e6
-	param[1] = 0
+	param[1] = false
 end
 
 # ╔═╡ a41878a2-2fd3-4a2a-ba85-d2a09c67da33
 cb3 = ContinuousCallback(condition3, affect3!)
 
 # ╔═╡ fc2dc11e-7022-4c6f-b7ed-5b077fc21ac5
-osol3 = solve(deepcopy(oprob), Tsit5(), saveat=0.1, callback=cb3)
+begin
+	proceed_with_condition[1] = true
+	osol3 = solve(deepcopy(oprob), Tsit5(), saveat=0.1, callback=cb3)
+end
 
 # ╔═╡ 2b511237-7739-44e5-b6bd-26a2fdc76bb5
 plot(osol3)
@@ -273,7 +276,7 @@ Initialize vector `params_ex1` with parameter values:
 "
 
 # ╔═╡ 27a4c4f5-0b2b-4d23-9bb0-a1a8ff6cfc4d
-# params_ex1 = [...] # Uncomment and complete the instruction
+# params_ex1 = missing      # Uncomment and complete the instruction
 params_ex1 = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4]
 
 # ╔═╡ e0a8a397-4500-47de-8be3-49d3174648b1
@@ -282,7 +285,7 @@ Create the ODE problem and store it in `oprob_ex1`:
 "
 
 # ╔═╡ 7955722d-fc35-4cce-8bf2-ee40ee7fbc82
-# oprob_ex1 = ...;     # Uncomment and complete the instruction
+# oprob_ex1 = missing;     # Uncomment and complete the instruction
 oprob_ex1 = ODEProblem(infection_model, u0, tspan, params_ex1);
 
 # ╔═╡ 0590bc0b-45d6-4a8e-8078-af057984523f
@@ -291,7 +294,7 @@ Solve the ODE problem and store the solution in `osol_ex1`:
 "
 
 # ╔═╡ f7b09e96-cf30-4bd0-841b-46621df693ab
-# osol_ex1 = ...;       # Uncomment and complete the instruction
+# osol_ex1 = missing;       # Uncomment and complete the instruction
 osol_ex1 = solve(oprob_ex1, Tsit5(), saveat=0.5);
 
 # ╔═╡ e7947165-b244-4ff6-bdf3-61d03aefe696
@@ -300,7 +303,7 @@ Plot the solutions:
 "
 
 # ╔═╡ adc0aa15-e0a9-4549-9609-967a9dc78b78
-# ...                   # Uncomment and complete the instruction
+# missing                   # Uncomment and complete the instruction
 plot(osol_ex1)
 
 # ╔═╡ 7a1effe4-776c-4143-8085-f98a213a2cc3
@@ -362,7 +365,7 @@ Convert to an ODE system. Check the differential equations and make sure you und
 "
 
 # ╔═╡ 2a66417b-79a2-4909-bd89-5650c49b9411
-# osys_ex2 = ...       # Uncomment and complete the instruction
+# osys_ex2 = missing       # Uncomment and complete the instruction
 osys_ex2 = convert(ODESystem, infection_med)
 
 # ╔═╡ 35956a99-5729-4bf7-bf09-b2232fc958da
@@ -371,8 +374,8 @@ Set-up parameter values:
 "
 
 # ╔═╡ cc31567f-631b-41b9-aa2d-3408ca951bcf
-# params_ex2 = [...]    # Uncomment and complete the instruction
-params_ex2 = [:α => 0.08, :β => 1.0e-6, :b => 0.1, :m => 0.4, :r => 0.2, :rb => 0.5]
+# params_ex2 = missing       # Uncomment and complete the instruction
+params_ex2 = [:α => 0.08, :β => 1.0e-6, :b => 0.2, :m => 0.4, :r => 0.2, :rb => 0.5]
 
 # ╔═╡ 82f8c50c-511d-4399-ac87-0890b678c6c1
 md"
@@ -380,7 +383,7 @@ Create the ODE problem and store it in `oprob_ex2`:
 "
 
 # ╔═╡ ec08adb2-561c-4f17-a0b5-019d7b1f1098
-# oprob_ex2 = ...       # Uncomment and complete the instruction
+# oprob_ex2 = missing       # Uncomment and complete the instruction
 oprob_ex2 = ODEProblem(infection_med, u0, tspan, params_ex2);
 
 # ╔═╡ c55ec157-6ec8-45db-9a54-0f39aceb9607
@@ -389,7 +392,7 @@ Solve the ODE problem and store the solution in `osol_ex2`:
 "
 
 # ╔═╡ 67668918-624e-4adf-be5d-6fdbc62555f6
-# osol_ex2 = ...        # Uncomment and complete the instruction
+# osol_ex2 = missing        # Uncomment and complete the instruction
 osol_ex2 = solve(oprob_ex2, Tsit5(), saveat=0.5);
 
 # ╔═╡ 832f984a-176d-4187-8476-5026d29a63d8
@@ -398,7 +401,7 @@ Plot the solutions:
 "
 
 # ╔═╡ 5f9a9838-099d-457f-9402-915f42d0cd33
-# ...          # Uncomment and complete the instruction
+# missing          # Uncomment and complete the instruction
 plot(osol_ex2)
 
 # ╔═╡ ef3ca25d-c110-452d-877a-6304ae6cd5a7
@@ -414,6 +417,15 @@ Try to answer the following questions:
 - Why does the number of recovered individuals first rise when the value of $b$ increases and then fall when the value of $b$ continues to increase?
 "
 
+# ╔═╡ dedb1ac1-cb54-416f-a092-12a50080c69f
+md"""
+Check the number of fatalities:
+"""
+
+# ╔═╡ a912f449-6c9d-4595-863f-a2ba523bad95
+# missing
+osol_ex2[:D][end]
+
 # ╔═╡ 089707c3-1df6-4799-a87b-0d4872a0267d
 md"
 ### Exercise 3 - Adding vaccination to the model
@@ -425,11 +437,13 @@ Vaccination affects several differential equations:
 - Susceptible individuals are vaccinated at a rate of $v$ (with unit $day^{-1}$). These persons can therefore no longer be infected.
 - The vaccinated persons become resistant.
 
-The vaccination programme is launched two days after the outbreak of the disease.
+We are going to use a vaccination rate $v$ so that the number of fatalities is about 10 times smaller after a period of 90 days compared to those in absence of vaccination (cf. Exercise 2).
+
+The vaccination programme is launched $2$ days after the outbreak of the disease.
 
 Assume that individuals are still being treated ($b = 0.2$ and $r_b = 0.5$). Extend the model obtained in the previous exercise for the launch of a vaccination campaign after the outbreak of the disease.
 
-Find out via trial and error what percentage of susceptible persons need to be vaccinated daily so that the number of fatalities is about 10 times smaller after a period of 90 days.
+Find out via trial and error what the vaccination rate need to be so that the number of fatalities is about $10$ times smaller after a period of $90$ days compared to those in absence of vaccination (cf. Exercise 2). Consider an initial step size in $v$ of $0.01$ and then fine tune with a step size of $0.001$.
 
 Use the same initial values and timespan as before.
 "
@@ -440,6 +454,13 @@ Set-up the new *reaction network/model* and name it `infection_med_vac`:
 "
 
 # ╔═╡ a1795123-876b-4bd3-ac3a-711367b500d1
+# Uncomment and complete the instruction
+# infection_med_vac = @reaction_network begin
+# 	α * β, S + I --> 2I
+# 	..., I --> D
+# 	(..., ...), I --> R
+# 	..., ... --> ...
+# end
 infection_med_vac = @reaction_network begin
 	α * β, S + I --> 2I
 	(1 - b) * m * r, I --> D
@@ -453,7 +474,7 @@ Convert to an ODE system. Check the differential equations and make sure you und
 "
 
 # ╔═╡ 710fe13c-bd43-4d1e-867e-72330722ac1e
-# osys_ex3 = ...       # Uncomment and complete the instruction
+# osys_ex3 = missing       # Uncomment and complete the instruction
 osys_ex3 = convert(ODESystem, infection_med_vac)
 
 # ╔═╡ 0274fbd8-c025-4e36-bbb0-f65f21b962c7
@@ -462,8 +483,8 @@ Set-up parameter values:
 "
 
 # ╔═╡ 34c4d746-45f7-43c4-a0f0-6e570373a35d
-# params_ex3 = [...]    # Uncomment and complete the instruction
-params_ex3 = [:α => 0.08, :β => 1.0e-6, :b => 0.2, :m => 0.4, :r => 0.2, :rb => 0.5, :v => 0.0]
+# params_ex3 = missing    # Uncomment and complete the instruction
+params_ex3 = [:α => 0.08, :β => 1.0e-6, :b => 0.2, :m => 0.4, :r => 0.2, :rb => 0.5, :v => 0.046]
 
 # ╔═╡ 060a5c5b-9834-42e2-98e9-ac23e7403b60
 md"
@@ -471,7 +492,7 @@ Create the ODE problem and store it in `oprob_ex3`:
 "
 
 # ╔═╡ c61ae8b6-2324-43fa-a5ae-274a919af559
-# oprob_ex3 = ...       # Uncomment and complete the instruction
+# oprob_ex3 = missing       # Uncomment and complete the instruction
 oprob_ex3 = ODEProblem(infection_med_vac, u0, tspan, params_ex3);
 
 # ╔═╡ 69983b90-b6ef-4732-a4af-a772bb1364e5
@@ -480,34 +501,35 @@ Solve the ODE problem when there is no vaccination ($v=0$) and store the solutio
 "
 
 # ╔═╡ 16211bc6-cd97-43c0-8faf-25bb490930b6
-# osol_ex3_no_vac = ...;   # Uncomment and complete the instruction
-osol_ex3_no_vac = solve(oprob_ex3, Tsit5(), saveat=0.5);
+# osol_ex3_no_vac = missing;   # Uncomment and complete the instruction
+osol_ex3_vac = solve(oprob_ex3, Tsit5(), saveat=0.5);
 
 # ╔═╡ 5ae9abb4-1be8-4ee3-97a2-6f8332a799af
 md"
-Check the number fatalities and divide by 10:
+Check the number fatalities:
 "
 
 # ╔═╡ 53806706-0caf-4e81-a610-9119340d1db6
-# ...         # Uncomment and complete the instruction
-osol_ex3_no_vac[end][3] / 10
+# missing         # Uncomment and complete the instruction
+osol_ex3_vac[:D][end]
 
-# ╔═╡ ee3205e2-4804-47d0-8970-e990e8b05076
-md"
-Check the order of the parameters in the model:
-"
+# ╔═╡ 461eada9-5f9c-4439-8b65-226382b6d148
+md"""
+Compare the latter with the number of fatalities when no vaccination is/was available (cf. Exercise 2) by setting up a condition here below where the final number of fatalities (with vaccination) divided by 10 is compared with (use larger than or smaller than) the number of fatalities (without vaccination):
+"""
 
-# ╔═╡ a3e7175e-5a3a-4fc1-aff5-8be49ae2f8fe
-# ...         # Uncomment and complete the instruction
-parameters(infection_med_vac)
+# ╔═╡ 0994d790-0fe8-46ab-bba2-a0a4ea466f64
+# missing
+osol_ex2[:D][end]/10 > osol_ex3_vac[:D][end]
 
 # ╔═╡ 8bb5dafd-6c26-4634-8be4-c2963efba056
 md"
+Once you have found the value of $v$ that makes 
 Set-up the condition and store it in `condition_ex3`:
 "
 
 # ╔═╡ 26c77206-fe3c-45c5-a627-f2b346c66be7
-# condition_ex3 = [...]   # Uncomment and complete the instruction
+# condition_ex3 = missing     # Uncomment and complete the instruction
 condition_ex3 = [2.0]
 
 # ╔═╡ c1d3ec29-5af8-4b79-8720-0a5146340b8d
@@ -518,10 +540,10 @@ Set-up the affect function and name it `affect_ex3`:
 # ╔═╡ ceae9947-ed0f-4975-a944-cc938cf22dde
 # Uncomment and complete the instruction
 # function affect_ex3!(integrator)
-# 	integrator.p[...] = ...
+# 	integrator.ps[...] = ...
 # end
 function affect_ex3!(integrator)
-	integrator.ps[:v] = 0.055     # v is the 7-th parameter
+	integrator.ps[:v] = 0.046     # v is the 7-th parameter
 end
 
 # ╔═╡ 6e767e36-f54e-4472-881a-ab04ad9c9d09
@@ -530,6 +552,7 @@ Set-up the callback function and name it `cb_ex3`:
 "
 
 # ╔═╡ 870c9d65-2229-40b7-9959-59afecb4f3bf
+# cb_ex3 = missing
 cb_ex3 = PresetTimeCallback(condition_ex3, affect_ex3!)
 
 # ╔═╡ 1bf8bc58-6848-4783-a614-7ac11646de92
@@ -538,7 +561,7 @@ Solve the ODE problem and store the solution in `osol_ex3`:
 "
 
 # ╔═╡ 8814c42b-16c7-466a-8ad8-58ee1c0921b2
-# osol_ex3 = ...        # Uncomment and complete the instruction
+# osol_ex3 = missing        # Uncomment and complete the instruction
 osol_ex3 = solve(deepcopy(oprob_ex3), Tsit5(), saveat=0.5, callback=cb_ex3);
 
 # ╔═╡ 25158ea5-1930-4fee-aab4-490b475d8635
@@ -547,11 +570,14 @@ Plot the solutions:
 "
 
 # ╔═╡ ed9472a0-09c9-4d1c-8f1d-1b7d87b97640
-# ...          # Uncomment and complete the instruction
+# missing          # Uncomment and complete the instruction
 plot(osol_ex3)
 
 # ╔═╡ 47243051-bb8f-444a-aca5-fb686680ca8b
-osol_ex3[end][3]
+# ╠═╡ disabled = true
+#=╠═╡
+osol_ex3[:D][end]
+  ╠═╡ =#
 
 # ╔═╡ Cell order:
 # ╠═18a4df05-0349-400d-a29e-b3fa71aa4d88
@@ -636,6 +662,8 @@ osol_ex3[end][3]
 # ╠═5f9a9838-099d-457f-9402-915f42d0cd33
 # ╟─ef3ca25d-c110-452d-877a-6304ae6cd5a7
 # ╟─f8dbab24-55aa-466f-a978-5f8db93b4b93
+# ╠═dedb1ac1-cb54-416f-a092-12a50080c69f
+# ╠═a912f449-6c9d-4595-863f-a2ba523bad95
 # ╠═089707c3-1df6-4799-a87b-0d4872a0267d
 # ╠═381a714d-699e-45c6-909a-02689b2a7e6b
 # ╠═a1795123-876b-4bd3-ac3a-711367b500d1
@@ -649,8 +677,8 @@ osol_ex3[end][3]
 # ╠═16211bc6-cd97-43c0-8faf-25bb490930b6
 # ╠═5ae9abb4-1be8-4ee3-97a2-6f8332a799af
 # ╠═53806706-0caf-4e81-a610-9119340d1db6
-# ╠═ee3205e2-4804-47d0-8970-e990e8b05076
-# ╠═a3e7175e-5a3a-4fc1-aff5-8be49ae2f8fe
+# ╠═461eada9-5f9c-4439-8b65-226382b6d148
+# ╠═0994d790-0fe8-46ab-bba2-a0a4ea466f64
 # ╠═8bb5dafd-6c26-4634-8be4-c2963efba056
 # ╠═26c77206-fe3c-45c5-a627-f2b346c66be7
 # ╠═c1d3ec29-5af8-4b79-8720-0a5146340b8d
