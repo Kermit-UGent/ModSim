@@ -177,17 +177,17 @@ md"## Petridish peril (inference edition)"
 md"""
 We continue with the "petridish peril" question from the previous practical. 
 
-You've made a model to predict bacterial population levels at certain timepoints based on your knowledge of how the species in question grows. You'd now like to update the model with information about the specific strain you're using, so you inoculate a few petri dishes and count them after a short incubation period.
+You've made a model to predict bacterial population levels at certain timepoints based on your knowledge of how the species in question grows. You'd now like to update the model with information about the specific strain you're using, so you inoculate a petri dish and count the number of bacteria after a short incubation period.
 
 Incorporate the following information into the model to make it more accurate:
-- The population levels after 5 hours of incubating were 6000, 21000 and 4000.
-- You expect the amount of bacteria you count to be normally distributed around the actual number with a standard deviation of 1000.
+- The population level after 5 hours of incubating was 21000.
+- You expect the amount of bacteria you count to be Poisson distributed around the actual number.
 """
 
 # ╔═╡ 2a84472c-cb6f-4607-9b98-c88cc2744e3d
 md"""
 !!! questions
-	- Now taking into account the measurements, what are the chances of your petridish being in a splittable state after 7, 8 and 9 hours?
+	- Now taking into account the measurement, what are the chances of your petridish being in a splittable state after 7, 8 and 9 hours?
 	- Visualise the updated growth curves.
 """
 
@@ -195,27 +195,29 @@ md"""
 logistic(t, P0, r, K) =  K / (1 + (K - P0)/P0 * exp(-r*t))
 
 # ╔═╡ f080f708-a457-40a3-936c-b82d5159975d
-dropletdist = MixtureModel([Uniform(1, 30), Uniform(20, 50)], [0.75, 0.25]);
+dropletdist = MixtureModel([Poisson(10), Poisson(30)], [0.75, 0.25]);
 
 # ╔═╡ 7b4aef69-10ec-4935-b7fd-4c1d49aa9b3d
 @model function petrigrowth(t)
 	P0 ~ dropletdist
-    r ~ Normal(1.0, 0.2)
+    r ~ Uniform(1, 2)
 	K ~ LogNormal(log(1e5), 0.3)
 
 	Pt = logistic(t, P0, r, K)
-    P_obs ~ Normal(Pt, 1000)
+    P_obs ~ Poisson(Pt)
+	
     return Pt
 end
 
-# ╔═╡ d0cdebbe-3339-4ebc-9aed-cfdfbd8da3c3
-P_obs = [6_000, 21_000, 4_000]
-
 # ╔═╡ a5b5a65e-2bac-49fa-b4ca-2fcaf64e4ada
-petrimodel = petrigrowth(5) | (P_obs = P_obs,)
+petrimodel = petrigrowth(5) | (P_obs = 21_000,)
 
 # ╔═╡ b579ccc6-993e-451b-a137-6fff6b630b49
-petri_chain = sample(petrimodel, NUTS(), n_samples)
+petri_chain = sample(
+	petrimodel,
+	Gibbs(NUTS(1000, 0.65, :r, :K), PG(50, :P0)),
+	n_samples
+)
 
 # ╔═╡ 9633f07a-d583-4680-b3cc-f5701540968f
 plot(petri_chain)
@@ -279,7 +281,6 @@ plot(logistfuns[1:100], xlims = (0, 12), legend = false, color = :skyblue, alpha
 # ╠═4b94e5a6-1ed6-4095-ab18-06b76d4fec99
 # ╠═f080f708-a457-40a3-936c-b82d5159975d
 # ╠═7b4aef69-10ec-4935-b7fd-4c1d49aa9b3d
-# ╠═d0cdebbe-3339-4ebc-9aed-cfdfbd8da3c3
 # ╠═a5b5a65e-2bac-49fa-b4ca-2fcaf64e4ada
 # ╠═b579ccc6-993e-451b-a137-6fff6b630b49
 # ╠═9633f07a-d583-4680-b3cc-f5701540968f

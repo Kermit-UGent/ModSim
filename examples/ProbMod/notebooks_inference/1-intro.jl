@@ -28,7 +28,7 @@ Consider the below figure of a small slice of the [tree of life](https://en.wiki
 
 # ╔═╡ 3ecd3ac7-2621-4ea6-8ff1-69962769d934
 md"""
-![Evolution example](https://raw.githubusercontent.com/MichielStock/ModSim/e56d4e97f80b7e5042c45ff713215cc98fbcb8ff/examples/ProbMod/figures/treeoflife.excalidraw.svg?token=AQ3DSFJCAJ3LLAFEERXDJETHP2FFQ)
+![Evolution example](https://raw.githubusercontent.com/MichielStock/ModSim/ed0b1789be099017bfea2d7e1541983e11431d4e/examples/ProbMod/figures/treeoflife.excalidraw.svg?token=AQ3DSFK4443SYCGXO37DNGDHQTO4Q)
 """
 
 # ╔═╡ 71bbd593-f2e4-40dd-b682-40e65305ebb3
@@ -58,7 +58,7 @@ Consider now that you find a new fossil of an ancient ancestor of the **seahorse
 """
 
 # ╔═╡ 6666a388-1c45-4f6f-804f-eb3a260eae98
-md"![Sharkmoment](https://raw.githubusercontent.com/MichielStock/ModSim/e56d4e97f80b7e5042c45ff713215cc98fbcb8ff/examples/ProbMod/figures/treeoflife2.excalidraw.svg?token=AQ3DSFPCOTFQMJSB4QMIGDTHP2FGS)"
+md"![Sharkmoment](https://raw.githubusercontent.com/MichielStock/ModSim/ed0b1789be099017bfea2d7e1541983e11431d4e/examples/ProbMod/figures/treeoflife2.excalidraw.svg?token=AQ3DSFL3TNPLVHX6KTKAGWDHQTO6K)"
 
 # ╔═╡ b0dbd481-ce36-4364-b995-b4fa8f36f76d
 md"""
