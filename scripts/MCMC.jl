@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.42
 
 using Markdown
 using InteractiveUtils
@@ -33,8 +33,7 @@ using Plots, PlutoUI, LaTeXStrings, LinearAlgebra, Random
 md"""
 # Bayesian reasoning and advanced sampling methods
 
-ADD INTRODUCTION HERE
-
+In the previous chapter, we explored how one can build joint probability distributions and generate samples from them. This chapter explores inference: we will fix one or multiple variables, which represents observing them, and will sample from the conditional distribution. 
 """
 
 # ╔═╡ 0f6cf892-b218-4740-a298-43f47e51acae
@@ -266,8 +265,18 @@ md"Consider a second example, in which we have ten states of which only transiti
 
 # ╔═╡ eab53e8a-b7cd-4c97-83f1-bcfd9c59cc4f
 begin
-	T = Tridiagonal(0.3ones(9), 0.1ones(10), 0.6ones(9))
-	T ./= sum(T, dims=2)
+	N = 10
+	rng = MersenneTwister(11)
+	
+	p_remain = rand(rng, 0.1:.1:0.9, N)
+	T = [i==j ? p_remain[i] : 0.0 for i in 1:N, j in 1:N]
+	for i in 1:N-1
+		T[i,i+1] = 1 - p_remain[i]
+	end
+	T[end,1] = 1 - p_remain[end]
+	
+	#T = Tridiagonal(0.3ones(9), 0.1ones(10), 0.6ones(9))
+	#T ./= sum(T, dims=2)
 end;
 
 # ╔═╡ 7915a972-df48-462c-bcc7-2ca94a98e441
@@ -277,7 +286,7 @@ T
 md"Starting from a single state, we can model how the state vector evolves to a the stationary distribution."
 
 # ╔═╡ b3c45c85-d075-452a-a827-b7d1e00a17a1
-md"Start from state $(@bind i0 Select(1:10))"
+md"Start from state $(@bind i0 Select(1:10, default=4))"
 
 # ╔═╡ fcfa5203-73df-40f6-a6c9-eda531054b38
 p₀ = [i==i0 ? 1.0 : 0.0 for i in 1:size(T,2)]
@@ -448,9 +457,6 @@ norm_likelihood(μ, σ) = exp(loglikelihood(uncertain_normal(y), (μ=μ, σ=σ))
 # ╔═╡ e3e51306-385a-461b-94e8-e2a18b5250ab
 norm_posterior(μ, σ) = norm_prior(μ, σ) * norm_likelihood(μ, σ)
 
-# ╔═╡ b4eef7a8-a61c-471d-baf0-1d0b5fb997e6
-plot_post = heatmap(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Posterior")
-
 # ╔═╡ 63af963c-a304-4142-8f23-a56a5fc14e76
 chain_MH = sample(MersenneTwister(1), uncertain_normal(y), MH(), 1_000)
 
@@ -462,6 +468,9 @@ quantile(chain_MH)
 
 # ╔═╡ 1b92c00e-8b2a-4cc8-b6f2-23d91cf4f989
 chain_MH2 = sample(MersenneTwister(1), uncertain_normal(y), my_MH, 1_000);
+
+# ╔═╡ 37986301-c9d2-42e3-8b73-7c833bf7ae17
+summarize(chain_MH2)
 
 # ╔═╡ 138bf97c-9295-440d-99f4-24f7fe58b774
 Σ = [σ₁^2 σ₁*σ₂*ρ;
@@ -475,9 +484,6 @@ chain_Gibbs = sample(uncertain_normal(y), Gibbs(MH(:μ), MH(:σ)), 1000)
 
 # ╔═╡ a9bd2d76-16e6-4084-b65d-0645ec94aa9c
 sample(uncertain_normal(y), Gibbs(HMC(0.2, 3, :μ), PG(20, :σ)), 1000)
-
-# ╔═╡ ddf796f3-a951-426f-a0f3-9b43f3ff6aef
-
 
 # ╔═╡ 9b4d67dc-9c75-45ee-9328-d229c527fdc6
 summarize(chain_Gibbs)
@@ -546,12 +552,53 @@ Making HMC behave well requires carefully tuning the parameters $\epsilon$ and $
 # ╔═╡ aa022156-efb4-4b2b-ac22-9b4228ee2578
 chain_NUTS = sample(MersenneTwister(1), uncertain_normal(y), NUTS(), 1000);
 
+# ╔═╡ 5f41a9e3-70e0-40d5-bdff-d90555130817
+summarize(chain_NUTS)
+
 # ╔═╡ e6201f93-d5fc-4f33-9e3c-f7d8eb0146b5
 md"""
-## Analysing chains and diagnostics
+## MCMC in practice
 
-TO BE COMPLETED
+Sampling from probability distributions is more complex than numerically solving differential equations. For both, using existing, tested, high-quality software is strongly advised. Picking the right sampling algorithm and making it work well requires insight into the model, choosing hood proposal distributions, and some experience.
+
+Rather than looking at the number of pseudo samples generated, it usually makes more sense to consider the [[effective number of samples]]. This metric is corrected for autocorrelation, i.e., samples close in a chain are not completely independent. There is no definitive answer to how many samples one needs. If the goal is pinpointing the posterior mean, a couple hundred could suffice. When one wants to characterize the exact shape of the posterior or analyse the tails, for example, 1% or 99% quantiles, many more might be required.
+
+Every chain needs some warm-up time to reach the stationary distribution. For this reason, the first fraction of the chain is usually discarded. One often runs several Markov chains in parallel, often on different computer threads or different nodes on a computer cluster. This might be valuable for diagnostic purposes, to see if the chains converge. However, note that every one of these chains will likely need a burn-in time, so a large part of the computational efforts will be wasted. Some authors advise trying several short chains for debugging and a very long chain for the final sampling.
+
+To check if a chain is converging nicely, trace plots are usually the most informative. Remember, a trace plot shows the value of the variable throughout the steps of the chain. An ideal trace plot should look somewhat like a hairy caterpillar, with fluctuations around a mean and no systematic trends. When the chain is behaving badly, expect to see sharp peaks, flat lines where the chain is stuck and systematic trends.
+
+> When you have a computational problem, there is often a problem with your model.
+
+The best way to have a chain that works well is to have a model that describes the data well. Here, there is ideally a single peak that corresponds to the optimal parameter configurations. When you see that the chain is not progressing well, this can usually be improved by adding some informative priors, even if they are very weak ones. This will often tamper with erratic behaviour.
 """
+
+# ╔═╡ 1b2a38dc-0caf-4c86-9910-8574fe10c48f
+@model function diffuse_prior(y1, y2)
+	μ ~ Turing.Flat()
+	σ ~ Turing.FlatPos(0.0)
+	y1 ~ Normal(μ, σ)
+	y2 ~ Normal(μ, σ)
+end
+
+# ╔═╡ 9e1c4bc8-882f-45bf-b437-38c369867dac
+y1, y2 = 7.8, 9.8
+
+# ╔═╡ 15c7c5ed-5bcf-4336-aecb-22fd3ef38d05
+chain_diff = sample(diffuse_prior(y1, y2), NUTS(), 10_000)
+
+# ╔═╡ cde76a39-51a0-4398-ba2c-81170e395a07
+@model function weak_prior(y1, y2)
+	μ ~ Normal(0, 1000)
+	σ ~ Exponential(10) #Uniform(0, 100)
+	y1 ~ Normal(μ, σ)
+	y2 ~ Normal(μ, σ)
+end
+
+# ╔═╡ 42a81a70-f8a1-4a11-a475-c4adddefde73
+chain_weak = sample(weak_prior(y1, y2), NUTS(), 10_000)
+
+# ╔═╡ 930902f1-5d0d-41a9-8c37-07e0d913aa6e
+quantile(chain_weak)
 
 # ╔═╡ 96f05537-6fb3-45ce-8d75-28efdfa03279
 @model function donut(R=5, σ=1.5)
@@ -615,8 +662,8 @@ function seed_bayesian_plot(k; a=8, b=3, n=10, title="Inference of p given $k of
 	p_MAP = argmax(seed_posterior, 0:0.01:1)
 		
 	plot_seed = plot(seed_prior, 0, 1, lw=2, label=labels ? "prior (Beta($a, $b))" : "", xlab=L"p", color="green"; title)
-	plot!(p->n * seed_likelihood(p), 0, 1, lw=2, label=labels ? "likelihood (rescaled)" : "", color="blue")
-	plot!(seed_posterior, 0, 1, lw=2, label=labels ? "posterior" : "", color="orange")
+	plot!(p->n * seed_likelihood(p), 0, 1, lw=2, label=labels ? "likelihood (rescaled)" : "", color="blue", ls=:dash)
+	plot!(seed_posterior, 0, 1, lw=2, label=labels ? "posterior" : "", color="orange", ls=:dashdot)
 	vline!([p_ML], lw=2, alpha=0.5, label= labels ? "p* (maximum likelihood)" : "", ls=:dash)
 	vline!([p_MAP], lw=2, alpha=0.5, label=labels ? "p* (maximum posterior likelihood)" : "", ls=:dot)
 	return plot_seed
@@ -640,20 +687,33 @@ end
 # ╔═╡ 91cfb385-5617-4129-b57b-69aff3621ce5
 x_mh, acc_mh = metropolis_hastings(p, 4.0, q_MH, n=200)
 
-# ╔═╡ 34cf42a4-b38d-4a94-89ee-6fb85c44acbd
-q = TruncatedNormal(2.5, 3, -1, 10)
+# ╔═╡ f578aafc-318f-4dc4-a574-0843057b1204
+q = Truncated(Normal(2.5, 3), -1, 10)
 
 # ╔═╡ efefaff1-e6c7-46fa-bfa7-b4e6dec67641
 plots = Dict()
 
+# ╔═╡ cc904bc9-7f2c-4943-90ff-e0753aea08b8
+let
+	prior_informative = Normal(5, 0.5) |> dist2pdf
+	prior_weakly = TriangularDist(1, 8, 5) |> dist2pdf
+	prior_diffuse = Uniform(0, 10) |> dist2pdf
+
+	p = plot(prior_informative, 0, 12, lw=2, label="informative prior", xlab=L"\theta", ylab=L"f_\theta(\theta)")
+	plot!(prior_weakly, 0, 12, label="weakly informative prior", lw=2, ls=:auto)
+	plot!(prior_diffuse, 0, 12, label="diffuse informative prior", lw=2, ls=:auto)
+	title!("Different types of priors")
+	plots["priors"] = p
+end
+
 # ╔═╡ 0bc4cdff-f86d-4174-8aac-d2ca61717f96
-plots["seeds_likelihood"] = plot(seed_likelihood, 0, 1, lw=2, label="likelihood", xlab=L"p", color="blue")
+plots["seeds_likelihood"] = plot(seed_likelihood, 0, 1, lw=2, label="likelihood", xlab=L"p", color="blue", ls=:dash)
 
 # ╔═╡ 08d33254-5013-4e4f-ae0b-1f5b6f3a2fb2
 plots["seeds_prior"] = plot(seed_prior, 0, 1, lw=2, label="prior", xlab=L"p", color="green")
 
 # ╔═╡ 217edb24-a555-4deb-ab58-2969d8564a7b
-plots["seeds_posterior"] = plot(seed_posterior, 0, 1, lw=2, label="posterior", xlab=L"p", color="orange")
+plots["seeds_posterior"] = plot(seed_posterior, 0, 1, lw=2, label="posterior", xlab=L"p", color="orange", ls=:dashdot)
 
 # ╔═╡ 34a5bb1a-8919-4e41-89a5-fdd4e48bec26
 plots["seeds_bayes"] = seed_bayesian_plot(k)
@@ -674,16 +734,22 @@ plots["seeds_strong_prior"] = seed_bayesian_plot(k, a=80, b=30, labels=false)
 plots["seeds_large_dataset"] = seed_bayesian_plot(10k, n=100, labels=false)
 
 # ╔═╡ 3eac18d0-f755-42aa-bbcc-9714cc64dc5a
-plots["norm_muprior"] = plot(dist2pdf(Normal(0, 20)), -50, 50, xlabel=L"\mu", label="Normal(0, 20)", title="prior for μ", lw=2)
+plots["norm_muprior"] = plot(dist2pdf(Normal(0, 20)), -50, 50, xlabel=L"\mu", label="Normal(0, 20)", title="Prior for μ", lw=2)
 
 # ╔═╡ cd8bf990-4f36-4a56-83c2-c58217448b1e
-plots["norm_sigmaprior"] = plot(dist2pdf(InverseGamma(.1)), 0, 20, xlabel=L"\sigma", label="InverseGamma(1)", title="prior for σ", lw=2)
+plots["norm_sigmaprior"] = plot(dist2pdf(InverseGamma(.1)), 0, 20, xlabel=L"\sigma", label="InverseGamma(1)", title="Prior for σ", lw=2)
+
+# ╔═╡ 45e175bc-0eaa-4280-aaf6-c8b318a6c12d
+plots["norm_priors"] = plot(plots["norm_muprior"], plots["norm_sigmaprior"],size=(800, 400))
 
 # ╔═╡ a09eda2e-0bb7-46c9-8d60-2b4447257772
 plots["norm_multiprior"] = heatmap(-15:0.1:15, 0.1:0.02:5, norm_prior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Prior")
 
 # ╔═╡ 3b821e04-a27a-489f-924e-e82a08693371
 plots["norm_likelihood"] = heatmap(-15:0.1:15, 0.1:0.02:5, norm_likelihood, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Likelihood")
+
+# ╔═╡ b4eef7a8-a61c-471d-baf0-1d0b5fb997e6
+plots["norm_posterior"] = plot_post = heatmap(-15:0.1:15, 0.1:0.02:5, norm_posterior, color=:speed, ylab=L"\sigma", xlab=L"\mu", title="Posterior")
 
 # ╔═╡ 2c81f5d1-2b8b-4fb5-b810-d5fcfdc8a5d6
 plots["norm_posterior"] = plot_post;
@@ -699,7 +765,8 @@ begin
 	x_rejection_sampling = x_prop[acc]
 	acceptance_probability = length(x_rejection_sampling) / n_rejection_sampling
 	
-	prs = plot(x->pdf(p_univar, x), -1, 10, lw=2, label="target p(x)", xlabel=L"x", title="Rejection sampling\np(accept)=$(round(acceptance_probability, digits=2))")
+	prs = plot(x->pdf(p_univar, x), -1, 10, lw=2, label="target p(x)", xlabel=L"x", title="Rejection sampling\np(accept)=$(round(acceptance_probability, digits=2))",
+	legend=:outerbottom)
 	plot!(x->M*pdf(q, x), -1, 10, lw=2, label="proposal distribiton M * q(x)")
 	plot!(zero, -1:0.02:10, fillrange=x->pdf(p_univar, x), fillalpha=0.3, lw=2, label="acceptance region", linealpha=0)
 	plot!(x->pdf(p_univar, x), -1, 10, fillrange=x->M*pdf(q, x), fillalpha=0.3, lw=2, label="rejection region", linealpha=0)
@@ -718,10 +785,10 @@ length(x_rejection_sampling)  # number of accepted samples
 acceptance_probability
 
 # ╔═╡ ff813a28-5ab7-4b49-8b05-b4b6a73b94a5
-plots["MC_ss"] = bar(π_mc, xlab="state", ylab="PMF", label="", title="Stationary distribution birth-death process")
+plots["MC_ss"] = bar(1:10, π_mc, xlab="state", ylab="PMF", label="", title="Stationary distribution of the cycle", xticks=1:10)
 
 # ╔═╡ bfd58734-b396-4424-9343-4562932f70e3
-plots["MC_ss_conv"] = groupedbar(0:30, vcat([p₀' * T^i for i in 0:30]...), bar_position = :stack, xlab = L"t", ylab = "fraction in state i", xticks=0:30, label=reshape(["state $i" for i in 1:size(T,2)], 1, :), title="State evolution in a birth-death process")
+plots["MC_ss_conv"] = groupedbar(0:30, vcat([p₀' * T^i for i in 0:30]...), bar_position = :stack, xlab = L"t", ylab = "fraction in state i", xticks=0:30, label=reshape(["state $i" for i in 1:size(T,2)], 1, :), title="State evolution of the cycle", legend=:outertopright)
 
 # ╔═╡ ecfc2307-6926-42c1-b08d-6ff93502c5cd
 let
@@ -730,9 +797,9 @@ let
 	
 	p = plot(x->pdf(p_univar, x), -1, 10, lw=2, label="", xlabel=L"x", title="Metropolis-Hastings", ylab="PDF")
 	
-	plot!(twinx(), x_mh, ind, lw=0.5, label="", ylab="sample number")
-	scatter!(twinx(), x_mh[acc_mh], ind[acc_mh], label="accepted", color=:blue, ms=2)
-	scatter!(twinx(), x_mh[.!acc_mh], ind[.!acc_mh], label="rejected", color=:orange, ms=2)
+	plot!(twinx(), x_mh, ind, lw=0.5, label="", ylab="sample number", color=:green, ylim=(0, 300))
+	scatter!(twinx(), x_mh[acc_mh], ind[acc_mh], label="accepted", color=:blue, ms=2, ylim=(0, 300))
+	scatter!(twinx(), x_mh[.!acc_mh], ind[.!acc_mh], label="rejected", color=:orange, ms=2, ylim=(0, 300))
 	plots["MH"] = p
 end
 
@@ -822,12 +889,25 @@ let
 	plots["NUTS_sampling"] = p
 end
 
+# ╔═╡ 8de88cd0-e326-4926-bfe9-776e3516d6e2
+plots["uninformative_prior"] = plot(chain_diff)
+
+# ╔═╡ 0969b685-e9c5-44d5-8698-a141dd01dca7
+plots["weak_diffusive_prior"] = plot(chain_weak)
+
+# ╔═╡ 262879f7-9441-4305-899a-b7c2881958fe
+plots
+
+# ╔═╡ d2414490-d2a5-4862-81e8-8ae8ffc5213a
+length(plots)
+
 # ╔═╡ Cell order:
 # ╠═103e5ba0-cfdc-11ee-13b1-cf53dfdd9a3b
 # ╠═d778ce04-8df4-42ef-95f1-9cf4880e0420
 # ╠═0350aa5b-d105-4dfa-a454-59873672b3a0
 # ╟─e87dd9a4-f4ed-46d7-9f9d-dae0cadb7d05
 # ╟─0f6cf892-b218-4740-a298-43f47e51acae
+# ╟─cc904bc9-7f2c-4943-90ff-e0753aea08b8
 # ╟─eb37dd4b-3af0-4534-92c2-e495b83024be
 # ╠═29928abf-f010-438e-9b60-e6673a51ddf5
 # ╠═730e5cbb-1787-44b3-9bb4-32dba7035ea8
@@ -853,6 +933,7 @@ end
 # ╟─f44abcc5-9010-4d10-b722-ef8147c8fd66
 # ╠═3eac18d0-f755-42aa-bbcc-9714cc64dc5a
 # ╠═cd8bf990-4f36-4a56-83c2-c58217448b1e
+# ╟─45e175bc-0eaa-4280-aaf6-c8b318a6c12d
 # ╟─0c29af96-949d-47b3-869f-274ed39c9d25
 # ╠═d8ff625a-6204-4579-a8f5-9650544c7222
 # ╟─2cbe07e6-8cf0-4dc4-8aea-f56059ffa367
@@ -883,14 +964,14 @@ end
 # ╠═cf858c95-d2b9-4f53-af1a-d5a511f531ce
 # ╟─d77c1db1-925f-4134-a860-8a1683b3adee
 # ╠═cc92d39d-830f-451c-81b4-de00f74545bf
-# ╠═c37ea17f-57b5-4871-a4d9-5aa5e609c846
-# ╠═38a6bd5f-78ab-43be-a010-6fe4c209b1a7
+# ╟─c37ea17f-57b5-4871-a4d9-5aa5e609c846
+# ╟─38a6bd5f-78ab-43be-a010-6fe4c209b1a7
 # ╟─eab53e8a-b7cd-4c97-83f1-bcfd9c59cc4f
 # ╠═7915a972-df48-462c-bcc7-2ca94a98e441
 # ╟─53799772-c8a1-4055-a01e-42f147ffc253
 # ╟─fcfa5203-73df-40f6-a6c9-eda531054b38
 # ╠═b2cbf023-a0ea-4714-b30b-b331a081c7fa
-# ╠═ff813a28-5ab7-4b49-8b05-b4b6a73b94a5
+# ╟─ff813a28-5ab7-4b49-8b05-b4b6a73b94a5
 # ╟─b3c45c85-d075-452a-a827-b7d1e00a17a1
 # ╠═bfd58734-b396-4424-9343-4562932f70e3
 # ╟─45e848aa-3e6a-47b5-a0cc-fa09dd9a4ae3
@@ -912,6 +993,7 @@ end
 # ╟─f97d0f4c-8b3c-4ea7-bcd2-6019ab831734
 # ╠═2cf4022e-1b68-4a69-b6d0-669c3e5ac230
 # ╠═1b92c00e-8b2a-4cc8-b6f2-23d91cf4f989
+# ╠═37986301-c9d2-42e3-8b73-7c833bf7ae17
 # ╠═35bc2b8f-716d-4a85-8e60-7242709448c3
 # ╟─0c652efb-0edb-4a4e-a14c-7d5ac6eb5ffa
 # ╠═ab09925c-4689-4f87-be44-f8eca12a5c9c
@@ -921,10 +1003,9 @@ end
 # ╠═3fca01f3-ac6e-4fdc-b8ca-48040ca562f3
 # ╟─138bf97c-9295-440d-99f4-24f7fe58b774
 # ╠═87b984ee-2daa-4cca-b5eb-60c4aa3b2fb5
-# ╠═76b0886a-fc91-40ef-89d5-dcf5d261907f
+# ╟─76b0886a-fc91-40ef-89d5-dcf5d261907f
 # ╠═06e83a23-fa3a-49f7-8f43-d46f3285e943
 # ╠═a9bd2d76-16e6-4084-b65d-0645ec94aa9c
-# ╠═ddf796f3-a951-426f-a0f3-9b43f3ff6aef
 # ╠═444a89d1-a8c1-4df8-945d-6e8dd32ae204
 # ╠═9b4d67dc-9c75-45ee-9328-d229c527fdc6
 # ╠═4d8fd482-11cb-4f2e-8c47-2428ee7e66c6
@@ -938,9 +1019,18 @@ end
 # ╟─786c8319-806c-461d-af08-f082d6f12339
 # ╟─81863647-168f-46b1-87f1-cc1169b7c6ff
 # ╠═aa022156-efb4-4b2b-ac22-9b4228ee2578
+# ╠═5f41a9e3-70e0-40d5-bdff-d90555130817
 # ╠═575ad310-8cbd-4b05-aee0-d84fb55ad6ed
 # ╟─4a86bf84-434a-4ef3-a9c6-4c72df5068e0
-# ╠═e6201f93-d5fc-4f33-9e3c-f7d8eb0146b5
+# ╟─e6201f93-d5fc-4f33-9e3c-f7d8eb0146b5
+# ╠═1b2a38dc-0caf-4c86-9910-8574fe10c48f
+# ╠═9e1c4bc8-882f-45bf-b437-38c369867dac
+# ╠═15c7c5ed-5bcf-4336-aecb-22fd3ef38d05
+# ╠═8de88cd0-e326-4926-bfe9-776e3516d6e2
+# ╠═cde76a39-51a0-4398-ba2c-81170e395a07
+# ╠═42a81a70-f8a1-4a11-a475-c4adddefde73
+# ╠═0969b685-e9c5-44d5-8698-a141dd01dca7
+# ╠═930902f1-5d0d-41a9-8c37-07e0d913aa6e
 # ╠═96f05537-6fb3-45ce-8d75-28efdfa03279
 # ╠═3708eb56-53e4-43b8-8af4-e1f6e302a0cf
 # ╠═07da284a-8f21-4088-b936-244d11f517dd
@@ -955,5 +1045,7 @@ end
 # ╟─df004387-ea5f-42b1-9409-7b37d1a5031a
 # ╠═01fb5888-a01a-4dd8-af08-bb70894a99b8
 # ╠═66c3e374-389c-4be9-bf16-341565d4b4c9
-# ╠═34cf42a4-b38d-4a94-89ee-6fb85c44acbd
+# ╠═f578aafc-318f-4dc4-a574-0843057b1204
 # ╠═efefaff1-e6c7-46fa-bfa7-b4e6dec67641
+# ╠═262879f7-9441-4305-899a-b7c2881958fe
+# ╠═d2414490-d2a5-4862-81e8-8ae8ffc5213a

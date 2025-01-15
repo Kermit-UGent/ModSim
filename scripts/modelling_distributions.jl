@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.42
 
 using Markdown
 using InteractiveUtils
@@ -90,13 +90,14 @@ Outcomes of random variables are assigned probabilities via probability function
 $$p_X(x) = P(X=x)\,,$$
 
 which should satisfy that for every $x$ it holds that  $p_X(x)\ge 0$ (probabilities are non-zero) and $\sum_x p_X(x) = 1$ (probabilities should be normalized). For example, for a simple fair die, the outcomes $x$ are $\{1,2,3,4,5,6\}$ with respective probabilities $\{1/6,1/6,1/6,1/6,1/6,1/6\}$.
+"""
 
-Much of our work will however deal with continuous variables, which are characterized using *probability density functions* (PDF) $f_X(x)$, which likewise are non-negative and normalized:
+# ╔═╡ 12df460c-a547-410f-ac1c-90d41c8a37f1
+md"Much of our work will however deal with continuous variables, which are characterized using *probability density functions* (PDF) $f_X(x)$, which likewise are non-negative and normalized:
 
 $$\int_{-\infty}^\infty f_X(x) \mathrm{d}x = 1\,.$$
 
-For example, we take a Weibull distribution:
-"""
+For example, we take a Weibull distribution:"
 
 # ╔═╡ c0677edb-29a4-4c4d-8ca7-9d81eac05c85
 dist = Weibull(2, 7)
@@ -173,6 +174,9 @@ $$E[g(x)] = \int_{-\infty}^\infty g(x)f_X(x) \mathrm{d}x\,.$$
 
 The above identity is sometimes called the *Law of the Unconscious Statistician*. For example, if $X$ represents the distribution of the radii of particles in an emulsion, we might compute the average area or volume. However, $g(\cdot)$ might be much more complex! It could represent a simulator described by a large system of ordinary differential equations, for example, a complex, multi-step industrial process in food industry to process particles into delicious foods. The reader might already feel that in this case it becomes rather hard to compute this integral analytically.
 """
+
+# ╔═╡ 36db4c41-6132-4082-a9e3-18b5560b69d4
+sum(x->4pi * x^2 * pdf(dist, x) * 0.01, 0:0.01:100)
 
 # ╔═╡ 85e08b91-10f9-4808-ac53-195f90387688
 md"""
@@ -330,6 +334,32 @@ $$Z_1=\sqrt{-2\log U_1}\cos(2\pi U_2)$$
 $$Z_2=\sqrt{-2\log U_2}\sin(2\pi U_1)$$
 """
 
+# ╔═╡ 03b2b204-5e4b-4d25-8c32-453a5c51926f
+md"$$P(F^{-1}_X(U)\le x) = P(U\le F_X(x))=F_X(x)\,.$$
+Libraries to work with probability distributions usually implement optimized methods for sampling from the standard distributions. 
+
+In addition to inverse transform sampling, there exist a plethora of specialized sampling methods. Consider the normal distribution as an important special case. The *Box–Muller transform* generates two standard normally distributed values from two independent samples $U_1$ and $U_2$ from $\text{Unif}(0,1)$:
+
+$$Z_1=\sqrt{-2\log U_1}\cos(2\pi U_2)$$
+$$Z_2=\sqrt{-2\log U_2}\sin(2\pi U_1)$$"
+
+# ╔═╡ 6167f6cd-547d-4046-b1b2-600e5fc5ac0e
+let
+	n = 20
+	
+	u1 = rand(n)
+	u2 = rand(n)
+	p = plot(title="Box-Muller transform", aspect_ratio=:equal, xlims=[-3, 3], ylims=[-3, 3])
+	
+	z1 = @. √(-2log(u1)) * cos(2π*u2)
+	z2 = @. √(-2log(u2)) * sin(2π*u1)
+	for i in 1:n
+		plot!([u1[i], z1[i]], [u2[i], z2[i]], label="", color=:red, alpha=0.6, ls=:dash, lw=2)
+	end
+	scatter!(u1, u2, xlab=L"x", ylab=L"y", color="gold", label=L"u_1,u_2")
+	scatter!(z1, z2, m=:^, label=L"z_1,z_2")
+end
+
 # ╔═╡ dc7eb2b3-b160-4943-84e9-8cf20d687d93
 md"Standard normal numbers are available in Base julia:"
 
@@ -413,33 +443,6 @@ md"""
 **Example:** In a given period of time, a biologist is interested in counting the number of fish caught in a specific location. The average rate of fish caught per hour is $\lambda = 3$. The biologist can model the number of fish caught in a certain time interval using the Poisson distribution. The parameter $\lambda$ represents the average rate of events (in this case, catching fish) in a fixed time interval. The PMF of the Poisson distribution allows the biologist to calculate the probability of observing a specific number of fish caught within that time interval. This distribution is useful for studying rare events where the average rate is known and where each event is independent of others, such as counting occurrences of diseases in a population or arrivals at a service counter.
 """
 
-# ╔═╡ 222cdcae-5b51-4fdc-a794-11471449ebcd
-let
-# Binomial
-	pbin = scatter(k->pdf(Binomial(20, .5), k), 0:25, label="n=25, p=0.5", xlab=L"k", ylab=L"P(X=k)")
-	scatter!(pbin, k->pdf(Binomial(20, .25), k), 0:25, label="n=25, p=0.25", marker=:^)
-	title!("Binomial distribution")
-	
-	# Poisson
-	ppois = scatter(k->pdf(Poisson(1), k), 0:20, label="λ=1", xlab=L"k", ylab=L"P(X=k)")
-	scatter!(ppois, k->pdf(Poisson(5), k), 0:20, label="λ=5", marker=:^)
-	scatter!(ppois, k->pdf(Poisson(10), k), 0:20, label="λ=10", marker=:v)
-	title!("Poisson distribution")
-	
-	# Geometric
-	pgeo = scatter(k->pdf(Geometric(0.1), k), 1:25, label="p=0.1", xlab=L"k", ylab=L"P(X=k)")
-	scatter!(pgeo, k->pdf(Geometric(0.2), k), 0:25, label="p=0.2", marker=:^)
-	scatter!(pgeo, k->pdf(Geometric(0.05), k), 0:25, label="p=0.05", marker=:v)
-	title!("Geometric distribution")
-	
-	# Geometric
-	punif = scatter(k->pdf(DiscreteUniform(5, 10), k), 0:30, label="a=5, b=10", xlab=L"k", ylab=L"P(X=k)")
-	scatter!(punif, k->pdf(DiscreteUniform(10, 25), k), 0:30, label="a=10, b=25", marker=:^)
-	title!("Uniform distribution")
-	
-	plot(pbin, ppois, pgeo, punif)
-end
-
 # ╔═╡ 8ae351eb-c1b8-4934-aa48-023f8feba75c
 md"""
 ### Distributions over unbounded real numbers
@@ -452,26 +455,6 @@ md"""
 | Laplace      | $f_X(x) = \frac{1}{2b} e^{-\frac{x-\mu}{b}}$                                                                                                            | $x \in \mathbb{R}$ | $\mu \in \mathbb{R}, b > 0$      | $\mu$                                    | Double exponential distibution.                                                           | Modelling noise in electronic devices or signal processing. |
 The normal or Gaussian distribution is by far the most used probability distribution for unbounded real numbers. The central limit theorem and other justifications are used why many naturally occuring phenomena follow a normal distribution. Indeed, the main bulk of a PDF is often bell-shaped. However, a striking feature of the normal distribution are its very light tail: the log-probability-density decreases quadratically. Encountering events that occurs more than $5\sigma$ from the expected value should only occur with a frequency of $6\times 10^{-7}$, which (as who has invested in the stock market can attest) not very realistic. Extreme events can occur much more frequently than a normal distribution would suggest. Many of these alternative distributions, such as the Laplace distribution have much ticker tails and are more suitable to describe processes with extreme events, such as in climate change.
 """
-
-# ╔═╡ ebe190e6-da7a-4c88-bd31-b5dc53f6a3e1
-let
-	# normal
-	pnorm = plot(xlabel=L"x", ylabel=L"f_X(x)", title="Normal")
-	for (μ, σ) in [(0., 1.), (2., 1.), (0.0, 2.0), (-1, 2)]
-		plot!(x->pdf(Normal(μ, σ),x),-5, 5, lw=2, label="μ=$μ, σ=$σ")
-	end
-	pnorm
-
-	# normal
-	plaplace = plot(xlabel=L"x", ylabel=L"f_X(x)", title="Laplace")
-	for (μ, θ) in [(0., 1.), (2., 1.), (0.0, 2.0), (-1, 2)]
-		plot!(x->pdf(Laplace(μ, θ),x),-8, 8, lw=2, label="μ=$μ, θ=$θ")
-	end
-	plaplace
-
-	plot(pnorm, plaplace)
-
-end
 
 # ╔═╡ af7119a0-2470-4bf0-8b30-59b38ddd8d5d
 md"""
@@ -775,16 +758,35 @@ TableOfContents()
 # ╔═╡ efd7bcba-f393-4659-ac5b-006740085144
 cummean(x) = cumsum(x) ./ (1:length(x))
 
+# ╔═╡ 0b9060d0-9c5a-4806-8d68-20e4ffd8f864
+dist2pdf(distribution) = x -> pdf(distribution, x)
+
+# ╔═╡ 7d71303b-defc-4e5f-beee-2bf684674ecf
+dist2cdf(distribution) = x -> cdf(distribution, x)
+
 # ╔═╡ 57052ba3-151c-4dda-904a-dac9c421241c
 plots = Dict()  # storing all the figures
 
 # ╔═╡ 41967e5b-9068-4318-acb6-d958b608c8f7
 let
-	p = plot(x->sqrt(1-x^2), 0, 1, aspect_ratio=:equal, xlim=[0,1], ylim=[0, 1], lw=2, fillrange=zero, fillalpha=0.3, xlab=L"x", ylab=L"y", label="circle", title="Monte Carlo for estimating π/4")
+	p = plot(x->sqrt(1-x^2), 0, 1, aspect_ratio=:equal, xlim=[0,1], ylim=[0, 1], lw=2, fillrange=zero, fillalpha=0.3, xlab=L"x", ylab=L"y", label="circle", title="Monte Carlo \nfor estimating π/4", legend=:outertopright)
 	scatter!(x_unif[in_circle], y_unif[in_circle], ms=0.8, markercolor="orange", markerstrokewidth=0, label="in circle")
 	scatter!(x_unif[.!in_circle], y_unif[.!in_circle], ms=0.8, markercolor="green", markerstrokewidth=0, label="out of circle")
 	plots["pi_sample"] = p
 	p
+end
+
+# ╔═╡ 47924cdc-b5bc-4612-949b-d0d23c8c47d9
+let
+	p = [1, 2, 1, 4, 3, 6]
+	p /= sum(p)
+	
+	pl = plot()
+	for i in 1:6
+		plot!(pl, [i, i], [0, p[i]], label="", ls=:dash, color=:red, lw=2, alpha=0.6)
+	end
+	scatter!(p, xlab=L"x", label="PMF", ylab=L"p_X(x)", title="PMF loaded die", color=:blue)
+	plots["PMF"] = pl
 end
 
 # ╔═╡ b9be819e-2db9-4952-9453-98bf815b00e8
@@ -800,6 +802,9 @@ let
 	p
 end
 
+# ╔═╡ d45fbe7b-168f-4c1e-8ab2-f17665b96938
+plots["area_weibull"]=histogram(g.(rand(dist, 100_000)), xlab=L"x", label=L"4\pi r^2", title="Sampled areas of a Weibull distribution")
+
 # ╔═╡ 7779254a-83b9-4849-957c-af4b62c3916a
 let
 	ps = []
@@ -807,10 +812,14 @@ let
 		p = histogram(rand(dist, n), label="", title="n=$n", normalize=true)
 		plot!(x -> pdf(dist, x), 0, 20, label="", lw=2)
 		push!(ps, p)
+		plots["lln_$(n)"] = p
 	end
-	plots["lln_vert"] = plot(ps..., layout=(4,:))
+	plots["lln"] = plot(ps...)
 	plot(ps...)
 end
+
+# ╔═╡ 7676138b-d99f-4610-b522-ccd6ea625ed4
+savefig( plots["lln"], "lnn.pdf")
 
 # ╔═╡ 73898b6c-d8bd-49a9-ba36-a068e62a7ec3
 let
@@ -823,6 +832,24 @@ let
 	#ylims!(8, 10)
 	plots["llm_conv"] = p
 	p
+end
+
+# ╔═╡ 4415cdd0-481b-4e14-bda9-d118c0acead5
+let
+	n = 10
+	u = rand(n)
+	p = plot(x->cdf(dist, x), 0, 20, xlab=L"x", label=L"F_X(x)", xlim=(0,20), lw=2, legend=:bottomright)
+	
+	title!("Inverse transform sampling")
+	x = Float64[]
+	for ui in u
+		xi = invlogcdf(dist, log(ui))
+		plot!([0, xi, xi], [ui, ui, 0], label="", color=:red, alpha=0.6, ls=:dash, lw=2)
+		push!(x, xi)
+	end
+	scatter!(zeros(n), u, label="draws from U(0,1)", color="gold")
+	scatter!(x, zeros(n), label="draws from X", m=:^)
+	plots["inverse_transform_sampling"] = p
 end
 
 # ╔═╡ d7e88a1a-73e9-48ff-bb51-2292346f88e0
@@ -908,6 +935,109 @@ let
 	plots["ste_mean_log"] = p
 end
 
+# ╔═╡ 222cdcae-5b51-4fdc-a794-11471449ebcd
+let
+# Binomial
+	pbin = scatter(k->pdf(Binomial(20, .5), k), 0:25, label="n=25, p=0.5", xlab=L"k", ylab=L"P(X=k)")
+	scatter!(pbin, k->pdf(Binomial(20, .25), k), 0:25, label="n=25, p=0.25", marker=:^)
+	title!("Binomial distribution")
+	plots["binomial_distr"] = pbin
+	
+	# Poisson
+	ppois = scatter(k->pdf(Poisson(1), k), 0:20, label="λ=1", xlab=L"k", ylab=L"P(X=k)")
+	scatter!(ppois, k->pdf(Poisson(5), k), 0:20, label="λ=5", marker=:^)
+	scatter!(ppois, k->pdf(Poisson(10), k), 0:20, label="λ=10", marker=:v)
+	title!("Poisson distribution")
+	plots["poisson_distr"] = ppois
+	
+	# Geometric
+	pgeo = scatter(k->pdf(Geometric(0.1), k), 1:25, label="p=0.1", xlab=L"k", ylab=L"P(X=k)")
+	scatter!(pgeo, k->pdf(Geometric(0.2), k), 0:25, label="p=0.2", marker=:^)
+	scatter!(pgeo, k->pdf(Geometric(0.05), k), 0:25, label="p=0.05", marker=:v)
+	title!("Geometric distribution")
+	plots["geom_distr"] = pgeo
+	
+	# Geometric
+	punif = scatter(k->pdf(DiscreteUniform(5, 10), k), 0:30, label="a=5, b=10", xlab=L"k", ylab=L"P(X=k)")
+	scatter!(punif, k->pdf(DiscreteUniform(10, 25), k), 0:30, label="a=10, b=25", marker=:^)
+	title!("Uniform distribution")
+	plots["unif_discr_distr"] = punif
+	
+	plot(pbin, ppois, pgeo, punif)
+end
+
+# ╔═╡ ebe190e6-da7a-4c88-bd31-b5dc53f6a3e1
+let
+	# normal
+	pnorm = plot(xlabel=L"x", ylabel=L"f_X(x)", title="Normal distribution")
+	for (μ, σ) in [(0, 1), (2, 1), (0, 2), (-1, 2)]
+		plot!(x->pdf(Normal(μ, σ),x),-5, 5, lw=2, label="N($μ, $σ)", ls=:auto)
+	end
+	plots["normal_distr"] = pnorm
+
+
+
+
+end
+
+# ╔═╡ 3de53132-5b89-483a-872e-4cf1142fc90b
+let
+		# Laplace
+	plaplace = plot(xlabel=L"x", ylabel=L"f_X(x)", title="Laplace distribution")
+	for (μ, θ) in [(0, 1), (2, 1), (0, 2), (-1, 2)]
+		plot!(x->pdf(Laplace(μ, θ),x),-8, 8, lw=2, label="Laplace($μ, $θ)", ls=:auto)
+	end
+	plaplace
+
+	plots["laplace_distr"] = plaplace
+end
+
+# ╔═╡ 4360ca84-c0bd-4c7a-afbc-edfef5a5f976
+let
+	dist_trian = TriangularDist(-2, 2) 
+	dist_trian2 = TriangularDist(-2, 2, 1)  # non-symmetric
+
+	p = plot(dist2pdf(dist_trian), -3, 3, xlab=L"x", label="Triang(-2, 2)", lw=2,ylab=L"f_X(x)", title="Triangular distribution")
+	plot!(dist2pdf(dist_trian2), -3, 3, label="Triang(-2, 2, 1)", lw=2, ls=:auto)
+	plot!(dist2pdf(TriangularDist(-3, 1, -2)), -3, 3, label="Triang(-3, 1, -2)", lw=2, ls=:auto)
+	plots["triangular_distr"] = p
+end
+
+# ╔═╡ dbdf1da5-67fd-47ea-b363-f03e1e0cdeb0
+let
+	p = plot(dist2pdf(Exponential(1)), 0, 8, xlab=L"x", label="Exp(1)", lw=2,ylab=L"f_X(x)", title="Exponential distribution")
+	plot!(dist2pdf(Exponential(2)), 0, 8, label="Exp(2)", lw=2, ls=:dash)
+	plot!(dist2pdf(Exponential(1/2)), 0, 8, label="Exp(1/2)", lw=2, ls=:dot)
+	plots["exp_distr"] = p
+end
+
+# ╔═╡ 0b3e16bd-032b-4630-8cb3-57c63bc44572
+let
+	p = plot(dist2cdf(Exponential(1)), 0, 8, xlab=L"x", label="Exp(1)", lw=2,ylab=L"F_X(x)", title="Exponential distribution (CDF)")
+	plot!(dist2cdf(Exponential(2)), 0, 8, label="Exp(2)", lw=2, ls=:dash)
+	plot!(dist2cdf(Exponential(1/2)), 0, 8, label="Exp(1/2)", lw=2, ls=:dot)
+	plots["exp_distr_CDF"] = p
+end
+
+# ╔═╡ 05152721-dbb5-4e26-86ba-2fc16c03dac8
+let
+	xm = 4
+	p = plot(dist2pdf(LogNormal()), 0, xm, xlab=L"x", label="Log-normal(0, 1)", lw=2,ylab=L"f_X(x)", title="Log-normal distribution")
+	plot!(dist2pdf(LogNormal(1, 1)), 0, xm, label="log-normal(1, 1)", lw=2, ls=:auto)
+	plot!(dist2pdf(LogNormal(0, 2)), 0, xm, label="log-normal(0, 2)", lw=2, ls=:auto)
+	plot!(dist2pdf(LogNormal(1, 2)), 0, xm, label="log-normal(1, 2)", lw=2, ls=:auto)
+	plots["lognorm_distr"] = p
+end
+
+# ╔═╡ adbb17b4-56d2-49ca-8bdb-ecd2d3f418cd
+let
+	p = plot(dist2pdf(Beta(1, 1)), 0, 1, xlab=L"x", label="Beta(1, 1)", lw=2,ylab=L"f_X(x)", title="Beta distribution")
+	plot!(dist2pdf(Beta(4, 4)), 0, 1, label="Beta(4, 4)", lw=2, ls=:auto)
+	plot!(dist2pdf(Beta(8, 2)), 0, 1, label="Beta(8, 2)", lw=2, ls=:auto)
+	plot!(dist2pdf(Beta(1, 3)), 0, 1, label="Beta(1, 3)", lw=2, ls=:auto)
+	plots["beta_distr"] = p
+end
+
 # ╔═╡ f2faec3d-3d44-43e9-bf03-37ba68e37300
 let
 	p = contourf(-10:0.05:25, -2:0.01:2, (x,y)->pdf(dist_prod, [x,y]), color=:speed, xlab=L"x", ylab=L"y")
@@ -918,10 +1048,13 @@ let
 end
 
 # ╔═╡ 4bd5e387-ac06-4f4b-822f-cbc89e7509f9
-plots["prod_cond_y"] = plot(y->pdf(distY, y), -2:0.01:2, label="Y | X=$xslice", color="orange", lw=2, xlabel="y", )
+plots["prod_cond_y"] = plot(y->pdf(distY, y), -2:0.01:2, label="Y | X=$xslice", color="orange", lw=2, xlabel="y", title="Marginal of Y")
 
 # ╔═╡ c7b2fc1e-9dd3-42e9-aa55-f9aea4781784
-plots["prod_cond_x"] = plot(x->pdf(distX, x), -10:0.05:25, label="f_{X | Y=$yslice}", color="blue", ls=:dash, lw=2, xlabel="x", )
+plots["prod_cond_x"] = plot(x->pdf(distX, x), -10:0.05:25, label="X | Y=$yslice", color="blue", ls=:dash, lw=2, xlabel="x", title="Marginal of X")
+
+# ╔═╡ 6f9f8748-d07b-41fe-a59e-12896b37ec98
+plots["plot_prod_margs"] = plot(plots["prod_cond_y"], plots["prod_cond_x"]);
 
 # ╔═╡ 94dd1214-e63c-44d5-b5c3-9ca834a89ebf
 let
@@ -982,7 +1115,7 @@ plots["rain_cond"] = histogram(rainfall_amount, xlab="rainfall amount (mm)", yla
 plots["seeds_cond"] = histogram(p_cond, ylabel="frequency", xlab=L"p", label="p given n=$ngerm", xlims=[0,1])
 
 # ╔═╡ a9a8f40f-da04-475b-aeaa-07add585ad9c
-plots; # dictionary of all the figures, for saving
+plots # dictionary of all the figures, for saving
 
 # ╔═╡ Cell order:
 # ╠═2d346892-cb15-11ee-2d81-73e08fcc3288
@@ -1000,6 +1133,8 @@ plots; # dictionary of all the figures, for saving
 # ╠═7c244dc0-6c7b-451e-b7c0-da25a77da657
 # ╠═fe471a6a-5c29-49f6-afba-83be7ab5d770
 # ╟─e0f96ed2-bc51-467e-be3e-8617293e33e2
+# ╟─47924cdc-b5bc-4612-949b-d0d23c8c47d9
+# ╟─12df460c-a547-410f-ac1c-90d41c8a37f1
 # ╠═c0677edb-29a4-4c4d-8ca7-9d81eac05c85
 # ╠═d786da44-5cfc-4c36-ae41-af6f623d5a4e
 # ╠═bce61d18-767d-4ae4-a211-759ef3e4da44
@@ -1014,6 +1149,7 @@ plots; # dictionary of all the figures, for saving
 # ╟─6ae427c7-a65e-4f9b-b5a7-8cb523fcd382
 # ╠═090d0c6f-de9f-4ce8-befa-4ae9dbe1b38e
 # ╟─70cfc225-dd83-472c-b745-5266026c3bfc
+# ╠═36db4c41-6132-4082-a9e3-18b5560b69d4
 # ╟─85e08b91-10f9-4808-ac53-195f90387688
 # ╠═36b475e9-a16b-464f-a423-a4fbfbf21ef0
 # ╟─f1ee69eb-d8e5-4a6b-b408-a52d33a09e52
@@ -1032,9 +1168,14 @@ plots; # dictionary of all the figures, for saving
 # ╠═64e0265f-a621-495f-b73a-0af23b0ef1ac
 # ╠═18a1b129-eac5-4080-8af9-7d9fbf800107
 # ╠═5a1522f7-411d-40f5-92e8-b5a154b8d735
-# ╟─7779254a-83b9-4849-957c-af4b62c3916a
-# ╟─73898b6c-d8bd-49a9-ba36-a068e62a7ec3
+# ╟─d45fbe7b-168f-4c1e-8ab2-f17665b96938
+# ╠═7779254a-83b9-4849-957c-af4b62c3916a
+# ╠═7676138b-d99f-4610-b522-ccd6ea625ed4
+# ╠═73898b6c-d8bd-49a9-ba36-a068e62a7ec3
 # ╟─8a493f5e-1f1b-4cf5-91e1-5504593cee9d
+# ╟─4415cdd0-481b-4e14-bda9-d118c0acead5
+# ╟─03b2b204-5e4b-4d25-8c32-453a5c51926f
+# ╠═6167f6cd-547d-4046-b1b2-600e5fc5ac0e
 # ╟─dc7eb2b3-b160-4943-84e9-8cf20d687d93
 # ╠═2d3e09ff-3766-46d5-abdd-4132c4fa06b9
 # ╠═3ecfb175-0c26-419e-9770-d406cd1dd2dc
@@ -1055,7 +1196,13 @@ plots; # dictionary of all the figures, for saving
 # ╟─222cdcae-5b51-4fdc-a794-11471449ebcd
 # ╟─8ae351eb-c1b8-4934-aa48-023f8feba75c
 # ╟─ebe190e6-da7a-4c88-bd31-b5dc53f6a3e1
+# ╟─3de53132-5b89-483a-872e-4cf1142fc90b
+# ╟─4360ca84-c0bd-4c7a-afbc-edfef5a5f976
 # ╟─af7119a0-2470-4bf0-8b30-59b38ddd8d5d
+# ╟─dbdf1da5-67fd-47ea-b363-f03e1e0cdeb0
+# ╟─0b3e16bd-032b-4630-8cb3-57c63bc44572
+# ╟─05152721-dbb5-4e26-86ba-2fc16c03dac8
+# ╟─adbb17b4-56d2-49ca-8bdb-ecd2d3f418cd
 # ╟─4290b2c6-1f5f-4780-9f32-08ae949b666c
 # ╟─07949347-3e7b-499f-9ca6-c62c131e2a65
 # ╟─8e7fa947-480d-4037-88a9-652ed7cc2cbd
@@ -1067,6 +1214,7 @@ plots; # dictionary of all the figures, for saving
 # ╟─4bd5e387-ac06-4f4b-822f-cbc89e7509f9
 # ╟─46b4ef15-bd34-4b59-aef5-5dc4e1193ec3
 # ╟─c7b2fc1e-9dd3-42e9-aa55-f9aea4781784
+# ╟─6f9f8748-d07b-41fe-a59e-12896b37ec98
 # ╟─ffa84522-dd02-47f8-ac3b-b1db08806b2d
 # ╟─0252887f-b133-426e-82fc-43ac091a7de6
 # ╟─8bfd6e24-27ce-4caf-b68c-b13d89f08337
@@ -1129,5 +1277,7 @@ plots; # dictionary of all the figures, for saving
 # ╟─1ad364c5-b65d-48d7-a829-e284c5e8eebc
 # ╠═5614c4b1-2c78-4fee-a480-3998a8e1ce6e
 # ╠═efd7bcba-f393-4659-ac5b-006740085144
+# ╠═0b9060d0-9c5a-4806-8d68-20e4ffd8f864
+# ╠═7d71303b-defc-4e5f-beee-2bf684674ecf
 # ╠═57052ba3-151c-4dda-904a-dac9c421241c
 # ╠═a9a8f40f-da04-475b-aeaa-07add585ad9c
