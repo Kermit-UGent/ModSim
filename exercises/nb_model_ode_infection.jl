@@ -29,12 +29,12 @@ md"
 "
 
 # ╔═╡ fab49cb7-c41e-498a-98f6-33b4821ceb90
-md"
+md"""
 We will work here with the same infection model as in the **Introdution to Catalyst** (revisit the concerned notebook if necessay). We shortly summarize some important aspects of the model and give a condensed version of the solution method and the examples.
-"
+"""
 
 # ╔═╡ 8ff0b57e-acc1-4ebd-a562-a82c9efa7ffc
-md"
+md"""
 The **state variables**:
 
 | Variable | Unit | Meaning |
@@ -43,10 +43,10 @@ The **state variables**:
 | ``I``    | *persons* | number of infected persons             |
 | ``D``    | *persons* | number of deceased persons             |
 | ``R``    | *persons* | number of recovered persons             |
-"
+"""
 
 # ╔═╡ e36b150a-b4fc-476f-bab7-e1162a4b263d
-md"
+md"""
 The **parameters**:
 
 | Variable | Unit | Meaning |
@@ -56,16 +56,16 @@ The **parameters**:
 | ``r`` | ``\frac{1}{day}`` | rate of leaving infection period |
 | ``m`` | ``\frac{person}{person}`` | fraction of persons deceasing |
 | ``1-m`` | ``\frac{person}{person}`` | fraction of persons becoming resistant |
-"
+"""
 
 # ╔═╡ bdefa657-88bd-43d6-8e54-cc6321a9e720
-md"
+md"""
 The infection model has three reaction events:
 
 - Infection, where a susceptible persons meets an infected persons and also becomes infected. The infection rate is $\alpha \beta$.
 - Deceasing, where an infected person die. The death rate is $m r$.
 - Recovery, where an infected person recovers. The recovery rate: $(1-m) r$.
-"
+"""
 
 # ╔═╡ afb751b9-39b8-4430-af4b-02f010667518
 md"""
@@ -77,9 +77,9 @@ $$I \xrightarrow[]{(1-m)r} R$$
 """
 
 # ╔═╡ aab497eb-c0bd-49e3-a0c1-71e13f5b0ad5
-md"
+md"""
 Load the Catalyst package:
-"
+"""
 
 # ╔═╡ 47f4a7cc-1a74-4ff0-ae21-2a5e4c495935
 md"
@@ -94,17 +94,17 @@ infection_model = @reaction_network begin
 end
 
 # ╔═╡ 5d5fae40-a4ed-4908-ba65-f3a16c38ab4f
-md"
+md"""
 The species:
-"
+"""
 
 # ╔═╡ fd347a58-5cad-4073-aadb-176fa54dcdfa
 species(infection_model)
 
 # ╔═╡ cbfe8833-786c-48f7-b849-705006d4c41d
-md"
+md"""
 The parameters:
-"
+"""
 
 # ╔═╡ 96f3dd68-da80-4f07-af2b-e3b9ec05cc0c
 parameters(infection_model)
@@ -118,9 +118,9 @@ Convert the *reaction model* if you want to see the symbolic differential equati
 osys  = convert(ODESystem, infection_model)
 
 # ╔═╡ a432a88a-8db3-4729-b9a3-8ca9322fc81e
-md"
+md"""
 Getting a list of the differential equations, the state variables and the parameters:
-"
+"""
 
 # ╔═╡ 7e268605-8314-4e7b-8c38-a65212e148a9
 equations(osys)
@@ -132,16 +132,16 @@ unknowns(osys)
 parameters(osys)
 
 # ╔═╡ 39e396e1-20fa-4e78-b0ab-99774ce55f0f
-md"
+md"""
 #### Simulating the system as an ODE-problem
 
 Load the packages Differential and Plot:
-"
+"""
 
 # ╔═╡ 4a581cce-9a1b-4516-9cf1-6a41ea6566e7
-md"
+md"""
 ##### Setting initial conditions, timespan and parameter values
-"
+"""
 
 # ╔═╡ c5ee2780-c652-4c9b-981b-53e5f91e1766
 u0 = [:S => 9999000, :I => 1000, :D => 0, :R => 0]
@@ -153,9 +153,9 @@ tspan = (0.0, 90.0)
 params = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4]
 
 # ╔═╡ 6d2580f7-f882-449d-a9b8-629ab41e2671
-md"
+md"""
 ##### Creating and solving the ODEProblem and plotting results
-"
+"""
 
 # ╔═╡ d3f39b29-71f5-4674-a52f-3ba63279fca7
 oprob = ODEProblem(infection_model, u0, tspan, params)
@@ -170,11 +170,11 @@ plot(osol)
 osol.u[end]
 
 # ╔═╡ 000495a6-e91d-438e-ab6d-7a5e95a99f27
-md"
+md"""
 ##### Example 1 - Influence of $r$
 
 Influence of the duration of infection $1/r$ for average infection periods of $10$, $5$, $2$ days and $1$ day contagious ($r=0.1, 0.2, 0.5$ and $1.0$).
-"
+"""
 
 # ╔═╡ 4ca0e1df-7765-4f36-a442-2749ea493426
 params1 = [:α => 0.08, :β => 1.0e-6, :r => 0.1, :m => 0.4]
@@ -189,23 +189,23 @@ osol1 = solve(oprob1, Tsit5(), saveat=0.5);
 plot(osol1)
 
 # ╔═╡ 171208da-69a3-4737-85e0-fae0805bbaa8
-md"
+md"""
 Change the value of $r$ in the `params1` vector to visualize the effect in the plot.
-"
+"""
 
 # ╔═╡ 98aedcf5-e0de-442f-b19b-c5b3d9e3d475
-md"
+md"""
 ##### Example 2 - Using PresetTimeCallback
 
 Suppose that regulations are such that on day 14, people need to reduce their contacts by 50%.
-"
+"""
 
 # ╔═╡ 462b2786-98d6-40cb-887d-aff6b63881e8
 condition2 = [14.0]
 
 # ╔═╡ efd74885-c25c-42e5-bef5-c9654329c220
 function affect2!(integrator)
-	integrator.ps[:β] = 0.5e-6     # β is the 2-nd parameter
+	integrator.ps[:β] = 0.5e-6
 end
 
 # ╔═╡ ecf20050-12d3-48e7-84f1-6919a9aab865
@@ -221,11 +221,11 @@ plot(osol2)
 osol2.u[end]
 
 # ╔═╡ bdf9cfa0-9dc4-4ea5-9024-63813ec30d09
-md"
+md"""
 ##### Example 3 - Using ContinuousCallback
 
 Suppose that when the number of infected individuals reaches $1\,000\,000$, then $999\,000$ of them are promptly put into isolation (or removed from the population).
-"
+"""
 
 # ╔═╡ fee597e0-97cb-40bc-a5b9-166631e8b9f6
 proceed_with_condition = [true]
@@ -257,18 +257,18 @@ plot(osol3)
 osol3.u[end]
 
 # ╔═╡ ad83a851-e424-4e8f-bae9-38b9283db2fa
-md"
+md"""
 ## Exercises
-"
+"""
 
 # ╔═╡ b580ef9b-7d53-4bf0-8511-213920d59ee2
-md"
+md"""
 ### Exercise 1 - Influence of $\alpha$
 
 Evaluate the effect of a decreasing risk of infection after contact with an infected person, i.e. $r = 0.2$, $\beta = 0.1$ and $\alpha = 8\%, 12\%, 16\%$ or $20\%$.
 
 Use the same initial values and timespan as before.
-"
+"""
 
 # ╔═╡ a2a109e3-ea74-4e74-91d0-6ea12ddf28d4
 md"
@@ -280,47 +280,47 @@ Initialize vector `params_ex1` with parameter values:
 params_ex1 = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4]
 
 # ╔═╡ e0a8a397-4500-47de-8be3-49d3174648b1
-md"
+md"""
 Create the ODE problem and store it in `oprob_ex1`:
-"
+"""
 
 # ╔═╡ 7955722d-fc35-4cce-8bf2-ee40ee7fbc82
 # oprob_ex1 = missing;     # Uncomment and complete the instruction
 oprob_ex1 = ODEProblem(infection_model, u0, tspan, params_ex1);
 
 # ╔═╡ 0590bc0b-45d6-4a8e-8078-af057984523f
-md"
+md"""
 Solve the ODE problem and store the solution in `osol_ex1`:
-"
+"""
 
 # ╔═╡ f7b09e96-cf30-4bd0-841b-46621df693ab
 # osol_ex1 = missing;       # Uncomment and complete the instruction
 osol_ex1 = solve(oprob_ex1, Tsit5(), saveat=0.5);
 
 # ╔═╡ e7947165-b244-4ff6-bdf3-61d03aefe696
-md"
+md"""
 Plot the solutions:
-"
+"""
 
 # ╔═╡ adc0aa15-e0a9-4549-9609-967a9dc78b78
 # missing                   # Uncomment and complete the instruction
 plot(osol_ex1)
 
 # ╔═╡ 7a1effe4-776c-4143-8085-f98a213a2cc3
-md"
+md"""
 Change the value of $\alpha$ in the `params_ex1` vector to visualize the effect in the plot.
-"
+"""
 
 # ╔═╡ c14d45b8-3af1-4e05-b10a-081ccd62a34d
-md"
+md"""
 Try to interpret the results yourself.
 Ask yourself the following questions:
 1. What are the trends in the obtained results?
 2. How can this be explained from the model structure?
-"
+"""
 
 # ╔═╡ b3f08d61-187d-4f99-b95f-508ff1b3d52d
-md"
+md"""
 ### Exercise 2 - Administration of medicinal products
 
 Scientists have developed a medicine that heals sick people and makes them immune to
@@ -340,12 +340,12 @@ Administering the drug to a fraction of the infected individuals affects two *re
 - A fraction of the untreated individuals also heals.
 
 Check the effect on the epidemic when $0\%$, $25\%$, $50\%$, $75\%$ and $100\%$ of infected individuals are treated with $r_b = 0.5$. Use the same initial conditions and timespan as before.
-"
+"""
 
 # ╔═╡ 08ba4614-e4fa-4203-9e28-c5c4bd9fcdd5
-md"
+md"""
 Set-up the new *reaction network/model* and name it `infection_med`:
-"
+"""
 
 # ╔═╡ e4087441-7d0d-4716-b9fa-eef45e9f3b87
 # infection_med = @reaction_network begin  # Uncomment and complete the instruction
@@ -360,62 +360,62 @@ infection_med = @reaction_network begin
 end
 
 # ╔═╡ 87b3796d-16c5-4fe9-a32e-d8bf7c754254
-md"
+md"""
 Convert to an ODE system. Check the differential equations and make sure you understand each term.
-"
+"""
 
 # ╔═╡ 2a66417b-79a2-4909-bd89-5650c49b9411
 # osys_ex2 = missing       # Uncomment and complete the instruction
 osys_ex2 = convert(ODESystem, infection_med)
 
 # ╔═╡ 35956a99-5729-4bf7-bf09-b2232fc958da
-md"
+md"""
 Set-up parameter values:
-"
+"""
 
 # ╔═╡ cc31567f-631b-41b9-aa2d-3408ca951bcf
 # params_ex2 = missing       # Uncomment and complete the instruction
 params_ex2 = [:α => 0.08, :β => 1.0e-6, :b => 0.2, :m => 0.4, :r => 0.2, :rb => 0.5]
 
 # ╔═╡ 82f8c50c-511d-4399-ac87-0890b678c6c1
-md"
+md"""
 Create the ODE problem and store it in `oprob_ex2`:
-"
+"""
 
 # ╔═╡ ec08adb2-561c-4f17-a0b5-019d7b1f1098
 # oprob_ex2 = missing       # Uncomment and complete the instruction
 oprob_ex2 = ODEProblem(infection_med, u0, tspan, params_ex2);
 
 # ╔═╡ c55ec157-6ec8-45db-9a54-0f39aceb9607
-md"
+md"""
 Solve the ODE problem and store the solution in `osol_ex2`:
-"
+"""
 
 # ╔═╡ 67668918-624e-4adf-be5d-6fdbc62555f6
 # osol_ex2 = missing        # Uncomment and complete the instruction
 osol_ex2 = solve(oprob_ex2, Tsit5(), saveat=0.5);
 
 # ╔═╡ 832f984a-176d-4187-8476-5026d29a63d8
-md"
+md"""
 Plot the solutions:
-"
+"""
 
 # ╔═╡ 5f9a9838-099d-457f-9402-915f42d0cd33
 # missing          # Uncomment and complete the instruction
 plot(osol_ex2)
 
 # ╔═╡ ef3ca25d-c110-452d-877a-6304ae6cd5a7
-md"
+md"""
 Change the value of $b$ in the `params_ex2` vector to visualize the effect in the plot. Interpret the obtained plots.
-"
+"""
 
 # ╔═╡ f8dbab24-55aa-466f-a978-5f8db93b4b93
-md"
+md"""
 Try to answer the following questions:
 
 - Why does the peak in the number of infected individuals shift to the right when the value of $b$ increases?
 - Why does the number of recovered individuals first rise when the value of $b$ increases and then fall when the value of $b$ continues to increase?
-"
+"""
 
 # ╔═╡ dedb1ac1-cb54-416f-a092-12a50080c69f
 md"""
@@ -427,7 +427,7 @@ Check the number of fatalities:
 osol_ex2[:D][end]
 
 # ╔═╡ 089707c3-1df6-4799-a87b-0d4872a0267d
-md"
+md"""
 ### Exercise 3 - Adding vaccination to the model
 
 Scientists have developed a vaccine that makes healthy people immediately immune to
@@ -446,12 +446,12 @@ Assume that individuals are still being treated ($b = 0.2$ and $r_b = 0.5$). Ext
 Find out via trial and error what the vaccination rate need to be so that the number of fatalities is about $10$ times smaller after a period of $90$ days compared to those in absence of vaccination (cf. Exercise 2). Consider an initial step size in $v$ of $0.01$ and then fine tune with a step size of $0.001$.
 
 Use the same initial values and timespan as before.
-"
+"""
 
 # ╔═╡ 381a714d-699e-45c6-909a-02689b2a7e6b
-md"
+md"""
 Set-up the new *reaction network/model* and name it `infection_med_vac`:
-"
+"""
 
 # ╔═╡ a1795123-876b-4bd3-ac3a-711367b500d1
 # Uncomment and complete the instruction
@@ -469,45 +469,45 @@ infection_med_vac = @reaction_network begin
 end
 
 # ╔═╡ 6b46d116-0da3-428a-b25f-221622dfa7e0
-md"
+md"""
 Convert to an ODE system. Check the differential equations and make sure you understand each term.
-"
+"""
 
 # ╔═╡ 710fe13c-bd43-4d1e-867e-72330722ac1e
 # osys_ex3 = missing       # Uncomment and complete the instruction
 osys_ex3 = convert(ODESystem, infection_med_vac)
 
 # ╔═╡ 0274fbd8-c025-4e36-bbb0-f65f21b962c7
-md"
+md"""
 Set-up parameter values:
-"
+"""
 
 # ╔═╡ 34c4d746-45f7-43c4-a0f0-6e570373a35d
 # params_ex3 = missing    # Uncomment and complete the instruction
 params_ex3 = [:α => 0.08, :β => 1.0e-6, :b => 0.2, :m => 0.4, :r => 0.2, :rb => 0.5, :v => 0.046]
 
 # ╔═╡ 060a5c5b-9834-42e2-98e9-ac23e7403b60
-md"
+md"""
 Create the ODE problem and store it in `oprob_ex3`:
-"
+"""
 
 # ╔═╡ c61ae8b6-2324-43fa-a5ae-274a919af559
 # oprob_ex3 = missing       # Uncomment and complete the instruction
 oprob_ex3 = ODEProblem(infection_med_vac, u0, tspan, params_ex3);
 
 # ╔═╡ 69983b90-b6ef-4732-a4af-a772bb1364e5
-md"
-Solve the ODE problem when there is no vaccination ($v=0$) and store the solution in `osol_ex3_no_vac`:
-"
+md"""
+Solve the ODE problem for (step wise) increasing values of $v$ and store the solution in `osol_ex3_no_vac`. Consider an initial step size in $v$ of $0.01$ and then fine tune with a step size of $0.001$.
+"""
 
 # ╔═╡ 16211bc6-cd97-43c0-8faf-25bb490930b6
 # osol_ex3_no_vac = missing;   # Uncomment and complete the instruction
 osol_ex3_vac = solve(oprob_ex3, Tsit5(), saveat=0.5);
 
 # ╔═╡ 5ae9abb4-1be8-4ee3-97a2-6f8332a799af
-md"
+md"""
 Check the number fatalities:
-"
+"""
 
 # ╔═╡ 53806706-0caf-4e81-a610-9119340d1db6
 # missing         # Uncomment and complete the instruction
@@ -515,7 +515,7 @@ osol_ex3_vac[:D][end]
 
 # ╔═╡ 461eada9-5f9c-4439-8b65-226382b6d148
 md"""
-Compare the latter with the number of fatalities when no vaccination is/was available (cf. Exercise 2) by setting up a condition here below where the final number of fatalities (with vaccination) divided by 10 is compared with (use larger than or smaller than) the number of fatalities (without vaccination):
+Compare the latter with the number of fatalities when no vaccination is/was available (cf. Exercise 2) by setting up a condition (a boolean expression return either `true` or `false`) here below where the final number of fatalities (with vaccination) divided by 10 is compared with (use larger than or smaller than) the number of fatalities (without vaccination):
 """
 
 # ╔═╡ 0994d790-0fe8-46ab-bba2-a0a4ea466f64
@@ -523,19 +523,18 @@ Compare the latter with the number of fatalities when no vaccination is/was avai
 osol_ex2[:D][end]/10 > osol_ex3_vac[:D][end]
 
 # ╔═╡ 8bb5dafd-6c26-4634-8be4-c2963efba056
-md"
-Once you have found the value of $v$ that makes 
-Set-up the condition and store it in `condition_ex3`:
-"
+md"""
+Once you have found the required value of $v$ launch the vaccination programme $2$ days after the outbreak. Set-up the $2$-day time condition and store it in `condition_ex3`:
+"""
 
 # ╔═╡ 26c77206-fe3c-45c5-a627-f2b346c66be7
 # condition_ex3 = missing     # Uncomment and complete the instruction
 condition_ex3 = [2.0]
 
 # ╔═╡ c1d3ec29-5af8-4b79-8720-0a5146340b8d
-md"
+md"""
 Set-up the affect function and name it `affect_ex3`:
-"
+"""
 
 # ╔═╡ ceae9947-ed0f-4975-a944-cc938cf22dde
 # Uncomment and complete the instruction
@@ -543,41 +542,38 @@ Set-up the affect function and name it `affect_ex3`:
 # 	integrator.ps[...] = ...
 # end
 function affect_ex3!(integrator)
-	integrator.ps[:v] = 0.046     # v is the 7-th parameter
+	integrator.ps[:v] = 0.046
 end
 
 # ╔═╡ 6e767e36-f54e-4472-881a-ab04ad9c9d09
-md"
+md"""
 Set-up the callback function and name it `cb_ex3`:
-"
+"""
 
 # ╔═╡ 870c9d65-2229-40b7-9959-59afecb4f3bf
 # cb_ex3 = missing
 cb_ex3 = PresetTimeCallback(condition_ex3, affect_ex3!)
 
 # ╔═╡ 1bf8bc58-6848-4783-a614-7ac11646de92
-md"
+md"""
 Solve the ODE problem and store the solution in `osol_ex3`:
-"
+"""
 
 # ╔═╡ 8814c42b-16c7-466a-8ad8-58ee1c0921b2
 # osol_ex3 = missing        # Uncomment and complete the instruction
 osol_ex3 = solve(deepcopy(oprob_ex3), Tsit5(), saveat=0.5, callback=cb_ex3);
 
 # ╔═╡ 25158ea5-1930-4fee-aab4-490b475d8635
-md"
+md"""
 Plot the solutions:
-"
+"""
 
 # ╔═╡ ed9472a0-09c9-4d1c-8f1d-1b7d87b97640
 # missing          # Uncomment and complete the instruction
 plot(osol_ex3)
 
 # ╔═╡ 47243051-bb8f-444a-aca5-fb686680ca8b
-# ╠═╡ disabled = true
-#=╠═╡
 osol_ex3[:D][end]
-  ╠═╡ =#
 
 # ╔═╡ Cell order:
 # ╠═18a4df05-0349-400d-a29e-b3fa71aa4d88
@@ -614,20 +610,20 @@ osol_ex3[:D][end]
 # ╠═6173506b-8f56-4100-a0a0-117c1ee8aa0f
 # ╠═e6b17756-a7e9-4f50-98dc-b69f9a54903f
 # ╠═f9bd32f5-c473-44d4-af9d-4d99032a2d21
-# ╠═000495a6-e91d-438e-ab6d-7a5e95a99f27
+# ╟─000495a6-e91d-438e-ab6d-7a5e95a99f27
 # ╠═4ca0e1df-7765-4f36-a442-2749ea493426
 # ╠═d56b486e-44e5-4db7-9c4e-00db5c1b733f
 # ╠═298ada89-4581-41c5-a89f-f01ae431c5ec
 # ╠═5b4ca642-0f89-40ab-9a2f-c35fc603a91d
-# ╠═171208da-69a3-4737-85e0-fae0805bbaa8
-# ╠═98aedcf5-e0de-442f-b19b-c5b3d9e3d475
+# ╟─171208da-69a3-4737-85e0-fae0805bbaa8
+# ╟─98aedcf5-e0de-442f-b19b-c5b3d9e3d475
 # ╠═462b2786-98d6-40cb-887d-aff6b63881e8
 # ╠═efd74885-c25c-42e5-bef5-c9654329c220
 # ╠═ecf20050-12d3-48e7-84f1-6919a9aab865
 # ╠═d9fa2879-adfb-4a66-ad81-185b5212c38f
 # ╠═31ceb303-dbb1-4f4d-9082-14ea1d83ab66
 # ╠═14143212-53f1-4753-8c25-e22559cdbccd
-# ╠═bdf9cfa0-9dc4-4ea5-9024-63813ec30d09
+# ╟─bdf9cfa0-9dc4-4ea5-9024-63813ec30d09
 # ╠═fee597e0-97cb-40bc-a5b9-166631e8b9f6
 # ╠═51363f3c-7aa9-48ed-808e-d1f7a4aadc0c
 # ╠═cd060e93-7a92-4824-b812-080391fbf554
@@ -636,10 +632,10 @@ osol_ex3[:D][end]
 # ╠═2b511237-7739-44e5-b6bd-26a2fdc76bb5
 # ╠═3a131f92-aa09-4e8c-98a1-0c4c1c74878a
 # ╟─ad83a851-e424-4e8f-bae9-38b9283db2fa
-# ╠═b580ef9b-7d53-4bf0-8511-213920d59ee2
+# ╟─b580ef9b-7d53-4bf0-8511-213920d59ee2
 # ╟─a2a109e3-ea74-4e74-91d0-6ea12ddf28d4
 # ╠═27a4c4f5-0b2b-4d23-9bb0-a1a8ff6cfc4d
-# ╠═e0a8a397-4500-47de-8be3-49d3174648b1
+# ╟─e0a8a397-4500-47de-8be3-49d3174648b1
 # ╠═7955722d-fc35-4cce-8bf2-ee40ee7fbc82
 # ╟─0590bc0b-45d6-4a8e-8078-af057984523f
 # ╠═f7b09e96-cf30-4bd0-841b-46621df693ab
@@ -648,45 +644,45 @@ osol_ex3[:D][end]
 # ╟─7a1effe4-776c-4143-8085-f98a213a2cc3
 # ╟─c14d45b8-3af1-4e05-b10a-081ccd62a34d
 # ╟─b3f08d61-187d-4f99-b95f-508ff1b3d52d
-# ╠═08ba4614-e4fa-4203-9e28-c5c4bd9fcdd5
+# ╟─08ba4614-e4fa-4203-9e28-c5c4bd9fcdd5
 # ╠═e4087441-7d0d-4716-b9fa-eef45e9f3b87
-# ╠═87b3796d-16c5-4fe9-a32e-d8bf7c754254
+# ╟─87b3796d-16c5-4fe9-a32e-d8bf7c754254
 # ╠═2a66417b-79a2-4909-bd89-5650c49b9411
-# ╠═35956a99-5729-4bf7-bf09-b2232fc958da
+# ╟─35956a99-5729-4bf7-bf09-b2232fc958da
 # ╠═cc31567f-631b-41b9-aa2d-3408ca951bcf
-# ╠═82f8c50c-511d-4399-ac87-0890b678c6c1
+# ╟─82f8c50c-511d-4399-ac87-0890b678c6c1
 # ╠═ec08adb2-561c-4f17-a0b5-019d7b1f1098
-# ╠═c55ec157-6ec8-45db-9a54-0f39aceb9607
+# ╟─c55ec157-6ec8-45db-9a54-0f39aceb9607
 # ╠═67668918-624e-4adf-be5d-6fdbc62555f6
-# ╠═832f984a-176d-4187-8476-5026d29a63d8
+# ╟─832f984a-176d-4187-8476-5026d29a63d8
 # ╠═5f9a9838-099d-457f-9402-915f42d0cd33
 # ╟─ef3ca25d-c110-452d-877a-6304ae6cd5a7
 # ╟─f8dbab24-55aa-466f-a978-5f8db93b4b93
-# ╠═dedb1ac1-cb54-416f-a092-12a50080c69f
+# ╟─dedb1ac1-cb54-416f-a092-12a50080c69f
 # ╠═a912f449-6c9d-4595-863f-a2ba523bad95
-# ╠═089707c3-1df6-4799-a87b-0d4872a0267d
-# ╠═381a714d-699e-45c6-909a-02689b2a7e6b
+# ╟─089707c3-1df6-4799-a87b-0d4872a0267d
+# ╟─381a714d-699e-45c6-909a-02689b2a7e6b
 # ╠═a1795123-876b-4bd3-ac3a-711367b500d1
-# ╠═6b46d116-0da3-428a-b25f-221622dfa7e0
+# ╟─6b46d116-0da3-428a-b25f-221622dfa7e0
 # ╠═710fe13c-bd43-4d1e-867e-72330722ac1e
-# ╠═0274fbd8-c025-4e36-bbb0-f65f21b962c7
+# ╟─0274fbd8-c025-4e36-bbb0-f65f21b962c7
 # ╠═34c4d746-45f7-43c4-a0f0-6e570373a35d
-# ╠═060a5c5b-9834-42e2-98e9-ac23e7403b60
+# ╟─060a5c5b-9834-42e2-98e9-ac23e7403b60
 # ╠═c61ae8b6-2324-43fa-a5ae-274a919af559
-# ╠═69983b90-b6ef-4732-a4af-a772bb1364e5
+# ╟─69983b90-b6ef-4732-a4af-a772bb1364e5
 # ╠═16211bc6-cd97-43c0-8faf-25bb490930b6
-# ╠═5ae9abb4-1be8-4ee3-97a2-6f8332a799af
+# ╟─5ae9abb4-1be8-4ee3-97a2-6f8332a799af
 # ╠═53806706-0caf-4e81-a610-9119340d1db6
-# ╠═461eada9-5f9c-4439-8b65-226382b6d148
+# ╟─461eada9-5f9c-4439-8b65-226382b6d148
 # ╠═0994d790-0fe8-46ab-bba2-a0a4ea466f64
-# ╠═8bb5dafd-6c26-4634-8be4-c2963efba056
+# ╟─8bb5dafd-6c26-4634-8be4-c2963efba056
 # ╠═26c77206-fe3c-45c5-a627-f2b346c66be7
-# ╠═c1d3ec29-5af8-4b79-8720-0a5146340b8d
+# ╟─c1d3ec29-5af8-4b79-8720-0a5146340b8d
 # ╠═ceae9947-ed0f-4975-a944-cc938cf22dde
-# ╠═6e767e36-f54e-4472-881a-ab04ad9c9d09
+# ╟─6e767e36-f54e-4472-881a-ab04ad9c9d09
 # ╠═870c9d65-2229-40b7-9959-59afecb4f3bf
-# ╠═1bf8bc58-6848-4783-a614-7ac11646de92
+# ╟─1bf8bc58-6848-4783-a614-7ac11646de92
 # ╠═8814c42b-16c7-466a-8ad8-58ee1c0921b2
-# ╠═25158ea5-1930-4fee-aab4-490b475d8635
+# ╟─25158ea5-1930-4fee-aab4-490b475d8635
 # ╠═ed9472a0-09c9-4d1c-8f1d-1b7d87b97640
 # ╠═47243051-bb8f-444a-aca5-fb686680ca8b
