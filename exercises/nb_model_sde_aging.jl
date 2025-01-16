@@ -186,8 +186,11 @@ md"""
 Interpret the results. Ask yourself the following question:
 
 1. Suppose that $5$ trillion senescent cells is about the maximum a human body can bear. What is the (approximate) corresponding range of ages?
-- Answer: ...
+- Answer: missing
 """
+#=
+If we imagine a horizontal line through X = 5 and look at the crossings with the earliest and latest curves, then the range in age would be about [60, 120].
+=#
 
 # ╔═╡ Cell order:
 # ╠═0c457482-95fe-11ef-0873-65164704c7a6
@@ -195,32 +198,32 @@ Interpret the results. Ask yourself the following question:
 # ╠═85b6ee78-2f7b-4f83-908b-c48fade56fcb
 # ╠═68588061-fedd-4f19-9e89-39b1bd791e33
 # ╠═1d0a8fb2-dab9-44ae-a230-f3e92cf3cd6a
-# ╠═a176adcc-bde0-4a25-aa80-33379e05e63f
-# ╠═818ba2af-83dd-4ddb-93e8-d0549ddd806b
-# ╠═d917e75d-eefb-415f-ba45-2f1d7c62d63c
-# ╠═7bda135b-2e0a-425f-b30c-e5a09dbb8a4a
+# ╟─a176adcc-bde0-4a25-aa80-33379e05e63f
+# ╟─818ba2af-83dd-4ddb-93e8-d0549ddd806b
+# ╟─d917e75d-eefb-415f-ba45-2f1d7c62d63c
+# ╟─7bda135b-2e0a-425f-b30c-e5a09dbb8a4a
 # ╠═38edfb50-7d6f-4fcc-b328-95ecb26d6de1
-# ╠═51edb519-2086-45a5-a666-b5a58c51b5e8
+# ╟─51edb519-2086-45a5-a666-b5a58c51b5e8
 # ╠═b3dd11e4-1209-46f3-a47a-07b54c5e9d77
-# ╠═0524da26-35cb-4846-b7ef-f5842ae5db74
-# ╠═98c1f94e-aea5-40c5-bee7-8df8794fedb3
+# ╟─0524da26-35cb-4846-b7ef-f5842ae5db74
+# ╟─98c1f94e-aea5-40c5-bee7-8df8794fedb3
 # ╠═80db134e-bc57-41b0-8e1b-2ac6bff0c806
 # ╠═ab8bef21-8c4f-4962-b9cb-e87ac1db049a
 # ╠═ab302108-e9a7-4941-a762-c0dc109c9b1d
-# ╠═3934ba8f-49c9-4f0c-8373-c8010f397d66
-# ╠═45fceec8-a641-43ed-9a17-72b795e09297
+# ╟─3934ba8f-49c9-4f0c-8373-c8010f397d66
+# ╟─45fceec8-a641-43ed-9a17-72b795e09297
 # ╠═7d164cdf-fd63-4c85-b168-3279d6d658eb
 # ╠═9f9a616a-4353-4f9a-8da5-effe4d214ed0
 # ╠═e4b9393d-d33c-4e16-814e-347b35435a82
-# ╠═91881bc3-a1f0-48f7-82e8-7d7acea2f4de
+# ╟─91881bc3-a1f0-48f7-82e8-7d7acea2f4de
 # ╠═7128ae66-c576-435b-8e33-4221f469ba1c
-# ╠═1bce56da-0c35-41df-adbd-b5dee116be11
-# ╠═7ca7c177-40b3-42c0-a57d-2f7eb874abdf
-# ╠═33debdb3-2008-4055-a778-600bf7409361
-# ╠═85c7adcd-5a69-4900-849e-6222568bf68f
+# ╟─1bce56da-0c35-41df-adbd-b5dee116be11
+# ╟─7ca7c177-40b3-42c0-a57d-2f7eb874abdf
+# ╟─33debdb3-2008-4055-a778-600bf7409361
+# ╟─85c7adcd-5a69-4900-849e-6222568bf68f
 # ╠═1f25730d-d93e-462a-ac02-f83381633849
-# ╠═7d531f11-1a64-4b43-aa4f-04d282a615bd
+# ╟─7d531f11-1a64-4b43-aa4f-04d282a615bd
 # ╠═5aaf1395-9b7c-451f-b1a3-44e5ba3c4d6a
-# ╠═c048528f-58a2-415d-a338-fc87302367b8
+# ╟─c048528f-58a2-415d-a338-fc87302367b8
 # ╠═147adea6-e7ed-4f7b-b753-127e41500109
-# ╠═b10a73a1-63ae-4a15-9a83-394f6ed4e36e
+# ╟─b10a73a1-63ae-4a15-9a83-394f6ed4e36e
