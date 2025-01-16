@@ -11,17 +11,14 @@ using Pkg; Pkg.activate("..")
 using Turing, StatsPlots
 
 # ╔═╡ 2d709e7b-3350-47ec-a3ed-8aa47ad5a8c2
-function generate_data(n_wasps = 10;
-	minbound = 0, maxbound = 1000, spoil_answer = false
-	)
+function generate_data(n_wasps = 10; minbound = 0, maxbound = 1000)
 	
 	x_n, y_n = rand(DiscreteUniform(minbound, maxbound), 2)
 	xs, ys = [rand(DiscreteUniform(minbound, maxbound), n_wasps) for _ in 1:2]
 	v_wasps = rand(Uniform(5, 10), n_wasps)
 	ts = [2*sqrt((x-x_n)^2 + (y-y_n)^2)/v_wasp for (x, y, v_wasp) in zip(xs, ys, v_wasps)]
-	spoil_answer && println("The true location of the nest is: $x_n, $y_n")
 
-	return xs, ys, ts
+	return xs, ys, ts, [x_n, y_n]
 end;
 
 # ╔═╡ af96af94-d969-4e9a-93f4-e205f8b7f576
@@ -50,7 +47,7 @@ md"""
 """
 
 # ╔═╡ c1850e64-9e2c-46fb-b7cd-22e8af81d3aa
-xs, ys, ts = generate_data(spoil_answer = true);
+xs, ys, ts, true_location = generate_data();
 
 # ╔═╡ 28cb3363-6856-4164-b60e-36ec2e88ed56
 scatter(xs, ys, label = "wasp locations", marker_z = ts, title = "Locations of wasps colored by return time", xlims = (0, 1000), ylims = (0, 1000))
@@ -61,9 +58,9 @@ scatter(xs, ys, label = "wasp locations", marker_z = ts, title = "Locations of w
     y_nest ~ Uniform(0, 1000)
     v_wasp ~ Gamma(8)
 
-    dists = @. sqrt((xs - x_nest)^2 + (ys - y_nest)^2)
     for i in eachindex(ts)
-        ts[i] ~ Normal(2*dists[i] / v_wasp, 10)
+		dist = sqrt((xs[i] - x_nest)^2 + (ys[i] - y_nest)^2)
+        ts[i] ~ Normal(2*dist / v_wasp, 10)
     end
 end
 
@@ -80,6 +77,7 @@ plot(chain)
 begin
 	scatter(chain[:x_nest], chain[:y_nest], opacity = 0.1, color = :blue, label = "Estimated nest locations", xlims = (0, 1000), ylims = (0, 1000));
 	scatter!(xs, ys, color = :orange, label = "wasp locations", marker_z = ts)
+	scatter!(true_location[1:1], true_location[2:2], color = RGB(0, 1, 0), label = "True location")
 end
 
 # ╔═╡ Cell order:
@@ -97,4 +95,4 @@ end
 # ╠═88e95234-4e43-4ead-bd0f-f32f9fc109c2
 # ╠═c5a94b3e-a4b8-42e6-a8c7-79e942212852
 # ╠═1c84ab96-b3db-494e-860e-80e2d178da43
-# ╟─0c6be1fa-bff5-495b-90e0-90dabe03105a
+# ╠═0c6be1fa-bff5-495b-90e0-90dabe03105a

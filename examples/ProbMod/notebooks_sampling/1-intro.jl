@@ -45,7 +45,7 @@ A_{circle} &= π
 
 # ╔═╡ 88b3087c-f78a-4df4-a9dc-5696bf4052d5
 md"""
-This means if we can estimate this probability, we can estimate π ezpz!
+This means if we can estimate this probability, we can estimate π easily!
 
 ```math
 \begin{align}
@@ -125,9 +125,9 @@ Inside of them, you can define random variables with the "`var ~ Distribution(pa
 # ╔═╡ 802e2769-613c-4ab6-b0e5-38173c220042
 md"""
 Our circle problem can be defined as follows:
-- Sample the `x` and `y` coordinates of the dart uniformly between -1 and 1
-- Calculate the distance to the centre of the circle [0, 0]
-- The dart is within the circle if the distance is smaller than the radius 1
+- Sample the `x` and `y` coordinates of the dart uniformly between -1 and 1.
+- Calculate the distance to the centre of the circle [0, 0].
+- The dart is within the circle if the distance is smaller than the radius 1.
 """
 
 # ╔═╡ 1ee1ca1b-93dc-4c5e-a1c5-79dc8b365226
@@ -259,7 +259,10 @@ scatter(dist_chain[:x], dist_chain[:y], aspect_ratio = :equal, groups = vec(sp_i
 md"### Dealing with many variables"
 
 # ╔═╡ bf0904ce-fb72-4a39-a57b-1c99c8e9c82e
-md"A common problem when defining the problem as a Turing model is many random variables being involved, often with the same distribution. Turing allows variables to be defined in a for-loop for this reason."
+md"A common problem when defining the problem as a Turing model is many random variables being involved, often with the same distribution. Turing allows variables to be defined in a for-loop for this reason.
+
+Consider the circle example again but using a loop this time, which can easily be generalized to $n$ dimensions:
+"
 
 # ╔═╡ 4c54bccf-c674-41da-be15-edac57f96ee9
 @model function distances_loop()
@@ -268,7 +271,7 @@ md"A common problem when defining the problem as a Turing model is many random v
 		coords[i] ~ Uniform(-1, 1)
 	end
 
-	dist = coords.^2 |> sum |> sqrt
+	dist = sqrt(sum(coords.^2))
 end
 
 # ╔═╡ c50b7bb9-57e9-4f86-a0fa-0a68488b2fa9
@@ -298,7 +301,7 @@ md"""
 md"Considering the humble example of `X ~ Exponential(10)`, let's do some plotting, sampling and calculating."
 
 # ╔═╡ 398e15bb-7cc4-4f61-919b-9edf790cacd3
-Exponential(10) |> plot
+plot(Exponential(10))
 
 # ╔═╡ 58a6ffb1-0fef-4edb-9fbe-de5b399b013d
 spX = rand(Exponential(10), n_samples)

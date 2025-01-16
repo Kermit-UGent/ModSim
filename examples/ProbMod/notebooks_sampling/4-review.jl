@@ -10,9 +10,6 @@ using Pkg; Pkg.activate("..")
 # ╔═╡ aa2737db-f89f-4e08-9abe-0a86e8880c19
 using Turing, StatsPlots
 
-# ╔═╡ d2ba7651-bd43-4607-9b9d-59e0087051f1
-n_samples = 100
-
 # ╔═╡ 38e71480-b874-11ef-0388-155c2fbaeb60
 md"# Review exercise: The Delta Works"
 
@@ -53,7 +50,7 @@ rand(heightdist, 10000) |> histogram
 # ╔═╡ 7a11c495-06ca-4a36-b594-0a720c25c42b
 @model function waveheight(years)
 	numstorms ~ Poisson(12 * years)
-	numwaves ~ Poisson(100 * numstorms) # or Poisson(years*12*100)
+	numwaves ~ Poisson(100 * numstorms)
 	
 	wave_heights ~ filldist(heightdist, numwaves)
 
@@ -64,10 +61,10 @@ end
 wavemodel = waveheight(500)
 
 # ╔═╡ b9352eaf-3af8-4f3b-91fa-088f7d866494
-sp_wh = [wavemodel() for i in 1:n_samples]
+sp_wh = [wavemodel() for i in 1:200]
 
 # ╔═╡ fb5b771e-7795-4d43-a570-0282fffb53f4
-histogram(sp_wh)
+histogram(sp_wh, bins = 20)
 
 # ╔═╡ a572a1d3-cf55-4b2b-9343-de690dcd69aa
 quantile(sp_wh, 0.99)
@@ -78,7 +75,6 @@ md"They should be able to deal with waves of ~30m."
 # ╔═╡ Cell order:
 # ╠═882b942c-a5ae-445d-a946-6eb8cddc423e
 # ╠═aa2737db-f89f-4e08-9abe-0a86e8880c19
-# ╠═d2ba7651-bd43-4607-9b9d-59e0087051f1
 # ╟─38e71480-b874-11ef-0388-155c2fbaeb60
 # ╟─20d494d3-e296-4ba5-b496-1cfd4add17ec
 # ╟─8ada0eec-a9cf-479d-82ef-32ec2ed36ae6

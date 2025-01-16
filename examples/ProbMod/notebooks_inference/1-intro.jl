@@ -28,7 +28,7 @@ Consider the below figure of a small slice of the [tree of life](https://en.wiki
 
 # ╔═╡ 3ecd3ac7-2621-4ea6-8ff1-69962769d934
 md"""
-![Evolution example](https://raw.githubusercontent.com/MichielStock/ModSim/ed0b1789be099017bfea2d7e1541983e11431d4e/examples/ProbMod/figures/treeoflife.excalidraw.svg?token=AQ3DSFK4443SYCGXO37DNGDHQTO4Q)
+![Evolution example](https://raw.githubusercontent.com/Kermit-UGent/ModSim/2a369561ce842cf079d7660a36d0d9308739dc69/examples/ProbMod/figures/treeoflife.excalidraw.svg)
 """
 
 # ╔═╡ 71bbd593-f2e4-40dd-b682-40e65305ebb3
@@ -40,7 +40,7 @@ The ray-finned fish fossil is also one of the individuals for which we have DNA 
 
 # ╔═╡ 138538d4-f6b5-4b8e-af3a-273858cc463c
 md"""
-Taking into account all fossils, we can see the roughly linear trend between evolution time and number of mutations in the gene.
+Taking into account all fossils, we can see that the number of mutations is roughly proportional with the time that has passed.
 """
 
 # ╔═╡ f49c6d3f-5870-4473-b142-799fa84dbfb7
@@ -58,7 +58,7 @@ Consider now that you find a new fossil of an ancient ancestor of the **seahorse
 """
 
 # ╔═╡ 6666a388-1c45-4f6f-804f-eb3a260eae98
-md"![Sharkmoment](https://raw.githubusercontent.com/MichielStock/ModSim/ed0b1789be099017bfea2d7e1541983e11431d4e/examples/ProbMod/figures/treeoflife2.excalidraw.svg?token=AQ3DSFL3TNPLVHX6KTKAGWDHQTO6K)"
+md"![Sharkmoment](https://raw.githubusercontent.com/Kermit-UGent/ModSim/2a369561ce842cf079d7660a36d0d9308739dc69/examples/ProbMod/figures/treeoflife2.excalidraw.svg)"
 
 # ╔═╡ b0dbd481-ce36-4364-b995-b4fa8f36f76d
 md"""
@@ -95,12 +95,22 @@ _mutation_model = _mutations(times);
 
 # ╔═╡ d6e30c59-5178-4ce9-8ad7-0b640adaa283
 _conditioned_model = _mutation_model | (num_mutations = observed_mutations,)
+# mind the `,` after `observed_mutations`!
 
 # ╔═╡ 4a5562e0-735a-49d2-b6d5-a95308081f83
 _mutation_chain = sample(_conditioned_model, NUTS(), 2000);
 
 # ╔═╡ ecc429c9-e773-4fd7-b9f7-44288478bd18
 histogram(_mutation_chain[:α], title = "Posterior distribution of mutation rate α")
+
+# ╔═╡ ad64b33c-fd44-454f-9fd3-018e2aa77d63
+begin
+	scatter(times, observed_mutations, xlabel = "Time (My)", ylabel = "Number of mutations", label = false, xlims = (0, 500), title = "Predicted trend")
+	for α in _mutation_chain[:α][1:10:end]
+		plot!(x -> α*x, color = :purple, alpha = 0.05, label = false)
+	end
+	plot!()
+end
 
 # ╔═╡ 12f017e3-b7b8-408d-a677-52dd2ea900eb
 md"## Explanation"
@@ -185,6 +195,9 @@ md"""
 	Note the `,` at the end of `(num_mutations = observed_mutations,)`. This is important, as without it Julia thinks you simply put parentheses around a variable assignment and you'll get an error!
 """
 
+# ╔═╡ a35a43e2-e6b0-47ce-80b2-48148336274c
+forgot_comma = mutation_model | (num_mutations = observed_mutations)
+
 # ╔═╡ c5f0dbb3-fba1-41f2-b7d2-740012603555
 md"""
 We can verify that for our conditioned model, the values of `num_mutations` has been set as constant: 
@@ -216,7 +229,7 @@ plot(mutation_chain) # looks appropriately fuzzy!
 # ╔═╡ f620d591-7982-4b67-9524-45cfac27436b
 md"""
 !!! note
-	For an example of a non-converged chain, try using the `MH()` sampler instead of `NUTS()`. This sampling algorithm takes a lot of fiddling with its parameters for it to work well.
+	For an example of a non-converged chain, try using the `MH()` sampler instead of `NUTS()`. This sampling algorithm takes a lot of fiddling with its parameters (or a larger number of samples) for it to work well.
 """
 
 # ╔═╡ 251a1b0e-7efc-4ce2-b0ea-48a5c13d2c63
@@ -321,6 +334,7 @@ histogram(horse_chain[:fossil_age])
 # ╠═d6e30c59-5178-4ce9-8ad7-0b640adaa283
 # ╠═4a5562e0-735a-49d2-b6d5-a95308081f83
 # ╠═ecc429c9-e773-4fd7-b9f7-44288478bd18
+# ╟─ad64b33c-fd44-454f-9fd3-018e2aa77d63
 # ╟─12f017e3-b7b8-408d-a677-52dd2ea900eb
 # ╟─7900fd13-cc69-41c5-972b-16d5b6d5452a
 # ╟─430927e8-7fb8-494c-b9da-d46f000c142f
@@ -338,9 +352,10 @@ histogram(horse_chain[:fossil_age])
 # ╟─b8adbdd4-2642-4375-9979-0cb8f52c5bc8
 # ╠═70f9e94d-a4e6-47d6-8d19-b60f7011d572
 # ╟─2d0c969d-03a2-4e4c-ace4-e439f81c771b
+# ╠═a35a43e2-e6b0-47ce-80b2-48148336274c
 # ╟─c5f0dbb3-fba1-41f2-b7d2-740012603555
 # ╠═d03cef36-3e82-4de4-89e7-af9f772edd8d
-# ╟─371a48d5-daea-4d0b-968b-7e3056a65494
+# ╠═371a48d5-daea-4d0b-968b-7e3056a65494
 # ╠═0d2c1359-434f-4f3d-8c04-c452c46d7ae8
 # ╟─1c00437c-e2f3-44f6-b020-ca213e321239
 # ╠═4c79adff-0640-4e69-815d-ab94ebd9c937
