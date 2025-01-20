@@ -150,8 +150,7 @@ oprob = ODEProblem(irrigation_mod, u0, tspan, params)
 
 # ╔═╡ 923d04ce-b4d2-44b0-afff-7062c4628ad0
 md"
-Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$.\
-Hint: you will need to use `remake(oprob; u0=[missing, missing])` to set the initial conditions for each of the experiments.
+Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$.
 "
 
 # ╔═╡ 481eb8b9-5de2-4f68-b06a-ec18e054c9f5

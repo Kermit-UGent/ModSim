@@ -81,8 +81,8 @@ Tips:
 anaerobic_fermentation1 = @reaction_network begin
 	@species S(t)=0.04 I(t)=0.02 G(t)=0.0 E(t)=0.01 CO2(t)=0.0
     k1, S + I --> 2G
-	# mm(K, k2, E), 2G --> 4E + 4CO2
 	mmr(E, k2, K), 2G --> 4E + 4CO2
+	# mmr(E, k2, K), G --> 2E + 2CO2
 end
 
 # ╔═╡ 485c2b25-f281-4ee9-bcb8-7ca010205930
@@ -102,6 +102,8 @@ Convert the system to a symbolic differential equation model and inspect your di
 # ╔═╡ bc56d0fb-db19-4f63-9f34-617308da6c8a
 # osys1 = missing         # Uncomment and complete the instruction
 osys1 = convert(ODESystem, anaerobic_fermentation1)
+# Same result with:
+# osys1 = convert(ODESystem, anaerobic_fermentation1, combinatoric_ratelaws=true)
 
 # ╔═╡ 5983b9d3-5119-47ac-9a0c-8a2755ad23e6
 md"""
@@ -150,7 +152,7 @@ osol1 = solve(oprob1, Tsit5(), saveat=0.5)
 
 # ╔═╡ f1c134c9-9127-4ed4-84a9-e1d218a82295
 md"""
-Plot the results.
+Plot the results. Use a line width of 2 (`linewidth=...`).
 """
 
 # ╔═╡ e8eeefd3-f83a-4154-945d-568ac629cd94
@@ -168,6 +170,11 @@ Interprete the results. Try to come up with an answer to the following questions
 3. Why is the difference in ethanol ($E$) and $CO_2$ concentration constant?
     - Answer: missing
 """
+#=
+1. The initial concentrations of S and I are 0.04 and 0.02 respectively. They are both being consumed (converted into G) in the first order reactions (first order w.r.t. S and I) at the same rate. Hence, when I becomes zero, then S becomes constant 0.04 - 0.02 = 0.02. The difference between both curves is constant.
+2. G is being produced by the consumption of S and I. Initially there is no G in the reactor, so the production precedes. The convertion of G into E will start with some delay because it is proportional to G. Hence, when there is enough G in the reactor the convertion will take place and will compete with the production of G. Hence G will first increase and then decline.
+3. Both E and CO2 are being produced at exactly the same rate. Since the initial concentrations are 0.01 and 0.0 respectively, their difference will always be constant.
+=#
 
 # ╔═╡ 939716cd-08c9-44a0-9217-146f9e312d35
 md"""
@@ -193,20 +200,19 @@ Make a copy of the content of the previous *reaction network object* and complem
 # ╔═╡ 4165677e-a483-404c-a8c5-6cd85e5a8090
 # Uncomment and complete the instruction
 # anaerobic_fermentation2 = @reaction_network begin
-# 	@species missing
+#     @species missing
 #     missing
 #     ...
 #     missing
 # end
 anaerobic_fermentation2 = @reaction_network begin
-	@species S(t)=0.04 I(t)=0.02 G(t)=0.0 E(t)=0.01 CO2(t)=0.0
+    @species S(t)=0.04 I(t)=0.02 G(t)=0.0 E(t)=0.01 CO2(t)=0.0
     k1, S + I --> 2G
-	# mm(K, k2, E), 2G --> 4E + 4CO2
-	mm(E, k2, K), 2G --> 4E + 4CO2
-	Q/V, (S, I, G, E, CO2) --> (0, 0, 0, 0, 0)
-	Q/V*Sin, 0 --> S
-	Q/V*Iin, 0 --> I
-	Q/V*Gin, 0 --> G
+    mm(E, k2, K), 2G --> 4E + 4CO2
+    Q/V, (S, I, G, E, CO2) --> (0, 0, 0, 0, 0)
+    Q/V*Sin, 0 --> S
+    Q/V*Iin, 0 --> I
+    Q/V*Gin, 0 --> G
 end
 
 # ╔═╡ 3da7ee15-6d30-42bb-be03-6f9129febc60
@@ -220,7 +226,7 @@ osys2 = convert(ODESystem, anaerobic_fermentation2)
 
 # ╔═╡ f6d58bac-7256-4b57-836d-6d243bf292c0
 md"""
-Make a copy of `u01` and rename it to `u02` with the initial conditions:
+Make an exact copy of `u01` and rename it to `u02` with the initial conditions:
 """
 
 # ╔═╡ 75eb088a-33fd-47d7-892a-da934ec9896a
@@ -229,7 +235,7 @@ u02 = [:S => 0.04, :I => 0.02, :G => 0.0, :E => 0.01, :CO2 => 0.0]
 
 # ╔═╡ b4c4fc78-b6e4-40db-9948-6be83ee57d87
 md"""
-Make a copy of `tspan1` and rename it to `tspan2`:
+Make an exact copy of `tspan1` and rename it to `tspan2`:
 """
 
 # ╔═╡ 4a0e9abf-99e7-4fe6-82ae-aa958ab51dd0
@@ -251,6 +257,7 @@ Create the ODE problem and store it in `oprob2`:
 """
 
 # ╔═╡ 18a3513f-8ecc-4c2f-bb39-5d0cb39a3d92
+# oprob2 = missing                 # Uncomment and complete the instruction
 oprob2 = ODEProblem(anaerobic_fermentation2, u02, tspan2, params2)
 
 # ╔═╡ 5318708e-3410-4675-8162-827c0c6e039c
@@ -259,27 +266,34 @@ Solve the ODE problem. Use `Tsit5()` and `saveat=0.5`. Store the solution in `os
 """
 
 # ╔═╡ e5476343-8376-4a9a-8286-f69e0d023939
+# osol2 = missing                    # Uncomment and complete the instruction
 osol2 = solve(oprob2, Tsit5(), saveat=0.5)
 
 # ╔═╡ 29a3cd1b-fd8f-4e5c-9ec7-a69fe328d824
 md"""
-Plot the results.
+Plot the results. Use a line width of 2 (`linewidth=...`). If you only want to see the curves for, e.g., $E$, $S$ and $G$, you can use the option `idxs=[:E, :S, :G]` in the `plot` command.
 """
 
 # ╔═╡ 0c179e6b-bcaf-4e89-8d04-59f24b456127
-# plot(osol, linewidth=2; idxs=:E)
+# missing                # Uncomment and complete the instruction
 plot(osol2, linewidth=2)
+# plot(osol2, linewidth=2, idxs=[:E, :S, :G])
 
 # ╔═╡ 5f865fec-09d5-4358-be57-0d568740968d
 md"""
 Check out the last concentrations (at the end time) for each of the species.
 
 Tips:
-- You can access the last value of $S$ with `osol2[:S][end]`.
-- You can put everything on one line separating the values with comma's.
+- You can see the last values of all species with `osol2.u[end]`
+- If later you need all last values separately, you can access the last value of $S$ with `osol2[:S][end]` and then you can put everything on one line separating the values with comma's.
 """
 
+# ╔═╡ acc8acb3-f014-4108-80d7-bff893ce07d1
+# missing                 # Uncomment and complete the instruction
+osol2.u[end]
+
 # ╔═╡ 053cca09-0e31-44c0-89db-26a581816744
+# osol2[:S][end], ..., ..., ..., ...)  # Uncomment and complete the instruction
 (osol2[:S][end], osol2[:I][end], osol2[:G][end], osol2[:E][end], osol2[:CO2][end])
 
 # ╔═╡ 83cfd592-896d-42f5-ae2a-b1d0a9f14aac
@@ -288,6 +302,7 @@ Create a vector named `u_guess` in the same way as `u02`, but now with the end v
 """
 
 # ╔═╡ f5a8f97b-7cbb-4eb4-b5ff-82c184b7de85
+# u_guess2 = missing              # Uncomment and complete the instruction
 u_guess2 = [:S=>osol2[:S][end], :I=>osol2[:I][end], :G=>osol2[:G][end], :E=>osol2[:E][end], :CO2=>osol2[:CO2][end]]
 
 # ╔═╡ ce67b1f7-a82d-4fa3-a22b-f8ee3d2f4af0
@@ -296,7 +311,8 @@ Calculate the steady-state values of the species:
 """
 
 # ╔═╡ 3a014879-883b-4cab-a7ac-0c3a708f5da6
-Seq2, Ieq2, Geq2, Eeq2, CO2eq2 = solve(SteadyStateProblem(ODEProblem(anaerobic_fermentation2, u_guess2, tspan2, params2)))
+# Sw2, Iw2, Gw2, Ew2, CO2w2 = missing # Uncomment and complete the instruction
+Sw2, Iw2, Gw2, Ew2, CO2w2 = solve(SteadyStateProblem(ODEProblem(anaerobic_fermentation2, u_guess2, tspan2, params2)))
 
 # ╔═╡ d7bde85c-05f1-4794-9e91-c4e5e120f876
 md"""
@@ -304,7 +320,7 @@ Check ou the steady states:
 """
 
 # ╔═╡ 876683d7-b3cd-4a06-94b2-d38a1d4a34b6
-Seq2, Ieq2, Geq2, Eeq2, CO2eq2
+Sw2, Iw2, Gw2, Ew2, CO2w2
 
 # ╔═╡ Cell order:
 # ╠═84e21b44-a1b0-11ef-014d-c58a169e3de3
@@ -312,52 +328,53 @@ Seq2, Ieq2, Geq2, Eeq2, CO2eq2
 # ╠═2552c020-1e29-451e-9f59-c4bde047faad
 # ╠═896b4151-e26b-40ee-bfb9-c56dfc4e7048
 # ╠═aaf6da21-60cc-478c-b447-3f33aa375240
-# ╠═bb10266a-1f6c-4fda-b276-6a9cf3a86e90
-# ╠═c3f85244-e0a8-4808-aa2d-15ab6bbb1b26
-# ╠═2e7c2eab-a3bc-4574-a0fd-0a45b59b803b
-# ╠═35f2015d-9c28-4bc8-83cd-c185757db0dc
-# ╠═bfd7fc6f-57f6-40d8-8618-d514d1e5d9ad
+# ╟─bb10266a-1f6c-4fda-b276-6a9cf3a86e90
+# ╟─c3f85244-e0a8-4808-aa2d-15ab6bbb1b26
+# ╟─2e7c2eab-a3bc-4574-a0fd-0a45b59b803b
+# ╟─35f2015d-9c28-4bc8-83cd-c185757db0dc
+# ╟─bfd7fc6f-57f6-40d8-8618-d514d1e5d9ad
 # ╠═53c32175-4298-4450-ae85-132ea0cd6a9b
-# ╠═485c2b25-f281-4ee9-bcb8-7ca010205930
+# ╟─485c2b25-f281-4ee9-bcb8-7ca010205930
 # ╠═86200a5e-55ce-4d58-87ba-fe30f65c9120
-# ╠═579318a9-bad9-4392-9420-3f5474ccfff8
+# ╟─579318a9-bad9-4392-9420-3f5474ccfff8
 # ╠═bc56d0fb-db19-4f63-9f34-617308da6c8a
-# ╠═5983b9d3-5119-47ac-9a0c-8a2755ad23e6
-# ╠═c822fcbc-e8d3-4952-93bc-38a41f1786a7
-# ╠═eb7fda8e-d1db-4bcc-91d6-964a6dcbbe90
+# ╟─5983b9d3-5119-47ac-9a0c-8a2755ad23e6
+# ╟─c822fcbc-e8d3-4952-93bc-38a41f1786a7
+# ╟─eb7fda8e-d1db-4bcc-91d6-964a6dcbbe90
 # ╠═124571f0-fe33-44a2-9ab4-f6a418ac4f51
-# ╠═703d2eb0-8504-496f-9abe-8c6911a0fdbc
+# ╟─703d2eb0-8504-496f-9abe-8c6911a0fdbc
 # ╠═9dd45f30-9076-45d5-827b-02ae2d73ef97
-# ╠═64f85604-9562-4a97-bedd-ea5d28ada096
+# ╟─64f85604-9562-4a97-bedd-ea5d28ada096
 # ╠═04816732-3419-40e3-a927-d6e102949553
-# ╠═9a517512-a7c0-4a92-a104-b19a8bf786c7
+# ╟─9a517512-a7c0-4a92-a104-b19a8bf786c7
 # ╠═69f9ce3a-0422-499a-8492-ea70de43d587
-# ╠═f1c134c9-9127-4ed4-84a9-e1d218a82295
+# ╟─f1c134c9-9127-4ed4-84a9-e1d218a82295
 # ╠═e8eeefd3-f83a-4154-945d-568ac629cd94
-# ╠═622f65d3-0592-419f-8101-bc6f8b8ea5ed
-# ╠═939716cd-08c9-44a0-9217-146f9e312d35
-# ╠═194a596b-22de-412e-8ead-94a8c02c98c6
-# ╠═76b1d8ba-cc55-48f7-bee4-09f899582e62
+# ╟─622f65d3-0592-419f-8101-bc6f8b8ea5ed
+# ╟─939716cd-08c9-44a0-9217-146f9e312d35
+# ╟─194a596b-22de-412e-8ead-94a8c02c98c6
+# ╟─76b1d8ba-cc55-48f7-bee4-09f899582e62
 # ╠═4165677e-a483-404c-a8c5-6cd85e5a8090
-# ╠═3da7ee15-6d30-42bb-be03-6f9129febc60
+# ╟─3da7ee15-6d30-42bb-be03-6f9129febc60
 # ╠═58b8545f-1699-45b4-91c0-86722668a428
-# ╠═f6d58bac-7256-4b57-836d-6d243bf292c0
+# ╟─f6d58bac-7256-4b57-836d-6d243bf292c0
 # ╠═75eb088a-33fd-47d7-892a-da934ec9896a
-# ╠═b4c4fc78-b6e4-40db-9948-6be83ee57d87
+# ╟─b4c4fc78-b6e4-40db-9948-6be83ee57d87
 # ╠═4a0e9abf-99e7-4fe6-82ae-aa958ab51dd0
-# ╠═0ec39752-6654-452b-98db-eadd8c02b27f
+# ╟─0ec39752-6654-452b-98db-eadd8c02b27f
 # ╠═3aea0dbe-1cb3-4b19-bb38-53e58db153dd
-# ╠═49984e8e-a194-464a-994f-501342800026
+# ╟─49984e8e-a194-464a-994f-501342800026
 # ╠═18a3513f-8ecc-4c2f-bb39-5d0cb39a3d92
-# ╠═5318708e-3410-4675-8162-827c0c6e039c
+# ╟─5318708e-3410-4675-8162-827c0c6e039c
 # ╠═e5476343-8376-4a9a-8286-f69e0d023939
-# ╠═29a3cd1b-fd8f-4e5c-9ec7-a69fe328d824
+# ╟─29a3cd1b-fd8f-4e5c-9ec7-a69fe328d824
 # ╠═0c179e6b-bcaf-4e89-8d04-59f24b456127
-# ╠═5f865fec-09d5-4358-be57-0d568740968d
+# ╟─5f865fec-09d5-4358-be57-0d568740968d
+# ╠═acc8acb3-f014-4108-80d7-bff893ce07d1
 # ╠═053cca09-0e31-44c0-89db-26a581816744
-# ╠═83cfd592-896d-42f5-ae2a-b1d0a9f14aac
+# ╟─83cfd592-896d-42f5-ae2a-b1d0a9f14aac
 # ╠═f5a8f97b-7cbb-4eb4-b5ff-82c184b7de85
-# ╠═ce67b1f7-a82d-4fa3-a22b-f8ee3d2f4af0
+# ╟─ce67b1f7-a82d-4fa3-a22b-f8ee3d2f4af0
 # ╠═3a014879-883b-4cab-a7ac-0c3a708f5da6
-# ╠═d7bde85c-05f1-4794-9e91-c4e5e120f876
+# ╟─d7bde85c-05f1-4794-9e91-c4e5e120f876
 # ╠═876683d7-b3cd-4a06-94b2-d38a1d4a34b6

@@ -215,7 +215,7 @@ end
 
 # ╔═╡ 11f15a0e-2958-4075-928c-5a24bcc00c69
 md"""
-Next we will need to make a function based on the solution function that return a single output.
+Next we will need to make a function based on the solution function that returns a single output.
 """
 
 # ╔═╡ d0f3197f-3094-4f6e-b33c-e5b74e0947f6
@@ -228,6 +228,8 @@ Now make a time vector that is the same as the time vector from the solution.
 
 # ╔═╡ 71f897a6-1e91-412b-ad58-c5f1e7cd1adb
 t_vals_log = 0:0.5:100.0
+# Alternative:
+# t_vals_log = tspan[1]:0.5:tspan[2]
 
 # ╔═╡ b3b97b57-a4f7-4cb6-80c8-6ad893ade75d
 md"""
@@ -253,10 +255,10 @@ To get the sensitivities of $W$ on $\mu$, and of $W$ on $W_f$, you need to use i
 """
 
 # ╔═╡ 6600d28e-2522-4069-a5e0-643be43f6117
-sens_W_on_μ_log = sens_W_log[:,1]    # sensitivity for W on μ
+sens_W_on_μ_log = sens_W_log[:,1]    # sensitivity of W on μ
 
 # ╔═╡ d9e3a4ac-c138-4b93-a19c-737166a0f0ea
-sens_W_on_Wf_log = sens_W_log[:,2]   # sensitivity for W on Wf
+sens_W_on_Wf_log = sens_W_log[:,2]   # sensitivity of W on Wf
 
 # ╔═╡ f07d8205-e172-45fa-b955-792bd95f3023
 md"""
@@ -276,6 +278,11 @@ We are now ready to plot the two sensitivity functions. We provide the time vect
 
 # ╔═╡ f58ce914-f366-4087-a7d1-8cfe69ac623b
 plot(t_vals_log, [sens_W_on_μ_rel_log, sens_W_on_Wf_rel_log], title="Normalized sensitivities", label=["W on μ" "W on Wf"], xlabel="Time (day)")
+
+# ╔═╡ 05972c7f-f64f-4865-b0a7-f33029d0a6fa
+md"""
+Notice that in the `label` option there is no comma separating the labels.
+"""
 
 # ╔═╡ 88aa13f6-e16c-40cd-ac10-3ede8b9fb429
 # ╠═╡ disabled = true
@@ -323,13 +330,17 @@ Create a *reaction network object* for the exponential growth model. Name it `gr
 # ╔═╡ 2836f231-3b90-4829-9012-3ed9a09239ff
 # Uncomment and complete the instruction
 # growth_exp = @reaction_network begin
+#     @species missing
+#     @parameters missing
 #     missing
 # end
 growth_exp = @reaction_network begin
 	@species W(t)=2.0
 	@parameters μ=0.02 Wf=10.0
-    μ*Wf, 0 --> W
-    μ, W --> 0
+	(μ*Wf, μ), 0 <--> W
+	# Alternative:
+    # μ*Wf, 0 --> W
+    # μ, W --> 0
 end
 
 # ╔═╡ e8db84be-31a0-415d-a194-064c4c87a293
@@ -347,7 +358,7 @@ Initialize a vector `u0_exp` with the initial condition:
 """
 
 # ╔═╡ 7dc013f7-7b35-42e4-aa77-0dca3755f389
-# u₀_exp = missing           # Uncomment and complete the instruction
+# u0_exp = missing           # Uncomment and complete the instruction
 u0_exp = [:W => 2.0]
 
 # ╔═╡ 86785c55-b567-449c-ae76-bc15a16223bc
@@ -408,6 +419,7 @@ Write a solution function with as argument a vector of the parameters (that you 
 """
 
 # ╔═╡ eb1e5f97-3e09-43f0-b6ce-cc6cbc42ec2f
+# Uncomment and complete the instruction
 # function growth_sim_exp(params)
 #     missing
 #     ...
@@ -427,7 +439,7 @@ Make a function based on the solution function that returns a single output.
 """
 
 # ╔═╡ f2fa716f-d7b5-4c95-a8c6-6b16fbfe1499
-# growth_sim_W_exp(params) = missing
+# growth_sim_W_exp(params) = missing   # Uncomment and complete the instruction
 growth_sim_W_exp(params) = growth_sim_exp(params)[:W]
 
 # ╔═╡ 0b413b98-a800-44e9-a917-ba61467bd613
@@ -436,7 +448,7 @@ Make the time vector.
 """
 
 # ╔═╡ 6be6fea7-561b-4eec-b249-fa4522a5b039
-# t_vals = missing
+# t_vals = missing             # Uncomment and complete the instruction
 t_vals_exp = 0:0.5:100.0
 
 # ╔═╡ 98070d41-e8c5-49e6-9eea-04c718cbff65
@@ -445,7 +457,7 @@ Compute the output for the given parameter values.
 """
 
 # ╔═╡ cef751aa-f9c8-46da-9436-9cc2e5d7515c
-# W_exp = missing
+# W_exp = missing              # Uncomment and complete the instruction
 W_exp = growth_sim_W_exp([μ_exp, Wf_exp])
 
 # ╔═╡ 9e7bb7ec-8fe3-422e-920f-13c2ef055feb
@@ -454,7 +466,7 @@ Using `ForwardDiff.jacobian` to compute the sensitivities for the single ouput(s
 """
 
 # ╔═╡ b13b5e77-ca60-465b-9f63-be9e5da0482f
-# sens_W_exp = missing
+# sens_W_exp = missing           # Uncomment and complete the instruction
 sens_W_exp = ForwardDiff.jacobian(growth_sim_W_exp, [μ_exp, Wf_exp])
 
 # ╔═╡ 735f5191-259e-440f-a379-20a2a70ec72c
@@ -463,11 +475,11 @@ Extract the (absolute) sensitivities of the outputs on the different parameters.
 """
 
 # ╔═╡ 689556c9-a690-4e9e-9052-7ac66e999d4d
-# sens_W_on_μ_exp = missing
+# sens_W_on_μ_exp = missing      # Uncomment and complete the instruction
 sens_W_on_μ_exp = sens_W_exp[:,1]
 
 # ╔═╡ b85f0d09-a102-435b-a898-149ba4b29caa
-# sens_W_on_Wf_exp = missing
+# sens_W_on_Wf_exp = missing     # Uncomment and complete the instruction
 sens_W_on_Wf_exp = sens_W_exp[:,2]
 
 # ╔═╡ d067f814-1dd5-4e59-8cfd-3bc0b2d97612
@@ -476,11 +488,11 @@ Compute the normalized sensitivities.
 """
 
 # ╔═╡ e01657f3-33ac-4eb8-b39e-e2441a165a8d
-# sens_W_on_μ_rel_exp = missing
+# sens_W_on_μ_rel_exp = missing   # Uncomment and complete the instruction
 sens_W_on_μ_rel_exp = sens_W_on_μ_exp .* μ_exp ./ W_exp
 
 # ╔═╡ 7231e54e-b293-48fc-b1f0-273f45f51539
-# sens_W_on_Wf_rel_exp = missing
+# sens_W_on_Wf_rel_exp = missing   # Uncomment and complete the instruction
 sens_W_on_Wf_rel_exp = sens_W_on_Wf_exp .* Wf_exp ./ W_exp
 
 # ╔═╡ 0524a976-9d4d-4ef9-b088-bdd9102415e6
@@ -489,7 +501,7 @@ Plot both normalized sensitivity functions (with appropriate title and labels):
 """
 
 # ╔═╡ 33031b53-6f2d-4256-a0aa-0ba97beaa7af
-# missing
+# missing     # Uncomment and complete the instruction
 plot(t_vals_exp, [sens_W_on_μ_rel_exp, sens_W_on_Wf_rel_exp], title="Normalized sensitivities", label=["W on μ" "W on Wf"], xlabel="Time (day)")
 
 # ╔═╡ 22b58c97-1aa2-49c4-8a0a-488c63014a90
@@ -513,14 +525,17 @@ Create a *reaction network object* for the Gompertz growth model. Name it `growt
 # ╔═╡ 1ae76036-42ef-46e9-88bf-d66d4267addc
 # Uncomment and complete the instruction
 # growth_gom = @reaction_network begin
+#     @species missing
+#     @parameters missing
 #     missing
 # end
 growth_gom = @reaction_network begin
 	@species W(t)=2.0
 	@parameters μ=0.09 D=0.04
+	μ-D*log(W), W --> 2*W
+	# Alternative:
     # μ, W --> 2*W
     # D*log(W), W --> 0
-	μ-D*log(W), W --> 2*W
 end
 
 # ╔═╡ e190ceca-30b1-49e2-baf5-ceb62929f4c0
@@ -599,6 +614,7 @@ Write a solution function with as argument a vector of the parameters (that you 
 """
 
 # ╔═╡ be21e269-16c4-42b0-8930-2d009bd91161
+# Uncomment and complete the instruction
 # function growth_sim_gom(params)
 #     missing
 #     ...
@@ -618,7 +634,7 @@ Make a function based on the solution function that returns a single output.
 """
 
 # ╔═╡ 69f96b57-7c8d-4e64-9e6a-9804d001b0b1
-# growth_sim_W_gom(params) = missing
+# growth_sim_W_gom(params) = missing  # Uncomment and complete the instruction
 growth_sim_W_gom(params) = growth_sim_gom(params)[:W]
 
 # ╔═╡ f7f6c56b-4910-4641-a462-eacfa4b4d034
@@ -627,7 +643,7 @@ Make the time vector.
 """
 
 # ╔═╡ 84c1bb38-23c3-4f70-be67-7da2300a737b
-# t_vals_gom = missing
+# t_vals_gom = missing      # Uncomment and complete the instruction
 t_vals_gom = 0:0.5:100.0
 
 # ╔═╡ 09eeab39-79a1-420a-8298-72b7002ec168
@@ -636,7 +652,7 @@ Compute the output for the given parameter values.
 """
 
 # ╔═╡ 9e15601f-4ad2-41be-8168-db30548a1c3b
-# W_gom = missing
+# W_gom = missing           # Uncomment and complete the instruction
 W_gom = growth_sim_W_gom([μ_gom, D_gom])
 
 # ╔═╡ 2b731e4a-d6eb-48f2-91f0-27e916d85683
@@ -645,7 +661,7 @@ Using `ForwardDiff.jacobian` to compute the sensitivities for the single ouput(s
 """
 
 # ╔═╡ 68ad7e05-7f79-4e8d-9031-fefb5f5c0897
-# sens_W_gom = missing
+# sens_W_gom = missing          # Uncomment and complete the instruction
 sens_W_gom = ForwardDiff.jacobian(growth_sim_W_gom, [μ_gom, D_gom])
 
 # ╔═╡ 362a8e24-8fac-4978-bc0e-13596a05d39e
@@ -654,11 +670,11 @@ Extract the (absolute) sensitivities of the outputs on the different parameters.
 """
 
 # ╔═╡ e9114d64-fe3e-420d-9fde-4b0fcbbc8527
-# sens_W_on_μ_gom = missing
+# sens_W_on_μ_gom = missing      # Uncomment and complete the instruction
 sens_W_on_μ_gom = sens_W_gom[:,1]
 
 # ╔═╡ 7c9e1112-0a63-417f-a65a-9c2bdfa8bc47
-# sens_W_on_D_gom = missing
+# sens_W_on_D_gom = missing      # Uncomment and complete the instruction
 sens_W_on_D_gom = sens_W_gom[:,2]
 
 # ╔═╡ 94e66042-b352-4bf2-a24b-b15789e10fe3
@@ -667,11 +683,11 @@ Compute the normalized sensitivities.
 """
 
 # ╔═╡ 1711346a-c161-415a-96f9-1235d786a584
-# sens_W_on_μ_rel_gom = missing
+# sens_W_on_μ_rel_gom = missing   # Uncomment and complete the instruction
 sens_W_on_μ_rel_gom = sens_W_on_μ_gom .* μ_gom ./ W_gom
 
 # ╔═╡ 7a87bfbb-a8c0-4071-8f86-66513ae40968
-# sens_W_on_D_rel_gom = missing
+# sens_W_on_D_rel_gom = missing    # Uncomment and complete the instruction
 sens_W_on_D_rel_gom = sens_W_on_D_gom .* D_gom ./ W_gom
 
 # ╔═╡ 7593a4bf-ad0f-4fd3-aa3c-8b6a5073cb02
@@ -680,7 +696,7 @@ Plot both sensitivity functions (with appropriate title and labels):
 "
 
 # ╔═╡ ad70a1d5-9b68-4cd6-9259-a3c25cad706b
-# missing
+# missing        # Uncomment and complete the instruction
 plot(t_vals_gom, [sens_W_on_μ_rel_gom, sens_W_on_D_rel_gom], title="Normalized sensitivities", label=["W on μ" "W on D"], xlabel="Time (day)")
 
 # ╔═╡ 12f64333-36d0-4e2a-9061-e3dcc7a4ae96
@@ -747,6 +763,7 @@ Draw your conclusions:
 # ╠═cb397e0b-56f9-420f-a86e-bfab35286b44
 # ╟─9e6946a4-f207-4bfb-9e19-aa7b77c2a05b
 # ╠═f58ce914-f366-4087-a7d1-8cfe69ac623b
+# ╟─05972c7f-f64f-4865-b0a7-f33029d0a6fa
 # ╠═88aa13f6-e16c-40cd-ac10-3ede8b9fb429
 # ╠═dc0507ee-0f67-4556-bdc3-1294177c86b7
 # ╟─04a1d1ad-53a9-4146-be09-65aa422e3730
@@ -754,9 +771,9 @@ Draw your conclusions:
 # ╟─fa2270d0-2548-409c-a23f-4369d8bce8ec
 # ╟─dca50b37-b06c-4efe-881e-cf966ebc8fd7
 # ╠═2836f231-3b90-4829-9012-3ed9a09239ff
-# ╠═e8db84be-31a0-415d-a194-064c4c87a293
+# ╟─e8db84be-31a0-415d-a194-064c4c87a293
 # ╠═78d175b4-a9b2-49b5-bbc8-eb348799985b
-# ╠═63952c54-3304-4500-9536-b375c5c8f280
+# ╟─63952c54-3304-4500-9536-b375c5c8f280
 # ╠═7dc013f7-7b35-42e4-aa77-0dca3755f389
 # ╟─86785c55-b567-449c-ae76-bc15a16223bc
 # ╟─05e96232-ce95-452b-98e4-e79817d45ae2
