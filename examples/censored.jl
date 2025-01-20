@@ -12,7 +12,7 @@ md"""
 
 # Censored
 
-Researchers are studying a new drug designed to cure a specific type of skin condition. They monitor 15 patients undergoing treatment for five months, recording the time it takes for patients to show no signs of the disease. Of the 15, seven were cured in the five-month study period, at `[2.1, 4.7, 1.6, 2.8, 4.3, 1.9, 4.2]` months. Eight patients might not achieve remission within the five-year study period (this is censored data). You may assume that these persons were cured at some later, unspecified time after the five-year period. Given a Gamma prior on the rate parameter $\lambda$, what is its posterior distribution? 
+Researchers are studying a new drug designed to cure a specific type of skin condition. They monitor 15 patients undergoing treatment for five months, recording the time it takes for patients to show no signs of the condition. Of the 15, seven were cured in the five-month study period, at `[2.1, 4.7, 1.6, 2.8, 4.3, 1.9, 4.2]` months. Eight patients were not achieve cured within the five-month study period (this is censored data). You may assume that these persons were cured at some later, unspecified time after the five-month trial. Given a Gamma prior on the rate parameter $\lambda$, what is its posterior distribution? 
 
 Give a 95% credibility interval.
 

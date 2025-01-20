@@ -1,17 +1,19 @@
 ### A Pluto.jl notebook ###
-# v0.19.43
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
 
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
+    #! format: off
     quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
+    #! format: on
 end
 
 # ╔═╡ 3e70b82a-e4d3-4747-9679-aa5ab41d5b06
@@ -127,7 +129,7 @@ md"[mm?](https://chem.libretexts.org/Bookshelves/Biological_Chemistry/Supplement
 MM?"
 
 # ╔═╡ 03373997-a9eb-4d5a-9ef5-8822c3f95285
-md"## Poisson"
+md"## Poisson via Laplace approximation"
 
 # ╔═╡ 70f8de3c-5c5f-4ff0-92eb-e6d2a06451e1
 @bind λ_pois Slider(0:0.2:50, show_value=true, default=26)
@@ -141,11 +143,23 @@ xs_tiny = [2, 4, 3, 4]
 # ╔═╡ d733961a-094a-4724-9b16-ee669a559945
 ll_pois2(λ) = sum(x->loglikelihood(Poisson(λ), x), xs_tiny)
 
+# ╔═╡ de91d6d5-8115-4c79-9420-6f85873975b4
+plot(ll_pois2, 0.1, 10)
+
 # ╔═╡ 46551486-d8a3-4aca-a92d-8c7f1c4439c0
 pois_map(λ) = ll_pois2(λ) - log(λ)
 
+# ╔═╡ 580a4e54-5675-45f5-a3b8-241c2d5b470d
+pois_map(λ::AbstractVecOrMat) = pois_map(λ[1])
+
+# ╔═╡ 87e09095-3a14-4cef-b8a3-705b9cb243d5
+plot(pois_map, 0.1, 10)
+
 # ╔═╡ 0d6cc24c-6008-4bb7-8fb9-45223febc05b
 λ_star = optimize(x->-pois_map(x[1]), [mean(xs_tiny)], Newton()).minimizer[1]
+
+# ╔═╡ 439bcebe-7607-441b-bae7-834482dd6059
+mean(xs_tiny)
 
 # ╔═╡ 1e634f77-286b-44ce-b768-72b060ee898b
 md"Fisher information using the second-order derivative:"
@@ -153,8 +167,17 @@ md"Fisher information using the second-order derivative:"
 # ╔═╡ 0082f110-22df-49d5-8958-29e9516e9ca8
 fi = -ForwardDiff.derivative(l->ForwardDiff.derivative(pois_map, l), λ_star)
 
+# ╔═╡ 697e8128-40d1-4c77-acfc-b948c88c394e
+ForwardDiff.hessian(pois_map, [λ_star])
+
+# ╔═╡ ba822f9b-0b29-451e-9349-e08e3e5697fa
+pois_map(9)
+
 # ╔═╡ 362fe960-f247-4d7b-ab9d-01b67d1e647e
 σ_λ = inv(√(fi))
+
+# ╔═╡ f041b223-efec-4a29-a753-d6563a7f9a10
+sqrt(mean(xs_tiny)) / sqrt(length(xs_tiny))  # classical estimator voor sde
 
 # ╔═╡ 8feddb40-5cf8-4d76-a959-dd3071c20e27
 post_Laplace = Normal(λ_star, σ_λ)
@@ -218,7 +241,7 @@ p = (alpha, beta, gamma, delta)
 lv_prob = ODEProblem(lotka_volterra!, [1.0, 1.0], (0.0, 10.0), p)
 
 # ╔═╡ b3c31cca-b472-4dec-b700-11cbff9465a9
-plot(solve(lv_prob, Tsit5()), lw=2)
+plot(solve(lv_prob, Tsit5()), lw=2, ylab="population size")
 
 # ╔═╡ 14810fe9-e6fe-46c7-b6cf-9705b5974113
 begin
@@ -226,7 +249,7 @@ begin
 	odedata = Array(sol) + 0.8 * randn(size(Array(sol)))
 
 	# Plot simulation and noisy observations.
-	plot(sol; alpha=0.3)
+	plot(sol; alpha=0.3, ylab="population size")
 	scatter!(sol.t, odedata'; color=[1 2], label="", marker=[:o :^])
 end
 
@@ -572,7 +595,7 @@ optimize(yeast_mod, MLE(), LBFGS()) |> coeftable
   ╠═╡ =#
 
 # ╔═╡ dd285391-6df6-47f7-a568-8786d2000f24
-optimize(yeast_mod, MAP(), LBFGS()) |> coeftable
+optimize(yeast_mod, MAP(), NelderMead()) |> coeftable
 
 # ╔═╡ 16089b87-a760-4309-86b9-8300bb5a23cf
 chain_yeast = sample(yeast_mod, NUTS(), MCMCSerial(), 5000, 5);
@@ -679,7 +702,7 @@ plots = Dict()
 
 # ╔═╡ 6edf2f34-1e9e-4775-bd6a-624d003b6688
 let
-	plots["poly_data"] = scatter(xpoly, ypoly)
+	plots["poly_data"] = scatter(xpoly, ypoly, ylab=L"y",xlab=L"x")
 end
 
 # ╔═╡ 181a4886-a515-4f06-9434-64b7387ee0d3
@@ -793,7 +816,7 @@ plots["LV_diagnostic"] = plot(lv_chain)
 
 # ╔═╡ 60022e21-b74a-41b7-a43d-6b14ed482112
 let
-	p = plot(; legend=false)
+	p = plot(; legend=false, ylab="population size")
 	posterior_samples = sample(lv_chain[[:α, :β, :γ, :δ]], 300; replace=false)
 	for p in eachrow(Array(posterior_samples))
 	    sol_p = solve(lv_prob, Tsit5(); p=p, saveat=0.1)
@@ -809,7 +832,7 @@ end
 
 # ╔═╡ 94cbbbd8-00f7-47fa-b814-0cbca085b886
 let
-	p = plot(; legend=false)
+	p = plot(; legend=false, ylab="population size")
 	posterior_samples = sample(chain2[[:α, :β, :γ, :δ]], 300; replace=false)
 	for p in eachrow(Array(posterior_samples))
 	    sol_p = solve(lv_prob, Tsit5(); p=p, saveat=0.1)
@@ -829,7 +852,7 @@ plots["LV_counts_diag"] = plot(lv_chain3)
 
 # ╔═╡ f845114c-b612-43c1-8a49-c3da8f52e278
 let
-	p = plot(; legend=false)
+	p = plot(; legend=false, ylab="population size")
 	posterior_samples = sample(lv_chain3[[:α, :β, :γ, :δ]], 300; replace=false)
 	for p in eachrow(Array(posterior_samples))
 	    sol_p = solve(lv_prob, Tsit5(); p=p, saveat=0.1)
@@ -852,7 +875,7 @@ plots
 # ╠═a10a9f8e-4088-49e2-a497-b1d253d83ecc
 # ╠═4b38ba22-8c3f-4c90-b42a-79063489641e
 # ╠═3e70b82a-e4d3-4747-9679-aa5ab41d5b06
-# ╠═0b6b3b7f-98e7-4922-82de-6a98453a627c
+# ╟─0b6b3b7f-98e7-4922-82de-6a98453a627c
 # ╠═1b055cac-6192-438f-8f3f-9891f5f06f49
 # ╠═ecceb6b5-74f4-4b5a-9c73-4ae1477b2c47
 # ╠═4ca12cc9-3bae-4535-a5c9-11cac5b2c89f
@@ -906,14 +929,21 @@ plots
 # ╠═cd3746d4-518d-476e-abf4-2ac92a2c1387
 # ╠═19221533-56dd-4d87-a00f-1b8f47160b00
 # ╠═37aac79a-ec46-4b6f-a9b8-abf16a5fe7b7
-# ╠═d864db4d-e240-4b90-a8f7-0327eb9e18b0
+# ╟─d864db4d-e240-4b90-a8f7-0327eb9e18b0
 # ╠═6dc06148-79bf-44bf-8a5c-b6221b55bce0
 # ╠═d733961a-094a-4724-9b16-ee669a559945
+# ╠═de91d6d5-8115-4c79-9420-6f85873975b4
+# ╠═87e09095-3a14-4cef-b8a3-705b9cb243d5
 # ╠═46551486-d8a3-4aca-a92d-8c7f1c4439c0
+# ╠═580a4e54-5675-45f5-a3b8-241c2d5b470d
 # ╠═0d6cc24c-6008-4bb7-8fb9-45223febc05b
+# ╠═439bcebe-7607-441b-bae7-834482dd6059
 # ╟─1e634f77-286b-44ce-b768-72b060ee898b
 # ╠═0082f110-22df-49d5-8958-29e9516e9ca8
+# ╠═697e8128-40d1-4c77-acfc-b948c88c394e
+# ╠═ba822f9b-0b29-451e-9349-e08e3e5697fa
 # ╠═362fe960-f247-4d7b-ab9d-01b67d1e647e
+# ╠═f041b223-efec-4a29-a753-d6563a7f9a10
 # ╠═8feddb40-5cf8-4d76-a959-dd3071c20e27
 # ╠═8b71bd3c-60b6-425c-87cf-64652d04c8b7
 # ╠═6ed728a8-80a8-457a-8908-3c840b88efae

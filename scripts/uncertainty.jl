@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.43
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
@@ -101,13 +101,13 @@ generated_quantities(sir_mc(), throw)
 md"[Using the Beer-Lambert Law to Calculate the Concentration of a Solution | Chemistry | Study.com](https://study.com/skill/learn/using-the-beer-lambert-law-to-calculate-the-concentration-of-a-solution-explanation.html)"
 
 # ╔═╡ e6bfb7d1-e594-41c9-9ee2-9668cae70e71
-I = 0.2 ± 0.03;
+Iobs = 0.2 ± 0.03;
 
 # ╔═╡ ccf61cf5-33b2-4349-a422-16a7c883038d
 I0 = 1.29 ± 0.06;
 
 # ╔═╡ 5a9da0cd-9809-445e-aeb3-b91875064106
-A = log10(I0 / I)
+A = log10(I0 / Iobs)
 
 # ╔═╡ ae807e33-3e05-4a3d-a591-2b0e04c9d6d8
 ϵ = 8850 ± 50;
@@ -116,7 +116,7 @@ A = log10(I0 / I)
 l = 3 ± 5e-4;
 
 # ╔═╡ 8cf4e046-c979-4633-b922-43a46c914f3c
-c = log10(I0 / I) / (l * ϵ)
+c = log10(I0 / Iobs) / (l * ϵ)
 
 # ╔═╡ a3f82cf6-b25d-4de1-b264-93d6e047ec6d
 md"Radius of a circle"
@@ -343,7 +343,7 @@ plots["mm_sens_vmax"] = plot(sens_mm_mumax, 0, 100, lw=2, title="Michaelis-Mente
 plots["mm_sens_vmax_rel"] = plot(sens_mm_mumax_rel, 0, 100, lw=2, title="Michaelis-Menten sensitivity (relative)", label="local sensititivity w.r.t. vmax", xlab="S [mol/L]", ylab="Sensitivity", ylims=(0, 2))
 
 # ╔═╡ 7e7956b5-43fc-48fb-92ff-67d0fdb875b1
-plots["mm_sens"] = plot(plots["mm_sens_Ks"], plots["mm_sens_Ks_rel"], plots["mm_sens_vmax_rel"], plots["mm_sens_vmax"], size=(1000, 800))
+plots["mm_sens"] = plot(plots["mm_sens_Ks"], plots["mm_sens_vmax"], plots["mm_sens_Ks_rel"], plots["mm_sens_vmax_rel"], size=(1000, 800))
 
 # ╔═╡ 71e3de0e-03d6-491b-9a1d-071e03f1f6ef
 plots["cuminf"] = contourf(β_vals, γ_vals, (g, l)->sir_summary((g, l))[1], color=:speed,

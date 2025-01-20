@@ -1,17 +1,19 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
 
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
+    #! format: off
     quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
+    #! format: on
 end
 
 # ╔═╡ 093b722d-28af-4219-8546-39a3262146b2
@@ -142,7 +144,7 @@ coffee_sol = solve(coffee_prob, saveat=0.1, tstops=1.9:0.001:3.3)
 
 # ╔═╡ f3737612-5458-4c6e-a634-246b2cb8cb05
 begin
-	plot(qin, 0:0.01:8, ls=:dash, label="q", color=:red, lw=2, xlab="t", title="Debit of milk added")
+	plot(qin, 0:0.01:8, ls=:dash, label="q [L/min]", color=:red, lw=2, xlab="t", title="Inflow of milk added")
 	vspan!([2, 3], alpha=0.4, color=:pink, label="")
 end
 
@@ -193,9 +195,11 @@ function lma_illustration(n, m; ϵ=0.05, kwargs...)
 	scatter!(x1, y1, label="A")
 	scatter!(x2, y2, label="B", m=:^)
 	D = (x1 .- x2').^2 .+ (y1 .- y2').^2 .|> sqrt
-	n_events = count(<(ϵ), D) ÷ 2
-	title!(p, "[A] = $n, [B] = $m\n $(n_events) reaction events")
 	d = minimum(D, dims=2)
+	n_events = count(<(ϵ), d)
+	
+	title!(p, "[A] = $n, [B] = $m\n $(n_events) reaction events")
+	
 	θs = 0:0.1:2π
 	for i in 1:n
 		if d[i] < ϵ
@@ -336,7 +340,7 @@ latexify(michaelis_menten_kinetics, form=:ode) |> clipboard
 eqmm  = (k₁ + k₋₁) * ES ~ k₂ * (Eₜ - ES) * S
 
 # ╔═╡ b38ed246-abf9-4808-b9eb-0f003224d98d
-Symbolics.solve_for([eqmm], [ES])
+Symbolics.symbolic_linear_solve([eqmm], [ES])
 
 # ╔═╡ 03a01f2e-cf36-426f-9df2-b8d848be7526
 DS = Differential(S)
@@ -421,6 +425,46 @@ end
 
 # ╔═╡ 4888025a-986f-4d68-88fb-24872d08a465
 convert(ODESystem, pharkin) 
+
+# ╔═╡ 8a4c283e-de4c-4ec4-9895-92b891269133
+md"## Cell compartment model"
+
+# ╔═╡ d99d3d04-a384-4486-8817-a0f5c603643c
+# transcription and regulation
+nuc = @network_component nuc begin
+  α, G --> G + M
+  (κ₊/V,κ₋), D + G <--> DG
+end
+
+# ╔═╡ 22fc94fa-edbf-4852-bfad-f906f5de3d75
+# translation and dimerization
+cyto = @network_component cyto begin
+  β, M --> M + P
+  (k₊/V,k₋), 2P <--> D
+  σ, P --> 0
+  μ, M --> 0
+end
+
+# ╔═╡ 15887746-475d-437a-844c-890223b051af
+begin
+# export reactions,
+# γ,δ=probability per time to be exported/imported
+cell_model = @network_component model begin
+  γ, $(nuc.M) --> $(cyto.M)
+  δ, $(cyto.D) --> $(nuc.D)
+end
+
+@named cell_model = compose(cell_model, [nuc, cyto])
+end
+
+# ╔═╡ 478a7d14-e01a-4216-9dc7-a87abc8efe77
+latexify(complete(cell_model)) |> clipboard
+
+# ╔═╡ e346bff6-e406-46a2-b8df-d7746b1c01da
+
+
+# ╔═╡ f8e77802-db0a-42b4-9852-2be16186dc99
+
 
 # ╔═╡ ff620b5c-8aa8-4b48-83bd-de533c53f52e
 md"### Reactor with dead zone"
@@ -521,7 +565,7 @@ TableOfContents()
 plots = Dict()
 
 # ╔═╡ e2b7dd60-327c-45fd-a8d7-683b5d4f1274
-plots["tank"] = plot(t->q*A/r - q*A/r*exp(-t*r/A), 0, 50, lw=2, label=L"V(t)", title="Tank filling problem")
+plots["tank"] = plot(t->q*A/r - q*A/r*exp(-t*r/A), 0, 50, lw=2, label=L"V(t)", title="Tank filling problem", xlab="t")
 
 # ╔═╡ 34906c24-e13c-422f-b330-bb905c356276
 let
@@ -532,7 +576,7 @@ end
 
 # ╔═╡ 0cb4e475-676b-4d9c-9a75-ea0a0659c5b0
 let
-	p = plot(coffee_sol, idxs=2, label="T", title="Coffee temperature", color=:orange, lw=2)
+	p = plot(coffee_sol, idxs=2, label="T [°C]", title="Coffee temperature", color=:orange, lw=2)
 	vspan!([2, 3], alpha=0.4, color=:pink, label="")
 	plots["coffeetemp"] = p
 end
@@ -548,6 +592,7 @@ let
 	prob = ODEProblem(tanks!, [0., 0.], (0.0, 100.0), (V1, V2, r1, r2, q, cin))
 	sol = solve(prob, saveat=0.1)
 	plot(cin, 0, 100, label=L"C_{in}(t)", lw=2, title="Tanks in series:\nexponential input")
+	ylabel!("concentration [g/L]")
 	plots["tanks_exp"] = plot!(sol, ls=:auto, label=[L"C_1(t)" L"C_2(t)"], lw=2)
 end
 
@@ -584,10 +629,10 @@ plots["LMA"] = plot(plots["LMA_50_50"], plots["LMA_10_10"], plots["LMA_100_100"]
 plots["NO_H2"] = plot(solve(reactsyst_prob, Rosenbrock23()), lw=2, ylabel="concentration [mol/L]", ls=:auto, idxs=[1,2,3,4])
 
 # ╔═╡ ff4a8011-1d9d-4a5a-a89f-7f032f1619e1
-plots["exp_growth"] = plot(solve(ODEProblem(growth1, [], (0., 20.))), lw=2, title="Exponential growth")
+plots["exp_growth"] = plot(solve(ODEProblem(growth1, [], (0., 20.))), lw=2, title="Exponential growth", ylab="population size")
 
 # ╔═╡ 8687a35e-5efd-45b7-b36e-acbe6d3932a3
-plots["log_growth"] = plot(solve(ODEProblem(growth2, [], (0., 20.))), lw=2, title="Logistic growth")
+plots["log_growth"] = plot(solve(ODEProblem(growth2, [], (0., 20.))), lw=2, title="Logistic growth", ylab="population size")
 
 # ╔═╡ d5e019dc-c8b4-4296-a3c0-921f7dc4a388
 let
@@ -706,21 +751,21 @@ end
 # ╔═╡ 0e2b9af8-9701-4d1c-838d-c289669522d1
 let
 	β, γ = 0.03, 0.3
-	prob_sir = ODEProblem(sir, [], (0.0, 30.0), (;β, γ))
+	prob_sir = ODEProblem(sir, [], (0.0, 30.0), [:β=>β, :γ=>γ])
 	plots["sir_beta=$(β)_gamma=$γ"] = plot(solve(prob_sir), lw=2, title="SIR model\nβ=$β and γ=$γ", ls=:auto)
 end
 
 # ╔═╡ ac6c7513-3476-4968-9d6e-eec6d09e019d
 let
 	β, γ = 0.3, 0.3
-	prob_sir = ODEProblem(sir, [], (0.0, 30.0), (;β, γ))
+	prob_sir = ODEProblem(sir, [], (0.0, 30.0), [:β=>β, :γ=>γ])
 	plots["sir_beta=$(β)_gamma=$γ"] = plot(solve(prob_sir), lw=2, title="SIR model\nβ=$β and γ=$γ", ls=:auto)
 end
 
 # ╔═╡ d408c7dc-4a57-400d-bad2-7ac02cc4fa14
 let
 	β, γ = 0.01, 0.3
-	prob_sir = ODEProblem(sir, [], (0.0, 30.0), (;β, γ))
+	prob_sir = ODEProblem(sir, [], (0.0, 30.0), [:β=>β, :γ=>γ])
 	plots["sir_beta=$(β)_gamma=$γ"] = plot(solve(prob_sir), lw=2, title="SIR model\nβ=$β and γ=$γ", ls=:auto)
 end
 
@@ -736,7 +781,7 @@ length(plots)
 # ╠═a52da2c2-f7df-11ee-033f-8500edb3c03f
 # ╠═8cff27a7-fde1-4b49-8ad6-513302997a4e
 # ╠═34bec0a1-40e8-48a2-9109-94872aaff1b9
-# ╠═abebedae-b977-43ae-aaa0-6b00990a5de4
+# ╟─abebedae-b977-43ae-aaa0-6b00990a5de4
 # ╠═0d09ba2e-3cac-4051-b98f-26b79736b225
 # ╠═fdc534e1-e334-48c1-aac4-5a89c47484e0
 # ╠═104ad25e-743b-4f47-8b10-0d3d6715f95c
@@ -828,6 +873,13 @@ length(plots)
 # ╠═350eb38a-4345-460f-89ca-63982ceadcb1
 # ╠═43140694-0a7d-4fe6-af17-54662c856073
 # ╠═4888025a-986f-4d68-88fb-24872d08a465
+# ╠═8a4c283e-de4c-4ec4-9895-92b891269133
+# ╠═d99d3d04-a384-4486-8817-a0f5c603643c
+# ╠═22fc94fa-edbf-4852-bfad-f906f5de3d75
+# ╠═15887746-475d-437a-844c-890223b051af
+# ╠═478a7d14-e01a-4216-9dc7-a87abc8efe77
+# ╠═e346bff6-e406-46a2-b8df-d7746b1c01da
+# ╠═f8e77802-db0a-42b4-9852-2be16186dc99
 # ╠═ff620b5c-8aa8-4b48-83bd-de533c53f52e
 # ╠═17689a8f-6da2-470a-b015-c55098c8a723
 # ╠═2f2398ed-355f-49ff-b5e0-1fa8215b51f6

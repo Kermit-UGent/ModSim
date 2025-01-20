@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
@@ -47,6 +47,9 @@ end
 # ╔═╡ 17683127-b550-4368-9e3e-3054bd5aa208
 
 
+# ╔═╡ 89d089b2-3220-4696-9ded-364c318b4a1e
+md"### Dosed bioreactor"
+
 # ╔═╡ 21e810e7-0879-4ffb-84f9-d67dafb900d6
 bacterial_growth = @reaction_network begin
 	@species X(t)=10 G(t)=8
@@ -62,7 +65,7 @@ dosetimes = 5:5:20
 timed_feeding = [dosetimes] => [bacterial_growth.G ~ bacterial_growth.G + 10]
 
 # ╔═╡ 90a998c4-5fdd-42c3-9086-267a46fe3999
-@named reactor_dosed = ReactionSystem(equations(bacterial_growth); discrete_events=timed_feeding)
+#@named reactor_dosed = ReactionSystem(equations(bacterial_growth); discrete_events=timed_feeding)
 
 # ╔═╡ 4c420cd0-975a-4d3b-a6cc-9eca35490c62
 md"## Stiff ODEs"
@@ -375,7 +378,32 @@ let
 	plots["bouncing_ball"] = plot(sol, lw=2, label=[L"x(t)" L"v(t)"], title="Bouncing ball with callbacks")
 end
 
+# ╔═╡ 5e7453ce-721b-4e4e-8f75-bb69aac8cf42
+let
+	@unpack G = bacterial_growth
+	dosing = [5, 10, 15, 20] => [G ~ G + 10]
+
+	@named dosed_reactor = ReactionSystem(equations(bacterial_growth),
+				discrete_events=dosing)
+
+	dosed_reactor = complete(dosed_reactor)
+
+	oprob = ODEProblem(dosed_reactor, [], (0, 20))
+
+	sol = solve(oprob, Tsit5())
+
+	prob = ODEProblem(bacterial_growth, [], (0, 20))
+
+	plots["undosed bioreactor"] = plot(solve(prob, Tsit5()), lw=2,
+						title="Undosed bioreactor")
+
+	plots["dosed_bioreactor"] = plot(sol, lw=2, title="Dosed bioreactor")
+	
+end
+
 # ╔═╡ 7b3ca635-5a3c-43f2-9690-5cdbd9074ed2
+# ╠═╡ disabled = true
+#=╠═╡
 let
 	dosetimes = 5:5:20
 	affect!(integrator) = integrator.u[2] += 10
@@ -387,6 +415,7 @@ let
 						title="Undosed bioreactor")
 	plots["dosed_bioreactor"] = plot(sol, lw=2, title="Dosed bioreactor")
 end
+  ╠═╡ =#
 
 # ╔═╡ e22ed4e6-6420-490c-9d55-fee19069f534
 let
@@ -423,7 +452,7 @@ let
 	W .-= X[[1], :]  # start at 0
 	W .*= √(τ)
 	p = plot(tsteps, W, lw=2, xlab=L"t", ylab=L"W(t)",
-		title="Five draws form a Wiener process", label="")
+		title="Five draws from a Wiener process", label="")
 	plots["Wiener"] = p
 	p
 end
@@ -444,6 +473,39 @@ let
 	p = plot(plarge, psmall,
 		layout=(2,1), xlab=L"t",ylab=L"W(t)", lw=2, label="")
 	plots["Wiener_scalefree"] = p
+	p
+end
+
+# ╔═╡ dc583986-3b76-44a7-ad5a-909aa392c38b
+let
+	τ = 0.01  # stepsize
+	tsteps = 0:τ:15
+	X = randn(length(tsteps), 10)
+	W = cumsum(X, dims=1)
+	W .-= X[[1], :]  # start at 0
+	W .*= √(τ)
+	p = plot(W[:,1:2:end], W[:,2:2:end], lw=2, xlab=L"x", ylab=L"y",
+		title="Five draws from a Wiener process (2D)", label="", alpha=0.8, aspect_ratio=:equal)
+	plots["Wiener_2D"] = p
+	p
+end
+
+# ╔═╡ f3ec3c15-aa56-4b20-ad83-2acec0aad6b6
+let
+	τ = 0.02  # stepsize
+	tsteps = 0:τ:20
+	n=5
+	X = randn(length(tsteps), 15)
+	W = cumsum(X, dims=1)
+	W .-= X[[1], :]  # start at 0
+	W .*= √(τ)
+	
+	p = plot(lw=2, xlab=L"x", ylab=L"y", zlab=L"z",
+		title="Five draws from a Wiener process (3D)", label="", alpha=0.8, aspect_ratio=:equal)
+	for i in 1:3:15
+		plot3d!(W[:,i], W[:,i+1], W[:,i+2], alpha=0.8, label="")
+	end
+	plots["Wiener_3D"] = p
 	p
 end
 
@@ -575,7 +637,9 @@ plots
 # ╠═992d2b4f-6521-4368-910d-3e7ef07fb6df
 # ╠═17683127-b550-4368-9e3e-3054bd5aa208
 # ╠═0de4a715-89d6-403b-ac65-adaed6062371
+# ╟─89d089b2-3220-4696-9ded-364c318b4a1e
 # ╠═21e810e7-0879-4ffb-84f9-d67dafb900d6
+# ╠═5e7453ce-721b-4e4e-8f75-bb69aac8cf42
 # ╠═7b3ca635-5a3c-43f2-9690-5cdbd9074ed2
 # ╠═4c7feb9f-a039-48a8-a7d0-3633f1a635fe
 # ╠═5ae78d7c-fc07-45f3-a59b-eb032ff2974d
@@ -595,6 +659,8 @@ plots
 # ╠═945febc8-2954-4d5c-a4b1-7f95c70ef4b6
 # ╟─5099fd5b-735e-4de3-918a-685dd4a82c22
 # ╟─18def41b-0827-4356-adfa-d3fc63e23cfa
+# ╟─dc583986-3b76-44a7-ad5a-909aa392c38b
+# ╠═f3ec3c15-aa56-4b20-ad83-2acec0aad6b6
 # ╠═6501070e-9093-4928-89b9-b9dd34128810
 # ╠═6c5f1ee1-ece0-4a44-8e92-c375f2bd40a7
 # ╠═7d0a5294-6fc2-45d5-b04f-2824649f5d81
@@ -664,10 +730,10 @@ plots
 # ╠═0b52aede-1a71-4034-9921-2ffc9120c0ae
 # ╠═9d84b996-a3e2-48c1-ae51-2bfc343bff0f
 # ╠═4aa42d80-81b5-4144-8b4a-6c3ebf29d84b
-# ╠═ae5be024-863d-46f1-b5d9-fc691b10e63b
+# ╟─ae5be024-863d-46f1-b5d9-fc691b10e63b
 # ╠═52082e32-8c8f-4699-a44a-2fbe99b96319
 # ╠═5bbf9db9-4537-416d-9edc-6487961b1690
-# ╠═6f6ba9c5-bc87-4b71-82a0-a4c64750a2ab
+# ╟─6f6ba9c5-bc87-4b71-82a0-a4c64750a2ab
 # ╠═2bf198cd-4463-4f97-975e-f805a37fa780
 # ╠═13036978-3008-4d7e-9661-a967381f4db6
 # ╠═23c38172-8916-42e3-a186-5cdd16939b5b
