@@ -6,19 +6,20 @@ fontscale = 1.5
 
 notebooks = Dict(
     #"modelling_distributions.jl" => "probmod",
-    #"MCMC.jl" => "MCMC",
+    # "MCMC.jl" => "MCMC",
     #"simulation_tools.jl" => "simulation_tools",
     #"modelling_ODEs.jl" => "ODEs",
     #"optimization.jl" => "optimization",
     #"calibration.jl" => "calibration",  # LV very unstable, might need to rerun several times
     "uncertainty.jl" => "uncertainty",
-    "hiptobesquare.jl" => "model_selection",
+    #"hiptobesquare.jl" => "model_selection",
 )
 
 
 for (nb, dir) in notebooks
     # run notebook and generate a plots dict
     let
+        println("$dir : $nb")
         include(joinpath("scripts", nb))
         for (name, pl) in plots
             Plots.scalefontsizes(fontscale)

@@ -25,6 +25,15 @@ end
 # ╔═╡ 52b28a4c-b0bb-11ef-2841-17ecfb596676
 using Plots, PlutoUI, DifferentialEquations, ForwardDiff, Catalyst
 
+# ╔═╡ 77860f25-1b30-4cf1-812a-03ff2100bacd
+using Turing
+
+# ╔═╡ c897d6e6-0b33-4dfb-89f3-f7e05bb9f73b
+using StatsPlots, Optim
+
+# ╔═╡ e96779da-57c0-4c11-b3ab-40dc5ae81bee
+using StatsBase
+
 # ╔═╡ bfcc4b4e-073e-401e-851c-d01ef828028a
 md"""
 # The minimal glucose model and dynamic compensation
@@ -190,11 +199,110 @@ end
 ```
 """
 
+# ╔═╡ e37ce327-504b-4fe4-baea-493cda834b4a
+md" this does not work yet. Split and use different model: https://allendowney.github.io/ModSimPy/chap18.html"
+
+# ╔═╡ e66378f7-8ec8-4f7f-ab40-5c64479f865e
+tmeas = 0:2:8
+
+# ╔═╡ bcafb5c2-4f3c-47f4-b786-8f656969abe6
+length(tmeas)
+
+# ╔═╡ 08d3cf6e-dc0b-4a56-a241-0d0033e79fad
+Gmeas = [92, 350, 287, 251, 240]
+
+# ╔═╡ c0d39fc8-d779-465e-91c1-3a6f9b694ee3
+Imeas = [11, 26, 130, 85, 51]
+
+# ╔═╡ c2c18077-add0-4ff9-a122-f248dbd1da79
+begin
+	scatter(tmeas, Gmeas, xlab="t [h]", label="G [mg/dL]")
+	scatter!(tmeas, Imeas, label="I [μU/mL]")
+end
+
+# ╔═╡ e93a2495-aa5b-46f6-ae3c-b94559583c60
+@model function glucose_inference(tmeas, Gmeas, Imeas)
+	@assert length(tmeas) == length(Gmeas) == length(Imeas)
+	N = length(tmeas)
+	σGsq ~ Gamma(5)
+	σIsq ~ Gamma(3)
+	q~10LogNormal()
+	s~10LogNormal()
+	γ~10LogNormal()
+	B=1
+ 	m~10LogNormal()
+	Ks~10LogNormal()
+	G0~100LogNormal()
+	I0~1LogNormal()
+	prob = remake(oprob1; u0=[G=>G0, I=>I0], tspan=(0., 8.), 
+									p=[:m=>m, :q=>q, :s=>s,
+										:γ=>γ, :Ks=>Ks, :B=>B])
+	sol = solve(prob, saveat=tmeas)
+	for i in 1:N
+		Gmeas[i] ~ Normal(sol[G][i], sqrt(σGsq))
+		Imeas[i] ~ Normal(sol[I][i], sqrt(σIsq))
+	end
+	return sol
+end
+
+# ╔═╡ 55e4db93-f376-4cbb-829d-fea9ce3f3998
+glucose_inference(tmeas, Gmeas, Imeas)()
+
+# ╔═╡ 8989e653-e3e8-4e4f-8fc2-596e931ed21c
+mod_data = glucose_inference(tmeas, Gmeas, Imeas)
+
+# ╔═╡ b763bb0c-581e-46ec-8104-53df25369642
+mod_data() |> plot
+
+# ╔═╡ 5e187f36-3883-4f08-b08c-a55d24e409cd
+chain1 = sample(mod_data, NUTS(), 100)
+
+# ╔═╡ 2bf57ee8-ac1d-412f-a4c8-6e4ce87a74c5
+summarize(chain1)
+
+# ╔═╡ aa32db53-c944-442a-88df-5937f380b54c
+#=╠═╡
+plot(chain1)
+  ╠═╡ =#
+
+# ╔═╡ 7b247ff1-f873-4b00-90c3-4c7a87485fb2
+#=╠═╡
+scatter(chain1[:q], chain1[:B])
+  ╠═╡ =#
+
+# ╔═╡ e591eff0-fd70-43d3-bf2a-34309a8ecd62
+#=╠═╡
+begin
+	p = scatter(tmeas, Gmeas, xlab="t [h]", label="G [mg/dL]")
+	scatter!(tmeas, Imeas, label="I [μU/mL]")
+	N = length(sample_sols)
+	for i in 1:10
+		n = rand(1:N)
+		plot!(sample_sols[n], lw=0.5, alpha=0.8, label="", color=[:blue :orange])
+	end
+	p
+end
+  ╠═╡ =#
+
+# ╔═╡ 04d6078e-f46b-43f2-988c-d91252b26747
+#=╠═╡
+sample_sols = generated_quantities(mod_data, chain1);
+  ╠═╡ =#
+
+# ╔═╡ 851e6a2f-3569-489d-b375-149329c68a7c
+mapGI = optimize(mod_data, MAP(), NelderMead())
+
 # ╔═╡ 246a06ba-ef48-47ba-aef0-51f07ceb96e4
 
 
+# ╔═╡ 403f6e68-e827-4885-830b-cb0d7f872ee0
+coeftable(mapGI)
+
 # ╔═╡ 2f992357-4608-40e6-9954-8306f31e9768
 
+
+# ╔═╡ 6ecda2c4-2a1d-4d24-b7b8-ec956a3e8d70
+#coeftable(mapG)
 
 # ╔═╡ Cell order:
 # ╠═52b28a4c-b0bb-11ef-2841-17ecfb596676
@@ -238,5 +346,27 @@ end
 # ╠═4d95e77b-fab0-454b-8319-1fe83e12f9e9
 # ╠═ea46f5f9-47a8-4641-a7e3-08a1a29cd04f
 # ╟─870e9229-374a-40b8-97f7-1a84d1a857e9
+# ╠═e37ce327-504b-4fe4-baea-493cda834b4a
+# ╠═e66378f7-8ec8-4f7f-ab40-5c64479f865e
+# ╠═bcafb5c2-4f3c-47f4-b786-8f656969abe6
+# ╠═08d3cf6e-dc0b-4a56-a241-0d0033e79fad
+# ╠═c0d39fc8-d779-465e-91c1-3a6f9b694ee3
+# ╠═c2c18077-add0-4ff9-a122-f248dbd1da79
+# ╠═77860f25-1b30-4cf1-812a-03ff2100bacd
+# ╠═e93a2495-aa5b-46f6-ae3c-b94559583c60
+# ╠═55e4db93-f376-4cbb-829d-fea9ce3f3998
+# ╠═8989e653-e3e8-4e4f-8fc2-596e931ed21c
+# ╠═b763bb0c-581e-46ec-8104-53df25369642
+# ╠═5e187f36-3883-4f08-b08c-a55d24e409cd
+# ╠═2bf57ee8-ac1d-412f-a4c8-6e4ce87a74c5
+# ╠═c897d6e6-0b33-4dfb-89f3-f7e05bb9f73b
+# ╠═aa32db53-c944-442a-88df-5937f380b54c
+# ╠═7b247ff1-f873-4b00-90c3-4c7a87485fb2
+# ╠═e591eff0-fd70-43d3-bf2a-34309a8ecd62
+# ╠═04d6078e-f46b-43f2-988c-d91252b26747
+# ╠═851e6a2f-3569-489d-b375-149329c68a7c
 # ╠═246a06ba-ef48-47ba-aef0-51f07ceb96e4
+# ╠═e96779da-57c0-4c11-b3ab-40dc5ae81bee
+# ╠═403f6e68-e827-4885-830b-cb0d7f872ee0
 # ╠═2f992357-4608-40e6-9954-8306f31e9768
+# ╠═6ecda2c4-2a1d-4d24-b7b8-ec956a3e8d70

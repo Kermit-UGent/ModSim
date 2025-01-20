@@ -4,77 +4,156 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 17b60ab6-b21e-11ef-07cf-d7fb167d8d72
-using Plots, Turing, PlutoUI
+# ╔═╡ 8ff3f3a2-b954-11ef-36c3-b7ee53f18169
+using Statistics, DataFrames, CSV
 
-# ╔═╡ 6413a973-95a9-4525-999a-8570b957d4f8
-md"""
+# ╔═╡ 442ba9c0-8889-4042-b762-12e712a39454
+using PlutoUI, Turing, Plots
 
-# Censored
+# ╔═╡ 511b6a4e-9f71-4f5c-a339-7180ed5a49d6
+path = joinpath(pkgdir(DataFrames), "docs", "src", "assets", "iris.csv");
 
-Researchers are studying a new drug designed to cure a specific type of skin condition. They monitor 15 patients undergoing treatment for five months, recording the time it takes for patients to show no signs of the condition. Of the 15, seven were cured in the five-month study period, at `[2.1, 4.7, 1.6, 2.8, 4.3, 1.9, 4.2]` months. Eight patients were not achieve cured within the five-month study period (this is censored data). You may assume that these persons were cured at some later, unspecified time after the five-month trial. Given a Gamma prior on the rate parameter $\lambda$, what is its posterior distribution? 
+# ╔═╡ 73e46529-bee5-4441-9032-21875fed3205
+ iris = CSV.read(path, DataFrame)
 
-Give a 95% credibility interval.
-
-Given the posterior of $\lambda$, what is the chance someone cures within 10 months?
-
-Hint: For the censored data, can you compute the probability that a patient survives beyond five months? What type of distribution models 8 of 15 patients exceeding this time?
-"""
-
-# ╔═╡ 3e8810ff-b456-473a-88e1-3344278ee78f
-x = [2.1, 4.7, 1.6, 2.8, 4.3, 1.9, 4.2]  # cured
-
-# ╔═╡ efe76607-7c83-4c1a-bfec-84fb90c44154
-n = 8  # not cured in 5 months
-
-# ╔═╡ 4fc7936b-aafc-46a0-8b58-4a601d514586
-@model function censored(x, n, tend)
-	λ ~ Gamma()  # rate paramters
-    N = length(x) + n  # total number of 
-    psurvive = 1 - cdf(Exponential(1/λ), tend)
-    n ~ Binomial(N, psurvive)
-    for i in 1:length(x)
-        x[i] ~ Exponential(1/λ)
-    end
-	return cdf(Exponential(1/λ), 10)
+# ╔═╡ faa90341-f1c9-4ba2-9402-2bd90beb1582
+for (df) in groupby(iris, :Species)
+	println(describe(df))
 end
 
-# ╔═╡ 96419a33-6a13-46d2-a610-55b29737eb7b
-model = censored(x, n, 5)
+# ╔═╡ e3b62465-67b8-437b-a2f1-c6d25d35be7c
+setosa = iris[1:50,1:5]
 
-# ╔═╡ 40123399-66b6-45a0-a55f-9299c3107cd9
-# prior sanity check
-prior_chain = sample(model, Prior(), 10_000);
+# ╔═╡ cc4db3e7-53f6-4a5c-b02c-fc614dd863ae
+describe(setosa)
 
-# ╔═╡ d96f4856-847f-4e0f-b5ce-a90fff8ef343
-summarize(prior_chain)
+# ╔═╡ 186cd276-e053-46b8-b78a-cb11527665ba
+Matrix(setosa[!,1:4]) |> cov
 
-# ╔═╡ 30bf124d-7d9b-48bb-b8e5-80beecc8f839
-posterior_chain = sample(model, NUTS(), 10_000);
+# ╔═╡ a2071b91-7731-4892-9c5c-f42def71be78
+sqrt(0.12 - 0.01/0.14)
 
-# ╔═╡ e7672833-0044-40e9-a215-b3c51c4ca8d4
-summarize(posterior_chain)
+# ╔═╡ 1be97aba-fbd0-4e33-af34-277a25258e09
+cond_pars(μa,μb,Σaa, Σab, Σbb) = μa + Σab / Σbb * 
 
-# ╔═╡ eea303cc-b1fa-42a4-9eed-ed5e608ff931
-quantile(posterior_chain, q=[0.025, 0.975])  # 95% credibility interval
+# ╔═╡ f9c475fb-6290-41a3-8adc-74b7978c3794
+@model function iris_setosa()
+	Sl ~ Normal(5, 0.35)
+	Sw ~ Normal(3.4+(Sl-5)*0.1/0.12, 0.22)
+	Pl ~ Uniform(1, 2)
+	Pw ~ Uniform(0.1, 0.6)
+end
 
-# ╔═╡ e4a44333-2216-4941-bee1-3befe8325c51
-p10months = generated_quantities(model, posterior_chain)
+# ╔═╡ 03050492-060c-4d96-8f13-928471c14661
+rand(iris_setosa())
 
-# ╔═╡ d34a22c4-146d-414e-9c57-219defad60cd
-mean(p10months)  # expected posterior probability that one is cured in 10 months
+# ╔═╡ f356378e-a3ee-40b0-b552-f3895aca3115
+versicolor = iris[51:100,1:5]
 
-# ╔═╡ 55a93fd2-7cb8-4ceb-b90d-0f533207045e
-quantile(p10months, [0.025, 0.975])  # 95% credibility interval
+# ╔═╡ 4a42186e-5047-4dac-9bb7-7e06c7998fd9
+describe(versicolor)
+
+# ╔═╡ 76b747a8-a35a-492c-9054-dc03ad847eef
+cov(Matrix(versicolor[:,1:4]))
+
+# ╔═╡ 5b0e3a81-efb2-4678-abd3-a98dde3ce19c
+@model function iris_versicolor()
+	Sl ~ Normal(5.93, 0.27)
+	Sw ~ Normal(2.77+0.085/0.098*(Sl-5.93), √(0.098 - 0.085^2/0.27))
+	Pl ~ Normal(4.26+18(Sl-5.93)/27, √(0.22-0.18^2/0.26))
+	Pw ~ Normal(1.33+0.073(Pl-4.26)/0.22, √(0.03-0.073^2/0.22))
+end
+
+# ╔═╡ f7cba63e-ea70-4f56-a33f-4fb50d026d87
+√(0.098 - 0.085^2/0.27)
+
+# ╔═╡ a679613f-c714-4722-ba8f-7f82109a2230
+rand(iris_versicolor())
+
+# ╔═╡ 999da0e9-f80c-4da9-82a7-6449f22dfc90
+virginica = iris[101:150,1:5]
+
+# ╔═╡ 09b1610a-bf64-4db5-a95c-57f952b586d4
+describe(virginica)
+
+# ╔═╡ 1034df52-a8cf-4a96-904a-b3c5844bd587
+cov(Matrix(virginica[:,1:4]))
+
+# ╔═╡ 43c431de-cb55-4f3e-89c4-123bceb81ba2
+@model function iris_virginica()
+	Sl ~ Normal(6.588, 0.4)
+	Sw ~ Normal(2.2+0.094/0.4*(Sl-6.588), √(0.1 - 0.094^2/0.4))
+	Pl ~ Normal(5.5+0.3(Sl-6.6)/0.4, √(0.3-0.3^2/0.4))
+	Pw ~ Normal(1.4+0.04(Pl-5.5)/0.3, √(0.07-0.05^2/0.3))
+end
+
+# ╔═╡ a93ae961-5eea-4dbe-b16a-f3f54aa18f20
+rand(iris_virginica())
+
+# ╔═╡ 475f7447-c1d7-40e7-a523-1f981ccc9981
+iris1 = (Sl=6.3, Sw=2.7, Pl=4.9, Pw=1.8)
+
+# ╔═╡ bd2f0804-f7cd-4253-9b47-8eca6a04dcfd
+p_D1_setosa = exp(logprior(iris_setosa(), iris1))
+
+# ╔═╡ 98f80d23-90dc-4206-bb97-9fd052dab8eb
+p_D1_virginica = exp(logprior(iris_virginica(), iris1))
+
+# ╔═╡ f964b986-d5bc-4efd-a437-a1e8adf7d93e
+p_D2_versicolor = exp(logprior(iris_versicolor(), iris1))
+
+# ╔═╡ 1fa08d98-1486-4b1b-a532-7dbe2cb78538
+p_versicolor_D1 = 1/3*p_D2_versicolor / (1/3*p_D1_setosa + 1/3*p_D1_virginica + 1/4*p_D2_versicolor)
+
+# ╔═╡ cd07dda5-6729-4ade-8a40-593cccc679e7
+md"Prior psetosa=0.1, pversicolor=.7, pvirginica=0.2"
+
+# ╔═╡ a1dde58c-561b-4f07-9fba-72d96cc77771
+p_versicolor_D1_unequalprior = 0.7p_D2_versicolor / (0.1p_D1_setosa + 0.2p_D1_virginica + 0.7p_D2_versicolor)
+
+# ╔═╡ 21608c4e-a58f-47d3-b8cb-b854d63c134d
+iris2 = (;Sl=5.5, Sw=3.3)
+
+# ╔═╡ fd9fefc0-a97f-43c5-b57d-b6461d94b0fa
+exp(logprior(iris_setosa() | (;Pw=1, Pl=2.0), iris2))
+
+# ╔═╡ c54c8f74-e4ac-41f9-a6e9-1bbd15dfbff6
+exp(logprior(iris_virginica() | (;Pw=1, Pl=2.0), iris2))
+
+# ╔═╡ 128a10b2-0e80-4e17-aac6-a0023f42ca95
+exp(logprior(iris_versicolor() | (;Pw=1, Pl=2.0), iris2))
+
+# ╔═╡ 3a6e862a-1896-4418-8ad4-ef1802e77ad6
+chain = sample(iris_setosa() | iris2, NUTS(), 1000)
+
+# ╔═╡ d6924c52-8fa5-4745-a8e0-afafb4a9e720
+bayesfactor_setosa(Pl) = logprior(iris_setosa() | (;Pw=2.0), (;Sl=5.6, Sw=3.3, Pl)) - logprior(iris_versicolor() | (;Pw=2.0), (;Sl=5.6, Sw=3.3, Pl))
+
+# ╔═╡ 62080edf-98c2-4dbd-ba21-6302c84e6b83
+plot(bayesfactor_setosa, 1, 2)
+
+# ╔═╡ 6e8c6716-8abf-4674-bbc4-2fb2af38b92a
+summarize(chain)
+
+# ╔═╡ f50a68aa-aae8-4370-9b51-c93111dc2ef9
+iris[rand(1:150),:]
+
+# ╔═╡ a9f035c5-485e-456d-850e-ac0d0ffa90db
+
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 
 [compat]
+CSV = "~0.10.15"
+DataFrames = "~1.7.0"
 Plots = "~1.40.9"
 PlutoUI = "~0.7.60"
 Turing = "~0.35.3"
@@ -86,7 +165,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.3"
 manifest_format = "2.0"
-project_hash = "beafe052f689782259887f22664ba5f442c2f2b1"
+project_hash = "22225b836147842b02e8a2efda6df74a0b52460f"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "72af59f5b8f09faee36b4ec48e014a79210f2f4f"
@@ -378,6 +457,12 @@ git-tree-sha1 = "389ad5c84de1ae7cf0e28e381131c98ea87d54fc"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.5.0"
 
+[[deps.CSV]]
+deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "PrecompileTools", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
+git-tree-sha1 = "deddd8725e5e1cc49ee205a1964256043720a6c3"
+uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+version = "0.10.15"
+
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "009060c9a6168704143100f36ab08f06c2af4642"
@@ -522,6 +607,12 @@ version = "4.1.1"
 git-tree-sha1 = "abe83f3a2f1b857aac70ef8b269080af17764bbe"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.16.0"
+
+[[deps.DataFrames]]
+deps = ["Compat", "DataAPI", "DataStructures", "Future", "InlineStrings", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrecompileTools", "PrettyTables", "Printf", "Random", "Reexport", "SentinelArrays", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
+git-tree-sha1 = "fb61b4812c49343d7ef0b533ba982c46021938a6"
+uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+version = "1.7.0"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -751,6 +842,17 @@ git-tree-sha1 = "acebe244d53ee1b461970f8910c235b259e772ef"
 uuid = "9aa1b823-49e4-5ca5-8b0f-3971ec8bab6a"
 version = "0.3.2"
 
+[[deps.FilePathsBase]]
+deps = ["Compat", "Dates"]
+git-tree-sha1 = "7878ff7172a8e6beedd1dea14bd27c3c6340d361"
+uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
+version = "0.9.22"
+weakdeps = ["Mmap", "Test"]
+
+    [deps.FilePathsBase.extensions]
+    FilePathsBaseMmapExt = "Mmap"
+    FilePathsBaseTestExt = "Test"
+
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
@@ -931,6 +1033,19 @@ version = "0.2.5"
 git-tree-sha1 = "4da0f88e9a39111c2fa3add390ab15f3a44f3ca3"
 uuid = "22cec73e-a1b8-11e9-2c92-598750a2cf9c"
 version = "0.3.1"
+
+[[deps.InlineStrings]]
+git-tree-sha1 = "45521d31238e87ee9f9732561bfee12d4eebd52d"
+uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
+version = "1.4.2"
+
+    [deps.InlineStrings.extensions]
+    ArrowTypesExt = "ArrowTypes"
+    ParsersExt = "Parsers"
+
+    [deps.InlineStrings.weakdeps]
+    ArrowTypes = "31f734f8-188a-4ce0-8406-c8a06bd891cd"
+    Parsers = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 
 [[deps.InplaceOps]]
 deps = ["LinearAlgebra", "Test"]
@@ -1619,6 +1734,12 @@ git-tree-sha1 = "eba4810d5e6a01f612b948c9fa94f905b49087b0"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 version = "0.7.60"
 
+[[deps.PooledArrays]]
+deps = ["DataAPI", "Future"]
+git-tree-sha1 = "36d8b4b899628fb92c2749eb488d884a926614d3"
+uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
+version = "1.4.3"
+
 [[deps.PositiveFactorizations]]
 deps = ["LinearAlgebra"]
 git-tree-sha1 = "17275485f373e6673f7e7f97051f703ed5b15b20"
@@ -1898,6 +2019,12 @@ deps = ["Dates"]
 git-tree-sha1 = "3bac05bc7e74a75fd9cba4295cde4045d9fe2386"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
 version = "1.2.1"
+
+[[deps.SentinelArrays]]
+deps = ["Dates", "Random"]
+git-tree-sha1 = "d0553ce4031a081cc42387a9b9c8441b7d99f32d"
+uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
+version = "1.4.7"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -2253,11 +2380,22 @@ git-tree-sha1 = "93f43ab61b16ddfb2fd3bb13b3ce241cafb0e6c9"
 uuid = "2381bf8a-dfd0-557d-9999-79630e7b1b91"
 version = "1.31.0+0"
 
+[[deps.WeakRefStrings]]
+deps = ["DataAPI", "InlineStrings", "Parsers"]
+git-tree-sha1 = "b1be2855ed9ed8eac54e5caff2afcdb442d52c23"
+uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
+version = "1.4.2"
+
 [[deps.WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "c1a7aa6219628fcd757dede0ca95e245c5cd9511"
 uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
 version = "1.0.0"
+
+[[deps.WorkerUtilities]]
+git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"
+uuid = "76eceee3-57b5-4d4a-8e66-0e911cebbf60"
+version = "1.6.1"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Zlib_jll"]
@@ -2551,19 +2689,45 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╠═17b60ab6-b21e-11ef-07cf-d7fb167d8d72
-# ╟─6413a973-95a9-4525-999a-8570b957d4f8
-# ╠═3e8810ff-b456-473a-88e1-3344278ee78f
-# ╠═efe76607-7c83-4c1a-bfec-84fb90c44154
-# ╠═4fc7936b-aafc-46a0-8b58-4a601d514586
-# ╠═96419a33-6a13-46d2-a610-55b29737eb7b
-# ╠═40123399-66b6-45a0-a55f-9299c3107cd9
-# ╠═d96f4856-847f-4e0f-b5ce-a90fff8ef343
-# ╠═30bf124d-7d9b-48bb-b8e5-80beecc8f839
-# ╠═e7672833-0044-40e9-a215-b3c51c4ca8d4
-# ╠═eea303cc-b1fa-42a4-9eed-ed5e608ff931
-# ╠═e4a44333-2216-4941-bee1-3befe8325c51
-# ╠═d34a22c4-146d-414e-9c57-219defad60cd
-# ╠═55a93fd2-7cb8-4ceb-b90d-0f533207045e
+# ╠═8ff3f3a2-b954-11ef-36c3-b7ee53f18169
+# ╠═442ba9c0-8889-4042-b762-12e712a39454
+# ╠═511b6a4e-9f71-4f5c-a339-7180ed5a49d6
+# ╠═73e46529-bee5-4441-9032-21875fed3205
+# ╠═faa90341-f1c9-4ba2-9402-2bd90beb1582
+# ╠═e3b62465-67b8-437b-a2f1-c6d25d35be7c
+# ╠═cc4db3e7-53f6-4a5c-b02c-fc614dd863ae
+# ╠═186cd276-e053-46b8-b78a-cb11527665ba
+# ╠═a2071b91-7731-4892-9c5c-f42def71be78
+# ╠═1be97aba-fbd0-4e33-af34-277a25258e09
+# ╠═f9c475fb-6290-41a3-8adc-74b7978c3794
+# ╠═03050492-060c-4d96-8f13-928471c14661
+# ╠═f356378e-a3ee-40b0-b552-f3895aca3115
+# ╠═4a42186e-5047-4dac-9bb7-7e06c7998fd9
+# ╠═76b747a8-a35a-492c-9054-dc03ad847eef
+# ╠═5b0e3a81-efb2-4678-abd3-a98dde3ce19c
+# ╠═f7cba63e-ea70-4f56-a33f-4fb50d026d87
+# ╠═a679613f-c714-4722-ba8f-7f82109a2230
+# ╠═999da0e9-f80c-4da9-82a7-6449f22dfc90
+# ╠═09b1610a-bf64-4db5-a95c-57f952b586d4
+# ╠═1034df52-a8cf-4a96-904a-b3c5844bd587
+# ╠═43c431de-cb55-4f3e-89c4-123bceb81ba2
+# ╠═a93ae961-5eea-4dbe-b16a-f3f54aa18f20
+# ╠═475f7447-c1d7-40e7-a523-1f981ccc9981
+# ╠═bd2f0804-f7cd-4253-9b47-8eca6a04dcfd
+# ╠═98f80d23-90dc-4206-bb97-9fd052dab8eb
+# ╠═f964b986-d5bc-4efd-a437-a1e8adf7d93e
+# ╠═1fa08d98-1486-4b1b-a532-7dbe2cb78538
+# ╠═cd07dda5-6729-4ade-8a40-593cccc679e7
+# ╠═a1dde58c-561b-4f07-9fba-72d96cc77771
+# ╠═21608c4e-a58f-47d3-b8cb-b854d63c134d
+# ╠═fd9fefc0-a97f-43c5-b57d-b6461d94b0fa
+# ╠═c54c8f74-e4ac-41f9-a6e9-1bbd15dfbff6
+# ╠═128a10b2-0e80-4e17-aac6-a0023f42ca95
+# ╠═3a6e862a-1896-4418-8ad4-ef1802e77ad6
+# ╠═d6924c52-8fa5-4745-a8e0-afafb4a9e720
+# ╠═62080edf-98c2-4dbd-ba21-6302c84e6b83
+# ╠═6e8c6716-8abf-4674-bbc4-2fb2af38b92a
+# ╠═f50a68aa-aae8-4370-9b51-c93111dc2ef9
+# ╠═a9f035c5-485e-456d-850e-ac0d0ffa90db
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
