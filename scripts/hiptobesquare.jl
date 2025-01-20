@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.43
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
@@ -14,42 +14,6 @@ md"""
 Given four points on the plane, can we determine wether they form a general quadrangle, or rather a trapizum or a rectangle? We build a stochastic model for each type of four-sized planar figure (with some noise) as a likelihood model.
 
 """
-
-# ╔═╡ 41e1e987-1c8b-4f5b-aaa1-c6d9221dd718
-md"Look at some samples from each model."
-
-# ╔═╡ 865c0b8c-8154-412f-a5ce-828767e3fe4c
-# likelihood function
-function ll(model, ((x1, y1), (x2, y2), (x3, y3), (x4, y4)))
-	return logprior(model, (;x1, y1, x2, y2, x3, y3, x4, y4))
-end
-
-# ╔═╡ 6a884693-6a8b-423e-889e-4fb72823dd52
-examples = Dict(
-	'A' => [(17.84717547196566, 19.760715118486512), (34.6061398162441, -33.38433191621974), (-1.693375136201844, -31.987940353049794), (-30.695701527005323, 6.7824003353973605)],
-	'B' => [(0.06879125492495752, 23.66395708167892), (15.48365977053534, -9.183291910824748), (-12.008630133706683, -9.549131031542046), (-13.5065409760042, 23.765726315750936)],
-	'C' => [(21.51869365548042, 8.158751439337376), (8.088970745018122, -21.19041987275375), (-21.269534643997858, -8.25944315605066), (-8.530202167842445, 21.010662780051337)],
-	'D' => [(17.30454621153156, 11.780046713473705), (17.647126164256964, -11.935772579978874), (-17.446512799022273, -11.444824263465748), (-17.356604119938453, 12.115750066824315)]
-)
-
-# ╔═╡ 60d39b99-826b-4d25-a589-0939218b9dda
-md"Look at four figures, what type of four-sided figure fits best?"
-
-# ╔═╡ 1f9e8740-5f69-465c-9428-010959ad6e54
-md"What if we only know the first 3 points? (open question)"
-
-# ╔═╡ 72f991f2-d65a-4197-bbe4-218457ca126e
-# likelihood function
-function ll3(model, ((x1, y1), (x2, y2), (x3, y3), (x4, y4)))
-	modcond = model | (x4=0, y4=0)
-	return logprior(modcond, (;x1, y1, x2, y2, x3, y3))
-end
-
-# ╔═╡ a09ab912-9591-4c98-b68c-18a158cee8bb
-md"For C, let us only use the first three points."
-
-# ╔═╡ 93c6a456-4c2a-4de8-b0d0-ba8ab5f84568
-((x1, y1), (x2, y2), (x3, y3), (x4, y4)) = examples['C']
 
 # ╔═╡ 1f6a1199-b68e-4306-a0b6-68eeb0ab0c35
 @model function quadrangle(;a=40, σ=0)
@@ -129,6 +93,26 @@ end
 	return [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
 end
 
+# ╔═╡ 41e1e987-1c8b-4f5b-aaa1-c6d9221dd718
+md"Look at some samples from each model."
+
+# ╔═╡ 865c0b8c-8154-412f-a5ce-828767e3fe4c
+# likelihood function
+function ll(model, ((x1, y1), (x2, y2), (x3, y3), (x4, y4)))
+	return logprior(model, (;x1, y1, x2, y2, x3, y3, x4, y4))
+end
+
+# ╔═╡ 6a884693-6a8b-423e-889e-4fb72823dd52
+examples = Dict(
+	'A' => [(17.84717547196566, 19.760715118486512), (34.6061398162441, -33.38433191621974), (-1.693375136201844, -31.987940353049794), (-30.695701527005323, 6.7824003353973605)],
+	'B' => [(0.06879125492495752, 23.66395708167892), (15.48365977053534, -9.183291910824748), (-12.008630133706683, -9.549131031542046), (-13.5065409760042, 23.765726315750936)],
+	'C' => [(21.51869365548042, 8.158751439337376), (8.088970745018122, -21.19041987275375), (-21.269534643997858, -8.25944315605066), (-8.530202167842445, 21.010662780051337)],
+	'D' => [(17.30454621153156, 11.780046713473705), (17.647126164256964, -11.935772579978874), (-17.446512799022273, -11.444824263465748), (-17.356604119938453, 12.115750066824315)]
+)
+
+# ╔═╡ 60d39b99-826b-4d25-a589-0939218b9dda
+md"Look at four figures, what type of four-sided figure fits best?"
+
 # ╔═╡ a3c06ab2-4107-4ecf-903b-71ad1d4e2749
 for k in "ABCD"
 	a = 40
@@ -145,6 +129,16 @@ for k in "ABCD"
 		println("log(P(D | $fig)) = $logP" )
 	end
 	println()
+end
+
+# ╔═╡ 1f9e8740-5f69-465c-9428-010959ad6e54
+md"What if we only know the first 3 points? (open question)"
+
+# ╔═╡ 72f991f2-d65a-4197-bbe4-218457ca126e
+# likelihood function
+function ll3(model, ((x1, y1), (x2, y2), (x3, y3), (x4, y4)))
+	modcond = model | (x4=0, y4=0)
+	return logprior(modcond, (;x1, y1, x2, y2, x3, y3))
 end
 
 # ╔═╡ d7375d2b-5b9b-4729-bd99-24ca5e5696e5
@@ -164,6 +158,12 @@ for k in "ABCD"
 	end
 	println()
 end
+
+# ╔═╡ a09ab912-9591-4c98-b68c-18a158cee8bb
+md"For C, let us only use the first three points."
+
+# ╔═╡ 93c6a456-4c2a-4de8-b0d0-ba8ab5f84568
+((x1, y1), (x2, y2), (x3, y3), (x4, y4)) = examples['C']
 
 # ╔═╡ c97046d2-1086-4226-a805-b0daaeb69cec
 parall_C = parallelogram() | (;x1, y1, x2, y2, x3, y3)

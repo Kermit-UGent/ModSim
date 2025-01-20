@@ -751,21 +751,21 @@ end
 # ╔═╡ 0e2b9af8-9701-4d1c-838d-c289669522d1
 let
 	β, γ = 0.03, 0.3
-	prob_sir = ODEProblem(sir, [], (0.0, 30.0), (;β, γ))
+	prob_sir = ODEProblem(sir, [], (0.0, 30.0), [:β=>β, :γ=>γ])
 	plots["sir_beta=$(β)_gamma=$γ"] = plot(solve(prob_sir), lw=2, title="SIR model\nβ=$β and γ=$γ", ls=:auto)
 end
 
 # ╔═╡ ac6c7513-3476-4968-9d6e-eec6d09e019d
 let
 	β, γ = 0.3, 0.3
-	prob_sir = ODEProblem(sir, [], (0.0, 30.0), (;β, γ))
+	prob_sir = ODEProblem(sir, [], (0.0, 30.0), [:β=>β, :γ=>γ])
 	plots["sir_beta=$(β)_gamma=$γ"] = plot(solve(prob_sir), lw=2, title="SIR model\nβ=$β and γ=$γ", ls=:auto)
 end
 
 # ╔═╡ d408c7dc-4a57-400d-bad2-7ac02cc4fa14
 let
 	β, γ = 0.01, 0.3
-	prob_sir = ODEProblem(sir, [], (0.0, 30.0), (;β, γ))
+	prob_sir = ODEProblem(sir, [], (0.0, 30.0), [:β=>β, :γ=>γ])
 	plots["sir_beta=$(β)_gamma=$γ"] = plot(solve(prob_sir), lw=2, title="SIR model\nβ=$β and γ=$γ", ls=:auto)
 end
 
