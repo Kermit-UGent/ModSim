@@ -18,7 +18,7 @@ md"## 1: Lights out"
 
 # ╔═╡ a3c26839-2acc-49d8-98c4-3a7142dd6512
 md"""
-You use 4 of the same LED light in your room. Recently, you've had to replace one for the fourth time. In total, they lasted for 16000, 20000, 23000 and 41000 hours. They _should_ all have lasted 30000 - 50000 hours according to the manufacturer. You want to estimate the chance that the mean lifetime `μ` is smaller than advertised and the manufacturers are filthy liars.
+You use 4 of the same LED light in your room. Recently, you've had to replace one for the fourth time. In total, they lasted for 16000, 20000, 23000 and 41000 hours. They _should_ all have lasted 30000 - 50000 hours according to the manufacturer. You want to estimate the chance that the mean lifetime `μ` is smaller than advertised and the manufacturers are liars.
 
 Make the following assumptions:
 - The lifetime of a light follows an exponential distribution.
@@ -44,11 +44,14 @@ cdf(lights_prior, 30_000)
 # ╔═╡ 126d3954-c77d-4c98-abe0-fd87d14e6265
 @model function lights()
 	μ ~ LogNormal(log(4e4), 0.3)
-	lightlife ~ Exponential(μ)
+	lightlifes = zeros(4)
+	for i in 1:4
+		lightlifes[i] ~ Exponential(μ)
+	end
 end
 
 # ╔═╡ 15fe25d9-5314-4056-8021-cf259ba27c94
-lightmodel = lights() | (lightlife = [16000, 20000, 23000, 41000],)
+lightmodel = lights() | (lightlifes = [16000, 20000, 23000, 41000],)
 
 # ╔═╡ 2a142576-aec2-4311-9c0e-cb68665d59f6
 lightschain = sample(lightmodel, NUTS(), 2000)
@@ -60,7 +63,7 @@ plot(lightschain)
 mean(lightschain[:μ] .< 30_000)
 
 # ╔═╡ ca8ec759-4a4f-4401-a747-aa904d3ee7b3
-md"From the available data, there's about a 25% chance the manufacturers are filthy liars."
+md"From the available data, there's about a 25% chance the manufacturers are liars."
 
 # ╔═╡ dedbd315-dce1-47f0-bc49-47325cd5b170
 md"## 2: Kitties"
@@ -79,9 +82,13 @@ Finally, you collect data by trying to pet them. Mochi lets you pet her 3 out of
 # ╔═╡ d5f55a6e-c482-41be-ac32-2a3b57bb711e
 md"""
 !!! questions
-	- What is the expected `affection` for both cats?
-	- Visualise the prior and posterior `affection` for both cats. Where on the plots are the MLE and MAP estimates situated?
+	1. What is the expected `affection` for both cats?
+	2. What is the chance Mochi likes you most?
+	3. Visualise the prior and posterior `affection` for both cats. Where on the plots are the MLE and MAP estimates situated?
 """
+
+# ╔═╡ 5642edf0-1187-4f46-ad4c-555c1f8256d3
+md"### 1"
 
 # ╔═╡ 9d129bf1-3527-420f-ac6e-296f9ddf50d2
 @model function kitkat(a, b, n)
@@ -112,6 +119,15 @@ mean(mochichain[:affection])
 
 # ╔═╡ 0ae66724-2188-40cd-8626-f757ca9f3d17
 mean(momochain[:affection])
+
+# ╔═╡ 7424fc21-d04b-423e-a344-11e04b81f803
+md"### 2"
+
+# ╔═╡ 22502264-7cad-4b0e-8af6-377b90e7eeec
+mean(mochichain[:affection] .> momochain[:affection])
+
+# ╔═╡ b54094be-b15e-4f62-a9d5-908ad85d5b09
+md"### 3"
 
 # ╔═╡ e03f656a-cd53-47ba-a77c-8c65a57c7778
 begin
@@ -294,17 +310,11 @@ circle1 = circle() | (x1=x1, y1=y1)
 # ╔═╡ b7ba8f91-f440-4166-af9e-11fcb5f1755f
 circle2 = circle1 | (x2=x2, y2=y2)
 
-# ╔═╡ bce50d45-b487-4458-9ce0-d8f7bcc0f1ab
-chain0 = sample(circle(), Prior(), 100);
-
 # ╔═╡ 3b5f3623-3d00-4ba4-9182-5bddacc56567
 chain1 = sample(circle1, NUTS(), 100);
 
 # ╔═╡ c11452bc-f404-4e51-8f68-292f5b538c88
 chain2 = sample(circle2, NUTS(), 100);
-
-# ╔═╡ 6daa26e0-40c1-42d6-9dab-11c7648cbdf6
-plotsample()
 
 # ╔═╡ c1174a5c-a6a1-46a0-96be-6997e3201dfc
 begin
@@ -345,6 +355,7 @@ end
 # ╟─dedbd315-dce1-47f0-bc49-47325cd5b170
 # ╟─db4af5b9-d424-458d-aeaa-f803dd06a222
 # ╟─d5f55a6e-c482-41be-ac32-2a3b57bb711e
+# ╟─5642edf0-1187-4f46-ad4c-555c1f8256d3
 # ╠═9d129bf1-3527-420f-ac6e-296f9ddf50d2
 # ╠═7efedd08-ca9b-4902-b609-1f61d5aa5528
 # ╠═9d436e87-64fe-4913-8265-c7ad5081ca32
@@ -354,6 +365,9 @@ end
 # ╠═de595c61-12f2-44f2-815a-a54d70ccedbe
 # ╠═a90a2915-d260-481b-a8fa-c57f0654d85b
 # ╠═0ae66724-2188-40cd-8626-f757ca9f3d17
+# ╟─7424fc21-d04b-423e-a344-11e04b81f803
+# ╠═22502264-7cad-4b0e-8af6-377b90e7eeec
+# ╟─b54094be-b15e-4f62-a9d5-908ad85d5b09
 # ╠═e03f656a-cd53-47ba-a77c-8c65a57c7778
 # ╠═f2d68649-6012-49fe-a11e-7d735d28bb2d
 # ╟─e9e09be2-62bc-4372-bdd4-3b78820188d7
@@ -369,7 +383,7 @@ end
 # ╟─30088664-5157-4d99-8584-7a42d0acdfb8
 # ╟─7dd2c189-79c0-4d29-9e17-9c24a78b5791
 # ╟─dcbf405c-786c-4226-b35c-dc718452bb61
-# ╠═28d28034-e999-4e34-b6b2-63c762094c59
+# ╟─28d28034-e999-4e34-b6b2-63c762094c59
 # ╠═791ff4ed-c9d1-48e2-9dd0-4bf3979c6167
 # ╠═cb189957-f9d4-480b-a492-92cfc2a8c2aa
 # ╠═81eca3b3-12d9-43d7-af14-e9aeb73f2471
@@ -383,9 +397,7 @@ end
 # ╟─0a140d2a-a24b-48df-9af8-7fa5d586a26f
 # ╠═b7649523-fd40-4fe3-8d86-fc2cb2c8c488
 # ╠═b7ba8f91-f440-4166-af9e-11fcb5f1755f
-# ╠═bce50d45-b487-4458-9ce0-d8f7bcc0f1ab
 # ╠═3b5f3623-3d00-4ba4-9182-5bddacc56567
 # ╠═c11452bc-f404-4e51-8f68-292f5b538c88
-# ╠═6daa26e0-40c1-42d6-9dab-11c7648cbdf6
 # ╠═c1174a5c-a6a1-46a0-96be-6997e3201dfc
 # ╠═793fc102-fc64-4041-a04e-e0b1b0741437

@@ -10,20 +10,20 @@ using Pkg; Pkg.activate("..")
 # ╔═╡ 4cfd4721-e29a-4270-8d15-021bcc966eb1
 using Turing, StatsPlots
 
-# ╔═╡ 0fc3fa95-0287-423c-ba5a-7e382202ff81
-n_samples = 1_000
+# ╔═╡ e4cb065e-12c6-4f1c-8497-1013fa9411d6
+md"# Sampling notebook #2: Basics"
 
 # ╔═╡ 9740ea64-cd4f-46b1-a741-02e392280601
 md"""
-# 1: Dice
+## 1: Dice
 """
 
 # ╔═╡ 187854bb-9e30-454d-9e03-cccf77aebb6b
 md"You're playing a fun game of Caverns and Chimeras, and are facing off against the mighty Carl the Chimera. The fight is not going great and your next spell **needs to deal 50 or more damage** to slay the scary monster before it kills you. Spells deal **damage equal to the sum of the dice** they let you roll.
 
 You can choose between your 2 mightiest spells:
-- Watercube: lets you throw **4 dice with 20 sides** each
-- Dirtprism: lets you throw **20 dice with 4 sides** each
+- **Watercube**: lets you throw **4 dice with 20 sides** each.
+- **Dirtprism**: lets you throw **20 dice with 4 sides** each.
 "
 
 # ╔═╡ 747e3c0a-357a-448a-b479-d0fcbe44a6c0
@@ -31,13 +31,14 @@ md"""
 !!! questions
     - What are the probabilities of either attack doing the job? 
     - Plot a histogram of the damage of both attacks.
+	- What is the probability of watercube dealing more damage than dirtprism?
 """
 
 # ╔═╡ eda95f45-083a-4e65-b57e-bd9890da1f9c
-md"## 4d20"
+md"### 4d20"
 
 # ╔═╡ 36477423-5628-4ed3-b54d-9a050557f6b7
-@model function dice()
+@model function watercube()
     roll1 ~ DiscreteUniform(1, 20)
 	roll2 ~ DiscreteUniform(1, 20)
 	roll3 ~ DiscreteUniform(1, 20)
@@ -49,23 +50,23 @@ md"## 4d20"
 end
 
 # ╔═╡ 02bc37e2-5cf6-404a-b3fe-b2120671adb2
-dicemodel = dice()
+watermodel = watercube()
 
 # ╔═╡ 97021710-4b26-4a1c-a794-265c9559ce4d
-sp_ds = [dicemodel() for i in 1:n_samples]
+sp_w = [watermodel() for i in 1:2000]
 
 # ╔═╡ c0cd75bd-2a46-4f62-a59a-9bb8d47d45f2
-mean(sp_ds .>= 50)
+mean(sp_w .>= 50)
 
 # ╔═╡ bc5f5d70-e269-45f9-867b-a00876ce8c40
-histogram(sp_ds, bins = 30)
+histogram(sp_w, bins = 30)
 
 # ╔═╡ a1b933ac-5d1b-4800-a6e8-e942846b19d8
-md"## 20d4"
+md"### 20d4"
 
 # ╔═╡ 6b009ba3-83a8-4176-86d4-dd9f70ed29ec
-@model function superdice()
-    rolls = zeros(20)
+@model function dirtprism()
+    rolls = zeros(20) # also possible to write out all 20 rolls by hand
 	for i in eachindex(rolls)
 		rolls[i] ~ DiscreteUniform(1, 4)
 	end
@@ -74,16 +75,22 @@ md"## 20d4"
 end
 
 # ╔═╡ 83afb3c1-9e6a-4d18-b0c7-05ed0173df40
-superdicemodel = superdice()
+dirtmodel = dirtprism()
 
 # ╔═╡ 700cc645-1123-4c8a-821e-1ae4fe8b0674
-sp_sds = [superdicemodel() for i in 1:n_samples]
+sp_d = [dirtmodel() for i in 1:2000]
 
 # ╔═╡ 98d04790-e86f-438a-9389-cb9697934bbf
-mean(sp_sds .>= 50)
+mean(sp_d .>= 50)
 
 # ╔═╡ d5413573-5202-4fa2-94f6-e92a613d63aa
-histogram(sp_sds, bins = 30)
+histogram(sp_d, bins = 30)
+
+# ╔═╡ 49790a8f-9f53-4ba7-9543-d6a879b520e0
+md"### Comparison"
+
+# ╔═╡ 6e098cb6-eddd-4924-a184-c2578dc28473
+mean(sp_w .> sp_d)
 
 # ╔═╡ 34f3014f-f4d4-43d1-b46f-bdca73aee33f
 md"# 2: Super eggs"
@@ -97,8 +104,8 @@ When a chicken lays an egg, there's a small chance it contains two egg yolks. Th
 md"""
 You can make the following assumptions
 - The age $A$ of a random chicken (in years) is Poisson distributed with mean 2.
-- The amount of eggs an $A$-year old chicken lays in a year $N$ is Poisson distributed with mean $300 - 20 \, A$.
-- The probability of an $A$-year old chicken's egg having a double yolk $P$ is Normally distributed with mean $\dfrac{1}{800 + 100\,A}$ and a standard deviation of $10^{-4}$.
+- The amount of eggs $N$ an $A$-year old chicken lays in a year is Poisson distributed with mean $300 - 20 \, A$.
+- The probability of an $A$-year old chicken's egg having a double yolk $P$ is distributed as a `Beta(1, 800 + 100*A)`.
 """
 
 # ╔═╡ 6e020801-983d-4ebc-a0e9-b5dd58f66c55
@@ -112,7 +119,7 @@ md"""
 @model function eggs()
 	A ~ Poisson(2)
 	N ~ Poisson(300 - 20*A)
-	P ~ Normal(1/(800+100*A), 1e-4)
+	P ~ Beta(1, 800 + 100*A)
 
 	doubles ~ Binomial(N, P)
 	return sum(doubles)
@@ -122,7 +129,7 @@ end
 egg_model = eggs();
 
 # ╔═╡ ed67949b-c7b3-46c2-af99-ab64dbef4065
-chain_egg = sample(egg_model, Prior(), n_samples)
+chain_egg = sample(egg_model, Prior(), 2000)
 
 # ╔═╡ 64d04ed9-6548-4251-8a4e-11b31e8f3143
 sp_egg = generated_quantities(egg_model, chain_egg);
@@ -144,88 +151,106 @@ md"# 3: Petridish peril"
 
 # ╔═╡ 45dfe42b-2274-40bc-bc1c-9903cd285ea1
 md"""
-Living the microbiology master thesis life, your mornings consist of inoculating petridishes with bacteria. Somewhere along the day, you need to split them before they have overgrown the entire dish and start dying. You want to estimate the risk of overgrowth occuring in function of time so you can get out of bed as late as possible without too much risk of disaster.
+Living the microbiology master thesis life, your mornings consist of inoculating petridishes with bacteria. Somewhere along the day, you need to split them. You want to do this **after** there's a decent amount of bacteria in the dish (>10\_000) but **before** they have overgrown the entire dish and start dying (<100\_000). This condition we call **splittable**.
+
+You'd like to estimate how long after inoculation you should return to your bacteria so that they're most likely to be in a splittable state.
 """
 
 # ╔═╡ 6f0b6153-b0fc-4ac0-81f3-044bd1211010
 md"""
 Bacteria follow **logistic growth**, and you can use the following assumptions:
 - The initial population size $P_0$ has a 75% chance of originating from a small droplet and a 25% chance for a big droplet
-  - Small droplets follow a `TriangularDist(1, 20, 5)`
-  - Big droplets follow a `TriangularDist(10, 50, 20)`
-- The growth rate $r$ follows a `Normal(1.0, 0.2)`
-- The growth capacity $K$ of the inoculated medium follows a `LogNormal(log(1e5), 0.3)`
+  - For small droplets, `P0` follows a `Poisson(10)`
+  - For big droplets, `P0` follows a `Poisson(30)`
+- The growth rate $r$ follows a `LogNormal(0.0, 0.3)`
+- The growth capacity $K$ of the inoculated medium follows a `Normal(1e5, 1e4)`
 """
 
 # ╔═╡ 0c0a8f60-8a1f-4445-81d9-08343e6235a6
 md"""
 !!! questions
-	- Plot the prior distribution of P0.
-	- What is the probability of a petridish having over $10^5$ bacteria after 7, 8 and 9 hours of incubating?
-	- Plot 100 of the sampled logistic growth curves from 0 to 12 hours.
-"""
-
-# ╔═╡ 67001598-27eb-4813-8465-3ffab01d84f4
-md"""
-!!! note
-	A simple way of representing the distribution of P0 is through a mixture model. Look up the documentation of `MixtureModel` for how to make one in Turing.
+	1. Plot the prior distribution of P0.
+	2. What is the probability your bacteria are in a splittable state 8 hours after inoculation?
+	3. Plot 100 of the sampled logistic growth curves from 0 to 12 hours.
 """
 
 # ╔═╡ 57982520-9627-4a8a-911f-0d26f8fbf5f2
 logistic(t, P0, r, K) =  K / (1 + (K - P0)/P0 * exp(-r*t))
 
-# ╔═╡ 78c87e03-9ffc-4b27-a9c7-78172e045c1a
-@model function petrigrowth(t)
-    smalldropdist = TriangularDist(1, 20, 5)
-	bigdropdist = TriangularDist(10, 50, 20)
-	P0 ~ MixtureModel([smalldropdist, bigdropdist], [0.75, 0.25])
-    r ~ Normal(1.0, 0.2)
-	K ~ LogNormal(log(1e5), 0.3)
+# ╔═╡ 8017759d-3d01-4195-b600-e2f15f18b34d
+md"### 1"
 
-    Pt = logistic(t, P0, r, K)
-    return Pt
-end
+# ╔═╡ 67001598-27eb-4813-8465-3ffab01d84f4
+md"""
+!!! tip
+	A simple way of representing the distribution of P0 is through a mixture model. Look up the documentation of `MixtureModel` for how to make one in Turing.
+"""
+
+# ╔═╡ fb50a0cd-f0d7-42a2-ab5a-9f38ab133039
+dropletdist = MixtureModel([Poisson(10), Poisson(30)], [0.75, 0.25]);
 
 # ╔═╡ 517577f2-9dc2-4b0f-aa3f-fd18f7f6fac3
-plot(MixtureModel([TriangularDist(1, 20, 5), TriangularDist(10, 50, 20)]))
+plot(dropletdist) # plot gives wrong result, the lines should stack
 
-# ╔═╡ 06dc3fc4-08f7-4bac-82d9-b020a533eab6
-petri_model = petrigrowth(8);
+# ╔═╡ 1b06f0cb-77e4-4ee8-8a7d-731ecc36c72f
+rand(dropletdist, 10000) |> histogram 
+	# plotting a histogram of random samples gives a better result
 
-# ╔═╡ 465bd995-0d0c-4c68-bfb1-69cc9156c5d4
-for t in [7, 8, 9]
-	sp_petri = [petrigrowth(t)() for sample in 1:n_samples]
-	prob_overgrown = mean(sp_petri .>= 1e5)
-	println(prob_overgrown)
+# ╔═╡ b2ac8613-f14f-4187-bc60-f3ec884ef151
+md"### 2"
+
+# ╔═╡ 0dae6320-4678-41d1-94d8-bce20b7fe3c2
+md"""
+!!! tip
+	You can `return` the logistic function estimated within the model and retrieve it using `generated_quantities` to make plotting easier later on.
+
+	Remember: anonymous functions can be defined using `myfun(x) = ...`
+"""
+
+# ╔═╡ 78c87e03-9ffc-4b27-a9c7-78172e045c1a
+@model function petrigrowth(t_obs)
+	P0 ~ dropletdist
+    r ~ LogNormal(0.0, 0.3)
+	K ~ Normal(1e5, 1e4)
+
+	logfun(t) = logistic(t, P0, r, K)
+    Pt = logfun(t_obs)
+    return logfun
 end
 
+# ╔═╡ 02b3485c-0b61-4427-ae50-a53f4537e20b
+petri_model = petrigrowth(8.0);
+
 # ╔═╡ 7da4a9f2-9df9-45da-a387-22804155d09f
-chain_petri = sample(petri_model, Prior(), n_samples)
+chain_petri = sample(petri_model, Prior(), 2000);
 
-# ╔═╡ e05ae9b2-08cc-4e15-b4f2-4adf3ad30cf2
-sp_petri = generated_quantities(petri_model, chain_petri);
+# ╔═╡ 24e6daff-0708-4175-80b8-fb13595487c4
+logfuns = generated_quantities(petri_model, chain_petri);
 
-# ╔═╡ 9bf2e9c1-c777-41df-856c-2cdb427e175a
-logistfuns = [
-	t -> logistic(t, P0, r, K) 
-	for (P0, r, K) in zip(chain_petri[:P0], chain_petri[:r], chain_petri[:K])
-];
+# ╔═╡ f492e7b0-7ee0-430a-8b31-6e82f8bf131d
+sp_petri = [logfun(8.0) for logfun in logfuns]
 
-# ╔═╡ de17d13e-65a8-459b-9aae-4e02a61a7fd8
-@time plot(logistfuns[1:100], xlims = (0, 12), legend = false, color = :skyblue, alpha = 0.5)
+# ╔═╡ 1018e455-12eb-4798-8fcf-3814b994ef51
+prob_splittable = mean((sp_petri .>= 1e4) .&& (sp_petri .<= 1e5))
+
+# ╔═╡ 05c8a2b3-91ce-47b2-8ef5-49c0b5db8aa0
+md"### 3"
+
+# ╔═╡ e4284ab8-869e-428f-ac6f-610f5b10f9ea
+plot(logfuns[1:100], color = :violet, alpha = 0.3, label = false, xlims = (0, 12))
 
 # ╔═╡ ff06c070-50a2-43d0-9729-1c47e728ff52
 md"# 4: Birthdays"
 
 # ╔═╡ 6ac2238a-16fd-4a8d-b779-8627d87367ed
 md"""
-Sometimes, people are born on the same day of year.
+Sometimes, people are born on the same day of the year.
 """
 
 # ╔═╡ 01648616-bf50-4f66-82fc-eaae3de22a38
 md"""
 !!! question
-	What is the probability 3+ students in a class of 150 share a birthday?
+	What is the probability that, in a class of 150 students, 3 or more share a birthday?
 """
 
 # ╔═╡ da44d18c-8be3-446e-a5c2-905af545d2c6
@@ -258,35 +283,15 @@ end
 bday_model = birthdays(150)
 
 # ╔═╡ b0443045-74a1-4b48-8f6c-a1b5e15eace4
-sp_maxoccs = [bday_model() for i in 1:n_samples]
+sp_maxoccs = [bday_model() for i in 1:2000]
 
 # ╔═╡ cac00880-15fa-483a-a09f-9b6d1219b0cf
 mean(sp_maxoccs .>= 3)
 
-# ╔═╡ 8d66c150-4502-4501-980e-b2ce0eb79221
-md"""
-Using the party trick #!
-"""
-
-# ╔═╡ 0e5dba08-2bf2-4fd3-8179-cfb64410318f
-P_samebday = 1/365
-
-# ╔═╡ e1b2c14f-1da4-4f8b-bf14-cf731e42d110
-possible_events = binomial(150, 3)
-
-# ╔═╡ aa6723e5-a502-4a6c-8471-a6609a3ed944
-expected_events = possible_events * P_samebday^2
-
-# ╔═╡ 51a7f215-beff-4da0-861e-03326198ae3a
-1 - pdf(Poisson(expected_events), 0)
-
-# ╔═╡ 4e1a6396-2c20-4921-bf50-8a0fe446ccce
-1-exp(-expected_events)
-
 # ╔═╡ Cell order:
+# ╟─e4cb065e-12c6-4f1c-8497-1013fa9411d6
 # ╠═7d4d4d20-b323-11ef-0926-b14785cb9ab5
 # ╠═4cfd4721-e29a-4270-8d15-021bcc966eb1
-# ╠═0fc3fa95-0287-423c-ba5a-7e382202ff81
 # ╟─9740ea64-cd4f-46b1-a741-02e392280601
 # ╟─187854bb-9e30-454d-9e03-cccf77aebb6b
 # ╟─747e3c0a-357a-448a-b479-d0fcbe44a6c0
@@ -302,6 +307,8 @@ expected_events = possible_events * P_samebday^2
 # ╠═700cc645-1123-4c8a-821e-1ae4fe8b0674
 # ╠═98d04790-e86f-438a-9389-cb9697934bbf
 # ╠═d5413573-5202-4fa2-94f6-e92a613d63aa
+# ╟─49790a8f-9f53-4ba7-9543-d6a879b520e0
+# ╠═6e098cb6-eddd-4924-a184-c2578dc28473
 # ╟─34f3014f-f4d4-43d1-b46f-bdca73aee33f
 # ╟─372436c4-262f-49b8-b1cf-626b043542bf
 # ╟─20111742-008a-44c3-8c27-62791cce3e1e
@@ -318,16 +325,22 @@ expected_events = possible_events * P_samebday^2
 # ╟─45dfe42b-2274-40bc-bc1c-9903cd285ea1
 # ╟─6f0b6153-b0fc-4ac0-81f3-044bd1211010
 # ╟─0c0a8f60-8a1f-4445-81d9-08343e6235a6
-# ╟─67001598-27eb-4813-8465-3ffab01d84f4
 # ╠═57982520-9627-4a8a-911f-0d26f8fbf5f2
-# ╠═78c87e03-9ffc-4b27-a9c7-78172e045c1a
+# ╟─8017759d-3d01-4195-b600-e2f15f18b34d
+# ╟─67001598-27eb-4813-8465-3ffab01d84f4
+# ╠═fb50a0cd-f0d7-42a2-ab5a-9f38ab133039
 # ╠═517577f2-9dc2-4b0f-aa3f-fd18f7f6fac3
-# ╠═06dc3fc4-08f7-4bac-82d9-b020a533eab6
-# ╠═465bd995-0d0c-4c68-bfb1-69cc9156c5d4
+# ╠═1b06f0cb-77e4-4ee8-8a7d-731ecc36c72f
+# ╟─b2ac8613-f14f-4187-bc60-f3ec884ef151
+# ╟─0dae6320-4678-41d1-94d8-bce20b7fe3c2
+# ╠═78c87e03-9ffc-4b27-a9c7-78172e045c1a
+# ╠═02b3485c-0b61-4427-ae50-a53f4537e20b
 # ╠═7da4a9f2-9df9-45da-a387-22804155d09f
-# ╠═e05ae9b2-08cc-4e15-b4f2-4adf3ad30cf2
-# ╠═9bf2e9c1-c777-41df-856c-2cdb427e175a
-# ╠═de17d13e-65a8-459b-9aae-4e02a61a7fd8
+# ╠═24e6daff-0708-4175-80b8-fb13595487c4
+# ╠═f492e7b0-7ee0-430a-8b31-6e82f8bf131d
+# ╠═1018e455-12eb-4798-8fcf-3814b994ef51
+# ╟─05c8a2b3-91ce-47b2-8ef5-49c0b5db8aa0
+# ╠═e4284ab8-869e-428f-ac6f-610f5b10f9ea
 # ╟─ff06c070-50a2-43d0-9729-1c47e728ff52
 # ╟─6ac2238a-16fd-4a8d-b779-8627d87367ed
 # ╟─01648616-bf50-4f66-82fc-eaae3de22a38
@@ -338,9 +351,3 @@ expected_events = possible_events * P_samebday^2
 # ╠═44407741-8c74-4c00-a040-897c4713e6d7
 # ╠═b0443045-74a1-4b48-8f6c-a1b5e15eace4
 # ╠═cac00880-15fa-483a-a09f-9b6d1219b0cf
-# ╟─8d66c150-4502-4501-980e-b2ce0eb79221
-# ╠═0e5dba08-2bf2-4fd3-8179-cfb64410318f
-# ╠═e1b2c14f-1da4-4f8b-bf14-cf731e42d110
-# ╠═aa6723e5-a502-4a6c-8471-a6609a3ed944
-# ╠═51a7f215-beff-4da0-861e-03326198ae3a
-# ╠═4e1a6396-2c20-4921-bf50-8a0fe446ccce
