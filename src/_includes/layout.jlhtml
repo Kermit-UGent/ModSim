@@ -82,14 +82,6 @@ $(pluto_head)
                 </div>
             </li>
             <li>
-                <div class="search-bar">
-                    <form action="$(root_url)/search" method="GET">
-                        <input type="search" name="q" placeholder="Search...">
-                        <input type=submit value="🔎">
-                    </form>
-                </div>
-            </li>
-            <li>
                 <div class="track-chooser">
                     <label>
                     <h2>Choose your track:</h2>
