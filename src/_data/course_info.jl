@@ -2,7 +2,7 @@ Dict(
     "course_name" => "MODSIM",
     "course_subtitle" => "Modelling and Simulation of Biosystems",
     "code" => "I002445",
-    "semester" => "second semester 2024-2025",
+    "semester" => "2nd semester '24-'25",
     "authors" => [
         "Michiel Stock" => "https://github.com/MichielStock",
         "Bram Spanoghe" => "https://github.com/orgs/Kermit-UGent/",
