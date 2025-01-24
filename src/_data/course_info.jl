@@ -1,13 +1,16 @@
 Dict(
-    "course_name" => "Name of your course",
-    "course_subtitle" => "a short catchy phrase about your course",
-    "code" => "code of your course",
-    "semester" => "Fall 20XX",
+    "course_name" => "MODSIM",
+    "course_subtitle" => "Modelling and Simulation of Biosystems",
+    "code" => "I002445",
+    "semester" => "second semester 2024-2025",
     "authors" => [
-        "First author name" => "first author homepage link",
-        "Second author name" => "second author homepage link"
+        "Michiel Stock" => "first author homepage link",
+        "Bram Spanoghe" => "second author homepage link",
+        "Daniel Illana González" => "your homepage link",
+        "Gauthier Vanhaelewyn" => "your homepage link",
+        "Daan Van Hauwermeiren" => "your homepage link",
     ],
-    "institution" => "Your university (or similar) name",
-    "institution_logo" => "name of your institution logo file, e.g. `logo.svg`. Place this under `assets`",
-    "repo" => "link to the repository of the source code"
+    "institution" => "Ghent University",
+    "institution_logo" => "KERMIT_warm.png", # SVG is borked for some dank reason, using png
+    "repo" => "https://github.com/Kermit-UGent/ModSim/"
 )
