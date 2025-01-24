@@ -9,9 +9,21 @@ Dict(
 
     # Highlights the key features of your class to make it more engaging. Remove it if you dont want to include it.
     "highlights" => [
-        Dict("name" => "Easy to customise", 
-             "text" => md"Let the template automate all of the website development and infrastructure, so that you can focus on the most important thing:
-             **easily develop your lesson materials!**",
+        Dict("name" => "Course Notes", 
+             # FIXME Add link to download pdf 
+             "text" => md"The MODSIM course notes in pdf format can be found as a download on Ufora or in the release notes on GitHub. When in doubt, just click this link.",
+             # FIXME change figure to small piece of the cover.
+             "img" => "https://user-images.githubusercontent.com/6933510/168320383-a401459b-97f5-41df-bc7b-ebe76e4886cc.png"
+        ),
+        Dict("name" => "What is here to be found?!", 
+             "text" => md"In this course website you will find info on the course notes, the installation of the software required for this course, and a (static!) view of the exercises and examples. On the left you can find the table of contents with all the pages.",
+             # FIXME change picture
+             "img" => "https://user-images.githubusercontent.com/6933510/168320383-a401459b-97f5-41df-bc7b-ebe76e4886cc.png"
+        ),
+        Dict("name" => "Questions, office hours, errata and bugs",
+             # FIXME check content 
+             "text" => md"For question you can check the fora on Ufora, ask the teaching responsible or assistents in class. Further, there are office hours on XYZ day from AAA to BBB in office number XYZ.123. Errata will be anounced on the errate page If you find something that looks wonky, is misspelledt (pun intended) or is bugged: please open a bug report here (https://github.com/Kermit-UGent/ModSim/issues/) or report it to one of the teaching assistents.",
+             # FIXME change picture
              "img" => "https://user-images.githubusercontent.com/6933510/168320383-a401459b-97f5-41df-bc7b-ebe76e4886cc.png"
         ),
         Dict("name" => "Revolutionary interactivity with Pluto.jl",
