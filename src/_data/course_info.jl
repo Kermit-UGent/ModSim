@@ -4,11 +4,11 @@ Dict(
     "code" => "I002445",
     "semester" => "second semester 2024-2025",
     "authors" => [
-        "Michiel Stock" => "first author homepage link",
-        "Bram Spanoghe" => "second author homepage link",
-        "Daniel Illana González" => "your homepage link",
-        "Gauthier Vanhaelewyn" => "your homepage link",
-        "Daan Van Hauwermeiren" => "your homepage link",
+        "Michiel Stock" => "https://github.com/MichielStock",
+        "Bram Spanoghe" => "https://github.com/orgs/Kermit-UGent/",
+        "Daniel Illana González" => "https://github.com/orgs/Kermit-UGent/",
+        "Gauthier Vanhaelewyn" => "https://github.com/orgs/Kermit-UGent/",
+        "Daan Van Hauwermeiren" => "https://github.com/DaanVanHauwermeiren/",
     ],
     "institution" => "Ghent University",
     "institution_logo" => "KERMIT_warm.png", # SVG is borked for some dank reason, using png
