@@ -16,221 +16,72 @@ macro bind(def, element)
     #! format: on
 end
 
-# ╔═╡ 1e078c8b-2df9-4646-b629-bac7f151e937
-using Catalyst, DifferentialEquations
+# ╔═╡ ac1e6158-d41f-11ef-07a3-bbf7014dbbcd
+using Catalyst, DifferentialEquations, Plots
 
-# ╔═╡ 158c4ad8-a38b-4828-812f-1abce60695dc
-using SciMLSensitivity
+# ╔═╡ b29ecd80-0e11-4501-a3bd-fbb778630072
+using PlutoUI
 
-# ╔═╡ 6785c1af-28e5-46b4-ba34-a8ab65be7ff8
-using ForwardDiff
-
-# ╔═╡ 21357c48-f35d-11ee-23f8-2534bb1d82f4
-begin
-	
-	# make this cell invisible when you are finished
-	title = "Modelling the effect of antibiotics on microbial resistence"
-	names = ["Michiel"]
-
-	academic_year = "2023_2024"
-
-	email_main_person = "mail@domain.be"
-
-	using PlutoUI  # interactivity
-	using Plots  # plotting
-	TableOfContents()
+# ╔═╡ 4dd925bf-d490-4b0a-8363-db376cbad00b
+lotka_volterra = @reaction_network begin
+	α, 🐰 --> 2🐰
+	β, 🦊 --> ∅
+	γ, 🐰 + 🦊 --> 🦊 + 0.1🦊
 end
 
-# ╔═╡ 14c7e803-c0ff-4211-8b60-2c9c246934dd
-md"""
-# $title
+# ╔═╡ f1d5bd29-2142-415a-84e2-2ab4e21cd0db
+osys = convert(ODESystem, lotka_volterra, combinatoric_ratelaws=false)
 
-**$(join(names, ", ", " and "))**
-"""
+# ╔═╡ 9bfd05e1-6a66-40e9-ad2d-0b2911095647
+sol = solve(oprob, RK4())
 
-# ╔═╡ 6948149f-854e-4b3c-b51c-099dd221ab83
-md"""
-## Abstract
+# ╔═╡ 79212598-3858-43e5-af34-4059fea38246
+plot(sol)
 
-The discovery of antibiotics is one of the greatest medical advancements of the 20th century. In this project, we use a simple ordinary differential equation (ODE) system to model the effect of antibiotic dosing on a system containing susceptible and resistant bacteria. Bacteria grow with a simple completion model (susceptible bacteria grow faster due to the fitness cost associated with being resistant). Antibiotics can be added to the system. Higher concentrations kill bacteria more effectively, though antibiotics are quickly removed from the system. When choosing doses and dosing time, can we maximally reduce bacterial infection while limiting our total use?
-"""
+# ╔═╡ b051487d-12fc-4a38-b580-3379ddb1521d
+plot(sol, idxs=(:🐰,:🦊), xlab="rabbits", ylab="foxes", arrow=true)
 
-# ╔═╡ 89551690-500d-4e37-ae20-5beb71cc87ac
-md"""
-## Model
+# ╔═╡ 10880546-4f88-430c-8453-8a18fec6b611
+md"Can you adapt the model to include a carrying capacity of 20 for the rabbits?"
 
-In this system, we model three variables: the number of susceptible ($S(t)$) and resistant ($R(t)$) bacteria and the concentration of antibiotics ($C(t)$). 
+# ╔═╡ 5449da57-bd43-4fa4-8519-ff0c91cf8001
+@bind showsol CheckBox()
 
-The following processes take place:
-- the growth rate of the bacteria depends on their total density according to a logistic growth: $\mu = r(1-\frac{S+R}{K})$.
-- susceptible bacteria have a fitness cost of $a$, limiting their growth rate $\mu(1-a)$;
-- both $S$ and $R$ are removed according to a first-order process with rate $\theta$;
-- the antibiotic kills off bacteria according to a first-order kinetics, with the rate determined by a Hill function. Resistant bacteria have twice as high $K_s$.
-- antibiotics leave the system (degradation and removal) with a rate of $g$.
-"""
-
-# ╔═╡ aed58771-86c1-4928-a1ba-b7d2f503b188
-antibiotics = @reaction_network begin
-	@species S(t)=500.0 R(t)=50.0 C(t)=0.0
-	r * (1-(S+R)/K), S --> 2S  # growth susceptible bacteria
-	r * (1-(S+R)/K) * (1-a), R --> 2R  # growth resistant bacteria (with fitness cost)
-	θ, (S, R) --> ∅  # natural removal of the bacteria
-	hill(C, v, Ks, 4), S --> ∅  # killing S bacteria via antibiotics 
-	hill(C, v, 2Ks, 4), R --> ∅  # killing R bacteria via antibiotics
-	g, C --> ∅  # removal of antibiotics
+# ╔═╡ f4e99c48-acfc-4acc-a70f-c4d4d33c2d72
+showsol && md"""
+```
+lotka_volterra = @reaction_network begin
+	α * (1 - 🐰/20), 🐰 --> 2🐰
+	β, 🦊 --> ∅
+	γ, 🐰 + 🦊 --> 🦊 + 0.1🦊
 end
-
-# ╔═╡ 33a6968f-d8df-4f56-baf3-6e0e88e54c23
-md"These reactions form the following system of ordinary differential equations:"
-
-# ╔═╡ 83b50ef8-9b68-428a-bf93-1583d032e9aa
-convert(ODESystem, antibiotics)
-
-# ╔═╡ ccb31a3a-f75e-479d-bec7-75cf590652c5
-parameters(antibiotics)
-
-# ╔═╡ f284fda5-aaf7-4121-a8f0-b996d501bec5
-md"## Simulation and analysis"
-
-# ╔═╡ aaf3d52e-7e6b-4742-b9df-5440b148e7ee
-md"### One dose of antibiotics"
-
-# ╔═╡ a2164307-6d18-4983-9aaa-25c8f5828655
-md"We set some sensible parameter values:"
-
-# ╔═╡ eab8adc0-e3c7-4693-990b-cb47e3d9c2cf
-pars = [:r=>2.7, :K=>1e3, :θ=>0.2, :a=>0.2, :g=>log(2), :v=>5.3, :Ks=>4.] 
-
-# ╔═╡ 556243a1-c387-4606-94d9-2dc06dfdc5f0
-md"We can simulate the system. Let us assume an initial concentration of antibiotics $C_0$ at $t=0$ and see what the effect is."
-
-# ╔═╡ 98451eb8-8755-47fe-b8c6-ce2959256dd8
-tspan = (0.0, 50.0)
-
-# ╔═╡ b62c37ac-8d33-49ac-8aa6-18d959bc6933
-@bind C0 Slider(0:100, show_value=true, default=20)
-
-# ╔═╡ 797ce7d7-c49d-4a00-a8e3-058b6de4d3a9
-oprob = ODEProblem(antibiotics, [:C=>C0], tspan, pars);
-
-# ╔═╡ aa32c5e2-0f67-4910-a612-d958fa13169c
-plot(solve(oprob, RK4()))
-
-# ╔═╡ 4679507b-e6e4-4d39-8610-77141f7b82e0
-md"""
-We note that:
-- When no antibiotic is present, the susceptible bacteria quickly take over.
-- At low concentrations (2-20), the resistant bacteria are killed off, while the resistant bacteria take (temporarily) over.
-- High antibiotic concentrations (> 40) show nearly complete eradication of both types of bacteria.
-
-We note that after a while (when all the antibiotics have left the system), the bacteria quickly return to total capacity.
-
-What if we give a second dose of antibiotic at a different time?
+```
 """
 
-# ╔═╡ 49e97512-4150-49e2-bd9b-c3bfd7c375dc
-md"### Second dose of antibiotics"
+# ╔═╡ df247423-a290-440e-a87b-020584db645e
+# ╠═╡ disabled = true
+#=╠═╡
+oprob = ODEProblem(lotka_volterra, [:🐰=>10.0, :🦊 => 1.0],
+						(0.0, 50.0), [:α=>0.8, :β=>0.2, :γ=>0.6], combinatoric_ratelaws=false)
+  ╠═╡ =#
 
-# ╔═╡ 50794b21-e90f-438d-ad9c-eaddfab14ce7
-function dose!(integrator, D)
-	integrator[:C] += D
-end
-
-# ╔═╡ 7f9c8c7d-90ef-496c-b907-300feba5edfc
-obprob2 = ODEProblem(antibiotics, [], tspan, pars);  # no AB in the system
-
-# ╔═╡ bf81ccd3-4cdf-4a9c-b334-f7339fed8dfe
-@bind D Slider(1.0:100.0, show_value=true)
-
-# ╔═╡ 438de4bb-6d15-4d76-b9a5-95b51924cbc2
-@bind tdose Slider(1.0:35.0, show_value=true)
-
-# ╔═╡ 37ecd681-bd01-4162-94cf-97f6d8d82a8e
-ps_cb = PresetTimeCallback(tdose, I->dose!(I, D));
-
-# ╔═╡ 0d464337-8a70-47eb-8c08-cc2a7d388cff
-begin
-	plot(solve(oprob, callback=ps_cb))
-	vline!([tdose], label="dosing time", ls=:dash, title="Second dosing with concentration of $D at day $tdose")
-end
-
-# ╔═╡ 0bfc00dd-cb88-4166-8cb0-2583882975f4
-md"A strong second dose after about eight days can keep the population in check for a while. However, if we give a lower dose, the resistant bacteria will strongly dominate!"
-
-# ╔═╡ 89798b17-a1f0-43ff-9b3f-42cae0d6020a
-md"### Sensitivity analysis"
-
-# ╔═╡ a0bff583-53ee-4a76-8dea-93711b93ec4c
-md"We can explore the system further by performing a local sensitivity analysis. Let us explore two parameters: the effectivity of the antibiotics (given by parameter $K_s$, the concentration where it at half its maximal effectivty) and $a$, the fitness cost of the resistant bacteria. We only consider a single initial dose of antibiotics."
-
-# ╔═╡ 1dc98bcc-c991-43f2-884e-ec6c20ee4554
-begin
-	tsteps = 0:0.1:30
-
-	S((Ks, a)) = solve(remake(oprob, p=[:Ks=>Ks, :a=>a]), RK4(), saveat=tsteps)[:S]
-	R((Ks, a)) = solve(remake(oprob, p=[:Ks=>Ks, :a=>a]), RK4(), saveat=tsteps)[:R]
-
-	sens_S((Ks, a)) = ForwardDiff.jacobian(S, [Ks, a])  # sensitivity for susceptible bacteria
-	sens_R((Ks, a)) = ForwardDiff.jacobian(R, [Ks, a])  # sensitivity for resistant bacteria
-
-end
-
-# ╔═╡ c321d1b8-e22b-4e28-adfc-dc2b20d28083
-@bind Ks Slider(1.0:1.0:20, show_value=true, default=4)
-
-# ╔═╡ 9f856137-5a46-4a6d-be12-aa38f9e20642
-@bind a Slider(0:0.1:0.9, show_value=true, default=0.1)
-
-# ╔═╡ 5600d0fa-80ef-40c2-ae12-570c348d1f14
-md"Below is a simulation with the given parameters:"
-
-# ╔═╡ 7c18a27d-a738-4d04-b712-d87fd91828af
-plot(tsteps, [S([Ks, a]) R([Ks, a])], label=["S" "R"], xlab="t", title="Bacterial load with Ks=$Ks and a=$a")
-
-# ╔═╡ 3e1c9cd4-aa4e-4f29-8788-45708b94406f
-md"Next, we perform a sensitivity analysis for Ks and a, respectively."
-
-# ╔═╡ 752a90ee-3e92-4426-b33c-9d65b8c465dc
-plot(tsteps, [sens_S((Ks, a))[:,1] sens_R((Ks, a))[:,1]], label=["S" "R"], xlab="t", title="Sensitivity for Ks")
-
-# ╔═╡ d45219d2-183e-4ca1-89bc-34d0eae1419b
-md"We see here that $K_s$ greatly positively impacts both types of bacteria shortly after the the antibiotics has been removed. The greater $K_s$, the higher the antibiotics concentration needs to be to substantionally effect the bacterial density. The effect is the greatest for resistant bacteria. At longer time intervals, a small increase in $K_s$ give a positive effect on the susceptible bacteria and a negative effect on the resistant ones. Due to competition, this is a zero-sum game and if the susceptible bacteria are less harmed, they can easier take back a large share of the system."
-
-# ╔═╡ d5287aba-93ab-440a-9cb5-97d879f5af9b
-plot(tsteps, [sens_S((Ks, a))[:,2] sens_R((Ks, a))[:,2]], label=["S" "R"], xlab="t", title="Sensitivity for a")
-
-# ╔═╡ c93ed717-dcfd-46f5-83c1-91d8eb7fa943
-md"Above, we see the effect of the fitness cost $a$, the decrease in growth rate the resistant bacteria show. Though the fitness cost only directly impacts the resistant bacteria, both are impacted due to competition. Just after the initial boom when the antibiotics have dissipated, there is a large negative local minimum for the resistant bacteria. After that, we see a strong negative effect for the resistant bacteria and, conversely, a positive effect for the susceptible ones."
-
-# ╔═╡ 60c63f1b-5a27-4539-a486-78c083457b0e
-md"""
-## Conclusion
-
-This toy model illustrates the effect of antibiotic treatment on a mixed population of susceptible and resistant bacteria. It highlights the importance of a sufficiently strong initial dose to prevent resistant bacteria from dominating the population. The model also demonstrates that the timing of a second dose can significantly influence the outcome, with a well-timed second dose potentially keeping the bacterial population in check.
-
-However, this model is a simplification of real-world scenarios. It assumes a simple first-order removal of antibiotics, whereas actual pharmacokinetics involve absorption, distribution, metabolism, and excretion. Incorporating these factors would enhance the model's accuracy. Additionally, the model could be improved by including a more realistic immune response, capable of eliminating bacteria at low concentrations. Future work could also explore the effects of multiple doses or continuous antibiotic infusions, as well as the impact of stochastic fluctuations in bacterial growth and antibiotic effects.
-"""
-
-# ╔═╡ 890afefc-f42b-4d74-b775-6dee5e5f0c2b
-md"## Appendix"
+# ╔═╡ a5acd96a-b759-4177-8097-a5f73ddda483
+oprob = ODEProblem(complete(osys), [:🐰=>10.0, :🦊 => 1.0],
+						(0.0, 50.0), [:α=>0.8, :β=>0.2, :γ=>0.6])
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Catalyst = "479239e8-5488-4da2-87a7-35f2df7eef83"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
-ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-SciMLSensitivity = "1ed8b502-d754-442c-8d5d-10ac956f44a1"
 
 [compat]
 Catalyst = "~14.4.1"
 DifferentialEquations = "~7.15.0"
-ForwardDiff = "~0.10.38"
 Plots = "~1.40.9"
-PlutoUI = "~0.7.60"
-SciMLSensitivity = "~7.72.0"
+PlutoUI = "~0.7.23"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -239,7 +90,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.3"
 manifest_format = "2.0"
-project_hash = "a694337c1cd8ff504cbdc6890daf6a9ff22e851a"
+project_hash = "60ab12f095032edc6c616c84a841208639572a8c"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "72af59f5b8f09faee36b4ec48e014a79210f2f4f"
@@ -251,17 +102,6 @@ weakdeps = ["ChainRulesCore", "ConstructionBase", "EnzymeCore"]
     ADTypesChainRulesCoreExt = "ChainRulesCore"
     ADTypesConstructionBaseExt = "ConstructionBase"
     ADTypesEnzymeCoreExt = "EnzymeCore"
-
-[[deps.AbstractFFTs]]
-deps = ["LinearAlgebra"]
-git-tree-sha1 = "d92ad398961a3ed262d8bf04a1a2b8340f915fef"
-uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
-version = "1.5.0"
-weakdeps = ["ChainRulesCore", "Test"]
-
-    [deps.AbstractFFTs.extensions]
-    AbstractFFTsChainRulesCoreExt = "ChainRulesCore"
-    AbstractFFTsTestExt = "Test"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -372,22 +212,6 @@ weakdeps = ["SparseArrays"]
 [[deps.Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
-[[deps.Atomix]]
-deps = ["UnsafeAtomics"]
-git-tree-sha1 = "c3b238aa28c1bebd4b5ea4988bebf27e9a01b72b"
-uuid = "a9b6321e-bd34-4604-b9c9-b65b8de01458"
-version = "1.0.1"
-
-    [deps.Atomix.extensions]
-    AtomixCUDAExt = "CUDA"
-    AtomixMetalExt = "Metal"
-    AtomixoneAPIExt = "oneAPI"
-
-    [deps.Atomix.weakdeps]
-    CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
-    Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
-    oneAPI = "8f75cd03-7ff8-4ecb-9b8f-daf728133b1b"
-
 [[deps.BandedMatrices]]
 deps = ["ArrayLayouts", "FillArrays", "LinearAlgebra", "PrecompileTools"]
 git-tree-sha1 = "fc8d8197de6c69ad6fd01c255b6b386ca8199331"
@@ -492,11 +316,6 @@ git-tree-sha1 = "009060c9a6168704143100f36ab08f06c2af4642"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.18.2+1"
 
-[[deps.Cassette]]
-git-tree-sha1 = "f8764df8d9d2aec2812f009a1ac39e46c33354b8"
-uuid = "7057c7e9-c182-5462-911a-8362d720325c"
-version = "0.3.14"
-
 [[deps.Catalyst]]
 deps = ["Combinatorics", "DataStructures", "DiffEqBase", "DocStringExtensions", "DynamicPolynomials", "DynamicQuantities", "Graphs", "JumpProcesses", "LaTeXStrings", "Latexify", "LinearAlgebra", "MacroTools", "ModelingToolkit", "Parameters", "Reexport", "Requires", "RuntimeGeneratedFunctions", "SciMLBase", "Setfield", "SparseArrays", "SymbolicUtils", "Symbolics", "Unitful"]
 git-tree-sha1 = "dafd059c1d80ba02006978cd05ea7264ff1f362e"
@@ -516,12 +335,6 @@ version = "14.4.1"
     GraphMakie = "1ecd5474-83a3-4783-bb4f-06765db800d2"
     HomotopyContinuation = "f213a82b-91d6-5c5d-acf7-10f1c761b327"
     StructuralIdentifiability = "220ca800-aa68-49bb-acd8-6037fa93a544"
-
-[[deps.ChainRules]]
-deps = ["Adapt", "ChainRulesCore", "Compat", "Distributed", "GPUArraysCore", "IrrationalConstants", "LinearAlgebra", "Random", "RealDot", "SparseArrays", "SparseInverseSubset", "Statistics", "StructArrays", "SuiteSparse"]
-git-tree-sha1 = "4312d7869590fab4a4f789e97bd82f0a04eaaa05"
-uuid = "082447d4-558c-5d27-93f4-14fc19e9eca2"
-version = "1.72.2"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
@@ -553,15 +366,21 @@ version = "3.27.1"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "b10d0b65641d57b8b4d5e234446582de5047050d"
+git-tree-sha1 = "c7acce7a7e1078a20a285211dd73cd3941a871d6"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.11.5"
+version = "0.12.0"
+
+    [deps.ColorTypes.extensions]
+    StyledStringsExt = "StyledStrings"
+
+    [deps.ColorTypes.weakdeps]
+    StyledStrings = "f489334b-da3d-4c2e-b8f0-e476e12c162b"
 
 [[deps.ColorVectorSpace]]
 deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "Requires", "Statistics", "TensorCore"]
-git-tree-sha1 = "a1f44953f2382ebb937d60dafbe2deea4bd23249"
+git-tree-sha1 = "8b3b6f87ce8f65a2b4f857528fd8d70086cd72b1"
 uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
-version = "0.10.0"
+version = "0.11.0"
 weakdeps = ["SpecialFunctions"]
 
     [deps.ColorVectorSpace.extensions]
@@ -750,10 +569,12 @@ deps = ["DiffEqBase", "Distributions", "GPUArraysCore", "LinearAlgebra", "Markdo
 git-tree-sha1 = "880d1fcf95e6492a4e7d65c2866dbdbf6580d4f8"
 uuid = "77a26b50-5914-5dd7-bc55-306e6241c503"
 version = "5.24.0"
-weakdeps = ["ReverseDiff"]
 
     [deps.DiffEqNoiseProcess.extensions]
     DiffEqNoiseProcessReverseDiffExt = "ReverseDiff"
+
+    [deps.DiffEqNoiseProcess.weakdeps]
+    ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
 
 [[deps.DiffResults]]
 deps = ["StaticArraysCore"]
@@ -911,28 +732,6 @@ git-tree-sha1 = "bdb1942cd4c45e3c678fd11569d5cccd80976237"
 uuid = "4e289a0a-7415-4d19-859d-a7e5c4648b56"
 version = "1.0.4"
 
-[[deps.Enzyme]]
-deps = ["CEnum", "EnzymeCore", "Enzyme_jll", "GPUCompiler", "LLVM", "Libdl", "LinearAlgebra", "ObjectFile", "PrecompileTools", "Preferences", "Printf", "Random", "SparseArrays"]
-git-tree-sha1 = "f39747b06eb299ca32c237d8423f092a8391e60f"
-uuid = "7da242da-08ed-463a-9acd-ee780be4f1d9"
-version = "0.13.28"
-
-    [deps.Enzyme.extensions]
-    EnzymeBFloat16sExt = "BFloat16s"
-    EnzymeChainRulesCoreExt = "ChainRulesCore"
-    EnzymeGPUArraysCoreExt = "GPUArraysCore"
-    EnzymeLogExpFunctionsExt = "LogExpFunctions"
-    EnzymeSpecialFunctionsExt = "SpecialFunctions"
-    EnzymeStaticArraysExt = "StaticArrays"
-
-    [deps.Enzyme.weakdeps]
-    BFloat16s = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
-    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-    GPUArraysCore = "46192b85-c4d5-4398-a991-12ede77f4527"
-    LogExpFunctions = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
-    SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
-    StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
-
 [[deps.EnzymeCore]]
 git-tree-sha1 = "0cdb7af5c39e92d78a0ee8d0a447d32f7593137e"
 uuid = "f151be2c-9106-41f4-ab19-57ee4f262869"
@@ -941,12 +740,6 @@ weakdeps = ["Adapt"]
 
     [deps.EnzymeCore.extensions]
     AdaptExt = "Adapt"
-
-[[deps.Enzyme_jll]]
-deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl", "TOML"]
-git-tree-sha1 = "b81b0143399acd84a2ed2a1fa0b4ab55e25ee625"
-uuid = "7cc45869-7501-5eee-bdea-0790c847d4ef"
-version = "0.0.172+0"
 
 [[deps.EpollShim_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1126,12 +919,6 @@ git-tree-sha1 = "846f7026a9decf3679419122b49f8a1fdb48d2d5"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.16+0"
 
-[[deps.FunctionProperties]]
-deps = ["Cassette", "DiffRules"]
-git-tree-sha1 = "bf7c740307eb0ee80e05d8aafbd0c5a901578398"
-uuid = "f62d2435-5019-4c03-9749-2d4c77af0cbc"
-version = "0.1.2"
-
 [[deps.FunctionWrappers]]
 git-tree-sha1 = "d62485945ce5ae9c0c48f124a84998d755bae00e"
 uuid = "069b7b12-0de2-55c6-9aab-29f3d0a68a2e"
@@ -1159,23 +946,11 @@ git-tree-sha1 = "fcb0584ff34e25155876418979d4c8971243bb89"
 uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
 version = "3.4.0+2"
 
-[[deps.GPUArrays]]
-deps = ["Adapt", "GPUArraysCore", "KernelAbstractions", "LLVM", "LinearAlgebra", "Printf", "Random", "Reexport", "ScopedValues", "Serialization", "Statistics"]
-git-tree-sha1 = "86a185085bffbafb11c046f676ee876597b76b66"
-uuid = "0c68f7d7-f131-5f86-a1c3-88cf8149b2d7"
-version = "11.2.0"
-
 [[deps.GPUArraysCore]]
 deps = ["Adapt"]
 git-tree-sha1 = "83cf05ab16a73219e5f6bd1bdfa9848fa24ac627"
 uuid = "46192b85-c4d5-4398-a991-12ede77f4527"
 version = "0.2.0"
-
-[[deps.GPUCompiler]]
-deps = ["ExprTools", "InteractiveUtils", "LLVM", "Libdl", "Logging", "PrecompileTools", "Preferences", "Scratch", "Serialization", "TOML", "TimerOutputs", "UUIDs"]
-git-tree-sha1 = "8e30cd0b1934f03dd925416970061c1014c6686f"
-uuid = "61eb1bfa-7361-4325-ad38-22787b887f55"
-version = "1.1.0"
 
 [[deps.GR]]
 deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Preferences", "Printf", "Qt6Wayland_jll", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "p7zip_jll"]
@@ -1241,11 +1016,6 @@ git-tree-sha1 = "55c53be97790242c29031e5cd45e8ac296dadda3"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "8.5.0+0"
 
-[[deps.HashArrayMappedTries]]
-git-tree-sha1 = "2eaa69a7cab70a52b9687c8bf950a5a93ec895ae"
-uuid = "076d061b-32b6-4027-95e0-9a2c6f6d7e74"
-version = "0.2.0"
-
 [[deps.HostCPUFeatures]]
 deps = ["BitTwiddlingConvenienceFunctions", "IfElse", "Libdl", "Static"]
 git-tree-sha1 = "8e070b599339d622e9a081d17230d74a5c473293"
@@ -1260,9 +1030,9 @@ version = "0.3.25"
 
 [[deps.Hyperscript]]
 deps = ["Test"]
-git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
+git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
 uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
-version = "0.0.5"
+version = "0.0.4"
 
 [[deps.HypertextLiteral]]
 deps = ["Tricks"]
@@ -1275,12 +1045,6 @@ deps = ["Logging", "Random"]
 git-tree-sha1 = "b6d6bfdd7ce25b0f9b2f6b3dd56b2673a66c8770"
 uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
 version = "0.2.5"
-
-[[deps.IRTools]]
-deps = ["InteractiveUtils", "MacroTools"]
-git-tree-sha1 = "950c3717af761bc3ff906c2e8e52bd83390b6ec2"
-uuid = "7869d1d1-7146-5819-86e3-90919afe41df"
-version = "0.4.14"
 
 [[deps.IfElse]]
 git-tree-sha1 = "debdd00ffef04665ccbb3e150747a77560e8fad1"
@@ -1381,18 +1145,6 @@ git-tree-sha1 = "07649c499349dad9f08dde4243a4c597064663e9"
 uuid = "ef3ab10e-7fda-4108-b977-705223b18434"
 version = "0.6.0"
 
-[[deps.KernelAbstractions]]
-deps = ["Adapt", "Atomix", "InteractiveUtils", "MacroTools", "PrecompileTools", "Requires", "StaticArrays", "UUIDs"]
-git-tree-sha1 = "b9a838cd3028785ac23822cded5126b3da394d1a"
-uuid = "63c18a36-062a-441e-b654-da1e3ab1ce7c"
-version = "0.9.31"
-weakdeps = ["EnzymeCore", "LinearAlgebra", "SparseArrays"]
-
-    [deps.KernelAbstractions.extensions]
-    EnzymeExt = "EnzymeCore"
-    LinearAlgebraExt = "LinearAlgebra"
-    SparseArraysExt = "SparseArrays"
-
 [[deps.Krylov]]
 deps = ["LinearAlgebra", "Printf", "SparseArrays"]
 git-tree-sha1 = "4f20a2df85a9e5d55c9e84634bbf808ed038cabd"
@@ -1410,24 +1162,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "aaafe88dccbd957a8d82f7d05be9b69172e0cee3"
 uuid = "88015f11-f218-50d7-93a8-a6af411a945d"
 version = "4.0.1+0"
-
-[[deps.LLVM]]
-deps = ["CEnum", "LLVMExtra_jll", "Libdl", "Preferences", "Printf", "Unicode"]
-git-tree-sha1 = "d422dfd9707bec6617335dc2ea3c5172a87d5908"
-uuid = "929cbde3-209d-540e-8aea-75f648917ca0"
-version = "9.1.3"
-
-    [deps.LLVM.extensions]
-    BFloat16sExt = "BFloat16s"
-
-    [deps.LLVM.weakdeps]
-    BFloat16s = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
-
-[[deps.LLVMExtra_jll]]
-deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl", "TOML"]
-git-tree-sha1 = "05a8bd5a42309a9ec82f700876903abce1017dd3"
-uuid = "dad2f222-ce93-54a1-a47d-0025e8a3acab"
-version = "0.0.34+0"
 
 [[deps.LLVMOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1663,11 +1397,6 @@ weakdeps = ["ChainRulesCore", "ForwardDiff", "SpecialFunctions"]
     ForwardDiffExt = ["ChainRulesCore", "ForwardDiff"]
     SpecialFunctionsExt = "SpecialFunctions"
 
-[[deps.MIMEs]]
-git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
-uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
-version = "0.1.4"
-
 [[deps.MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "oneTBB_jll"]
 git-tree-sha1 = "f046ccd0c6db2832a9f639e2c669c6fe867e5f4f"
@@ -1793,28 +1522,6 @@ git-tree-sha1 = "019f12e9a1a7880459d0173c182e6a99365d7ac1"
 uuid = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
 version = "4.5.1"
 
-[[deps.NNlib]]
-deps = ["Adapt", "Atomix", "ChainRulesCore", "GPUArraysCore", "KernelAbstractions", "LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "bdc9d30f151590aca0af22690f5ab7dc18a551cb"
-uuid = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
-version = "0.9.27"
-
-    [deps.NNlib.extensions]
-    NNlibAMDGPUExt = "AMDGPU"
-    NNlibCUDACUDNNExt = ["CUDA", "cuDNN"]
-    NNlibCUDAExt = "CUDA"
-    NNlibEnzymeCoreExt = "EnzymeCore"
-    NNlibFFTWExt = "FFTW"
-    NNlibForwardDiffExt = "ForwardDiff"
-
-    [deps.NNlib.weakdeps]
-    AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
-    CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
-    EnzymeCore = "f151be2c-9106-41f4-ab19-57ee4f262869"
-    FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
-    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-    cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
-
 [[deps.NaNMath]]
 deps = ["OpenLibm_jll"]
 git-tree-sha1 = "030ea22804ef91648f29b7ad3fc15fa49d0e6e71"
@@ -1875,12 +1582,6 @@ git-tree-sha1 = "a1ea35ab0bcc99753e26d574ba1e339f19d100fa"
 uuid = "5959db7a-ea39-4486-b5fe-2dd0bf03d60d"
 version = "1.2.0"
 
-[[deps.ObjectFile]]
-deps = ["Reexport", "StructIO"]
-git-tree-sha1 = "dfcc26739b1ffa3ab51fb16f01ba7eb144f7bc50"
-uuid = "d8793406-e978-5875-9003-1fc021f44a92"
-version = "0.4.3"
-
 [[deps.OffsetArrays]]
 git-tree-sha1 = "5e1897147d1ff8d98883cda2be2187dcf57d8f0c"
 uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
@@ -1935,17 +1636,6 @@ version = "1.10.0"
 
     [deps.Optim.weakdeps]
     MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
-
-[[deps.Optimisers]]
-deps = ["ChainRulesCore", "Functors", "LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "53ff746a3a2b232a37dbcd262ac8bbb2b18202b8"
-uuid = "3bd65402-5787-11e9-1adc-39752487f4e2"
-version = "0.4.4"
-weakdeps = ["Adapt", "EnzymeCore"]
-
-    [deps.Optimisers.extensions]
-    OptimisersAdaptExt = ["Adapt"]
-    OptimisersEnzymeCoreExt = "EnzymeCore"
 
 [[deps.Opus_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -2232,10 +1922,10 @@ version = "1.40.9"
     Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [[deps.PlutoUI]]
-deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
-git-tree-sha1 = "eba4810d5e6a01f612b948c9fa94f905b49087b0"
+deps = ["AbstractPlutoDingetjes", "Base64", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
+git-tree-sha1 = "5152abbdab6488d5eec6a01029ca6697dff4ec8f"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.60"
+version = "0.7.23"
 
 [[deps.PoissonRandom]]
 deps = ["Random"]
@@ -2266,10 +1956,12 @@ deps = ["Adapt", "ArrayInterface", "ForwardDiff"]
 git-tree-sha1 = "6c62ce45f268f3f958821a1e5192cf91c75ae89c"
 uuid = "d236fae5-4411-538c-8e31-a6e3d9e00b46"
 version = "0.4.24"
-weakdeps = ["ReverseDiff"]
 
     [deps.PreallocationTools.extensions]
     PreallocationToolsReverseDiffExt = "ReverseDiff"
+
+    [deps.PreallocationTools.weakdeps]
+    ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
 
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
@@ -2327,10 +2019,12 @@ deps = ["DataStructures", "LinearAlgebra"]
 git-tree-sha1 = "cda3b045cf9ef07a08ad46731f5a3165e56cf3da"
 uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 version = "2.11.1"
-weakdeps = ["Enzyme"]
 
     [deps.QuadGK.extensions]
     QuadGKEnzymeExt = "Enzyme"
+
+    [deps.QuadGK.weakdeps]
+    Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
@@ -2351,12 +2045,6 @@ deps = ["Random"]
 git-tree-sha1 = "c6ec94d2aaba1ab2ff983052cf6a606ca5985902"
 uuid = "e6cf234a-135c-5ec9-84dd-332b85af5143"
 version = "1.6.0"
-
-[[deps.RealDot]]
-deps = ["LinearAlgebra"]
-git-tree-sha1 = "9f0a1b71baaf7650f4fa8a1d168c7fb6ee41f0c9"
-uuid = "c1ae055f-0cd5-4b69-90a6-9a35b1a98df9"
-version = "0.1.0"
 
 [[deps.RecipesBase]]
 deps = ["PrecompileTools"]
@@ -2426,12 +2114,6 @@ deps = ["StaticArrays"]
 git-tree-sha1 = "256eeeec186fa7f26f2801732774ccf277f05db9"
 uuid = "ae5879a3-cd67-5da8-be7f-38c6eb64a37b"
 version = "1.1.1"
-
-[[deps.ReverseDiff]]
-deps = ["ChainRulesCore", "DiffResults", "DiffRules", "ForwardDiff", "FunctionWrappers", "LinearAlgebra", "LogExpFunctions", "MacroTools", "NaNMath", "Random", "SpecialFunctions", "StaticArrays", "Statistics"]
-git-tree-sha1 = "cc6cd622481ea366bb9067859446a8b01d92b468"
-uuid = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
-version = "1.15.3"
 
 [[deps.Rmath]]
 deps = ["Random", "Rmath_jll"]
@@ -2514,29 +2196,11 @@ weakdeps = ["SparseArrays", "StaticArraysCore"]
     SciMLOperatorsSparseArraysExt = "SparseArrays"
     SciMLOperatorsStaticArraysCoreExt = "StaticArraysCore"
 
-[[deps.SciMLSensitivity]]
-deps = ["ADTypes", "Accessors", "Adapt", "ArrayInterface", "ChainRulesCore", "DiffEqBase", "DiffEqCallbacks", "DiffEqNoiseProcess", "Distributions", "Enzyme", "FastBroadcast", "FiniteDiff", "ForwardDiff", "FunctionProperties", "FunctionWrappersWrappers", "Functors", "GPUArraysCore", "LinearAlgebra", "LinearSolve", "Markdown", "PreallocationTools", "QuadGK", "Random", "RandomNumbers", "RecursiveArrayTools", "Reexport", "ReverseDiff", "SciMLBase", "SciMLJacobianOperators", "SciMLOperators", "SciMLStructures", "StaticArrays", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface", "Tracker", "Zygote"]
-git-tree-sha1 = "9eff93778a5c61244027bfe9c4f016153bbbf156"
-uuid = "1ed8b502-d754-442c-8d5d-10ac956f44a1"
-version = "7.72.0"
-
-    [deps.SciMLSensitivity.extensions]
-    SciMLSensitivityMooncakeExt = "Mooncake"
-
-    [deps.SciMLSensitivity.weakdeps]
-    Mooncake = "da2b9cff-9c12-43a0-ae48-6db2b0edb7d6"
-
 [[deps.SciMLStructures]]
 deps = ["ArrayInterface"]
 git-tree-sha1 = "0444a37a25fab98adbd90baa806ee492a3af133a"
 uuid = "53ae85a6-f571-4167-b2af-e1d143709226"
 version = "1.6.1"
-
-[[deps.ScopedValues]]
-deps = ["HashArrayMappedTries", "Logging"]
-git-tree-sha1 = "1147f140b4c8ddab224c94efa9569fc23d63ab44"
-uuid = "7e506255-f358-4e82-b7e4-beb19740aa63"
-version = "1.3.0"
 
 [[deps.Scratch]]
 deps = ["Dates"]
@@ -2573,13 +2237,18 @@ deps = ["ADTypes", "ArrayInterface", "ConcreteStructs", "DiffEqBase", "DiffResul
 git-tree-sha1 = "44021f3efc023be3871195d8ad98b865001a2fa1"
 uuid = "727e6d20-b764-4bd8-a329-72de5adea6c7"
 version = "1.12.3"
-weakdeps = ["ChainRulesCore", "ReverseDiff", "Tracker", "Zygote"]
 
     [deps.SimpleNonlinearSolve.extensions]
     SimpleNonlinearSolveChainRulesCoreExt = "ChainRulesCore"
     SimpleNonlinearSolveReverseDiffExt = "ReverseDiff"
     SimpleNonlinearSolveTrackerExt = "Tracker"
     SimpleNonlinearSolveZygoteExt = "Zygote"
+
+    [deps.SimpleNonlinearSolve.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
+    Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
+    Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [[deps.SimpleTraits]]
 deps = ["InteractiveUtils", "MacroTools"]
@@ -2645,12 +2314,6 @@ version = "2.23.1"
     PolyesterForwardDiff = "98d1487c-24ca-40b6-b7ab-df2af84e126b"
     Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
     Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
-
-[[deps.SparseInverseSubset]]
-deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "52962839426b75b3021296f7df242e40ecfc0852"
-uuid = "dc90abb0-5640-4711-901d-7e5b23a2fada"
-version = "0.1.2"
 
 [[deps.SparseMatrixColorings]]
 deps = ["ADTypes", "DataStructures", "DocStringExtensions", "LinearAlgebra", "Random", "SparseArrays"]
@@ -2762,25 +2425,6 @@ deps = ["ArrayInterface", "CloseOpenIntervals", "IfElse", "LayoutPointers", "Lin
 git-tree-sha1 = "f35f6ab602df8413a50c4a25ca14de821e8605fb"
 uuid = "7792a7ef-975c-4747-a70f-980b88e8d1da"
 version = "0.5.7"
-
-[[deps.StructArrays]]
-deps = ["ConstructionBase", "DataAPI", "Tables"]
-git-tree-sha1 = "9537ef82c42cdd8c5d443cbc359110cbb36bae10"
-uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
-version = "0.6.21"
-weakdeps = ["Adapt", "GPUArraysCore", "KernelAbstractions", "LinearAlgebra", "SparseArrays", "StaticArrays"]
-
-    [deps.StructArrays.extensions]
-    StructArraysAdaptExt = "Adapt"
-    StructArraysGPUArraysCoreExt = ["GPUArraysCore", "KernelAbstractions"]
-    StructArraysLinearAlgebraExt = "LinearAlgebra"
-    StructArraysSparseArraysExt = "SparseArrays"
-    StructArraysStaticArraysExt = "StaticArrays"
-
-[[deps.StructIO]]
-git-tree-sha1 = "c581be48ae1cbf83e899b14c07a807e1787512cc"
-uuid = "53d494c1-5632-5724-8f4c-31dff12d585f"
-version = "0.3.1"
 
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -2910,16 +2554,6 @@ git-tree-sha1 = "468b4685af4abe0e9fd4d7bf495a6554a6276e75"
 uuid = "0796e94c-ce3b-5d07-9a54-7f471281c624"
 version = "0.5.29"
 
-[[deps.Tracker]]
-deps = ["Adapt", "ChainRulesCore", "DiffRules", "ForwardDiff", "Functors", "LinearAlgebra", "LogExpFunctions", "MacroTools", "NNlib", "NaNMath", "Optimisers", "Printf", "Random", "Requires", "SpecialFunctions", "Statistics"]
-git-tree-sha1 = "c266e49953dadd0923caa17b3ea464ab6b97b3f2"
-uuid = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
-version = "0.2.37"
-weakdeps = ["PDMats"]
-
-    [deps.Tracker.extensions]
-    TrackerPDMatsExt = "PDMats"
-
 [[deps.TranscodingStreams]]
 git-tree-sha1 = "0c45878dcfdcfa8480052b6ab162cdd138781742"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
@@ -2987,15 +2621,6 @@ deps = ["ConstructionBase"]
 git-tree-sha1 = "25008b734a03736c41e2a7dc314ecb95bd6bbdb0"
 uuid = "a7c27f48-0311-42f6-a7f8-2c11e75eb415"
 version = "0.1.6"
-
-[[deps.UnsafeAtomics]]
-git-tree-sha1 = "b13c4edda90890e5b04ba24e20a310fbe6f249ff"
-uuid = "013be700-e6cd-48c3-b4a1-df204f14c38f"
-version = "0.3.0"
-weakdeps = ["LLVM"]
-
-    [deps.UnsafeAtomics.extensions]
-    UnsafeAtomicsLLVM = ["LLVM"]
 
 [[deps.Unzip]]
 git-tree-sha1 = "ca0969166a028236229f63514992fc073799bb78"
@@ -3210,24 +2835,6 @@ git-tree-sha1 = "622cf78670d067c738667aaa96c553430b65e269"
 uuid = "3161d3a3-bdf6-5164-811a-617609db77b4"
 version = "1.5.7+0"
 
-[[deps.Zygote]]
-deps = ["AbstractFFTs", "ChainRules", "ChainRulesCore", "DiffRules", "Distributed", "FillArrays", "ForwardDiff", "GPUArrays", "GPUArraysCore", "IRTools", "InteractiveUtils", "LinearAlgebra", "LogExpFunctions", "MacroTools", "NaNMath", "PrecompileTools", "Random", "Requires", "SparseArrays", "SpecialFunctions", "Statistics", "ZygoteRules"]
-git-tree-sha1 = "0b3c944f5d2d8b466c5d20a84c229c17c528f49e"
-uuid = "e88e6eb3-aa80-5325-afca-941959d7151f"
-version = "0.6.75"
-weakdeps = ["Colors", "Distances", "Tracker"]
-
-    [deps.Zygote.extensions]
-    ZygoteColorsExt = "Colors"
-    ZygoteDistancesExt = "Distances"
-    ZygoteTrackerExt = "Tracker"
-
-[[deps.ZygoteRules]]
-deps = ["ChainRulesCore", "MacroTools"]
-git-tree-sha1 = "27798139afc0a2afa7b1824c206d5e87ea587a00"
-uuid = "700de1a5-db45-46bc-99cf-38207098b444"
-version = "0.2.5"
-
 [[deps.eudev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "gperf_jll"]
 git-tree-sha1 = "431b678a28ebb559d224c0b6b6d01afce87c51ba"
@@ -3341,48 +2948,17 @@ version = "1.4.1+2"
 """
 
 # ╔═╡ Cell order:
-# ╟─14c7e803-c0ff-4211-8b60-2c9c246934dd
-# ╟─6948149f-854e-4b3c-b51c-099dd221ab83
-# ╟─89551690-500d-4e37-ae20-5beb71cc87ac
-# ╠═1e078c8b-2df9-4646-b629-bac7f151e937
-# ╠═aed58771-86c1-4928-a1ba-b7d2f503b188
-# ╟─33a6968f-d8df-4f56-baf3-6e0e88e54c23
-# ╠═83b50ef8-9b68-428a-bf93-1583d032e9aa
-# ╠═ccb31a3a-f75e-479d-bec7-75cf590652c5
-# ╟─f284fda5-aaf7-4121-a8f0-b996d501bec5
-# ╟─aaf3d52e-7e6b-4742-b9df-5440b148e7ee
-# ╟─a2164307-6d18-4983-9aaa-25c8f5828655
-# ╠═eab8adc0-e3c7-4693-990b-cb47e3d9c2cf
-# ╟─556243a1-c387-4606-94d9-2dc06dfdc5f0
-# ╠═98451eb8-8755-47fe-b8c6-ce2959256dd8
-# ╠═b62c37ac-8d33-49ac-8aa6-18d959bc6933
-# ╠═797ce7d7-c49d-4a00-a8e3-058b6de4d3a9
-# ╠═aa32c5e2-0f67-4910-a612-d958fa13169c
-# ╟─4679507b-e6e4-4d39-8610-77141f7b82e0
-# ╟─49e97512-4150-49e2-bd9b-c3bfd7c375dc
-# ╠═50794b21-e90f-438d-ad9c-eaddfab14ce7
-# ╠═7f9c8c7d-90ef-496c-b907-300feba5edfc
-# ╠═bf81ccd3-4cdf-4a9c-b334-f7339fed8dfe
-# ╠═37ecd681-bd01-4162-94cf-97f6d8d82a8e
-# ╠═438de4bb-6d15-4d76-b9a5-95b51924cbc2
-# ╟─0d464337-8a70-47eb-8c08-cc2a7d388cff
-# ╟─0bfc00dd-cb88-4166-8cb0-2583882975f4
-# ╟─89798b17-a1f0-43ff-9b3f-42cae0d6020a
-# ╠═158c4ad8-a38b-4828-812f-1abce60695dc
-# ╠═6785c1af-28e5-46b4-ba34-a8ab65be7ff8
-# ╟─a0bff583-53ee-4a76-8dea-93711b93ec4c
-# ╟─1dc98bcc-c991-43f2-884e-ec6c20ee4554
-# ╠═c321d1b8-e22b-4e28-adfc-dc2b20d28083
-# ╠═9f856137-5a46-4a6d-be12-aa38f9e20642
-# ╟─5600d0fa-80ef-40c2-ae12-570c348d1f14
-# ╟─7c18a27d-a738-4d04-b712-d87fd91828af
-# ╟─3e1c9cd4-aa4e-4f29-8788-45708b94406f
-# ╟─752a90ee-3e92-4426-b33c-9d65b8c465dc
-# ╟─d45219d2-183e-4ca1-89bc-34d0eae1419b
-# ╟─d5287aba-93ab-440a-9cb5-97d879f5af9b
-# ╟─c93ed717-dcfd-46f5-83c1-91d8eb7fa943
-# ╟─60c63f1b-5a27-4539-a486-78c083457b0e
-# ╟─890afefc-f42b-4d74-b775-6dee5e5f0c2b
-# ╟─21357c48-f35d-11ee-23f8-2534bb1d82f4
+# ╠═ac1e6158-d41f-11ef-07a3-bbf7014dbbcd
+# ╠═b29ecd80-0e11-4501-a3bd-fbb778630072
+# ╠═4dd925bf-d490-4b0a-8363-db376cbad00b
+# ╠═f1d5bd29-2142-415a-84e2-2ab4e21cd0db
+# ╠═df247423-a290-440e-a87b-020584db645e
+# ╠═a5acd96a-b759-4177-8097-a5f73ddda483
+# ╠═9bfd05e1-6a66-40e9-ad2d-0b2911095647
+# ╠═79212598-3858-43e5-af34-4059fea38246
+# ╠═b051487d-12fc-4a38-b580-3379ddb1521d
+# ╟─10880546-4f88-430c-8453-8a18fec6b611
+# ╟─5449da57-bd43-4fa4-8519-ff0c91cf8001
+# ╟─f4e99c48-acfc-4acc-a70f-c4d4d33c2d72
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

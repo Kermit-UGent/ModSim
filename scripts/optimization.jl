@@ -1,17 +1,19 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
 
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
+    #! format: off
     quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
+    #! format: on
 end
 
 # ╔═╡ 99ff6d3d-0a9c-485c-87b0-d361080fd7ca
@@ -208,7 +210,7 @@ plots = Dict()
 
 # ╔═╡ 90125dda-fa19-415c-a8d7-eb37bc1dbf14
 begin
-	 p_ros = contourf(-2:0.01:2, -1:0.01:3, log10 ∘ f_rosenbrock, color= cgrad(:speed), xlab=L"x_1", ylab=L"x_1", title="Rosenbrock function", xlims=[-2,2], ylims=[-1, 3])
+	 p_ros = contourf(-2:0.01:2, -1:0.01:3, log10 ∘ f_rosenbrock, color= cgrad(:speed), xlab=L"x_1", ylab=L"x_2", title="Rosenbrock function", xlims=[-2,2], ylims=[-1, 3])
 	plots["rosenbrock"] = scatter!([1], [1], label="", color="red")
 end
 
@@ -358,7 +360,7 @@ end
 
 # ╔═╡ d8ca4713-5063-47f4-8763-ae72694dac0b
 let
-	p = plot(title="Convergence for the Rosenbrock function", xscale=:log10, yscale=:log10, xlab=L"k+1", ylab=L"f(x^{(k)})-f(x^\star)", ls=:auto)
+	p = plot(title="Convergence rates\nRosenbrock function", xscale=:log10, yscale=:log10, xlab=L"k+1", ylab=L"f(x^{(k)})-f(x^\star)", ls=:auto)
 	f_gd = [p.value for p in sol_GD.trace]
 	plot!(f_gd, label="gradient descent", lw=2, color=:blue, ls=:solid)
 	f_newton = [p.value for p in sol_newton.trace]
