@@ -11,7 +11,7 @@ Dict(
     "highlights" => [
         Dict("name" => "Course Notes", 
              # FIXME Add link to download pdf 
-             "text" => md"The MODSIM course notes in pdf format can be found as a download on Ufora or in the release notes on GitHub. When in doubt, just click this link.",
+             "text" => md"The MODSIM course notes in pdf format can be found as a download on Ufora or in the release notes on GitHub. When in doubt, just [click this link](https://filesender.belnet.be/?s=download&token=4914b5f0-80df-4ec0-a663-77111268f5e5).",
              # FIXME change figure to small piece of the cover.
              "img" => "https://user-images.githubusercontent.com/6933510/168320383-a401459b-97f5-41df-bc7b-ebe76e4886cc.png"
         ),
