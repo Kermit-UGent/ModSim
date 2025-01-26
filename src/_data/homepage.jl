@@ -13,18 +13,18 @@ Dict(
              # FIXME Add link to download pdf 
              "text" => md"The MODSIM course notes in pdf format can be found as a download on Ufora or in the release notes on GitHub. When in doubt, just [click this link](https://filesender.belnet.be/?s=download&token=4914b5f0-80df-4ec0-a663-77111268f5e5).",
              # FIXME change figure to small piece of the cover.
-             "img" => "https://user-images.githubusercontent.com/6933510/168320383-a401459b-97f5-41df-bc7b-ebe76e4886cc.png"
+             "img" => "https://github.com/user-attachments/assets/0a178611-f4e3-4572-94a7-ac881aa20f21"
         ),
         Dict("name" => "What is here to be found?!", 
              "text" => md"In this course website you will find info on the course notes, the installation of the software required for this course, and a (static!) view of the exercises and examples. On the left you can find the table of contents with all the pages.",
              # FIXME change picture
-             "img" => "https://user-images.githubusercontent.com/6933510/168320383-a401459b-97f5-41df-bc7b-ebe76e4886cc.png"
+             "img" => "https://github.com/user-attachments/assets/796b2e07-b741-49cd-8ae9-5ce8d9fff4d2"
         ),
         Dict("name" => "Questions, office hours, errata and bugs",
              # FIXME check content 
              "text" => md"For question you can check the fora on Ufora, ask the teaching responsible or assistents in class. Further, there are office hours on XYZ day from AAA to BBB in office number XYZ.123. Errata will be anounced on the errate page If you find something that looks wonky, is misspelledt (pun intended) or is bugged: please open a bug report here (https://github.com/Kermit-UGent/ModSim/issues/) or report it to one of the teaching assistents.",
              # FIXME change picture
-             "img" => "https://user-images.githubusercontent.com/6933510/168320383-a401459b-97f5-41df-bc7b-ebe76e4886cc.png"
+             "img" => "https://github.com/user-attachments/assets/56e59af1-8566-40ec-85ac-7184926a29fc"
         ),
         Dict("name" => "Interactivity with Julia and Pluto.jl",
              "text" => md"""
