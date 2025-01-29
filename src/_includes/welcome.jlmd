@@ -12,5 +12,9 @@ $(isempty(get(metadata["homepage"], "disclaimer", "")) ? nothing : @htl("""<bloc
 
 <main class="homepage">
 $(Base.include(@__MODULE__, joinpath(@__DIR__, "..", "assets", "scripts", "get_highlights.jl")))
+<!-- 
+Disabling the get_subjects code: we do not want to use it in this repo
 $(Base.include(@__MODULE__, joinpath(@__DIR__, "..", "assets", "scripts", "get_subjects.jl")))
+-->
+
 </main>
