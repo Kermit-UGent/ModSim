@@ -14,4 +14,6 @@ main a img {
 
 # Course logistics
 
-Describe here the logistics of your class.
+Classes will be held in A1.1 Tuesday at 1PM
+
+Excercises in PC-lab E.-1 Monday mornings and Tuesday afternoon.

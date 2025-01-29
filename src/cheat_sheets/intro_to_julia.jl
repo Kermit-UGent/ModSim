@@ -1,5 +1,18 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.20.4
+
+#> [frontmatter]
+#> order = "4"
+#> title = "Intro to Julia"
+#> date = "2025-01-28"
+#> tags = ["welcome"]
+#> description = "General introduction to Julia"
+#> layout = "layout.jlhtml"
+#> 
+#>     [[frontmatter.author]]
+#>     name = "Daan Van Hauwermeiren"
+#>     [[frontmatter.author]]
+#>     name = "Michiel Stock"
 
 using Markdown
 using InteractiveUtils
