@@ -14,19 +14,14 @@
 #>     [[frontmatter.author]]
 #>     name = "Michiel Stock"
 
-
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ c3cccc9c-dbfc-11ef-31c5-07bc34711b2d
-begin
-	using Pkg
-	Pkg.activate("../../pluto-deployment-environment")
-	using Catalyst, Plots, DifferentialEquations
-end
+using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
-# ╔═╡ df1d7710-f666-46c4-9bca-2707a997eb83
-md"# The `Catalyst` cheat sheet"
+# ╔═╡ fe5e5f00-638f-4ca3-a331-c746af53b6b4
+using Catalyst, Plots, DifferentialEquations
 
 # ╔═╡ 22cc8f5e-da25-48bb-8cbc-952e205d5640
 md"""## Notes before the cheat sheet
@@ -50,8 +45,27 @@ Note that the indentation is optional, and only used for readability.
 """
 
 
+# ╔═╡ 19b4c4a9-8e6c-4a4e-ae8f-3506ef7d15ec
+md"""
+`Catalyst.jl` is a Julia package that provides a clean interface to
+building reaction networks, which can be turned into ODESystems
+that `DifferentialEquations.jl` can simulate. Since almost all mass
+transfer problems can be written using reactions (or, more generally
+speaking, processes), `Catalyst.jl` will be our main tool for building
+mechanistic models.
+"""
+
+# ╔═╡ df1d7710-f666-46c4-9bca-2707a997eb83
+md"# The `Catalyst` cheat sheet"
+
 # ╔═╡ 6c756d57-075b-446d-b88b-9934a57179bd
-md"## defining a reaction system"
+md"## Defining a reaction system"
+
+# ╔═╡ 20f23ad3-ce33-4e12-b3fb-b9376b1a4962
+md"""
+Use the `@reaction_network` macro to define a reaction network.
+This macro allows you to specify reactions using a simple syntax.
+"""
 
 # ╔═╡ dc557b21-e296-446b-b7ab-0462707569c6
 mm = @reaction_network begin
@@ -66,7 +80,7 @@ species(mm)  # check the species
 parameters(mm)  # check the parameters
 
 # ╔═╡ 96703b25-43f5-4fa0-8283-c43fc5a670f2
-equations(mm)  # check the equationd
+equations(mm)  # check the equations
 
 # ╔═╡ ea2a4e2b-a546-442c-abbe-43dc52f68c85
 let
@@ -316,10 +330,13 @@ let
 end
 
 # ╔═╡ Cell order:
-# ╟─c3cccc9c-dbfc-11ef-31c5-07bc34711b2d
-# ╟─df1d7710-f666-46c4-9bca-2707a997eb83
 # ╟─22cc8f5e-da25-48bb-8cbc-952e205d5640
-# ╟─6c756d57-075b-446d-b88b-9934a57179bd
+# ╠═c3cccc9c-dbfc-11ef-31c5-07bc34711b2d
+# ╠═fe5e5f00-638f-4ca3-a331-c746af53b6b4
+# ╟─19b4c4a9-8e6c-4a4e-ae8f-3506ef7d15ec
+# ╟─df1d7710-f666-46c4-9bca-2707a997eb83
+# ╠═6c756d57-075b-446d-b88b-9934a57179bd
+# ╠═20f23ad3-ce33-4e12-b3fb-b9376b1a4962
 # ╠═dc557b21-e296-446b-b7ab-0462707569c6
 # ╠═f62bff24-00a4-4b7f-97ef-c2dce24b70fe
 # ╠═063a77c2-5404-4729-b1c1-679c3326d636
