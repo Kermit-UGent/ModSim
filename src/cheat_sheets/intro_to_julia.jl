@@ -2,10 +2,10 @@
 # v0.20.4
 
 #> [frontmatter]
-#> order = "4"
+#> order = "2"
 #> title = "Intro to Julia"
 #> date = "2025-01-28"
-#> tags = ["welcome"]
+#> tags = ["cheat sheets"]
 #> description = "General introduction to Julia"
 #> layout = "layout.jlhtml"
 #> 

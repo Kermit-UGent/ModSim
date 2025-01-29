@@ -2,10 +2,10 @@
 # v0.20.4
 
 #> [frontmatter]
-#> order = "4"
-#> title = "Catalyst Cheat Sheet"
+#> order = "3"
+#> title = "Catalyst"
 #> date = "2025-01-26"
-#> tags = ["welcome"]
+#> tags = ["cheat sheets"]
 #> description = "Catalyst Cheat Sheet"
 #> layout = "layout.jlhtml"
 #> 
