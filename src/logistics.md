@@ -20,4 +20,4 @@ Excercises in PC-lab E.-1 Monday mornings and Tuesday afternoon.
 
 # Course notes
 
-The MODSIM course notes in pdf format can be found as a download on Ufora or in the (release notes on this GitHub repository)[https://github.com/Kermit-UGent/ModSim/releases].
+The MODSIM course notes in pdf format can be found as a download on Ufora or in the [release notes on this GitHub repository](https://github.com/Kermit-UGent/ModSim/releases).
