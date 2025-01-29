@@ -20,8 +20,8 @@ using InteractiveUtils
 
 # ╔═╡ c3cccc9c-dbfc-11ef-31c5-07bc34711b2d
 begin
-	# using Pkg
-	# Pkg.activate("../pluto-deployment-environment/")
+	using Pkg
+	Pkg.activate("../../pluto-deployment-environment")
 	using Catalyst, Plots, DifferentialEquations
 end
 
