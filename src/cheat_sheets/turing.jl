@@ -27,10 +27,10 @@ using Turing
 using StatsPlots
 
 # ╔═╡ 387c26b2-ff21-4d85-b6eb-0cc0c8ee7347
-md"# Turing cheatsheet"
+md"# `Turing` cheatsheet"
 
 # ╔═╡ 157d654f-1a17-4eeb-ac0d-cdb6ceac7729
-md"## Working with Distributions.jl"
+md"## Distributions.jl"
 
 # ╔═╡ 7833de91-b850-41bd-96b4-4bd706473343
 distr = LogNormal(2.0, 1.0) # Define a LogNormal distribution with mean 2.0 and standard deviation 1.0
@@ -78,7 +78,7 @@ mean(mysample) # Approximate the mean using the sample
 std(mysample) # Approximate the standard deviation
 
 # ╔═╡ cf744a4c-bee2-4b0b-b731-073f632a402e
-md"### Calculate probabilities using samples:"
+md"### Calculate probabilities using samples"
 
 # ╔═╡ 2f130b63-0ea8-4acc-80e3-4c6c218fb7ff
 mean(x -> x^2 > 5, mysample) # P(X^2 > 5): Method 1 - Anonymous function and mean
@@ -93,7 +93,7 @@ filtered_sample = filter(x -> x^2 > 5, mysample) # P(X^2 > 5): Method 3 - Filter
 length(filtered_sample) / length(mysample)
 
 # ╔═╡ 4379606f-0e88-47e2-ae4c-de76d29b5e00
-md"### Other calculations with samples:"
+md"### Other calculations with samples"
 
 # ╔═╡ 228dc51e-bd89-49d0-86bb-1b02c464aa49
 mean(sin, mysample) # Approximate E[sin(X)] using the sample (more efficient)
