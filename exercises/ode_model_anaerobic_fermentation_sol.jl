@@ -23,14 +23,17 @@ using Catalyst
 # ╔═╡ aaf6da21-60cc-478c-b447-3f33aa375240
 using DifferentialEquations, Plots
 
+# ╔═╡ e119ed70-fd81-4978-92d9-696cad71125f
+using PlutoUI; TableOfContents()
+
 # ╔═╡ bb10266a-1f6c-4fda-b276-6a9cf3a86e90
 md"""
-### Exercise - Anaerobic fermentation
+# Exercise - Anaerobic fermentation
 """
 
 # ╔═╡ c3f85244-e0a8-4808-aa2d-15ab6bbb1b26
 md"""
-#### Part 1
+## Part 1
 """
 
 # ╔═╡ 2e7c2eab-a3bc-4574-a0fd-0a45b59b803b
@@ -59,12 +62,12 @@ The initial concentrations and the parameter values are summarised in the follow
 
 # ╔═╡ 35f2015d-9c28-4bc8-83cd-c185757db0dc
 md"
-##### Implementation of the system
+#### Implementation of the system
 "
 
 # ╔═╡ bfd7fc6f-57f6-40d8-8618-d514d1e5d9ad
 md"""
-Create a *reaction network object* model for the aforementioned problem in order to simulate the evolution of $S$, $I$, $G$, $E$ and $CO_2$ during $720\;min$ ($=12\;h$). Name it `anaerobic_fermentation1`.
+Create a *reaction network object* model for the aforementioned problem in order to simulate the evolution of $S$, $I$, $G$, $E$ and $CO_2$ during $1440\;min$ ($=24\;h$). Name it `anaerobic_fermentation1`.
 
 Tips:
 - For the reaction with reaction rate $r_2$, in order to have a second-order reaction with respect to glucose, you need to double the stoichiometric coefficients, i.e., you reaction should be $2G \rightarrow 4E + 4CO_2$.
@@ -82,7 +85,6 @@ anaerobic_fermentation1 = @reaction_network begin
 	@species S(t)=0.04 I(t)=0.02 G(t)=0.0 E(t)=0.01 CO2(t)=0.0
     k1, S + I --> 2G + I
 	mmr(E, k2, K), 2G --> 4E + 4CO2
-	# mmr(E, k2, K), G --> 2E + 2CO2
 end
 
 # ╔═╡ 485c2b25-f281-4ee9-bcb8-7ca010205930
@@ -196,18 +198,18 @@ md"- Answer: missing"
 
 # ╔═╡ 939716cd-08c9-44a0-9217-146f9e312d35
 md"""
-#### Part 2
+## Part 2
 """
 
 # ╔═╡ 194a596b-22de-412e-8ead-94a8c02c98c6
 md"""
-Additionally, sucrose, invertase and glucose are added at a flow rate $Q_{in},[L\; min^{-1}]$ and respective concentrations $S_{in}, I_{in}$ and $G_{in}$. The same flow rate is removed from the reactor. Now the volume $V$ of the reactor will matter.
+Additionally, sucrose and glucose are added at a flow rate $Q_{in},[L\; min^{-1}]$ and respective concentrations $S_{in}$ and $G_{in}$. The same flow rate is removed from the reactor but the invertase $I$ stays in the reactor. Now the volume $V$ of the reactor will matter. Furthermore, the invertase enzyme degrades at a rate $d=0.003\;min^{-1}$.
 
 The additional parameter values are summarised in the following table:
 
-|  $Q_{in}$ |    $V$    | $S_{in}$  | $I_{in}$  | $G_{in}$ |
+|  $Q_{in}$ |    $V$    | $S_{in}$  | $G_{in}$  | $d$ |
 |:---------:|:---------:|:---------:|:---------:|:--------:|
-|   $1.00$  |   $100$   |  $0.12$   |  $0.08$   |  $0.05$  |
+|   $1.00$  |   $100$   |  $0.12$   |  $0.05$   |  $0.003$  |
 """
 
 # ╔═╡ 76b1d8ba-cc55-48f7-bee4-09f899582e62
@@ -219,6 +221,7 @@ Make a copy of the content of the previous *reaction network object* and complem
 # Uncomment and complete the instruction
 # anaerobic_fermentation2 = @reaction_network begin
 #     @species missing
+# 	  @parameters missing
 #     missing
 #     ...
 #     missing
@@ -228,11 +231,9 @@ anaerobic_fermentation2 = @reaction_network begin
 	@parameters d=0.003
     k1, S + I --> 2G + I
     mm(E, k2, K), 2G --> 4E + 4CO2
-    # Q/V, (S, I, G, E, CO2) --> (0, 0, 0, 0, 0)
     Q/V, (S, G, E, CO2) --> (0, 0, 0, 0)
 	d, I --> 0
     Q/V*Sin, 0 --> S
-    # Q/V*Iin, 0 --> I
     Q/V*Gin, 0 --> G
 end
 
@@ -252,7 +253,6 @@ Make an exact copy of `u01` and rename it to `u02` with the initial conditions:
 
 # ╔═╡ 75eb088a-33fd-47d7-892a-da934ec9896a
 # u02 = missing                # Uncomment and complete the instruction
-# u02 = [:S => 0.04, :I => 0.02, :G => 0.0, :E => 0.01, :CO2 => 0.0]
 u02 = [:S => 0.04, :I => 0.02, :G => 0.0, :E => 0.01, :CO2 => 0.0]
 
 # ╔═╡ b4c4fc78-b6e4-40db-9948-6be83ee57d87
@@ -262,7 +262,6 @@ Make an exact copy of `tspan1` and rename it to `tspan2`:
 
 # ╔═╡ 4a0e9abf-99e7-4fe6-82ae-aa958ab51dd0
 # tspan2 = missing                # Uncomment and complete the instruction
-# tspan2=(0.0, 720.0)
 tspan2=(0.0, 1440.0)
 
 # ╔═╡ 0ec39752-6654-452b-98db-eadd8c02b27f
@@ -272,7 +271,6 @@ Make a copy of `params1`, rename it to `params2` and supplement it with the new 
 
 # ╔═╡ 3aea0dbe-1cb3-4b19-bb38-53e58db153dd
 # param2 = missing                # Uncomment and complete the instruction
-# params2=[:Q => 1, :V => 100.0, :Sin => 0.12, :Iin => 0.08, :Gin => 0.05, :k1 => 0.4, :k2 => 0.65, :K => 0.5]
 params2=[:Q => 1, :V => 100.0, :Sin => 0.12, :Gin => 0.05, :k1 => 0.4, :k2 => 0.65, :K => 0.5]
 
 # ╔═╡ 49984e8e-a194-464a-994f-501342800026
@@ -302,6 +300,14 @@ Plot the results. Use a line width of 2 (`linewidth=...`). If you only want to s
 # missing                # Uncomment and complete the instruction
 plot(osol2, linewidth=2)
 # plot(osol2, linewidth=2, idxs=[:E, :S, :G])
+
+# ╔═╡ e596f49e-1b3a-422e-be9a-f72133f042d5
+md"""
+Interprete the results.
+"""
+
+# ╔═╡ 3505c10d-270c-49fc-a83a-3753974d4d5a
+md"- Answer: missing"
 
 # ╔═╡ 5f865fec-09d5-4358-be57-0d568740968d
 md"""
@@ -346,12 +352,85 @@ Check ou the steady states:
 # ╔═╡ 876683d7-b3cd-4a06-94b2-d38a1d4a34b6
 Sw2, Iw2, Gw2, Ew2, CO2w2
 
+# ╔═╡ 55d303ec-29cb-4e8e-ab52-808d881ae0f2
+md"""
+## Part 3
+"""
+
+# ╔═╡ e0ef008c-9276-41e5-a85a-649a276c4666
+md"""
+We now want to keep a relatively high production of ethanol. Therefore, if the invertase decreases to $0.008$, then the invertase is instantaneously renewed to the initial concentration of $0.02$. Apply the change in the invertase concentration using a continuous event.
+"""
+
+# ╔═╡ 81db6771-ee45-42c8-ab23-fe1960370b86
+md"""
+Create the correct condition.
+"""
+
+# ╔═╡ 166a21f0-46a5-4d7a-9f54-788d7a51a487
+# condition3 = missing    # Uncomment and complete the instruction
+condition3 = [anaerobic_fermentation2.I ~ 0.008] => [anaerobic_fermentation2.I ~ 0.02]
+
+# ╔═╡ 5e6c5431-6fad-4272-a539-5e3af83fa226
+md"""
+Include the condition into the *reaction network model*.
+"""
+
+# ╔═╡ 98be4b39-4097-4cfa-886e-171558da0df6
+# Uncomment and complete the instruction
+# @named anaerobic_fermentation3_c = missing
+@named anaerobic_fermentation3_c = ReactionSystem(equations(anaerobic_fermentation2), continuous_events=condition3)
+
+# ╔═╡ 66568f6a-b874-42cb-834d-ab9d4df815d1
+md"""
+Complete the *reaction network model*.
+"""
+
+# ╔═╡ 66441227-c202-48da-a6ed-58e25ffde3ce
+# Uncomment and complete the instruction
+# anaerobic_fermentation3_c_com = missing
+anaerobic_fermentation3_c_com = complete(anaerobic_fermentation3_c)
+
+# ╔═╡ 71b4bd6e-b906-4d88-a9a3-18700528ea12
+md"""
+Create a new ODE problem.
+"""
+
+# ╔═╡ 16d0d671-464c-4de3-bd73-593e1a73168b
+# oprob3 = missing        # Uncomment and complete the instruction
+oprob3 = ODEProblem(anaerobic_fermentation3_c_com, u02, tspan2, params2)
+
+# ╔═╡ 66015536-5f23-45b5-8d57-f1d27d604f8c
+md"""
+Solve the new ODE problem. Make a `deepcopy`, use `Tsit5()` and `saveat=0.5`.
+"""
+
+# ╔═╡ 7f0777a2-6eb9-4c6d-9fb7-25a1f32f291d
+osol3 = solve(deepcopy(oprob3), Tsit5(), saveat=0.5)
+
+# ╔═╡ 124d578f-42ea-488e-af65-312793f104ca
+md"""
+Plot the results.
+"""
+
+# ╔═╡ 9ad3aff4-76ea-452f-bd7b-fc379725df70
+plot(osol3)
+
+# ╔═╡ e07e1667-2f2c-4086-9818-90dff54296de
+md"""
+Interprete the results.
+"""
+
+# ╔═╡ 91af34c0-9b38-4a62-8387-5e3c60b4b145
+md"- Answer: missing"
+
 # ╔═╡ Cell order:
 # ╠═84e21b44-a1b0-11ef-014d-c58a169e3de3
 # ╠═3cd7556f-73b8-4176-a779-ad38909f464d
 # ╠═2552c020-1e29-451e-9f59-c4bde047faad
 # ╠═896b4151-e26b-40ee-bfb9-c56dfc4e7048
 # ╠═aaf6da21-60cc-478c-b447-3f33aa375240
+# ╠═e119ed70-fd81-4978-92d9-696cad71125f
 # ╟─bb10266a-1f6c-4fda-b276-6a9cf3a86e90
 # ╟─c3f85244-e0a8-4808-aa2d-15ab6bbb1b26
 # ╟─2e7c2eab-a3bc-4574-a0fd-0a45b59b803b
@@ -398,6 +477,8 @@ Sw2, Iw2, Gw2, Ew2, CO2w2
 # ╠═e5476343-8376-4a9a-8286-f69e0d023939
 # ╟─29a3cd1b-fd8f-4e5c-9ec7-a69fe328d824
 # ╠═0c179e6b-bcaf-4e89-8d04-59f24b456127
+# ╟─e596f49e-1b3a-422e-be9a-f72133f042d5
+# ╟─3505c10d-270c-49fc-a83a-3753974d4d5a
 # ╟─5f865fec-09d5-4358-be57-0d568740968d
 # ╠═acc8acb3-f014-4108-80d7-bff893ce07d1
 # ╠═053cca09-0e31-44c0-89db-26a581816744
@@ -407,3 +488,19 @@ Sw2, Iw2, Gw2, Ew2, CO2w2
 # ╠═3a014879-883b-4cab-a7ac-0c3a708f5da6
 # ╟─d7bde85c-05f1-4794-9e91-c4e5e120f876
 # ╠═876683d7-b3cd-4a06-94b2-d38a1d4a34b6
+# ╟─55d303ec-29cb-4e8e-ab52-808d881ae0f2
+# ╟─e0ef008c-9276-41e5-a85a-649a276c4666
+# ╟─81db6771-ee45-42c8-ab23-fe1960370b86
+# ╠═166a21f0-46a5-4d7a-9f54-788d7a51a487
+# ╟─5e6c5431-6fad-4272-a539-5e3af83fa226
+# ╠═98be4b39-4097-4cfa-886e-171558da0df6
+# ╟─66568f6a-b874-42cb-834d-ab9d4df815d1
+# ╠═66441227-c202-48da-a6ed-58e25ffde3ce
+# ╟─71b4bd6e-b906-4d88-a9a3-18700528ea12
+# ╠═16d0d671-464c-4de3-bd73-593e1a73168b
+# ╟─66015536-5f23-45b5-8d57-f1d27d604f8c
+# ╠═7f0777a2-6eb9-4c6d-9fb7-25a1f32f291d
+# ╟─124d578f-42ea-488e-af65-312793f104ca
+# ╠═9ad3aff4-76ea-452f-bd7b-fc379725df70
+# ╟─e07e1667-2f2c-4086-9818-90dff54296de
+# ╟─91af34c0-9b38-4a62-8387-5e3c60b4b145

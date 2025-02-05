@@ -23,6 +23,9 @@ using Catalyst
 # ╔═╡ 1d0a8fb2-dab9-44ae-a230-f3e92cf3cd6a
 using DifferentialEquations, Plots
 
+# ╔═╡ 22e0eda2-a922-48bb-9b6f-ec0c6dfeb524
+using Distributions
+
 # ╔═╡ a176adcc-bde0-4a25-aa80-33379e05e63f
 md"""
 # Exercise: Aging and saturated repair
@@ -163,6 +166,79 @@ Plot the solutions. Use the option `ylim=(0, 6)` in order to limit the range of 
 # ╔═╡ 147adea6-e7ed-4f7b-b753-127e41500109
 # missing                     # Uncomment and complete the instruction
 
+# ╔═╡ 1db274cd-3b01-4f45-8aa0-ffe6878a1dd1
+md"""
+#### Distribution of ages at 5 trillion senescent cells
+"""
+
+# ╔═╡ c024dd3a-8fa8-4dbe-9669-0f338416a6af
+md"""
+Set up a histogram that shows the distribution of ages once the 5 trillion senescent cells are present in the body.
+"""
+
+# ╔═╡ 3fe09628-cbfb-4e56-85e8-b97285b32e87
+md"""
+!!! hints
+- The number of senescent cells of the `i`-th trajoctory can be accessed with: `essol.u[i][:X]`.
+- The index of the first element in the `i`-th trajectory that is greater than 5 can be found with: `findfirst(>(5), essol.u[i][:X])`.
+- An index is a valid index when it if not `nothing`.
+- The time at index position `j` can be accessed with `essol.u[i].t[j]`
+- Appending an element, e.g., `x` to an array `times` can be done as follow: `append!(times, x)`
+"""
+
+# ╔═╡ 0f901112-e504-4b7d-b7ec-3a80153903ca
+# Uncomment and complete the instruction
+# begin
+# 	times = []                  # make empty vector
+# 	for missing                 # for loop from 1 to 100, default step is 1
+# 		# find index of first element that is greater than 5
+# 		missing
+# 		if missing              # if index is a valid index
+# 			missing             # append time to vector times
+# 		end
+# 	end
+# end
+
+# ╔═╡ 65edc40f-430f-4d1a-9062-17bf8e1d7d59
+md"""
+Make a histogram with the array `times`. Use `bins=range(0, 120, length=121)`.
+"""
+
+# ╔═╡ 17a51f9e-0adf-4802-8d13-c43eb7801bc7
+# missing               # Uncomment and complete the instruction
+
+# ╔═╡ dad744a4-0fd2-406d-a600-429ad7619efd
+md"""
+Check the mean.
+"""
+
+# ╔═╡ a41d2ab4-ffad-4b27-9811-ab57c51526cb
+# missing                # Uncomment and complete the instruction
+
+# ╔═╡ 98ca03e1-9c4e-40db-9dd7-68f1898c1ef7
+md"""
+Check the standard deviation.
+"""
+
+# ╔═╡ 7ac54e2a-9c8e-4743-a1a0-38490b04f759
+# missing                # Uncomment and complete the instruction
+
+# ╔═╡ 0f9118f5-93f4-42f8-a0cf-754ce9ce9dbe
+md"""
+Check the minimum value.
+"""
+
+# ╔═╡ a07565f7-31d9-4c50-8345-5777adb8a77a
+# missing                 # Uncomment and complete the instruction
+
+# ╔═╡ 6f4253ce-e686-4061-ae13-9b35065464d9
+md"""
+Check the maximum value.
+"""
+
+# ╔═╡ 70628044-aaa5-46d6-a2df-deabbd8f2df8
+# missing                 # Uncomment and complete the instruction
+
 # ╔═╡ b10a73a1-63ae-4a15-9a83-394f6ed4e36e
 md"""
 Interpret the results. Ask yourself the following question:
@@ -203,6 +279,7 @@ md"- Answer: missing"
 # ╠═85b6ee78-2f7b-4f83-908b-c48fade56fcb
 # ╠═68588061-fedd-4f19-9e89-39b1bd791e33
 # ╠═1d0a8fb2-dab9-44ae-a230-f3e92cf3cd6a
+# ╠═22e0eda2-a922-48bb-9b6f-ec0c6dfeb524
 # ╟─a176adcc-bde0-4a25-aa80-33379e05e63f
 # ╟─818ba2af-83dd-4ddb-93e8-d0549ddd806b
 # ╟─d917e75d-eefb-415f-ba45-2f1d7c62d63c
@@ -231,6 +308,20 @@ md"- Answer: missing"
 # ╠═5aaf1395-9b7c-451f-b1a3-44e5ba3c4d6a
 # ╟─c048528f-58a2-415d-a338-fc87302367b8
 # ╠═147adea6-e7ed-4f7b-b753-127e41500109
+# ╟─1db274cd-3b01-4f45-8aa0-ffe6878a1dd1
+# ╟─c024dd3a-8fa8-4dbe-9669-0f338416a6af
+# ╟─3fe09628-cbfb-4e56-85e8-b97285b32e87
+# ╠═0f901112-e504-4b7d-b7ec-3a80153903ca
+# ╟─65edc40f-430f-4d1a-9062-17bf8e1d7d59
+# ╠═17a51f9e-0adf-4802-8d13-c43eb7801bc7
+# ╟─dad744a4-0fd2-406d-a600-429ad7619efd
+# ╠═a41d2ab4-ffad-4b27-9811-ab57c51526cb
+# ╟─98ca03e1-9c4e-40db-9dd7-68f1898c1ef7
+# ╠═7ac54e2a-9c8e-4743-a1a0-38490b04f759
+# ╟─0f9118f5-93f4-42f8-a0cf-754ce9ce9dbe
+# ╠═a07565f7-31d9-4c50-8345-5777adb8a77a
+# ╟─6f4253ce-e686-4061-ae13-9b35065464d9
+# ╠═70628044-aaa5-46d6-a2df-deabbd8f2df8
 # ╟─b10a73a1-63ae-4a15-9a83-394f6ed4e36e
 # ╟─a4f5a40e-c4ec-45ef-b44b-b64b71717c25
 # ╟─88c5c0f5-5bbf-4c54-9a9a-bf6369a2e895

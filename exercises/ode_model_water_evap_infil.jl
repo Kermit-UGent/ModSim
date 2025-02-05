@@ -68,15 +68,6 @@ Model the aforementioned system of differential equations using a *reaction netw
 # water_evap_infil = @reaction_network begin
 #     missing
 # end
-water_evap_infil = @reaction_network begin
-    I, 0 --> W     # W is producted at a constant rate (zeroth-order)
-    O, W => 0      # W is removed at a constant rate (zeroth-order)
-    k₁, W --> 0
-    (k₂, k₂), W <--> G
-	# Alternatively:
-	# k₂, W --> G
-    # k₂, G --> W
-end
 
 # ╔═╡ 608c61bc-c029-433e-ad8f-b13cfb40bc3d
 md"""
@@ -85,7 +76,6 @@ Convert the system to a symbolic differential equation model and verify that you
 
 # ╔═╡ 5647d122-5e8d-4ff9-a798-4076ee93b771
 # osys = missing         # Uncomment and complete the instruction
-osys = convert(ODESystem, water_evap_infil)
 
 # ╔═╡ acab2bf0-b792-4ccc-bee0-7611bedab23c
 md"""
@@ -99,7 +89,6 @@ Initialize a vector `u0` with the initial conditions:
 
 # ╔═╡ 733bdb56-fb4f-4bc6-b50c-e3245fd59730
 # u0 = missing          # Uncomment and complete the instruction
-u0 = [:W => 6.75, :G => 6.75]
 
 # ╔═╡ 521fcca5-3c88-463b-9395-e5871b9fc5a3
 md"""
@@ -108,7 +97,6 @@ Set the timespan for the simulation:
 
 # ╔═╡ f2267cc9-4bfd-44af-984c-cf54aa855f91
 # tspan =  missing      # Uncomment and complete the instruction
-tspan = (0.0, 20)
 
 # ╔═╡ e12840ed-d448-4f7c-893d-cfe974f62f9a
 md"""
@@ -117,7 +105,6 @@ Initialize a vector `param` with the parameter values:
 
 # ╔═╡ 5a3d520d-fd4f-485c-a8b0-63858eca4bfc
 # params = missing      # Uncomment and complete the instruction
-params = [:I => 2.7, :O => 20.0, :k₁ => 0.4, :k₂ => 1.0]
 
 # ╔═╡ 666c3aa1-26ef-4d77-bb81-f8830e66eea2
 md"""
@@ -126,7 +113,6 @@ Set-up a the *condition*, name it `condition`.
 
 # ╔═╡ ce612639-0791-4df9-bbd1-11da5ae8b247
 # condition = missing      # Uncomment and complete the instruction
-condition = [water_evap_infil.W ~ 0] => [water_evap_infil.O ~ 0]
 
 # ╔═╡ b4e50fbc-6780-4559-8cab-d7f2fd533eba
 md"""
@@ -135,7 +121,6 @@ Make a new *reaction system* where the discrete event is included. Name it `wate
 
 # ╔═╡ 82db28cb-d842-442f-a566-32c6fe3acc90
 # @named water_evap_infil_c = missing    # Uncomment and complete the instruction
-@named water_evap_infil_c = ReactionSystem(equations(water_evap_infil), continuous_events=condition)
 
 # ╔═╡ 7b649517-ccab-4f30-b75d-527295cd24a2
 md"""
@@ -144,7 +129,6 @@ Complete the new *reaction system*. Name it `water_evap_infil_c_com`.
 
 # ╔═╡ 2d72257d-cf23-4a07-b659-4b886abe5abc
 # water_evap_infil_c_com = missing     # Uncomment and complete the instruction
-water_evap_infil_c_com = complete(water_evap_infil_c)
 
 # ╔═╡ aafb49a4-b468-49b2-838d-5ddfcc852d48
 md"""
@@ -153,7 +137,6 @@ Create the ODE problem and store it in `oprob`:
 
 # ╔═╡ a25d3652-13f5-47ef-9f16-c6698547a734
 # oprob = missing           # Uncomment and complete the instruction
-oprob = ODEProblem(water_evap_infil_c_com, u0, tspan, params)
 
 # ╔═╡ 451a3c66-5bcc-4161-af81-f89af33b5862
 md"""
@@ -162,7 +145,6 @@ Solve the ODE problem. Make a deepcopy and use `Tsit5()` and `saveat=0.1`. Store
 
 # ╔═╡ b9d2c6cb-88f0-4a88-9e61-eecc905ff3e6
 # osol = missing                # Uncomment and complete the instruction
-osol = solve(deepcopy(oprob), Tsit5(), saveat=0.1)
 
 # ╔═╡ ab77c284-d379-47d1-bd86-88fa77749165
 md"""
@@ -171,7 +153,6 @@ Plot the results:
 
 # ╔═╡ e29a3294-245b-445d-bb1e-12cafb2ec175
 # missing                  # Uncomment and complete the instruction
-plot(osol)
 
 # ╔═╡ 66588291-d399-4169-9383-ac6c05cdf906
 md"""
@@ -182,9 +163,6 @@ Interpret the results. Ask yourself the following questions:
 
 # ╔═╡ 89ece6c0-3690-4265-8b1d-c3a3cc8b095f
 md"- Answer: missing"
-#=
-1. Yes, the drop in W in the beginning can clearly been seen. It drops to 0 as expected.
-=#
 
 # ╔═╡ 92fa2a5a-123b-434c-a97f-39d9727a5ab6
 md"""
@@ -193,9 +171,6 @@ md"""
 
 # ╔═╡ 71dde4bd-711c-40c3-8ee2-9f7a79d72aa2
 md"- Answer: missing"
-#=
-2. Why does $G$ also drop when $W$ drops? Explain.
-=#
 
 # ╔═╡ d04d906d-1432-4753-81b9-b03a06df9816
 md"""
@@ -204,9 +179,6 @@ md"""
 
 # ╔═╡ 4ce3328e-3436-45ad-b899-9b901b53a8ea
 md"- Answer: missing"
-#=
-3. Towards its initial values because initially (at t=0) the system was in equilibrium (with O=0). You can calculate that W = I/k₁ = 6.75 and W = G at t=0.
-=#
 
 # ╔═╡ Cell order:
 # ╠═62dc7706-f58a-11ee-2d3d-f78f7ceca914
@@ -243,8 +215,8 @@ md"- Answer: missing"
 # ╟─ab77c284-d379-47d1-bd86-88fa77749165
 # ╠═e29a3294-245b-445d-bb1e-12cafb2ec175
 # ╟─66588291-d399-4169-9383-ac6c05cdf906
-# ╠═89ece6c0-3690-4265-8b1d-c3a3cc8b095f
+# ╟─89ece6c0-3690-4265-8b1d-c3a3cc8b095f
 # ╟─92fa2a5a-123b-434c-a97f-39d9727a5ab6
-# ╠═71dde4bd-711c-40c3-8ee2-9f7a79d72aa2
+# ╟─71dde4bd-711c-40c3-8ee2-9f7a79d72aa2
 # ╟─d04d906d-1432-4753-81b9-b03a06df9816
-# ╠═4ce3328e-3436-45ad-b899-9b901b53a8ea
+# ╟─4ce3328e-3436-45ad-b899-9b901b53a8ea
