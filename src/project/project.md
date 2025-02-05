@@ -18,19 +18,18 @@ main a img {
 
 ## Assignment
 
-This project aims to apply the principles of the course Modelling and Simulation to a *small*, self-contained example related to bioscience engineering. To this end, you can draw inspiration from our abstracts. You must work on your project in the Pluto notebook environment. 
+This project aims to apply the principles of the course Modelling and Simulation to a *small*, self-contained example related to bioscience engineering. To this end, you can draw inspiration from one of our abstracts. You must work on your project in the Pluto notebook environment in the provided template (Dutch or English). 
 
-Your project must be of a maximum length of **eight pages when printed**. Your project contains the following:
-
+Your project must be of a maximum length of **eight to ten pages when printed**. Your project contains the following:
 - [ ] an abstract with context, why it is relevant, a summary of what you have done and a conclusion
-- [ ] a dynamical model (based on ODEs or similar models such as a Markov Chain)
+- [ ] a model based on differential equations or a probabilistic model (a stochastic program)
 - [ ] a clear outline of the variables and parameters
-- [ ] it has some aspect of either process optimization (so you use optimization to improve a parameter, input or decision) or calibration (you tweak a parameter based on sampling or optimization)
+- [ ] it has some aspect of either process optimization (so you use optimization to improve a parameter, input or decision), calibration (you tweak a parameter based on sampling or optimization) or gains some deeper insight in the system (e.g., how inputs influence the output).
 - [ ] you use some form of uncertainty assessment, sensitivity analysis or some other stochastic component
 
 These aspects can be extended or limited, as you choose. For example, you use your model for some process optimization via an optimizer but you can also tune a parameter by hand.
 
-You must submit the project as a PDF, HTML, and Julia (.jl) file through UFORA. Between submitting and the final exam, you will be asked to evaluate three other projects in a (limited) manner.
+You must submit the project as a PDF, HTML, and Julia (.jl) file through UFORA **by 9 May**.
 
 Each project should also end with a small attribution who did what parts according to the [CRediT](https://en.wikipedia.org/wiki/Contributor_Roles_Taxonomy) (Contribution Roles Taxonomy) classification. For example:
 
@@ -48,12 +47,12 @@ Each project should also end with a small attribution who did what parts accordi
 ## Tips and advice
 
 - Keep it as simple as possible. A project exploring a small model with two or three variables, outlining a well-known concept from your courses can lead to excellent projects or marks.
-- You can use ChatGPT, Gemini or any other AI tool to help you at any point of the project, from brainstorming the initial idea to writing and proofreading text to helping with the code.
+- You can use generative AI tools to help you at any point of the project, from brainstorming the initial idea to writing and proofreading text to helping with the code. You still have to explain everything and make sure the text looks "natural".
 - Make sure you explain your reasoning well. Let others read it if it is clear how to do it.
-- Make uninteresting or hard-o-understand pieces of code invisible if they don't help the reader.
+- Make uninteresting or hard-to-understand pieces of code invisible if they don't help the reader.
 - You can use `DifferentialEquations.jl` or `ModelingToolkit.jl` if you want to build models that are beyond the scope of `Catalyst.jl`. For example, if you want to model a thermal process. However, this you personal choice, projects that use extra software will not be marked higher. It is perfectly possible to work out an exellent project using only the examples from the practical notes and theory course.
 - We expect figures to be tidy (titles, labels and axis). See the example projects for how to do this.
 - Use clear variable names and use comments (`#`) to annotate parts that are not clear.
 - The programming can and should be minimal.
 - Teaching staff will be available for feedback after the lectures and labs or at designated time slots.
-- Keep it as simple as possible. 
+- Keep it as simple as possible!
