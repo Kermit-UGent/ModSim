@@ -5,7 +5,7 @@
 #> order = "4"
 #> title = "Turing Cheat Sheet"
 #> date = "2025-01-29"
-#> tags = ["welcome"]
+#> tags = ["cheat sheets"]
 #> description = "Turing Cheat Sheet"
 #> layout = "layout.jlhtml"
 #> 
