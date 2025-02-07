@@ -56,6 +56,24 @@ import ProgressLogging
 # ╔═╡ cd576da6-59ae-4d1b-b812-1a35023b6875
 import ThreadsX
 
+# ╔═╡ e0ae20f5-ffe7-4f0e-90be-168924526e03
+"Like `Base.map`, but with ProgressLogging."
+function progressmap(f, itr)
+	progressmap_generic(map, f, itr)
+end
+
+# ╔═╡ d58f2a89-4631-4b19-9d60-5e590908b61f
+"Like `Base.asyncmap`, but with ProgressLogging."
+function progressmap_async(f, itr; kwargs...)
+	progressmap_generic(asyncmap, f, itr; kwargs...)
+end
+
+# ╔═╡ 2221f133-e490-4e3a-82d4-bd1c6c979d1c
+"Like `ThreadsX.map`, but with ProgressLogging."
+function progressmap_threaded(f, itr; kwargs...)
+	progressmap_generic(ThreadsX.map, f, itr; kwargs...)
+end
+
 # ╔═╡ 86471faf-af03-4f35-8b95-c4011ceaf7c3
 function progressmap_generic(mapfn, f, itr; kwargs...)
 	l = length(itr)
@@ -77,24 +95,6 @@ function progressmap_generic(mapfn, f, itr; kwargs...)
 
 	log(0)
 	output
-end
-
-# ╔═╡ e0ae20f5-ffe7-4f0e-90be-168924526e03
-"Like `Base.map`, but with ProgressLogging."
-function progressmap(f, itr)
-	progressmap_generic(map, f, itr)
-end
-
-# ╔═╡ d58f2a89-4631-4b19-9d60-5e590908b61f
-"Like `Base.asyncmap`, but with ProgressLogging."
-function progressmap_async(f, itr; kwargs...)
-	progressmap_generic(asyncmap, f, itr; kwargs...)
-end
-
-# ╔═╡ 2221f133-e490-4e3a-82d4-bd1c6c979d1c
-"Like `ThreadsX.map`, but with ProgressLogging."
-function progressmap_threaded(f, itr; kwargs...)
-	progressmap_generic(ThreadsX.map, f, itr; kwargs...)
 end
 
 # ╔═╡ 6c8e76ea-d648-449a-89de-cb6632cdd6b9
@@ -123,6 +123,40 @@ end
 
 See `TemplateInput` and `TemplateOutput` for more info!
 """
+
+# ╔═╡ a166e8f3-542e-4068-a076-3f5fd4daa61c
+Base.@kwdef struct TemplateInput
+	contents::Vector{UInt8}
+	relative_path::String
+	absolute_path::String
+	frontmatter::FrontMatter=FrontMatter()
+end
+
+# ╔═╡ 6288f145-444b-41cb-b9e3-8f273f9517fb
+begin
+	Base.@kwdef struct TemplateOutput
+		contents::Union{Vector{UInt8},String,Nothing}
+		file_extension::String="html"
+		frontmatter::FrontMatter=FrontMatter()
+		search_index_data::Union{Nothing,String}=nothing
+	end
+	TemplateOutput(t::TemplateOutput; kwargs...) = TemplateOutput(;
+		contents=t.contents,
+		file_extension=t.file_extension,
+		frontmatter=t.frontmatter,
+		search_index_data=t.search_index_data,
+		kwargs...,
+	)
+end
+
+# ╔═╡ ff55f7eb-a23d-4ca7-b428-ab05dcb8f090
+# fallback method
+function template_handler(::Any, input::TemplateInput)::TemplateOutput
+	TemplateOutput(;
+		contents=nothing,
+		file_extension="nothing",
+	)
+end
 
 # ╔═╡ 4a2dc5a4-0bf2-4678-b984-4ecb7b397d72
 md"""
@@ -178,78 +212,14 @@ end)
 # ╔═╡ 08b42df7-9120-4b42-80ee-8e438752b50c
 # s_result.exported
 
-# ╔═╡ adb1ddac-d992-49ca-820f-e1ed8ca33bf8
-md"""
-## `.jl`: PlutoSliderServer.jl
-"""
+# ╔═╡ 7717e24f-62ee-4852-9dec-d09b734d0693
+s_result = run_mdx(s; data=Dict("num" => 3));
 
-# ╔═╡ bb905046-59b7-4da6-97ad-dbb9055d823a
-const pluto_deploy_settings = PlutoSliderServer.get_configuration(PlutoSliderServer.default_config_path())
+# ╔═╡ 9f945292-ff9e-4f29-93ea-69b10fc4428d
+s_result.contents |> HTML
 
-# ╔═╡ b638df55-fd74-4ae8-bdbd-ec7b18214b40
-function prose_from_code(s::String)::String
-	replace(replace(
-		replace(
-			replace(s, 
-				# remove embedded project/manifest
-				r"000000000001.+"s => ""),
-			# remove cell delimiters
-			r"^# [╔╟╠].*"m => ""), 
-		# remove some code-only punctiation
-		r"[\!\#\$\*\+\-\/\:\;\<\>\=\(\)\[\]\{\}\:\@\_]" => " "), 
-	# collapse repeated whitespace
-	r"\s+"s => " ")
-end
-
-# ╔═╡ 87b4431b-438b-4da4-9d06-79e7f3a2fe05
-prose_from_code("""
-[xs for y in ab(d)]
-fonsi
-""")
-
-# ╔═╡ cd4e479c-deb7-4a44-9eb0-c3819b5c4067
-find(f::Function, xs) = for x in xs
-	if f(x)
-		return x
-	end
-end
-
-# ╔═╡ 2e527d04-e4e7-4dc8-87e6-8b3dd3c7688a
-const FrontMatter = Dict{String,Any}
-
-# ╔═╡ a166e8f3-542e-4068-a076-3f5fd4daa61c
-Base.@kwdef struct TemplateInput
-	contents::Vector{UInt8}
-	relative_path::String
-	absolute_path::String
-	frontmatter::FrontMatter=FrontMatter()
-end
-
-# ╔═╡ 6288f145-444b-41cb-b9e3-8f273f9517fb
-begin
-	Base.@kwdef struct TemplateOutput
-		contents::Union{Vector{UInt8},String,Nothing}
-		file_extension::String="html"
-		frontmatter::FrontMatter=FrontMatter()
-		search_index_data::Union{Nothing,String}=nothing
-	end
-	TemplateOutput(t::TemplateOutput; kwargs...) = TemplateOutput(;
-		contents=t.contents,
-		file_extension=t.file_extension,
-		frontmatter=t.frontmatter,
-		search_index_data=t.search_index_data,
-		kwargs...,
-	)
-end
-
-# ╔═╡ ff55f7eb-a23d-4ca7-b428-ab05dcb8f090
-# fallback method
-function template_handler(::Any, input::TemplateInput)::TemplateOutput
-	TemplateOutput(;
-		contents=nothing,
-		file_extension="nothing",
-	)
-end
+# ╔═╡ 83366d96-4cd3-4def-a0da-16a22b40124f
+s_result.frontmatter
 
 # ╔═╡ 692c1e0b-07e1-41b3-abcd-2156bda65b41
 """
@@ -318,14 +288,44 @@ function run_mdx(s::String;
 	)
 end
 
-# ╔═╡ 7717e24f-62ee-4852-9dec-d09b734d0693
-s_result = run_mdx(s; data=Dict("num" => 3));
+# ╔═╡ adb1ddac-d992-49ca-820f-e1ed8ca33bf8
+md"""
+## `.jl`: PlutoSliderServer.jl
+"""
 
-# ╔═╡ 9f945292-ff9e-4f29-93ea-69b10fc4428d
-s_result.contents |> HTML
+# ╔═╡ bb905046-59b7-4da6-97ad-dbb9055d823a
+const pluto_deploy_settings = PlutoSliderServer.get_configuration(PlutoSliderServer.default_config_path())
 
-# ╔═╡ 83366d96-4cd3-4def-a0da-16a22b40124f
-s_result.frontmatter
+# ╔═╡ b638df55-fd74-4ae8-bdbd-ec7b18214b40
+function prose_from_code(s::String)::String
+	replace(replace(
+		replace(
+			replace(s, 
+				# remove embedded project/manifest
+				r"000000000001.+"s => ""),
+			# remove cell delimiters
+			r"^# [╔╟╠].*"m => ""), 
+		# remove some code-only punctiation
+		r"[\!\#\$\*\+\-\/\:\;\<\>\=\(\)\[\]\{\}\:\@\_]" => " "), 
+	# collapse repeated whitespace
+	r"\s+"s => " ")
+end
+
+# ╔═╡ 87b4431b-438b-4da4-9d06-79e7f3a2fe05
+prose_from_code("""
+[xs for y in ab(d)]
+fonsi
+""")
+
+# ╔═╡ cd4e479c-deb7-4a44-9eb0-c3819b5c4067
+find(f::Function, xs) = for x in xs
+	if f(x)
+		return x
+	end
+end
+
+# ╔═╡ 2e527d04-e4e7-4dc8-87e6-8b3dd3c7688a
+const FrontMatter = Dict{String,Any}
 
 # ╔═╡ 94bb6730-a4ad-42d2-aa58-41b70a15cd0e
 md"""
@@ -353,6 +353,28 @@ end
 md"""
 ## Generated assets
 """
+
+# ╔═╡ 0d2b7382-2ddf-48c3-90c8-bc22de454c97
+"""
+```julia
+register_asset(contents, original_name::String)
+```
+
+Place an asset in the `/generated_assets/` subfolder of the output directory and return a [`RegisteredAsset`](@ref) referencing it for later use. (The original filename will be sanitized, and a content hash will be appended.)
+
+To be used inside `process_file` methods which need to generate additional files. You can use `registered_asset.url` to get a location-independent href to the result.
+"""
+function register_asset(contents, original_name::String)
+	h = myhash(contents)
+	n, e = splitext(basename(original_name))
+	
+	
+	mkpath(joinpath(output_dir, "generated_assets"))
+	newpath = joinpath(output_dir, "generated_assets", "$(legalize(n))_$(h)$(e)")
+	write(newpath, contents)
+	rel = relpath(newpath, output_dir)
+	return RegisteredAsset(joinpath(root_url, rel), rel, newpath)
+end
 
 # ╔═╡ 5e91e7dc-82b6-486a-b745-34f97b6fb20c
 struct RegisteredAsset
@@ -647,35 +669,6 @@ function template_handler(
 	)
 end
 
-# ╔═╡ 4013400c-acb4-40fa-a826-fd0cbae09e7e
-reprhtml(x) = repr(MIME"text/html"(), x)
-
-# ╔═╡ 5b325b50-8984-44c6-8677-3c6bc5c2b0b1
-"A magic token that will turn into a relative URL pointing to the website root when used in output."
-const root_url = "++magic#root#url~$(string(rand(UInt128),base=62))++"
-
-# ╔═╡ 0d2b7382-2ddf-48c3-90c8-bc22de454c97
-"""
-```julia
-register_asset(contents, original_name::String)
-```
-
-Place an asset in the `/generated_assets/` subfolder of the output directory and return a [`RegisteredAsset`](@ref) referencing it for later use. (The original filename will be sanitized, and a content hash will be appended.)
-
-To be used inside `process_file` methods which need to generate additional files. You can use `registered_asset.url` to get a location-independent href to the result.
-"""
-function register_asset(contents, original_name::String)
-	h = myhash(contents)
-	n, e = splitext(basename(original_name))
-	
-	
-	mkpath(joinpath(output_dir, "generated_assets"))
-	newpath = joinpath(output_dir, "generated_assets", "$(legalize(n))_$(h)$(e)")
-	write(newpath, contents)
-	rel = relpath(newpath, output_dir)
-	return RegisteredAsset(joinpath(root_url, rel), rel, newpath)
-end
-
 # ╔═╡ e2510a44-df48-4c05-9453-8822deadce24
 function template_handler(
 	::Val{Symbol(".jl")}, 
@@ -908,6 +901,13 @@ process_results = map(rendered_results) do page
 		)
 	end
 end
+
+# ╔═╡ 4013400c-acb4-40fa-a826-fd0cbae09e7e
+reprhtml(x) = repr(MIME"text/html"(), x)
+
+# ╔═╡ 5b325b50-8984-44c6-8677-3c6bc5c2b0b1
+"A magic token that will turn into a relative URL pointing to the website root when used in output."
+const root_url = "++magic#root#url~$(string(rand(UInt128),base=62))++"
 
 # ╔═╡ 70fa9af8-31f9-4e47-b36b-828c88166b3d
 md"""
