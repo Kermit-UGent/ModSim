@@ -12,6 +12,8 @@ To launch pluto, either:
 
 ## gh-pages / website
 
+all the info and files are in the `src` directory. There will be some redundancy between files/scripts in other folders and the ones in the `src` folder. 
+
 see `website_maintenance.md`
 
 Also don't forget to update the toml and manifest files in `pluto-deployment-environment`. Make sure to respect the Julia version, currently this is `1.11.2`.
