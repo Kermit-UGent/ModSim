@@ -2,10 +2,10 @@
 # v0.20.4
 
 #> [frontmatter]
-#> order = "4"
+#> order = "2"
 #> title = "Intro to Julia"
 #> date = "2025-01-28"
-#> tags = ["welcome"]
+#> tags = ["cheat sheets"]
 #> description = "General introduction to Julia"
 #> layout = "layout.jlhtml"
 #> 
@@ -30,7 +30,11 @@ macro bind(def, element)
 end
 
 # ╔═╡ 9a1cca86-0fff-4f8a-a033-8cf6db337503
-using PlutoUI, Markdown; TableOfContents()
+begin
+  using Pkg
+  Pkg.activate("../../pluto-deployment-environment")
+  using PlutoUI, Markdown; TableOfContents()
+end
 
 # ╔═╡ a15c46f7-b561-41c7-8da2-12f04465fb19
 using LinearAlgebra  
