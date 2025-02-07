@@ -14,8 +14,8 @@ main a img {
 
 # New errata?
 
-Have you found a spelling mistake, an error? Do you think there might be a typo somewhere? Let us know on the dedicated forum on `Ufora`!.
+Have you found a spelling mistake, an error? Do you think there might be a typo somewhere? Let us know on the dedicated forum on `Ufora`!
 
 # Errata overview
 
-> Placeholder
+> Placeholder: errata will be listed here
