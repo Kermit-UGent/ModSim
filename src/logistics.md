@@ -12,11 +12,15 @@ main a img {
 }
 </style>
 
+# in general
+
+Look at Ufora for the latest announcements and practicalities.
+
 # Course logistics
 
 Classes will be held in A1.1 Tuesday at 1PM
 
-Excercises in PC-lab E.-1 Monday mornings and Tuesday afternoon.
+Exercises in PC-lab E.-1.1 Monday mornings and Tuesday afternoon.
 
 # Course notes
 
