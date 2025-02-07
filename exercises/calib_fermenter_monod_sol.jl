@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -21,20 +21,14 @@ using InteractiveUtils
 using Catalyst, DifferentialEquations, Plots
 
 # ╔═╡ 295caa68-db27-4c9b-bc34-86ab088fec24
-using Turing
-
-# ╔═╡ a0269a25-269c-49c1-aa05-047fa3a959d4
-using StatsPlots, StatsBase
+using Turing, StatsPlots, StatsBase
 
 # ╔═╡ dc6e9bdc-dae0-43aa-b624-f9314d1d9884
-using LinearAlgebra
-
-# ╔═╡ 31243ea7-1f0f-490f-8886-b1b7ab7ae5b4
-using Optim
+using LinearAlgebra, Optim
 
 # ╔═╡ 2f0a4c62-3441-4c63-9bb9-383e7f554eb5
 md"""
-### Exercise: Fermenter - Monod kinetics - Calibration
+# Exercise: Fermenter - Monod kinetics - Calibration
 """
 
 # ╔═╡ 595ea8ee-bc67-4696-9232-982612fb554d
@@ -107,7 +101,7 @@ begin
 end
 
 # ╔═╡ ef977370-06ee-4a73-85e2-609a744167d3
-md"
+md"""
 We have previously used the following parameter values:
 
 -  $\mu_{max} = 0.40\;h^{-1}$, $K_s = 0.015\;g/L$, $S_{in} = 0.22\;g/L$
@@ -116,7 +110,7 @@ We have previously used the following parameter values:
 Furthermore, suppose that at $t = 0\;h$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of $0.0005\;g/L$.
 
 Calibrate the parameter values for $\mu_{max}$ and $K_s$ using the aforementioned measurement data for $S$ and $X$ in a timespan of $[0, 100]\,h$. Take the values above as initial values for $\mu_{max}$ and $K_s$.
-"
+"""
 
 # ╔═╡ 7a227eaf-18d0-44f4-ac4b-f529e81c7471
 md"""
@@ -141,7 +135,7 @@ oprob = ODEProblem(fermenter_monod, u0, tspan, params, combinatoric_ratelaws=fal
 
 # ╔═╡ f6a8f134-6db0-4d74-8af5-82826347d8f0
 md"""
-Declare the Turing model.
+Declare the Turing model. Use `InverseGamma()` for the standard deviations of the measurements and `LogNormal()` for `μmax` and `K`.
 """
 
 # ╔═╡ 4c28a66a-ee2c-42a2-95c7-ea4ddb6a232d
@@ -228,7 +222,7 @@ params_opt = [:μmax => μmax_opt, :Ks => Ks_opt, :Y => 0.67, :Q => 2, :V => 40,
 
 # ╔═╡ 4e8870dc-2da6-4b80-82d6-26c7ceedad7d
 md"""
-Create an ODEProblem and solve it:
+Create an ODEProblem and solve it. Use `Tsit5()` and `saveat=0.5`.
 """
 
 # ╔═╡ 853c1a92-d50f-4b05-9ed3-d3ee1656665a
@@ -248,14 +242,14 @@ Plot $S$ and $X$ simulated with the optimized parameter values together with the
 # ╔═╡ d0156099-ad03-4711-ac0f-94882fb78266
 # Uncomment and complete the instruction
 # begin
-#   missing
-#   missing
-#   missing
+# 	missing
+# 	missing
+# 	missing
 # end
 begin
-  plot(osol_opt, labels=["S sim" "X sim"], xlabel="t")
-  scatter!(t_meas, S_meas, label="S meas", color=:blue)
-  scatter!(t_meas, X_meas, label="X meas", color=:red)
+	plot(osol_opt, labels=["S sim" "X sim"], xlabel="t")
+	scatter!(t_meas, S_meas, label="S meas", color=:blue)
+	scatter!(t_meas, X_meas, label="X meas", color=:red)
 end
 
 # ╔═╡ Cell order:
@@ -264,16 +258,14 @@ end
 # ╠═c54dae10-60af-4141-b56d-ed61cb0ced8a
 # ╠═16438e07-1b2b-467e-822a-081d19cae92b
 # ╠═295caa68-db27-4c9b-bc34-86ab088fec24
-# ╠═a0269a25-269c-49c1-aa05-047fa3a959d4
 # ╠═dc6e9bdc-dae0-43aa-b624-f9314d1d9884
-# ╠═31243ea7-1f0f-490f-8886-b1b7ab7ae5b4
 # ╟─2f0a4c62-3441-4c63-9bb9-383e7f554eb5
 # ╟─595ea8ee-bc67-4696-9232-982612fb554d
 # ╟─824db995-7a66-4719-a534-7e0f6dec90b5
 # ╠═245c2636-95da-4c76-8b03-c4d20bbabb48
 # ╠═68f9ecb3-15b0-4a53-8864-5dac13a89e95
 # ╟─de8ddc14-8f82-403d-8f42-29673ef2a722
-# ╠═b7b7d58f-d406-4596-b834-ced6d8fada83
+# ╟─b7b7d58f-d406-4596-b834-ced6d8fada83
 # ╠═99c6f31a-0968-4804-9980-71fcc1af1f49
 # ╠═bf4ad873-e0fe-415c-9e78-fe0b5ac1414e
 # ╠═1dae5875-f405-4ecb-8b7b-3c3f22b549bb

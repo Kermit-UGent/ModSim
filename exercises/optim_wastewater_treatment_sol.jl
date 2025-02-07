@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -21,17 +21,14 @@ using InteractiveUtils
 using Catalyst, DifferentialEquations, Plots
 
 # ╔═╡ e48dc930-be03-47b2-b9e3-16e854782aec
-using Turing
+using Turing, StatsBase, Optim
 
-# ╔═╡ 39cc0864-7399-431b-bfc2-70196866c41b
-using StatsBase
-
-# ╔═╡ 9d23f4bf-c3bd-4e79-923c-4b3b77b806a3
-using Optim
+# ╔═╡ 6458329f-73dd-4cb0-8da4-90678875a1f0
+using PlutoUI; TableOfContents()
 
 # ╔═╡ c1bc698d-41ee-45e6-b17d-29f0d53557a1
 md"""
-#### Exercise: Wastewater treatment - Optimisation
+# Exercise: Wastewater treatment - Optimisation
 """
 
 # ╔═╡ dfe77a8c-a8db-46d7-9a4d-3b00413d383b
@@ -58,14 +55,14 @@ The amount of organic waste that is being breakdown by the microorganisms depend
 
 # ╔═╡ c0c83df7-a9cc-4bde-b6ec-038a423b0d90
 md"""
-#### Part 1
+## Part 1
 
 In this part, we will simulate the system with the parameters given above.
 """
 
 # ╔═╡ bbd50cc5-032a-4219-bcee-91145935a7c4
 md"""
-##### Implementation of the system
+### Implementation of the system
 """
 
 # ╔═╡ a5f79c20-f62e-4df2-be79-b4f2141ced5e
@@ -132,7 +129,7 @@ params = [:q=>5, :V=>50, :r=>0.4, :Cin=>3.0, :Ks=>5.2, :kd=>0.10, :Y=>1.2]
 
 # ╔═╡ b8a48461-3882-45f6-980c-38d650ac52c7
 md"""
-##### Creating an ODE problem, solve the problem and plot results
+### Creating an ODE problem, solve the problem and plot results
 """
 
 # ╔═╡ a4c57b64-6a7d-4bd4-8bb2-578923e184d2
@@ -182,7 +179,7 @@ osol[:C][end]
 
 # ╔═╡ 7eb5df9c-a475-4812-81c3-e43484c82242
 md"""
-#### Part 2
+## Part 2
 
 In this part, we will optimize the value of the flow rate $q$ so that the concentration of organic waste in the tank is at most $0.28\; kg\,m^{-3}$.
 """
@@ -251,7 +248,7 @@ params_opt = [:q=>q_opt, :V=>50, :r=>0.4, :Cin=>3.0, :Ks=>5.2, :kd=>0.10, :Y=>1.
 
 # ╔═╡ cd515dad-44fb-4af2-b933-805ef76be9b3
 md"""
-Create an ODEProblem and solve it.
+Create an ODEProblem and solve it. Use `Tsit5()` and `saveat=0.1`.
 """
 
 # ╔═╡ a4388f06-1223-4815-a557-9b9c3ec232bb
@@ -293,8 +290,7 @@ Draw your conclusion.
 # ╠═2b26c3b2-df08-4b24-a08d-23717248c10d
 # ╠═0407d891-a46d-4deb-a21a-23833acbcb87
 # ╠═e48dc930-be03-47b2-b9e3-16e854782aec
-# ╠═39cc0864-7399-431b-bfc2-70196866c41b
-# ╠═9d23f4bf-c3bd-4e79-923c-4b3b77b806a3
+# ╠═6458329f-73dd-4cb0-8da4-90678875a1f0
 # ╟─c1bc698d-41ee-45e6-b17d-29f0d53557a1
 # ╟─dfe77a8c-a8db-46d7-9a4d-3b00413d383b
 # ╟─c0c83df7-a9cc-4bde-b6ec-038a423b0d90
@@ -315,7 +311,7 @@ Draw your conclusion.
 # ╠═b1e18139-5277-4f06-b1f8-b0f5f11c41d8
 # ╟─ad6d8fe6-e62f-4c67-8d63-4ee13b928ad0
 # ╠═e2ffba9e-aaf2-4540-84cf-8b7297ae9285
-# ╠═70871ee8-b0a4-4a9a-af39-5a63459b55f7
+# ╟─70871ee8-b0a4-4a9a-af39-5a63459b55f7
 # ╠═34309734-3751-47e0-a602-d113ffaae510
 # ╟─a0e735ad-09c2-4aa8-bc41-b294a9d56ea8
 # ╠═f62898d5-1b8d-4350-8655-78aa3decb2a2

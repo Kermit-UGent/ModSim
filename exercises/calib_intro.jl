@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -21,16 +21,13 @@ using InteractiveUtils
 using Catalyst, DifferentialEquations, Plots
 
 # ╔═╡ dbfe4800-0974-4ca1-bb0a-d8803409a98b
-using Turing
-
-# ╔═╡ 7965b69b-fff6-4284-ad65-a92a58cda04a
-using StatsPlots, StatsBase
+using Turing, StatsPlots, StatsBase
 
 # ╔═╡ 6e227e07-166a-41ce-839a-4c4c72addb23
-using LinearAlgebra
+using LinearAlgebra, Optim
 
-# ╔═╡ 9f20022f-d74b-42ce-a751-4ea94eb896fe
-using Optim
+# ╔═╡ b992c080-a0ce-4188-b632-e734a141e67d
+using PlutoUI; TableOfContents()
 
 # ╔═╡ 37da8786-fea0-4c2f-a76f-6e6c68325a78
 md"""
@@ -220,7 +217,7 @@ We are now ready to optimize the priors ($\sigma_W$, $W_0$, $\mu$ and $W_f$). Th
 
 # ╔═╡ 73e35289-6dc0-4e2e-83eb-b56f83cdbbbf
 md"""
-#### Method - Maximum Likelihood Estimation
+### Method - Maximum Likelihood Estimation
 """
 
 # ╔═╡ 47bd729c-4851-42f7-a03f-6ceacd3c717e
@@ -292,14 +289,14 @@ Finally, we plot $W$ simulated with the optimized initial value and parameter va
 
 # ╔═╡ 55eba435-6ca4-4f4f-b08a-be700d5bda91
 begin
-plot(osol_opt1_log, label="Logistic growth", xlabel="t",
-	xlims=(0, 100), ylims=(0, 14))
-scatter!(t_meas, W_meas, label="Yield")
+	plot(osol_opt1_log, label="Logistic growth", xlabel="t",
+		xlims=(0, 100), ylims=(0, 14))
+	scatter!(t_meas, W_meas, label="Yield")
 end
 
 # ╔═╡ 5d386b00-93b5-4a88-b4e3-e5c3eebd6dd5
 md"""
-#### Method - Maximum A Posterior
+### Method - Maximum A Posterior
 """
 
 # ╔═╡ 6f0e91d0-6b99-4cf1-8145-523589a21e89
@@ -371,14 +368,14 @@ Finally, we plot $W$ simulated with the optimized initial value and parameter va
 
 # ╔═╡ 4e07c39b-502d-4b38-ae7f-f103cb4bae16
 begin
-plot(osol_opt2_log, label="Logistic growth", xlabel="t",
-	xlims=(0, 100), ylims=(0, 14))
-scatter!(t_meas, W_meas, label="Yield")
+	plot(osol_opt2_log, label="Logistic growth", xlabel="t",
+		xlims=(0, 100), ylims=(0, 14))
+	scatter!(t_meas, W_meas, label="Yield")
 end
 
 # ╔═╡ 29170e2a-9916-438e-92ca-9f4783397b5e
 md"""
-#### Method - MCMC with NUTS
+### Method - MCMC with NUTS
 """
 
 # ╔═╡ 7ff9fe52-156b-4a92-9058-781670de3abb
@@ -440,9 +437,9 @@ Finally, we plot $W$ simulated with the optimized initial value and parameter va
 
 # ╔═╡ 20a6f165-449a-42cc-9565-f342a7535422
 begin
-plot(osol_opt3_log, label="Logistic growth", xlabel="t",
-	xlims=(0, 100), ylims=(0, 14))
-scatter!(t_meas, W_meas, label="Yield")
+	plot(osol_opt3_log, label="Logistic growth", xlabel="t",
+		xlims=(0, 100), ylims=(0, 14))
+	scatter!(t_meas, W_meas, label="Yield")
 end
 
 # ╔═╡ 137bde23-76f2-4ebf-8bc2-ea8640001436
@@ -592,7 +589,7 @@ params_opt_exp = [:μ => μ_opt_exp, :Wf => Wf_opt_exp]
 
 # ╔═╡ 25be4255-0888-4ecd-a2fd-d66402c5cb50
 md"""
-Create an ODEProblem and solve it:
+Create an ODEProblem and solve it. Use `Tsit5()` and `saveas=0.5`.
 """
 
 # ╔═╡ 36e8a174-d526-45ee-b3c6-88d698ad5d5f
@@ -615,9 +612,9 @@ Plot $W$ simulated with the optimized initial value and parameter values togethe
 # missing
 # end
 begin
-plot(osol_opt_exp, label="Exponential growth", xlabel="t",
-	xlims=(0, 100), ylims=(0, 14))
-scatter!(t_meas, W_meas, label="Yield")
+	plot(osol_opt_exp, label="Exponential growth", xlabel="t",
+		xlims=(0, 100),ylims=(0, 14))
+	scatter!(t_meas, W_meas, label="Yield")
 end
 
 # ╔═╡ 785d500b-f8ea-446a-9952-2a5fd5d83d24
@@ -661,8 +658,9 @@ Use the same measurement data (`W_meas`, `t_meas`) as before.
 
 # ╔═╡ e5081280-d226-4834-8932-c89becd8313c
 md"""
-Declare the Turing model. Take for $\sigma_W$ and $W_0$ the same priors (and distributions) as before, but take for $\mu$ a Uniform prior distribution in the range $[0, 2]$ and the same for $D$ but in the range $[0, 1]$.
+Declare the Turing model. Take the same priors as before.
 """
+# Take for $\sigma_W$ and $W_0$ the same priors (and distributions) as before, but take for $\mu$ a Uniform prior distribution in the range $[0, 2]$ and the same for $D$ but in the range $[0, 1]$.
 
 # ╔═╡ c739a908-2353-4e7a-8fbd-f640dc8cabe0
 # Uncomment and complete the instruction
@@ -755,7 +753,7 @@ params_opt_gom = [:μ => μ_opt_gom, :D => D_opt_gom]
 
 # ╔═╡ 48bc085c-9ce6-4752-a5a9-a814f803f571
 md"""
-Create an ODEProblem and solve it:
+Create an ODEProblem and solve it. Use `Tsit5()` and `saveas=0.5`.
 """
 
 # ╔═╡ 5b9b2e5b-9deb-4ff6-a923-b15b8b08f0c9
@@ -778,16 +776,18 @@ Finally, we plot $W$ simulated with the optimized initial value and parameter va
 # missing
 # end
 begin
-plot(osol_opt_gom, label="Gompertz growth", xlabel="t",
-	xlims=(0, 100), ylims=(0, 14))
-scatter!(t_meas, W_meas, label="Yield")
+	plot(osol_opt_gom, label="Gompertz growth", xlabel="t",
+		xlims=(0, 100), ylims=(0, 14))
+	scatter!(t_meas, W_meas, label="Yield")
 end
 
 # ╔═╡ f0b4772d-a72b-44e0-a3a1-ba9ad4c4dfeb
 md"""
 Which grass growth model fits best these data? How can you prove this numerically?
-- Answer: missing
 """
+
+# ╔═╡ 7e98a771-52bb-484e-82ab-2e42e7cb4053
+md"- Answer: missing"
 
 # ╔═╡ Cell order:
 # ╠═a09f814a-0c6a-11ef-0e79-a50b01287d63
@@ -795,9 +795,8 @@ Which grass growth model fits best these data? How can you prove this numericall
 # ╠═f8a92690-990b-4341-89e1-322adbcb8d1b
 # ╠═015050b3-3339-4b1a-ad7d-c358cce73675
 # ╠═dbfe4800-0974-4ca1-bb0a-d8803409a98b
-# ╠═7965b69b-fff6-4284-ad65-a92a58cda04a
 # ╠═6e227e07-166a-41ce-839a-4c4c72addb23
-# ╠═9f20022f-d74b-42ce-a751-4ea94eb896fe
+# ╠═b992c080-a0ce-4188-b632-e734a141e67d
 # ╟─37da8786-fea0-4c2f-a76f-6e6c68325a78
 # ╟─4623369d-8c5a-422d-9e40-0f1dd7586260
 # ╟─3cb0a166-ac53-4c3f-9832-e93742040cfb
@@ -811,7 +810,7 @@ Which grass growth model fits best these data? How can you prove this numericall
 # ╟─9a5bc72b-346d-4e95-a873-783037ed98bc
 # ╠═ba56adb1-9405-40d5-be48-4273b42ab145
 # ╠═6e3e53ea-4fe7-4a34-8b00-cbf8d63a3203
-# ╠═f4748167-b635-47a1-9015-32e1258c0afa
+# ╟─f4748167-b635-47a1-9015-32e1258c0afa
 # ╠═a022b2ab-68a0-40ca-b914-7a2adcf4ae39
 # ╟─acccb2fa-12b2-4fc7-91e3-58a4b1a02892
 # ╠═e54ea8d1-0854-44fa-aed8-45d106e921e4
@@ -867,10 +866,10 @@ Which grass growth model fits best these data? How can you prove this numericall
 # ╟─c17c4e00-8688-4f9c-b0ae-741d70601aba
 # ╠═f751b962-1810-429c-b34b-658b63fa9ba0
 # ╠═0fd058cc-9bd8-4e12-b5dd-79818519165b
-# ╠═57c95382-69cc-47e7-aa94-4767136bb23b
+# ╟─57c95382-69cc-47e7-aa94-4767136bb23b
 # ╠═4e07c39b-502d-4b38-ae7f-f103cb4bae16
-# ╠═29170e2a-9916-438e-92ca-9f4783397b5e
-# ╠═7ff9fe52-156b-4a92-9058-781670de3abb
+# ╟─29170e2a-9916-438e-92ca-9f4783397b5e
+# ╟─7ff9fe52-156b-4a92-9058-781670de3abb
 # ╠═0c047043-3284-422a-9c88-2f4f4c170edf
 # ╠═19c362cb-2764-41c9-a571-2e8e2bfcde93
 # ╠═93db47b2-34e8-43b4-beac-b5620fd444e7
@@ -909,7 +908,7 @@ Which grass growth model fits best these data? How can you prove this numericall
 # ╠═8788082d-f5d1-4385-8037-a0d360a841c7
 # ╠═03a4fa85-08db-46d4-bb53-c0ccea90a211
 # ╟─8f5e1413-227c-44fa-bb2d-3653cbc27e38
-# ╠═8a7f7aab-878e-41b5-b9da-d06747df042e
+# ╟─8a7f7aab-878e-41b5-b9da-d06747df042e
 # ╠═30602ff1-041b-4fca-bf8e-55ff57df9e37
 # ╟─881011be-6434-416f-915b-3333e8dea32f
 # ╠═5602b88a-07f8-438b-994c-65f11e17a0ba
@@ -926,7 +925,7 @@ Which grass growth model fits best these data? How can you prove this numericall
 # ╠═da5a0cbb-b033-46f1-a300-3954de138835
 # ╠═73da8f53-c3af-43b0-9b23-60471f1e3587
 # ╟─b0e67564-efe8-4fb2-bcf2-a711b770244e
-# ╠═e5081280-d226-4834-8932-c89becd8313c
+# ╟─e5081280-d226-4834-8932-c89becd8313c
 # ╠═c739a908-2353-4e7a-8fbd-f640dc8cabe0
 # ╟─1d0383ad-54d6-4ff2-8555-def83bfff0e6
 # ╠═cd1cf2f8-9f7f-4ed4-9cb7-1a6efee68ab4
@@ -949,3 +948,4 @@ Which grass growth model fits best these data? How can you prove this numericall
 # ╟─52d7975a-5346-447f-9aad-4ecd11b6460a
 # ╠═e96efd6a-a666-4120-8480-9423e5d82ae1
 # ╟─f0b4772d-a72b-44e0-a3a1-ba9ad4c4dfeb
+# ╟─7e98a771-52bb-484e-82ab-2e42e7cb4053
