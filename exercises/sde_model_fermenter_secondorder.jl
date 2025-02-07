@@ -48,7 +48,7 @@ Create a *reaction network object* model for the aforementioned problem in order
 # ╔═╡ d2e2680c-01c6-449a-bb5f-7472bc1de243
 md"""
 Assign the following noise scaling values:
-- `η = 0.10` for the *reaction* `k*X, S --> Y*X` (default value for `η`)
+- `η = 0.10` for the main *reaction* (default value for `η`)
 - noise scaling of `0.05` for the *reaction* describing the inlet $S_{in}$
 - noise scaling of `0.0` for the remaining *reactions*
 """

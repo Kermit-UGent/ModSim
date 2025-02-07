@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -17,14 +17,14 @@ using Markdown
 # ╔═╡ 2a1306f3-d811-459d-83ca-98cf62dc2db0
 using InteractiveUtils
 
+# ╔═╡ 4e03b93e-f63e-466c-9941-d66e62306010
+using PlutoUI; TableOfContents()
+
 # ╔═╡ 9e8fd818-a14f-41cf-b2fd-a7425141b283
 using Catalyst
 
 # ╔═╡ 0b3921c9-6d6e-4c52-8c21-d883ed493028
 using DifferentialEquations, Plots
-
-# ╔═╡ 4e03b93e-f63e-466c-9941-d66e62306010
-using PlutoUI; TableOfContents()
 
 # ╔═╡ 62b185be-e327-4ef3-af39-819732d107bf
 md"""

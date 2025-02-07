@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -96,7 +96,7 @@ Initialize a vector `u0` with the default initial condition, set the timespan fo
 # tspan = missing               # Uncomment and complete the instruction
 
 # ╔═╡ ab302108-e9a7-4941-a762-c0dc109c9b1d
-# params = missing              # Uncomment and complete the instruction
+# parms = missing               # Uncomment and complete the instruction
 
 # ╔═╡ 3934ba8f-49c9-4f0c-8373-c8010f397d66
 md"""

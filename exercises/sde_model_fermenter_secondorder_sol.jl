@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -48,7 +48,7 @@ Create a *reaction network object* model for the aforementioned problem in order
 # ╔═╡ d2e2680c-01c6-449a-bb5f-7472bc1de243
 md"""
 Assign the following noise scaling values:
-- `η = 0.10` for the *reaction* `k*X, S --> Y*X` (default value for `η`)
+- `η = 0.10` for the main *reaction* (default value for `η`)
 - noise scaling of `0.05` for the *reaction* describing the inlet $S_{in}$
 - noise scaling of `0.0` for the remaining *reactions*
 """
@@ -78,7 +78,7 @@ Convert the system to a symbolic differential equation model and verify, by anal
 
 # ╔═╡ e1f11068-e489-4c54-a30d-981f5cb19b47
 # osys = missing      # Uncomment and complete the instruction
-osys = convert(ODESystem, fermenter_sde_secondorder)
+osys = convert(ODESystem, fermenter_sde_secondorder, combinatoric_ratelaws=false)
 
 # ╔═╡ a65c84c8-d2ec-44e4-9a07-cbd59f190c57
 md"""
@@ -115,7 +115,7 @@ Hint:
 # ╔═╡ aeddc31e-9de2-4792-a2d8-59a14dfc8173
 # sprob = missing      # Uncomment and complete the instruction
 # sprob = SDEProblem(fermenter_sde_secondorder, u0, tspan, params, combinatoric_ratelaws=false)
-sprob = SDEProblem(fermenter_sde_secondorder, u0, tspan, params)
+sprob = SDEProblem(fermenter_sde_secondorder, u0, tspan, params, combinatoric_ratelaws=false)
 
 # ╔═╡ 3a981326-2031-4c63-ad31-c44ddd7a88d5
 md"""
@@ -132,6 +132,7 @@ Plot the results with the option `ylim=(0.0, 2.0)`:
 """
 
 # ╔═╡ 593a0e0a-c4d8-4b12-b38b-15b47705f8a7
+# missing
 plot(ssol, ylim=(0.0, 2.0))
 
 # ╔═╡ 08746e97-d794-4261-9ba6-9002cf17e4c1
@@ -167,7 +168,7 @@ plot(essol, ylim=(0.0,2.0), linealpha=0.5)
 # ╠═8152f632-af15-4164-a8ff-07c33a9a49b3
 # ╠═1ca1d1db-1fdd-4a76-b350-126add7e013c
 # ╠═e04f782d-67da-4e21-a3bf-d2ddff4bba0b
-# ╠═a28e7ddf-76e9-4628-888c-e1d838da75ce
+# ╟─a28e7ddf-76e9-4628-888c-e1d838da75ce
 # ╟─959d6307-a30d-4ae7-970d-b2c7584c2c8f
 # ╟─98858b9c-d4f9-451f-a7b9-fcaa012ee28e
 # ╟─d2e2680c-01c6-449a-bb5f-7472bc1de243

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -238,7 +238,8 @@ Make a histogram so that you can have an idea of the distribution when the rabbi
 
 # ╔═╡ 1c8188de-e8b8-44ae-b0b6-7d490f3a15e8
 # missing              # Uncomment and complete the instruction
-histogram(times, bins=range(0, 10, length=121))
+# histogram(times, bins=range(0, 10, length=121))
+histogram(times, bins=range(0, 10, length=121), normalize=:pdf)
 
 # ╔═╡ Cell order:
 # ╠═9b9d35c4-9136-11ef-284a-d5964e231d9e
@@ -250,7 +251,7 @@ histogram(times, bins=range(0, 10, length=121))
 # ╟─3a1a01f6-7f6e-411d-958b-0dce35b791ff
 # ╟─92a0efee-1e40-4080-aee2-831d98312176
 # ╟─91e77fb0-cab3-4da7-8bc9-6f657df2497c
-# ╠═d11b4e97-df16-4641-9e32-c7f2a098ffb7
+# ╟─d11b4e97-df16-4641-9e32-c7f2a098ffb7
 # ╠═6d49c334-76e0-4210-890b-e3e79097222d
 # ╟─1c2c38f9-6c76-4274-8e87-178ca7813706
 # ╠═3ffbec86-a33a-4a71-9c8c-9f895a3a1f26
