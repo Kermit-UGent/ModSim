@@ -10,7 +10,7 @@
 #> layout = "layout.jlhtml"
 #> 
 #>     [[frontmatter.author]]
-#>     name = "Daan Van Hauwermeiren"
+#>     name = "Bram Spanoghe"
 #>     [[frontmatter.author]]
 #>     name = "Michiel Stock"
 
