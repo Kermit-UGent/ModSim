@@ -112,16 +112,16 @@ params = [:k => 3.0, :Smax => 150.0, :v => 1.0e-3, :r => 5.0, :S₁res => 10.0]
 
 # ╔═╡ 493d0d3d-cc43-4c2e-931f-f4acbc2f41ae
 md"""
-Unpack the variables and parameters so that we can use them in an intuitive way to calculate to observables. For $R$ we will take the value of $(5+10)/2=7.5$.
+Unpack the variables and parameters so that we can use them in an intuitive way to calculate to observables.
 """
 
 # ╔═╡ 67f62789-a5f0-4e05-a4fb-dbade2ad7891
-# @unpack ..., ..., ..., ..., ..., ... = ... # Uncomment and complete the instruction
-@unpack S₁, S₂, k, Smax, v, S₁res = irrigation_mod
+# @unpack ..., ..., ..., ..., ..., ..., ... = ... # Uncomment and complete the instruction
+@unpack S₁, S₂, k, Smax, v, S₁res, r = irrigation_mod
 
 # ╔═╡ 7793eb61-3a2a-471a-b283-20db4a059b70
 md"""
-Create the *condition* that contains the timepoint for the sudden change in $R$. Store it in `condition`:
+Create the *condition* that contains the timepoint for the sudden change in $r$. Store it in `condition`:
 """
 
 # ╔═╡ c2bb92b9-ad9e-4bbc-8914-822848aea552
@@ -166,9 +166,9 @@ osol = solve(deepcopy(oprob), Tsit5(), saveat=0.5)
 
 # ╔═╡ ba5adc9e-5339-45e2-a126-fbdcdd0f283e
 md"""
-Calculate the observables. Take $r=(5.0+10.0)/2 = 7.5$. We summarize the observables here.
+Calculate the observables.
 
-- The excess running water (runoff): $R \cfrac{S_1 + S_{1,res}}{S_{max}}$,
+- The excess running water (runoff): $r \cfrac{S_1 + S_{1,res}}{S_{max}}$,
 - The underground outflow into groundwater: $v\,S_2^2$,
 - The amount of percolation to deeper soil layers: $\cfrac{k}{S_{max}} S_1$.
 """
@@ -181,7 +181,7 @@ Calculate the observables. Take $r=(5.0+10.0)/2 = 7.5$. We summarize the observa
 # 	percolation = ...;
 # end
 begin
-	runoff = 7.5*(S₁ + S₁res)/Smax;
+	runoff = r*(S₁ + S₁res)/Smax;
 	outflow = v*(S₂)^2;
 	percolation = k/Smax*S₁;
 end;
@@ -205,7 +205,7 @@ Interpret the results. Ask yourself the following questions:
 # ╔═╡ 63ca9bf9-8b49-41ee-a062-eecc54f88e28
 md"- Answer: missing"
 #=
-1. Yes, the effect of the increase in R can clearly been seen at t=60 in the three observables.
+1. Yes, the effect of the increase in r can clearly been seen at t=60 in the three observables.
 =#
 
 # ╔═╡ 85e8869e-5859-4b8f-a72d-f0c979191ec7
