@@ -168,8 +168,8 @@ The substrates and the products may contain one or more reactants, separated by 
 
 # ╔═╡ bb5578b8-40d4-48c9-be87-cfaeadb8c5f9
 md"""
-!!! hint "Hint"
-The Greek letters can be visualized by typing a **backslash** followed by the **name of the Greek letter** and then the **TAB** key. For example `\alpha` followed by the TAB key results in in a list where you can choose `α`.
+!!! tip "Tip"
+	The Greek letters can be visualized by typing a **backslash** followed by the **name of the Greek letter** and then the **TAB** key. For example `\alpha` followed by the TAB key results in in a list where you can choose `α`.
 """
 
 # ╔═╡ af6b169d-55c3-4384-9f57-ad629e02bad6
@@ -196,7 +196,7 @@ parameters(infection_model)
 # ╔═╡ 2bd02577-7321-46b5-9f42-1484ed86d1d3
 md"""
 !!! important "Important"
-You can also get the different species and parameters using `@unpack` followed by comma separated species and/or parameter names followed by the equal sign and the name of the reaction network model. For example:
+	You can also get the different species and parameters using `@unpack` followed by comma separated species and/or parameter names followed by the equal sign and the name of the reaction network model. For example:
 """
 
 # ╔═╡ 64455b26-4374-435f-b71b-8b9600cab263
@@ -212,7 +212,7 @@ osys = convert(ODESystem, infection_model)
 
 # ╔═╡ eeb25e50-165b-4e93-8397-5b09fe8e7242
 md"""
-Note that the model equations are essencially:
+Note that the model equations are essentially:
 
 $$\cfrac{dS(t)}{dt} = -\alpha \beta S(t) I(t)$$
 $$\cfrac{dI(t)}{dt} = \alpha \beta S(t) I(t) - r I(t)$$
@@ -248,18 +248,18 @@ parameters(osys)
 md"""
 ### Simulating the system as an ODE-problem
 
-We first need to load the Differential and Plot package, which is required for simulating the system and plotting the results.
+We first need to load the `DifferentialEquations` and `Plots` packages, which are required for simulating the system and plotting the results.
 """
 
 # ╔═╡ 3197244f-655b-4dca-80f3-794b30722551
 md"""
-Now we wish to simulate our model. To do this, we need to provide some the following information:
+Now we wish to simulate our model. To do this, we need to provide the following information:
 
 - Initial conditions for the state variables $S$, $I$, $D$ and $R$.
 - The parameter values for $\alpha$, $\beta$, $r$ and $m$.
 - The timespan, which is the timeframe over which we wish to run the simulation.
 
-Assume in this example that there are $10\,000\,000$ people in the country, and that initially $1\,000$ person are infected. Hence, $I_0 = 1\,000$, $S_0 = 10\,000\,000-I_0 = 9\,999\,000$, $D_0 = 0$ and $R_0 = 0$.\
+Assume in this example that there are $10\,000\,000$ people in the country, and that initially $1\,000$ persons are infected. Hence, $I_0 = 1\,000$, $S_0 = 10\,000\,000-I_0 = 9\,999\,000$, $D_0 = 0$ and $R_0 = 0$.\
 Furthermore, we take the following values for the parameters: $\alpha = 0.08\;person/contact$, $\beta = 10^{-6}\;contact/(person^2\,day)$, $r = 0.2\;day^{-1}$ (i.e. a person is contagious for an average of $5\;days$) and $m=0.4$. The following table summarizes the above values:
 
 |Initial conditions                   |Parameters          |
@@ -279,7 +279,7 @@ md"""
 
 # ╔═╡ 1ba859fa-46a5-434f-a99c-e710ba85caf8
 md"""
-The initial conditions are given as a *Vector*. This is a type which collects several different values. To declare a vector, the values are specific within brackets, `[]`, and separated by `,`. Since we have four species, the vector holds four elements. E.g., we set the value of $I$ using the `:I => 1` syntax. Here, we first denote the name of the species (with a colon `:` pre-appended), next follows a `=>` and then the value of `I`.\
+The initial conditions are given as a *Vector*. This is a type which collects several different values. To declare a vector, the values are specified within brackets, `[]`, and separated by `,`. Since we have four species, the vector holds four elements. E.g., we set the value of $I$ using the `:I => 1` syntax. Here, we first denote the name of the species (with a colon `:` pre-appended), next follows a `=>` and then the value of `I`.\
 The vector holding the initial conditions for $S$, $I$, $D$ and $R$ can be created in the following way:
 """
 
@@ -288,7 +288,7 @@ u0 = [:S => 9_999_000.0, :I => 1_000.0, :D => 0.0, :R => 0.0]
 
 # ╔═╡ 95c1c0ea-51d0-47ee-8948-a5b87c42a70d
 md"
-Note that the order of the vector elements doesn't matter, because the initial values of each of the species is indicated using its variable name.
+Note that the order of the vector elements doesn't matter here, since the initial values of each of the species is indicated using its variable name.
 "
 
 # ╔═╡ 57036f49-2f1f-4327-89ed-2c96098a1c22
@@ -298,7 +298,7 @@ md"""
 
 # ╔═╡ 56ebb72d-2351-4e67-b268-1f48bbb77cb3
 md"""
-The timespan sets the time point at which we start the simulation (typically `0.0` is used) and the final time point of the simulation. These are combined into a two-valued Tuple. Tuples are similar to vectors, but are enclosed by `()` and not `[]`. Again, we will let both time points be decimal valued.
+The timespan sets the time point at which we start the simulation (typically `0.0` is used) and the final time point of the simulation. These are combined into a two-valued *Tuple*. Tuples are similar to vectors, but are enclosed by `()` and not `[]`. Again, we will let both time points be decimal valued.
 """
 
 # ╔═╡ a25d5925-a254-488b-b782-d29cff4470a2
@@ -311,7 +311,7 @@ md"""
 
 # ╔═╡ a235c7ce-f14a-4c7c-86a1-08aa5f2d9c85
 md"""
-Similarly, the parameters values are also given as a vector. We have four parameters, hence, the parameter vector will also contain four elements. We use a similar notation for setting the parameter values as the initial condition (first the colon, then the parameter name, then an arrow, then the value).
+Similarly, the parameter values are also given as a vector. We have four parameters, hence, the parameter vector will also contain four elements. We use a similar notation for setting the parameter values as the initial condition (first the colon, then the parameter name, then an arrow, then the value).
 """
 
 # ╔═╡ 9a9440fa-d8a3-44bc-8037-4bf1f8af40b0
@@ -358,7 +358,7 @@ md"""
 
 # ╔═╡ 0af3c166-46b6-455d-af6b-a72c4d2a5ce4
 md"""
-Finally, we can plot the solution through the plot function.
+Finally, we can plot the solution through the `plot` function.
 """
 
 # ╔═╡ 513c037b-c54c-47fa-b97a-06f69a983386
@@ -374,7 +374,7 @@ plot(osol, idxs=[:S, :I])     # brackets [ ]
 
 # ╔═╡ f3cf01a1-3c65-4a37-bf9a-cd2233cb470b
 md"""
-If you want a fase plot of for example just $I$ versus $S$, you can specify this with the option `idxs=(:S, :I)` (*notice the parentheses*) in the plot function. You can indicate the $S$ and $I$ axes with the additional options `xlab="S"` and `ylab="I"`.
+If you want a phase plot of, for example, just $I$ versus $S$, you can specify this with the option `idxs=(:S, :I)` (*notice the parentheses*) in the plot function. You can indicate the $S$ and $I$ axes with the additional options `xlab="S"` and `ylab="I"`.
 """
 
 # ╔═╡ ff8f4c23-5695-48aa-9965-02677103f2c9
@@ -437,7 +437,7 @@ You may have noticed that while using the Pluto notebooks, when you change the v
 md"""
 ### Example 1 - Influence of $r$
 
-Influence of the duration of infection $1/r$ for average infection periods of between $10$, days and $1$ day contagious ($r$ between $0.1$ and $1.0$, step $0.1$, default value $0.1$).
+Influence of the duration of infection $1/r$ for average infection periods of between $10$ days and $1$ day of being contagious ($r$ between $0.1$ and $1.0$, step $0.1$, default value $0.1$).
 """
 
 # ╔═╡ b6baafc2-6d5e-43c3-8ef9-845961cdd20b
@@ -450,14 +450,14 @@ We will create a slider for the $r$-values between $0.1$ and $1.0$, stepsize $0.
 
 # ╔═╡ ae38c663-0ee4-409e-bfca-5f13ed88b67d
 md"""
-We will create een new parameter value vector, ODE problem and solution object by putting `1` at the end of the corresponding variable names. In that way, the previous simulation results will be unaffected! The model, the initial conditions and the timespan are identical as before. In there we also use the variable `r` coupled to the slider.
+We will create a new parameter value vector, ODE problem and solution object by putting `1` at the end of the corresponding variable names. In that way, the previous simulation results will be unaffected! The model, the initial conditions and the timespan are identical as before. In there we also use the variable `r` coupled to the slider.
 """
 
 # ╔═╡ d44da6c6-c93d-4c61-8125-9eee464c897e
 params1 = [:α => 0.08, :β => 1.0e-6, :r => r, :m => 0.4]
 
 # ╔═╡ 00a72697-d36a-41cc-9eec-8e821829ce0e
-# put semi-colon at end of instruction to avoid seeing its output.
+# type a semi-colon at end of an instruction to avoid seeing its output
 oprob1 = ODEProblem(infection_model, u0, tspan, params1);
 
 # ╔═╡ cf39b4cf-9cd0-4755-80db-ca4aea7c1084
@@ -476,28 +476,36 @@ md"""
 Try to interpret the results yourself.
 Ask yourself the following questions:
 
-1. What are the trends in the results obtained?
+!!! question
+	1. What are the trends in the results obtained?
 """
 
-# ╔═╡ ff9ce0c5-931f-44f4-aa0d-4aead0284160
-md"- Answer: missing"
+# ╔═╡ 4242ec68-b36d-4f7f-9001-2c90c66d5b9b
+md"""
+- Answer: 
+"""
 
 # ╔═╡ f5f98168-119c-4b49-a8e3-a3cc775faeb0
-md"""2. How can this be explained from the model structure?"""
+md"""
+!!! question
+	2. How can this be explained from the model structure?
+"""
 
-# ╔═╡ a308de53-80a2-4b37-a752-cb2c383cf7a4
-md"- Answer: missing"
+# ╔═╡ 30b0e2b3-2b8d-43a5-9587-9fcb0b89b258
+md"""
+- Answer: 
+"""
 
 # ╔═╡ ade413c2-d7d9-4250-8490-75534900a389
 md"""
 ### Example 2 - Discrete Event
 
-Suppose that regulations are such that on day 14, people need to reduce their contacts by 50%. Hence, this means that the parameter value $\beta$ needs to be divided by a factor of 2 at timepoint 14. In order to realize that we need to now the order of the parameters in the model because we will need to address the value of $\beta$ by means of an index.
+Suppose that regulations are such that on day 14, people need to reduce their contacts by 50%. Hence, this means that the parameter value $\beta$ needs to be divided by a factor of 2 at timepoint 14. 
 """
 
 # ╔═╡ 58730ac6-d83b-420d-a000-2f50545f0d39
 md"""
-We need to state that the parameter $\beta$ needs to be reduce by $50\%$ at time $t=14\,days$. We put this in a condition named `condition2`.
+We need to state that the parameter $\beta$ needs to be reduced by $50\%$ at time $t=14$. We include this condition in a variable named `condition2` in the following way:
 """
 
 # ╔═╡ 7411474c-fac7-4b7c-8ded-4c2df5956fb0
@@ -505,7 +513,7 @@ condition2 = [14.0] => [infection_model.β ~ infection_model.β/2]
 
 # ╔═╡ e6949052-6d12-4414-ac67-cb9435b46290
 md"""
-The discrete time event needs to be included in our model.
+The discrete time event needs to be now included in our model.
 """
 
 # ╔═╡ 8752373f-a602-437b-9b3a-2602c8babf87
@@ -513,7 +521,7 @@ The discrete time event needs to be included in our model.
 
 # ╔═╡ ee596a6c-29bf-4d18-b687-be943c128aa7
 md"""
-After that, we need to *complete* our *reaction network model*.
+After that, we need to *complete* our *reaction network model*, so that the model can be simulated.
 """
 
 # ╔═╡ 40f849cb-20f9-4bbe-806e-512abd6f3210
@@ -555,19 +563,25 @@ osol2.u[end]
 md"""
 Try to interpret the results yourself. Ask yourself the following questions:
 
-1. What are the trends in the results obtained?
+!!! question
+	1. What are the trends in the results obtained?
 """
 
-# ╔═╡ a736a17b-ee8e-491b-840a-6319619a8dab
-md"- Answer: missing"
+# ╔═╡ 6eb368f5-8d43-4fb8-b6eb-c783675d1dd9
+md"""
+- Answer: 
+"""
 
 # ╔═╡ 2ba54805-e901-4281-9b07-cc7137b8c809
 md"""
-2. How much less casualties are there compared to not altering the contact rate?
+!!! question
+	2. How much less casualties are there compared to not altering the contact rate?
 """
 
-# ╔═╡ 20d56d2f-2532-4286-88cc-b42ccb22d246
-md"- Answer: missing"
+# ╔═╡ fec6e165-bd1a-4e57-b7f3-ae712e03276c
+md"""
+- Answer: 
+"""
 
 # ╔═╡ cb8a6f77-f08c-4fc8-9445-bd1c17521fcc
 md"""
@@ -578,7 +592,7 @@ Suppose that when the number of infected individuals reaches $1\,000\,000$, then
 
 # ╔═╡ 5005a09d-a844-4f9d-a058-0d93583d5bab
 md"""
-Normally in a continuous event the value of one or more species can be changed when a certain condition is met. In our specific case we want the change in the species happening only once! So, if you want that the continuous event: ''when $I$ reaches $10^6$ then $999000$ is subtrated from $I$'' happens only once, then we need to include a ficticious new *species* in our *reaction network model*. We will call this ficticious *species* `pwc` (a short for _**p**roceed **w**ith **c**ondition_) and we set it default to `true`.
+Normally in a continuous event the value of one or more species can be changed when a certain condition is met. In our specific case we want the change in the species happening only once! So, if you want that the continuous event "when $I$ reaches $10^6$ then $999000$ is subtracted from $I$" happens only once, then we need to include a ficticious new *species* in our *reaction network model*. We will call this ficticious species `pwc` (a short for _**p**roceed **w**ith **c**ondition_) and we set its default value to `true`.
 """
 
 # ╔═╡ f77d2d75-468f-4746-b81e-0bbbf33fc8d7
@@ -652,19 +666,25 @@ osol3.u[end]
 md"""
 Try to interpret the results yourself. Ask yourself the following questions:
 
-1. What are the trends in the results obtained?
+!!! question
+	1. What are the trends in the results obtained?
 """
 
-# ╔═╡ 7872701b-8506-4303-b615-32d3c1afa50d
-md"- Answer: missing"
+# ╔═╡ 33ff901b-6c7e-4b8c-a163-663d9443a213
+md"""
+- Answer: 
+"""
 
 # ╔═╡ 0d6c2233-35c5-4257-9dfd-398704080ba3
 md"""
-2. How much less casualties are there compared to not putting $999\,000$ individuals into isolation? (Hint: you also need to take into account the casualties in the $999\,000$ individuals that had been put into isolation.)
+!!! question
+	2. How much less casualties are there compared to not putting $999\,000$ individuals into isolation? (Hint: you also need to take into account the casualties in the $999\,000$ individuals that had been put into isolation.)
 """
 
-# ╔═╡ 029a2024-1ec7-4af9-9e73-717f13483468
-md"- Answer: missing"
+# ╔═╡ f5d23dba-02a9-4d27-8eb1-ff89d2902cdf
+md"""
+- Answer: 
+"""
 
 # ╔═╡ Cell order:
 # ╠═be326550-25ea-4c5f-ac4a-dd74d12bc89a
@@ -755,9 +775,9 @@ md"- Answer: missing"
 # ╠═52901bbf-e47b-4da1-95c4-f0869812398c
 # ╟─102b4fbc-23b1-46ed-bb72-124eb88517ce
 # ╟─f6cbafbf-98b4-4286-86d2-fe95821a5ff4
-# ╟─ff9ce0c5-931f-44f4-aa0d-4aead0284160
+# ╟─4242ec68-b36d-4f7f-9001-2c90c66d5b9b
 # ╟─f5f98168-119c-4b49-a8e3-a3cc775faeb0
-# ╟─a308de53-80a2-4b37-a752-cb2c383cf7a4
+# ╟─30b0e2b3-2b8d-43a5-9587-9fcb0b89b258
 # ╟─ade413c2-d7d9-4250-8490-75534900a389
 # ╟─58730ac6-d83b-420d-a000-2f50545f0d39
 # ╠═7411474c-fac7-4b7c-8ded-4c2df5956fb0
@@ -774,9 +794,9 @@ md"- Answer: missing"
 # ╟─18151ab1-1e4e-48d8-be70-4fa4c8a43af1
 # ╠═7d7ed974-7c9c-4c30-ab2a-e3028ce702dd
 # ╟─7375edbc-24a4-4300-bdef-2686cb377cfc
-# ╟─a736a17b-ee8e-491b-840a-6319619a8dab
+# ╟─6eb368f5-8d43-4fb8-b6eb-c783675d1dd9
 # ╟─2ba54805-e901-4281-9b07-cc7137b8c809
-# ╟─20d56d2f-2532-4286-88cc-b42ccb22d246
+# ╟─fec6e165-bd1a-4e57-b7f3-ae712e03276c
 # ╟─cb8a6f77-f08c-4fc8-9445-bd1c17521fcc
 # ╟─5005a09d-a844-4f9d-a058-0d93583d5bab
 # ╠═f77d2d75-468f-4746-b81e-0bbbf33fc8d7
@@ -796,6 +816,6 @@ md"- Answer: missing"
 # ╟─6d1aa79b-8614-4a77-a327-f7e6962d1944
 # ╠═d04b8d97-e9d3-4428-a695-bfde4b44a291
 # ╟─70fd136e-5ded-4c30-818e-a5de61fbbf86
-# ╟─7872701b-8506-4303-b615-32d3c1afa50d
+# ╟─33ff901b-6c7e-4b8c-a163-663d9443a213
 # ╟─0d6c2233-35c5-4257-9dfd-398704080ba3
-# ╟─029a2024-1ec7-4af9-9e73-717f13483468
+# ╟─f5d23dba-02a9-4d27-8eb1-ff89d2902cdf
