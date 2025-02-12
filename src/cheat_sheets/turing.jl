@@ -29,6 +29,11 @@ using Turing
 # ╔═╡ f20a633b-9e9f-40f8-8a1a-eec1890a5652
 using StatsPlots
 
+# ╔═╡ c11a0059-c0a5-4789-90b1-41b7d7c46d1c
+md"""
+!!! important
+	When running this notebook locally, deactivate or delete the above cell."""
+
 # ╔═╡ 387c26b2-ff21-4d85-b6eb-0cc0c8ee7347
 md"# `Turing` cheatsheet"
 
@@ -209,8 +214,9 @@ mean(chain_x .> chain_y) # Approximate P(X > Y | Z=3)
 
 # ╔═╡ Cell order:
 # ╠═1cd55133-8bb2-4883-953d-77824c3df54f
+# ╟─c11a0059-c0a5-4789-90b1-41b7d7c46d1c
 # ╟─387c26b2-ff21-4d85-b6eb-0cc0c8ee7347
-# ╠═157d654f-1a17-4eeb-ac0d-cdb6ceac7729
+# ╟─157d654f-1a17-4eeb-ac0d-cdb6ceac7729
 # ╠═13ff3e4f-dae2-4e08-946a-857f672e1049
 # ╠═7833de91-b850-41bd-96b4-4bd706473343
 # ╟─e6394f7a-cefc-4734-854f-72440380973e
