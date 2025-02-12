@@ -652,7 +652,7 @@ Now we can plot the results.
 """
 
 # ╔═╡ 02173eaa-1178-4383-b57a-03e53ce38af8
-plot(osol3)
+plot(osol3, idxs=[:S, :I, :D, :R])
 
 # ╔═╡ 6d1aa79b-8614-4a77-a327-f7e6962d1944
 md"""
