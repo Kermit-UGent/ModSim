@@ -282,7 +282,7 @@ begin
 	mean_zero_counts = []   # vector to store the corresponding mean zero values
 	for p_val = p_values    # p_val will be each of the p_values
 		zero_counts_p_val = []  # vector to store the zeros for the 1000 simulations
-		for i = 1:1000          # do a 1000 simulations
+		for i = 1:1000          # do a 1000 simulation
 			# take a deepcopy and remake the problem for the specific p-value
 			jdprob_re = remake(deepcopy(jdprob); p=[:p₁=>p_val])
 			# solve the problem
@@ -295,11 +295,29 @@ begin
 	end
 end
 
+# ╔═╡ 705d3fcb-20b6-4481-a304-1d3ccd623674
+md"""
+Have a look at the mean zero counts by typing `mean_zero_counts`:
+"""
+
 # ╔═╡ 5968317a-6c07-4655-8137-6702656bb3b4
+# missing
 mean_zero_counts
+
+# ╔═╡ ff9370d8-3395-4382-9f51-afa11748319e
+md"""
+Plot the mean zero counts as a function of the $p$-values.
+"""
 
 # ╔═╡ 48be49d0-0b60-44f3-8152-1ca917a4232e
 plot(p_values, mean_zero_counts)
+
+# ╔═╡ d6452915-bdf0-48f0-8c7d-3df83c7bce72
+md"""
+!!! question "Question"
+	- From what value of $p$ do the empty number of bike racks at Olin clearly begin to rise?
+	- Reflect on this, does this make sense? Hint: change the value of $p_2$ and observe what happens.
+"""
 
 # ╔═╡ Cell order:
 # ╠═6b342f14-e7d5-11ef-1ea0-77ceb0d78f32
@@ -347,5 +365,8 @@ plot(p_values, mean_zero_counts)
 # ╠═049de8d5-b221-452b-b2c4-9bc1e0c17f48
 # ╟─a73a2853-1f48-4179-9771-083794d3f137
 # ╠═682e9120-0e1c-4dfa-9ec6-66bb0a3f4374
+# ╟─705d3fcb-20b6-4481-a304-1d3ccd623674
 # ╠═5968317a-6c07-4655-8137-6702656bb3b4
+# ╟─ff9370d8-3395-4382-9f51-afa11748319e
 # ╠═48be49d0-0b60-44f3-8152-1ca917a4232e
+# ╟─d6452915-bdf0-48f0-8c7d-3df83c7bce72
