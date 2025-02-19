@@ -29,12 +29,11 @@ macro bind(def, element)
     #! format: on
 end
 
+# ╔═╡ 1e9aabbf-05a3-4ec3-9a1f-8ec42931f35d
+using Pkg; Pkg.activate("../../pluto-deployment-environment")
+
 # ╔═╡ 9a1cca86-0fff-4f8a-a033-8cf6db337503
-begin
-  using Pkg
-  Pkg.activate("../../pluto-deployment-environment")
-  using PlutoUI, Markdown; TableOfContents()
-end
+using PlutoUI, Markdown; TableOfContents()
 
 # ╔═╡ a15c46f7-b561-41c7-8da2-12f04465fb19
 using LinearAlgebra  
@@ -44,6 +43,11 @@ using Statistics
 
 # ╔═╡ bf1385da-4ac2-11eb-3992-41abac921370
 using Plots
+
+# ╔═╡ 2ec33313-e161-420d-ae8b-ac91f945e030
+md"""
+!!! important
+	When running this notebook locally, deactivate or delete the above cell."""
 
 # ╔═╡ fd21a9fa-4ab9-11eb-05e9-0d0963826b9f
 md"""
@@ -754,6 +758,8 @@ end
     
 
 # ╔═╡ Cell order:
+# ╠═1e9aabbf-05a3-4ec3-9a1f-8ec42931f35d
+# ╟─2ec33313-e161-420d-ae8b-ac91f945e030
 # ╠═9a1cca86-0fff-4f8a-a033-8cf6db337503
 # ╟─fd21a9fa-4ab9-11eb-05e9-0d0963826b9f
 # ╟─2f210d77-c1fe-4854-b8cb-2c33dcf64292
