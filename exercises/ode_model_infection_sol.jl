@@ -20,7 +20,7 @@ end
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 18a4df05-0349-400d-a29e-b3fa71aa4d88
@@ -291,14 +291,14 @@ Suppose that when the number of infected individuals reaches $1\,000\,000$, then
 
 # ╔═╡ cbf0a768-f6ac-43fb-8d05-e7dac51d4cc0
 infection_model3 = @reaction_network begin
-	@species pwc(t)=true
+	@species thr(t)=1e6
 	α * β, S + I --> 2I
 	r * m, I --> D
 	r * (1 - m), I --> R
 end
 
 # ╔═╡ fee597e0-97cb-40bc-a5b9-166631e8b9f6
-condition3 = [infection_model3.I ~ 1e6*infection_model3.pwc] => [infection_model3.I ~ infection_model3.I - 0.999e6, infection_model3.pwc ~ false]
+condition3 = [infection_model3.I ~ infection_model3.thr] => [infection_model3.I ~ infection_model3.I - 0.999e6, infection_model3.thr ~ 1e9]
 
 # ╔═╡ 51363f3c-7aa9-48ed-808e-d1f7a4aadc0c
 @named infection_model3_c = ReactionSystem(equations(infection_model3), continuous_events=condition3)
@@ -314,7 +314,7 @@ osol3 = solve(deepcopy(oprob3), Tsit5(), saveat=0.5)
 
 # ╔═╡ 2b511237-7739-44e5-b6bd-26a2fdc76bb5
 begin
-	plot(osol3)
+	plot(osol3; idxs=[:S, :I, :D, :R])
 	plot!(osol; linestyle=:dash, label=:none, color=:grey, lw=0.5)
 end
 
@@ -334,10 +334,10 @@ md"""
 (osol3[:D][end] + 0.4*0.999e6)/osol[:D][end] - 1 	# Deceased are reduced only 1%!
 
 # ╔═╡ 8507a09a-5b19-4c37-b0cf-411732960315
-osol3[:S][end]/osol[:S][end] - 1 	# Infections have increased 56% (wrt. example 1)
+osol3[:S][end]/osol[:S][end] - 1   # 56% less infections  (wrt. example 1)
 
 # ╔═╡ ea00eba1-af9d-48d3-a893-0dc57777b7a5
-osol3[:S][end]/osol2[:S][end] - 1 	# Amount of population exposed decreased 79%
+osol3[:R][end]/osol[:R][end] - 1   # 11% less recoveries (due to fewer infections)
 
 # ╔═╡ 38b507e1-a046-4432-a756-21287681242f
 md"""
@@ -369,6 +369,12 @@ md"
 Initialize vector `params_ex1` with parameter values:
 "
 
+# ╔═╡ e7f46917-72c7-4136-b45c-268ce85a5406
+# ╠═╡ disabled = true
+#=╠═╡
+α = 1
+  ╠═╡ =#
+
 # ╔═╡ e0a8a397-4500-47de-8be3-49d3174648b1
 md"""
 Create the ODE problem and store it in `oprob_ex1`:
@@ -394,6 +400,10 @@ md"""
 md"""
 Make a slider for $\alpha$ in the range of $0.08$ and $0.20$ with a step of $0.02$. Take a default value of $0.08$.
 """
+
+# ╔═╡ 85e81822-2ea6-4d05-b879-1791bff255b9
+# missing                  # Uncomment and complete the instruction
+@bind α Slider(0.08:0.02:0.20, default=0.08, show_value=true)
 
 # ╔═╡ 27a4c4f5-0b2b-4d23-9bb0-a1a8ff6cfc4d
 # params_ex1 = missing      # Uncomment and complete the instruction
@@ -752,16 +762,6 @@ md"""
 !!! hint
 	The rate of infection has to do with how many people get infected during a certain period...
 """
-
-# ╔═╡ e7f46917-72c7-4136-b45c-268ce85a5406
-# ╠═╡ disabled = true
-#=╠═╡
-α = 1
-  ╠═╡ =#
-
-# ╔═╡ 85e81822-2ea6-4d05-b879-1791bff255b9
-# missing                  # Uncomment and complete the instruction
-@bind α Slider(0.08:0.02:0.20, default=0.08, show_value=true)
 
 # ╔═╡ Cell order:
 # ╠═18a4df05-0349-400d-a29e-b3fa71aa4d88

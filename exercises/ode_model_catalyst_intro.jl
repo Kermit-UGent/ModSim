@@ -20,7 +20,7 @@ end
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ be326550-25ea-4c5f-ac4a-dd74d12bc89a
@@ -471,31 +471,6 @@ md"""
 Now, change the value of $r$ in the `param1` vector and analyze the effect in the plot.
 """
 
-# ╔═╡ f6cbafbf-98b4-4286-86d2-fe95821a5ff4
-md"""
-Try to interpret the results yourself.
-Ask yourself the following questions:
-
-!!! question
-	1. What are the trends in the results obtained?
-"""
-
-# ╔═╡ 4242ec68-b36d-4f7f-9001-2c90c66d5b9b
-md"""
-- Answer: 
-"""
-
-# ╔═╡ f5f98168-119c-4b49-a8e3-a3cc775faeb0
-md"""
-!!! question
-	2. How can this be explained from the model structure?
-"""
-
-# ╔═╡ 30b0e2b3-2b8d-43a5-9587-9fcb0b89b258
-md"""
-- Answer: 
-"""
-
 # ╔═╡ ade413c2-d7d9-4250-8490-75534900a389
 md"""
 ### Example 2 - Discrete Event
@@ -549,7 +524,11 @@ Now we can plot the results.
 """
 
 # ╔═╡ 0af84963-ca64-4958-a544-42d445da5a7c
-plot(osol2)
+# We can compare the result now to the solution without contact reduction
+begin
+	plot(osol2)
+	plot!(osol; linestyle=:dash, label=:none, color=:grey, lw=0.5)
+end
 
 # ╔═╡ 18151ab1-1e4e-48d8-be70-4fa4c8a43af1
 md"""
@@ -561,27 +540,18 @@ osol2.u[end]
 
 # ╔═╡ 7375edbc-24a4-4300-bdef-2686cb377cfc
 md"""
-Try to interpret the results yourself. Ask yourself the following questions:
-
 !!! question
-	1. What are the trends in the results obtained?
+	How do we interpret this event? Is the number of deceased and infections reduced? How much?
 """
 
 # ╔═╡ 6eb368f5-8d43-4fb8-b6eb-c783675d1dd9
-md"""
-- Answer: 
-"""
+osol2[:D][end]/osol[:D][end] - 1 	# The number of deceased is reduced 13%
 
-# ╔═╡ 2ba54805-e901-4281-9b07-cc7137b8c809
-md"""
-!!! question
-	2. How much less casualties are there compared to not altering the contact rate?
-"""
+# ╔═╡ 247c3c88-7ba7-4db1-ad56-de1758851ade
+osol2[:S][end]/osol[:S][end] - 1 	# 6 times less infections with contact measures
 
-# ╔═╡ fec6e165-bd1a-4e57-b7f3-ae712e03276c
-md"""
-- Answer: 
-"""
+# ╔═╡ 7911963b-e663-4fbc-9113-98cc1a091628
+osol2[:R][end]/osol[:R][end] - 1 	# 13% less recoveries (due to fewer infections)
 
 # ╔═╡ cb8a6f77-f08c-4fc8-9445-bd1c17521fcc
 md"""
@@ -597,7 +567,7 @@ Normally in a continuous event the value of one or more species can be changed w
 
 # ╔═╡ f77d2d75-468f-4746-b81e-0bbbf33fc8d7
 infection_model3 = @reaction_network begin
-	@species pwc(t)=true
+	@species thr(t)=1e6
 	α * β, S + I --> 2I
 	r * m, I --> D
 	r * (1 - m), I --> R
@@ -612,7 +582,7 @@ We create the condition in the following way. When `pwc` is true then $I$ will b
 """
 
 # ╔═╡ 87d9be87-3bc7-4442-a396-fb501355fe8c
-condition3 = [infection_model3.I ~ 1e6*infection_model3.pwc] => [infection_model3.I ~ infection_model3.I - 0.999e6, infection_model3.pwc ~ false]
+condition3 = [infection_model3.I ~ infection_model3.thr] => [infection_model3.I ~ infection_model3.I - 0.999e6, infection_model3.thr ~ 1e9]
 
 # ╔═╡ 467834b5-0063-4e91-b446-2828a1d44d78
 md"""
@@ -652,7 +622,10 @@ Now we can plot the results.
 """
 
 # ╔═╡ 02173eaa-1178-4383-b57a-03e53ce38af8
-plot(osol3, idxs=[:S, :I, :D, :R])
+begin
+	plot(osol3; idxs=[:S, :I, :D, :R])
+	plot!(osol; linestyle=:dash, label=:none, color=:grey, lw=0.5)
+end
 
 # ╔═╡ 6d1aa79b-8614-4a77-a327-f7e6962d1944
 md"""
@@ -664,26 +637,31 @@ osol3.u[end]
 
 # ╔═╡ 70fd136e-5ded-4c30-818e-a5de61fbbf86
 md"""
-Try to interpret the results yourself. Ask yourself the following questions:
-
 !!! question
-	1. What are the trends in the results obtained?
+	How do we interpret this new event? Is this a better measure than contact reduction alone? Would you know how we call such an event?
 """
 
-# ╔═╡ 33ff901b-6c7e-4b8c-a163-663d9443a213
-md"""
-- Answer: 
-"""
+# ╔═╡ f6dd15c0-8aa0-424b-8134-45245a077186
+0.4*0.999e6 	# Amount of people deceased during isolation (infected)
 
-# ╔═╡ 0d6c2233-35c5-4257-9dfd-398704080ba3
-md"""
-!!! question
-	2. How much less casualties are there compared to not putting $999\,000$ individuals into isolation? (Hint: you also need to take into account the casualties in the $999\,000$ individuals that had been put into isolation.)
-"""
+# ╔═╡ 4bd15c53-44b7-42ad-b225-79a9d90b38a8
+(osol3[:D][end] + 0.4*0.999e6)/osol[:D][end] - 1 	# Deceased are reduced only 1%!
+
+# ╔═╡ aeeb2fc7-fa7d-4a89-97d4-f2c12373bbdc
+osol3[:S][end]/osol[:S][end] - 1   # 56% less infections  (wrt. example 1)
+
+# ╔═╡ c8986056-3b29-4574-a43d-d0e051a4bee9
+osol3[:R][end]/osol[:R][end] - 1   # 11% less recoveries (due to fewer infections)
 
 # ╔═╡ f5d23dba-02a9-4d27-8eb1-ff89d2902cdf
 md"""
 - Answer: 
+"""
+
+# ╔═╡ ef982f58-9deb-4ac2-93d8-e7677332d80d
+md"""
+!!! hint
+	Isolation alone is not effective to protect the part of the population that's already been infected. The peak of infections is not avoided, only delayed. However, the proportion of the population exposed is much lower thanks to isolation. *Would then a combined set of rules be best in that case?*
 """
 
 # ╔═╡ Cell order:
@@ -774,10 +752,6 @@ md"""
 # ╠═cf39b4cf-9cd0-4755-80db-ca4aea7c1084
 # ╠═52901bbf-e47b-4da1-95c4-f0869812398c
 # ╟─102b4fbc-23b1-46ed-bb72-124eb88517ce
-# ╟─f6cbafbf-98b4-4286-86d2-fe95821a5ff4
-# ╟─4242ec68-b36d-4f7f-9001-2c90c66d5b9b
-# ╟─f5f98168-119c-4b49-a8e3-a3cc775faeb0
-# ╟─30b0e2b3-2b8d-43a5-9587-9fcb0b89b258
 # ╟─ade413c2-d7d9-4250-8490-75534900a389
 # ╟─58730ac6-d83b-420d-a000-2f50545f0d39
 # ╠═7411474c-fac7-4b7c-8ded-4c2df5956fb0
@@ -794,9 +768,9 @@ md"""
 # ╟─18151ab1-1e4e-48d8-be70-4fa4c8a43af1
 # ╠═7d7ed974-7c9c-4c30-ab2a-e3028ce702dd
 # ╟─7375edbc-24a4-4300-bdef-2686cb377cfc
-# ╟─6eb368f5-8d43-4fb8-b6eb-c783675d1dd9
-# ╟─2ba54805-e901-4281-9b07-cc7137b8c809
-# ╟─fec6e165-bd1a-4e57-b7f3-ae712e03276c
+# ╠═6eb368f5-8d43-4fb8-b6eb-c783675d1dd9
+# ╠═247c3c88-7ba7-4db1-ad56-de1758851ade
+# ╠═7911963b-e663-4fbc-9113-98cc1a091628
 # ╟─cb8a6f77-f08c-4fc8-9445-bd1c17521fcc
 # ╟─5005a09d-a844-4f9d-a058-0d93583d5bab
 # ╠═f77d2d75-468f-4746-b81e-0bbbf33fc8d7
@@ -816,6 +790,9 @@ md"""
 # ╟─6d1aa79b-8614-4a77-a327-f7e6962d1944
 # ╠═d04b8d97-e9d3-4428-a695-bfde4b44a291
 # ╟─70fd136e-5ded-4c30-818e-a5de61fbbf86
-# ╟─33ff901b-6c7e-4b8c-a163-663d9443a213
-# ╟─0d6c2233-35c5-4257-9dfd-398704080ba3
+# ╠═f6dd15c0-8aa0-424b-8134-45245a077186
+# ╠═4bd15c53-44b7-42ad-b225-79a9d90b38a8
+# ╠═aeeb2fc7-fa7d-4a89-97d4-f2c12373bbdc
+# ╠═c8986056-3b29-4574-a43d-d0e051a4bee9
 # ╟─f5d23dba-02a9-4d27-8eb1-ff89d2902cdf
+# ╟─ef982f58-9deb-4ac2-93d8-e7677332d80d

@@ -20,7 +20,7 @@ end
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 18a4df05-0349-400d-a29e-b3fa71aa4d88

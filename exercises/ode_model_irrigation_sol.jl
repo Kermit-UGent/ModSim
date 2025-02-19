@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ f3ae43dc-f7e1-11ee-3615-695b9e85b621
@@ -112,7 +112,7 @@ params = [:k => 3.0, :Smax => 150.0, :v => 1.0e-3, :r => 5.0, :S₁res => 10.0]
 
 # ╔═╡ 493d0d3d-cc43-4c2e-931f-f4acbc2f41ae
 md"""
-Unpack the variables and parameters so that we can use them in an intuitive way to calculate to observables.
+Unpack the variables and parameters so that we can use them in an intuitive way the calculate to observables.
 """
 
 # ╔═╡ 67f62789-a5f0-4e05-a4fb-dbade2ad7891
