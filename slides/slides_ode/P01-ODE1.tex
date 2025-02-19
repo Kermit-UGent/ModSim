@@ -136,7 +136,7 @@
 		\large
 		\item Infection model
 		\begin{itemize}
-			\item Influence of $\alpha$
+			\item Influence of parameter $\alpha$
 			\item Administration of medicinal products
 			\item Adding vaccination to the model
 		\end{itemize}
@@ -152,56 +152,94 @@
 }
 
 \frame{
-\frametitle{Installing packages}
+\frametitle{Your environment}
 \begin{enumerate}
-\item Create a folder (e.g., \texttt{modsim}) in a suitable location (e.g., \texttt{Documents}) where you will place all your Pluto notebooks
+\item[1.] Create a folder for the course (e.g., \texttt{modsim}) in a suitable location (e.g., \texttt{Documents})
 \begin{itemize} \medskip
 \item In principle this can be any location, choose an easily accessible one \smallskip
 \item Preferably don't choose the \texttt{Downloads} folder...
-\end{itemize} \bigskip
-\item Go to your created folder (cf. \texttt{modsim}) with a \textit{File Explorer}, then open this location in the \textit{Terminal} or command line interface (CLI), e.g., right click on your mouse and choose \texttt{Open in Terminal}. \bigskip
-\item Run Julia with the command \texttt{julia}. \bigskip
-\item Activate your ``environment'' (cf. in the \texttt{modsim} folder) and start to install/add new packages.\\ \medskip
-There are two equivalent possibilities, we will show both.
+\end{itemize} \medskip
+\item[2.] Go to your created folder (cf. \texttt{modsim}) with a \textit{File Explorer} \medskip
+\item[3.] Now create a new folder \texttt{P1\_ODEs1} (under the folder \texttt{modsim}) \medskip
+\item[4.] From the Ufora module \textbf{Exercises} $>$ \textbf{Important files}, download:
+\begin{itemize}
+\item \texttt{Project.toml}
+\item \texttt{launch\_pluto.jl}
+\end{itemize}
+\medskip
+Place these two files in your \texttt{modsim} folder.
 \end{enumerate}
-
-
 }
-
 
 \frame{
-\frametitle{Installing packages}
-\textbf{Possibility 1}
+\frametitle{Your environment}
+\begin{enumerate}
+\item[5.] Next, from the Ufora module \textbf{Exercises} $>$ \textbf{P1: ODEs 1}, download all the Pluto notebook files
 \begin{itemize}
-\item Enter the package manager by pressing {\color{ugent-la}\texttt{]}}
-\item Type: {\color{ugent-la}\texttt{activate .}}
-\item Now, to install/add packages you need to write \texttt{add} followed by a comma separated list of package names. You don't need to include all packages on one line, you can subdivide. E.g., you could type:\\
-{\color{ugent-la}
-\texttt{add Pluto, PlutoUI}\\
-\texttt{add Markdown, InteractiveUtils}\\
-\texttt{add Catalyst, DifferentialEquations, Plots}\\
-\texttt{add Distributions}} \medskip
-\item Make sure you added all aforementioned packages. You will need them in Practicum 1 and 2. \medskip
-\item Leave the package manager after installation is done by pressing \texttt{<BACKSPACE>}.
+\item \texttt{ode\_model\_catalyst\_intro.jl}
+\item \texttt{ode\_model\_infection.jl}
+\item etc.
 \end{itemize}
+Place all these files in the folder \texttt{P1\_ODEs1}.\medskip
+\item[6.] Go back to your \texttt{modsim} folder with a \textit{File Explorer}, then open in this location in the \textit{Terminal} or command line interface (CLI), e.g., right click on your mouse and choose \texttt{Open in Terminal}. \medskip
+\item[7.] Type {\color{ugent-la} \texttt{julia launch\_pluto.jl}} and then click [\textit{Enter}]
+\begin{itemize}
+\item Packages will be installed, this might take a few minutes...
+\item When installation in complete, you will be able to open the notebooks in the folder \texttt{P1\_ODEs1} by using the Pluto interface
+\end{itemize}
+
+\end{enumerate}
 }
 
+%\frame{
+%\frametitle{Installing packages}
+%\begin{enumerate}
+%\item Create a folder (e.g., \texttt{modsim}) in a suitable location (e.g., \texttt{Documents}) where you will place all your Pluto notebooks
+%\begin{itemize} \medskip
+%\item In principle this can be any location, choose an easily accessible one \smallskip
+%\item Preferably don't choose the \texttt{Downloads} folder...
+%\end{itemize} \bigskip
+%\item Go to your created folder (cf. \texttt{modsim}) with a \textit{File Explorer}, then open this location in the \textit{Terminal} or command line interface (CLI), e.g., right click on your mouse and choose \texttt{Open in Terminal}. \bigskip
+%\item Run Julia with the command \texttt{julia}. \bigskip
+%\item Activate your ``environment'' (cf. in the \texttt{modsim} folder) and start to install/add new packages.\\ \medskip
+%There are two equivalent possibilities, we will show both.
+%\end{enumerate}
+%}
 
-\frame{
-\frametitle{Installing packages}
-\textbf{Possibility 2}
-\begin{itemize}
-\item Still in the \texttt{julia} prompt, type {\color{ugent-la}\texttt{using Pkg}} \medskip
-\item Type: {\color{ugent-la}\texttt{Pkg.activate(".")}} \medskip
-\item Now, to install/add packages you can do that as follow:\\
-{\color{ugent-la}
-\texttt{Pkg.add(["Pluto", "PlutoUI"])}\\
-\texttt{Pkg.add(["Markdown", "InteractiveUtils"])}\\
-\texttt{Pkg.add(["Catalyst", "DifferentialEquations", "Plots"])}\\
-\texttt{Pkg.add("Distributions")}} \medskip
-\item Make sure you added all aforementioned packages. You will need them in Practicum 1 and 2.
-\end{itemize}
-}
+
+%\frame{
+%\frametitle{Installing packages}
+%\textbf{Possibility 1}
+%\begin{itemize}
+%\item Enter the package manager by pressing {\color{ugent-la}\texttt{]}}
+%\item Type: {\color{ugent-la}\texttt{activate .}}
+%\item Now, to install/add packages you need to write \texttt{add} followed by a comma separated list of package names. You don't need to include all packages on one line, you can subdivide. E.g., you could type:\\
+%{\color{ugent-la}
+%\texttt{add Pluto, PlutoUI}\\
+%\texttt{add Markdown, InteractiveUtils}\\
+%\texttt{add Catalyst, DifferentialEquations, Plots}\\
+%\texttt{add Distributions}} \medskip
+%\item Make sure you added all aforementioned packages. You will need them in Practicum 1 and 2. \medskip
+%\item Leave the package manager after installation is done by pressing \texttt{<BACKSPACE>}.
+%\end{itemize}
+%}
+%
+%
+%\frame{
+%\frametitle{Installing packages}
+%\textbf{Possibility 2}
+%\begin{itemize}
+%\item Still in the \texttt{julia} prompt, type {\color{ugent-la}\texttt{using Pkg}} \medskip
+%\item Type: {\color{ugent-la}\texttt{Pkg.activate(".")}} \medskip
+%\item Now, to install/add packages you can do that as follow:\\
+%{\color{ugent-la}
+%\texttt{Pkg.add(["Pluto", "PlutoUI"])}\\
+%\texttt{Pkg.add(["Markdown", "InteractiveUtils"])}\\
+%\texttt{Pkg.add(["Catalyst", "DifferentialEquations", "Plots"])}\\
+%\texttt{Pkg.add("Distributions")}} \medskip
+%\item Make sure you added all aforementioned packages. You will need them in Practicum 1 and 2.
+%\end{itemize}
+%}
 
 \frame{
 \frametitle{What is modelling?}
@@ -408,21 +446,21 @@ For a given problem it is: \medskip
 }
 
 
-\frame{
-\frametitle{Pluto notebooks}
-\large \bigskip
-All exercises will be in the form of Pluto notebooks. You will find them on Ufora in a submodule of the module \textbf{Exercises}. \medskip
-\begin{itemize}
-\item For this practicum, go to the Ufora submodule\\ \textbf{P1: ODEs 1 $>$ files} \medskip
-\item Download the Julia script \texttt{launch\_pluto.jl} and all the Pluto notebooks (\texttt{e.g., ode\_model\_catalyst\_intro.jl}, etc.) into your dedicated \texttt{modsim} folder. \medskip
-\begin{itemize} 
-\item \texttt{launch\_pluto.jl} is a small script to activate your environment and to be able to use the packages you installed in your environment. \medskip
-\end{itemize}
-\item Go to your dedicated folder (cf. \texttt{modsim}) with a \textit{File Explorer}, then in this location right click on your mouse and choose \texttt{Open in Terminal} (or something alike). \medskip
-\item Type {\color{ugent-la} \texttt{julia launch\_pluto.jl}} and then click [\textit{Enter}] \medskip
-\item The Pluto notebook of you choice will open in your browser.
-\end{itemize}
-}
+%\frame{
+%\frametitle{Pluto notebooks}
+%\large \bigskip
+%All exercises will be in the form of Pluto notebooks. You will find them on Ufora in a submodule of the module \textbf{Exercises}. \medskip
+%\begin{itemize}
+%\item For this practicum, go to the Ufora submodule\\ \textbf{P1: ODEs 1 $>$ files} \medskip
+%\item Download the Julia script \texttt{launch\_pluto.jl} and all the Pluto notebooks (\texttt{e.g., ode\_model\_catalyst\_intro.jl}, etc.) into your dedicated \texttt{modsim} folder. \medskip
+%\begin{itemize} 
+%\item \texttt{launch\_pluto.jl} is a small script to activate your environment and to be able to use the packages you installed in your environment. \medskip
+%\end{itemize}
+%\item Go to your dedicated folder (cf. \texttt{modsim}) with a \textit{File Explorer}, then in this location right click on your mouse and choose \texttt{Open in Terminal} (or something alike). \medskip
+%\item Type {\color{ugent-la} \texttt{julia launch\_pluto.jl}} and then click [\textit{Enter}] \medskip
+%\item The Pluto notebook of you choice will open in your browser.
+%\end{itemize}
+%}
 
 
 \frame{
