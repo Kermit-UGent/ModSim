@@ -228,7 +228,10 @@ parameters(rn)
 reactions(rn)
 
 # ╔═╡ 959b8b64-959a-4869-b499-159eccfa0768
-latexify(rn, type=:ode)
+latexify(rn) |> clipboard
+
+# ╔═╡ 0f19626f-5c0a-4fde-b7b0-824ec624cd96
+convert(ODESystem, rn)
 
 # ╔═╡ 8a752cbe-8220-41f8-997f-f2eb321b2a2b
 convert(ODESystem, rn) |> latexify |> clipboard
@@ -812,6 +815,7 @@ length(plots)
 # ╠═ad511e07-230f-4405-9613-40f2e55676e6
 # ╠═730255e3-ba36-482c-bff3-8435d348fe40
 # ╠═959b8b64-959a-4869-b499-159eccfa0768
+# ╠═0f19626f-5c0a-4fde-b7b0-824ec624cd96
 # ╠═8a752cbe-8220-41f8-997f-f2eb321b2a2b
 # ╠═063f7b0d-c8e6-4128-87f9-d3b5b5139670
 # ╠═691b4a76-fc29-4cb9-a3ca-26d03bd84cec

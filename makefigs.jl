@@ -5,13 +5,13 @@ using Plots
 fontscale = 1.5
 
 notebooks = Dict(
-    #"modelling_distributions.jl" => "probmod",
-    # "MCMC.jl" => "MCMC",
+    "modelling_distributions.jl" => "probmod",
+     "MCMC.jl" => "MCMC",
     #"simulation_tools.jl" => "simulation_tools",
     #"modelling_ODEs.jl" => "ODEs",
     #"optimization.jl" => "optimization",
     #"calibration.jl" => "calibration",  # LV very unstable, might need to rerun several times
-    "uncertainty.jl" => "uncertainty",
+    #"uncertainty.jl" => "uncertainty",
     #"hiptobesquare.jl" => "model_selection",
 )
 

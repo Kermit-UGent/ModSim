@@ -1,17 +1,19 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
 
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
+    #! format: off
     quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
+    #! format: on
 end
 
 # ╔═╡ 2d346892-cb15-11ee-2d81-73e08fcc3288
@@ -393,6 +395,16 @@ For some specialized statistical studies or when safety is of concern, such as c
 For some applications, (pseudo-)random numbers are too random! This is because there are likely to cover the space uniformly in expected values (and hence only for large samples). For some Monte-Carlo application, such as estimating  a volume in a space, one needs numbers that cover the space a bit more homogeneously. These are called low-discrepancy or *quasi-random numbers*. These would fail tests to check if they are random because they often look too 'regular'. One method to generate such numbers is the *Sobol method*.  If we compare pseudo- and quasi-random numbers for estimating $\pi$ using simple rejection sampling, we see that the latter often converges faster. 
 """
 
+# ╔═╡ 3b5df17c-7110-4a6f-926b-6c6f6621b575
+let
+	n = 50
+	p = plot(legend=false, title="10 series of $n random numbers in U(0,1)")
+	for i in 1:10
+		scatter!(rand(n), i*ones(n), yaxis=false, alpha=0.8)
+	end
+	p
+end
+
 # ╔═╡ a8f762eb-e3b6-434a-9526-8f58ae227ae5
 md"""
 ### Convergence of the mean
@@ -493,6 +505,33 @@ Maximum entropy can be motivated by:
 
 Most of the distributions you know and love can be obtained this way. The MaxEnt principle is used a lot in the life sciences. For example, in ecology in species distribution modelling, one often takes the distribution with the largest entropy that fits the data.
 """
+
+# ╔═╡ 010eaf3e-b4ed-44df-aadc-1c315a835e05
+low_entropy_dist = Categorical([0, 0, 0, 1, 0, 0])
+
+# ╔═╡ e3a05983-1695-4459-a13a-7a3147dbfcc9
+el = entropy(low_entropy_dist)
+
+# ╔═╡ 93f56253-380f-4fa4-b95d-70b87cb0b604
+Ep = λ -> sum(i*exp(-λ*i) for i in 1:6) / sum(exp(-λ*i) for i in 1:6)
+
+# ╔═╡ 4a9cc597-da77-4d93-b753-248222255df4
+plot(Ep, -0.2, -0.15)
+
+# ╔═╡ d3f4b8ac-4eb9-41a9-bcf6-e06b66b1942e
+begin
+	pme = exp.(0.175*(1:6))
+	pme ./= sum(pme)
+end
+
+# ╔═╡ 9e877033-a02c-414e-8e52-e4ebdfdf5b71
+high_entropy_dist = Categorical(pme)
+
+# ╔═╡ 94797811-3d8b-4610-b0ee-5b1a912553eb
+mean(high_entropy_dist)
+
+# ╔═╡ 74bfaae3-fb0c-471a-aa9a-2d1151ec9b6a
+eh = round(entropy(high_entropy_dist), digits=2)
 
 # ╔═╡ 07949347-3e7b-499f-9ca6-c62c131e2a65
 md"## Combining simple distributions into complex ones"
@@ -1038,6 +1077,18 @@ let
 	plots["beta_distr"] = p
 end
 
+# ╔═╡ 05be43b4-175e-4f5c-8ae1-ff7086ed1736
+plots["low_entropy"] = scatter([0, 0, 0, 1, 0, 0], xlab="x", ylab=L"P(X=x)", 
+	color=:blue,
+	label="PMF",
+	title="Low-entropy die\n H(X)=$el, E[X]=4")
+
+# ╔═╡ a09dc827-8415-4094-990e-a20256e0be2b
+plots["high_entropy"] = scatter(pme, xlab="x", ylab=L"P(X=x)", 
+	color=:blue,
+	label="PMF",
+	title="High-entropy die\n H(X)=$eh, E[X]=4", ylims=[0, maximum(pme)+0.01])
+
 # ╔═╡ f2faec3d-3d44-43e9-bf03-37ba68e37300
 let
 	p = contourf(-10:0.05:25, -2:0.01:2, (x,y)->pdf(dist_prod, [x,y]), color=:speed, xlab=L"x", ylab=L"y")
@@ -1184,6 +1235,7 @@ plots # dictionary of all the figures, for saving
 # ╠═ac78fddb-0b24-4956-8137-44615721bc06
 # ╠═44ca88b0-4256-4123-93f8-82d1ba3b3b77
 # ╟─896da840-ad94-40d7-8a65-be92b174e88b
+# ╠═3b5df17c-7110-4a6f-926b-6c6f6621b575
 # ╟─d7e88a1a-73e9-48ff-bb51-2292346f88e0
 # ╠═2b79770c-00a8-4c3b-b39e-b31400593ea4
 # ╟─74e50a3d-7623-45c2-8d3a-2c34f363177e
@@ -1204,7 +1256,17 @@ plots # dictionary of all the figures, for saving
 # ╟─05152721-dbb5-4e26-86ba-2fc16c03dac8
 # ╟─adbb17b4-56d2-49ca-8bdb-ecd2d3f418cd
 # ╟─4290b2c6-1f5f-4780-9f32-08ae949b666c
-# ╟─07949347-3e7b-499f-9ca6-c62c131e2a65
+# ╠═010eaf3e-b4ed-44df-aadc-1c315a835e05
+# ╠═05be43b4-175e-4f5c-8ae1-ff7086ed1736
+# ╠═e3a05983-1695-4459-a13a-7a3147dbfcc9
+# ╠═93f56253-380f-4fa4-b95d-70b87cb0b604
+# ╠═4a9cc597-da77-4d93-b753-248222255df4
+# ╠═d3f4b8ac-4eb9-41a9-bcf6-e06b66b1942e
+# ╠═9e877033-a02c-414e-8e52-e4ebdfdf5b71
+# ╠═94797811-3d8b-4610-b0ee-5b1a912553eb
+# ╠═74bfaae3-fb0c-471a-aa9a-2d1151ec9b6a
+# ╠═a09dc827-8415-4094-990e-a20256e0be2b
+# ╠═07949347-3e7b-499f-9ca6-c62c131e2a65
 # ╟─8e7fa947-480d-4037-88a9-652ed7cc2cbd
 # ╠═1d883714-026b-4206-8ee3-a58e89a70c52
 # ╠═52fd8a26-93a1-4c83-a5fd-4247cdff3629
