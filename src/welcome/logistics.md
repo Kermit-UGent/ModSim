@@ -12,7 +12,7 @@ main a img {
 }
 </style>
 
-# in general
+# In general
 
 Look at Ufora for the latest announcements and practicalities.
 
@@ -28,4 +28,7 @@ The MODSIM course notes in pdf format can be found as a download on Ufora or in 
 
 # Course slides
 
-The MODSIM slides in pdf format can be found as a download on Ufora.
+The MODSIM slides in pdf format can be found as a download on Ufora or below
+
+1. [Introduction](https://drive.google.com/file/d/1jRds-XdyeYNwGct1saWknohM_PCZQ1Es/view?usp=sharing)
+2. [Modelling with ODEs](https://drive.google.com/file/d/1ibxEfs5E8KddoZW66c1NKcA8XceAsl4x/view?usp=sharing)
