@@ -44,9 +44,6 @@ function ball!(du, u, g, t)
 	return du
 end
 
-# ╔═╡ 17683127-b550-4368-9e3e-3054bd5aa208
-
-
 # ╔═╡ 89d089b2-3220-4696-9ded-364c318b4a1e
 md"### Dosed bioreactor"
 
@@ -57,6 +54,22 @@ bacterial_growth = @reaction_network begin
 	r, X + G --> 2X
 	m, X --> 0
 end
+
+# ╔═╡ 7b3ca635-5a3c-43f2-9690-5cdbd9074ed2
+# ╠═╡ disabled = true
+#=╠═╡
+let
+	dosetimes = 5:5:20
+	affect!(integrator) = integrator.u[2] += 10
+	cb = PresetTimeCallback(dosetimes, affect!)
+	
+	prob = ODEProblem(bacterial_growth, [], (0, 20))
+	sol = solve(prob, Tsit5(), callback=cb)
+	plots["undosed bioreactor"] = plot(solve(prob, Tsit5()), lw=2,
+						title="Undosed bioreactor")
+	plots["dosed_bioreactor"] = plot(sol, lw=2, title="Dosed bioreactor")
+end
+  ╠═╡ =#
 
 # ╔═╡ 4c7feb9f-a039-48a8-a7d0-3633f1a635fe
 dosetimes = 5:5:20
@@ -83,9 +96,12 @@ convert(ODESystem, combustion_model)
 # ╔═╡ 43183390-219c-4ade-a92a-80373a7c8585
 combustion_problem = ODEProblem(combustion_model, [:u=>1/100], (0.0, 200.0))
 
+# ╔═╡ 22ff7a8b-fbae-4c5a-86c7-92d9c4eb7935
+plot(u->u^2 - u^3, 0, 1, xlab="u", ylab="u'", lw=2)
+
 # ╔═╡ b446a764-b80a-43c6-9fd1-72b099cfed0d
 radicals = @reaction_network begin
-	@species A(t)=10.0 B(t)=10.0 C(t)=10.0
+	@species A(t)=10.0 B(t)=0 C(t)=0
 	0.04, A --> B
 	3e7, B + B --> C + B
 	1e4, B + C --> A + C
@@ -98,10 +114,16 @@ end
 
 
 # ╔═╡ 312e9d28-ed88-47ae-92b1-b1334e2e9d7a
-plot(solve(ODEProblem(radicals, [], (0.0, 40.0)), Rosenbrock23()))
+plot(solve(ODEProblem(radicals, [], (0.0, 10)), Tsit5()))
+
+# ╔═╡ 2cba2928-c7a7-4304-97ab-2efb5d6a8297
+@time solve(ODEProblem(radicals, [], (0.0, 10)), Tsit5()) |> length
 
 # ╔═╡ 2aad9bca-736f-4aaa-ad50-74cc01661117
-plot(solve(ODEProblem(radicals, [], (0.0, 1e12)), Rosenbrock23()))
+plot(solve(ODEProblem(radicals, [], (0.0, 10)), Rosenbrock23()))
+
+# ╔═╡ 80404482-0534-43fd-8783-84ae6522706d
+@time solve(ODEProblem(radicals, [], (0.0, 10)), Rosenbrock23())  |> length
 
 # ╔═╡ 945febc8-2954-4d5c-a4b1-7f95c70ef4b6
 md"## Stochastic differential equations"
@@ -375,12 +397,12 @@ let
 	g = 9.81
 	prob = ODEProblem(ball!, u0, tspan, g)
 	sol = solve(prob, Tsit5(), callback = cb)
-	plots["bouncing_ball"] = plot(sol, lw=2, label=[L"x(t)" L"v(t)"], title="Bouncing ball with callbacks")
+	plots["bouncing_ball"] = plot(sol, lw=2, label=[L"y(t)" L"v(t)"], title="Bouncing ball with callbacks")
 end
 
 # ╔═╡ 5e7453ce-721b-4e4e-8f75-bb69aac8cf42
 let
-	@unpack G = bacterial_growth
+	@unpack G, X = bacterial_growth
 	dosing = [5, 10, 15, 20] => [G ~ G + 10]
 
 	@named dosed_reactor = ReactionSystem(equations(bacterial_growth),
@@ -389,7 +411,7 @@ let
 	dosed_reactor = complete(dosed_reactor)
 
 	oprob = ODEProblem(dosed_reactor, [], (0, 20))
-
+	
 	sol = solve(oprob, Tsit5())
 
 	prob = ODEProblem(bacterial_growth, [], (0, 20))
@@ -398,24 +420,11 @@ let
 						title="Undosed bioreactor")
 
 	plots["dosed_bioreactor"] = plot(sol, lw=2, title="Dosed bioreactor")
-	
-end
 
-# ╔═╡ 7b3ca635-5a3c-43f2-9690-5cdbd9074ed2
-# ╠═╡ disabled = true
-#=╠═╡
-let
-	dosetimes = 5:5:20
-	affect!(integrator) = integrator.u[2] += 10
-	cb = PresetTimeCallback(dosetimes, affect!)
+	#R = G / X
+	#plot(sol, idxs=[R])
 	
-	prob = ODEProblem(bacterial_growth, [], (0, 20))
-	sol = solve(prob, Tsit5(), callback=cb)
-	plots["undosed bioreactor"] = plot(solve(prob, Tsit5()), lw=2,
-						title="Undosed bioreactor")
-	plots["dosed_bioreactor"] = plot(sol, lw=2, title="Dosed bioreactor")
 end
-  ╠═╡ =#
 
 # ╔═╡ e22ed4e6-6420-490c-9d55-fee19069f534
 let
@@ -635,7 +644,6 @@ plots
 # ╠═ff86545c-64a2-4c6f-8c36-9066b270aa6b
 # ╠═018d215a-41f4-4d21-b57f-fca3ac3a755d
 # ╠═992d2b4f-6521-4368-910d-3e7ef07fb6df
-# ╠═17683127-b550-4368-9e3e-3054bd5aa208
 # ╠═0de4a715-89d6-403b-ac65-adaed6062371
 # ╟─89d089b2-3220-4696-9ded-364c318b4a1e
 # ╠═21e810e7-0879-4ffb-84f9-d67dafb900d6
@@ -651,11 +659,14 @@ plots
 # ╟─e22ed4e6-6420-490c-9d55-fee19069f534
 # ╟─f2201e7f-9aec-4962-a9b7-a7fd627d64e6
 # ╟─8fcdad45-8789-473e-9d1a-2692b62d526d
+# ╠═22ff7a8b-fbae-4c5a-86c7-92d9c4eb7935
 # ╠═b446a764-b80a-43c6-9fd1-72b099cfed0d
 # ╠═c90f5869-89f8-486e-a4ad-9e4fbbd1eccd
 # ╠═8372fad0-07ea-4905-8b8e-26316aa93f68
 # ╠═312e9d28-ed88-47ae-92b1-b1334e2e9d7a
+# ╠═2cba2928-c7a7-4304-97ab-2efb5d6a8297
 # ╠═2aad9bca-736f-4aaa-ad50-74cc01661117
+# ╠═80404482-0534-43fd-8783-84ae6522706d
 # ╠═945febc8-2954-4d5c-a4b1-7f95c70ef4b6
 # ╟─5099fd5b-735e-4de3-918a-685dd4a82c22
 # ╟─18def41b-0827-4356-adfa-d3fc63e23cfa
@@ -680,7 +691,7 @@ plots
 # ╠═ce7b1335-e43d-40dc-8ee8-d75b6df80dce
 # ╠═3604baf4-7623-4842-aeb8-74785417b398
 # ╠═6286a56e-90c4-41b0-8b62-f7189fd5505d
-# ╠═4f671499-19b2-426c-a689-2ee4b084f3d0
+# ╟─4f671499-19b2-426c-a689-2ee4b084f3d0
 # ╠═6e94632a-cad9-49ea-8cdc-e4ec55871682
 # ╠═bb562e40-daaf-47be-a1d0-1938bc227fc0
 # ╠═2ee4fe85-feed-471d-86e2-53212fc05650

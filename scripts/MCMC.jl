@@ -721,19 +721,19 @@ plots["seeds_posterior"] = plot(seed_posterior, 0, 1, lw=2, label="posterior", x
 plots["seeds_bayes"] = seed_bayesian_plot(k)
 
 # ╔═╡ 92cd9bfb-8a58-4b73-ab02-5ac4447499d0
-plots["seeds_10"] = seed_bayesian_plot(10, labels=false)
+plots["seeds_10"] = seed_bayesian_plot(10)
 
 # ╔═╡ fb486bb6-b462-40f5-8189-2b46c5817fc1
-plots["seeds_2"] = seed_bayesian_plot(2, labels=false)
+plots["seeds_2"] = seed_bayesian_plot(2)
 
 # ╔═╡ 780b3e4e-7959-401f-aca5-5dad90276128
-plots["seeds_weak_prior"] = seed_bayesian_plot(k, a=1, b=1, labels=false)
+plots["seeds_weak_prior"] = seed_bayesian_plot(k, a=1, b=1)
 
 # ╔═╡ ba15b522-e4e8-4de7-882e-a0d14da2fac1
-plots["seeds_strong_prior"] = seed_bayesian_plot(k, a=80, b=30, labels=false)
+plots["seeds_strong_prior"] = seed_bayesian_plot(k, a=80, b=30)
 
 # ╔═╡ 9609ee3c-2a5e-450f-8822-d616552cae09
-plots["seeds_large_dataset"] = seed_bayesian_plot(10k, n=100, labels=false)
+plots["seeds_large_dataset"] = seed_bayesian_plot(10k, n=100)
 
 # ╔═╡ 3eac18d0-f755-42aa-bbcc-9714cc64dc5a
 plots["norm_muprior"] = plot(dist2pdf(Normal(0, 20)), -50, 50, xlabel=L"\mu", label="Normal(0, 20)", title="Prior for μ", lw=2)
