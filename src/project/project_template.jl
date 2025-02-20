@@ -3,7 +3,7 @@
 
 #> [frontmatter]
 #> order = "2"
-#> title = "template"
+#> title = "template (EN)"
 #> date = "2025-02-07"
 #> tags = ["project"]
 #> description = "Project Template"

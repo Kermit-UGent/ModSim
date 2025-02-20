@@ -1,5 +1,16 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.20.4
+
+#> [frontmatter]
+#> order = "2"
+#> title = "template (NL)"
+#> date = "2025-02-20"
+#> tags = ["project"]
+#> description = "Project Template"
+#> layout = "layout.jlhtml"
+#> 
+#>     [[frontmatter.author]]
+#>     name = "Michiel Stock"
 
 using Markdown
 using InteractiveUtils
