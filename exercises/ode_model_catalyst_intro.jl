@@ -150,6 +150,8 @@ The following code creates a so called *reaction network object*, that we have n
 
 # ╔═╡ 7d2f8bf9-3a00-4631-84ff-1a36b6d7e19b
 infection_model = @reaction_network begin
+	@species S(t)=9_999_000.0 I(t)=0.0
+	@parameters α=1e-6
 	α * β, S + I --> 2I
 	r * m, I --> D
 	r * (1 - m), I --> R
@@ -562,7 +564,7 @@ Suppose that when the number of infected individuals reaches $1\,000\,000$, then
 
 # ╔═╡ 5005a09d-a844-4f9d-a058-0d93583d5bab
 md"""
-Normally in a continuous event the value of one or more species can be changed when a certain condition is met. In our specific case we want the change in the species happening only once! So, if you want that the continuous event "when $I$ reaches $10^6$ then $999000$ is subtracted from $I$" happens only once, then we need to include a ficticious new *species* in our *reaction network model*. We will call this ficticious species `pwc` (a short for _**p**roceed **w**ith **c**ondition_) and we set its default value to `true`.
+Normally in a continuous event the value of one or more species can be changed when a certain condition is met. In our specific case we want the change in the species happening only once! So, if you want that the continuous event "when $I$ reaches $10^6$ then $999\,000$ is subtracted from $I$" happens only once, then we need to include a ficticious new *species* in our *reaction network model*. We will call this ficticious species `pwc` (a short for _**p**roceed **w**ith **c**ondition_) and we set its default value to `true`.
 """
 
 # ╔═╡ f77d2d75-468f-4746-b81e-0bbbf33fc8d7
@@ -582,7 +584,7 @@ We create the condition in the following way. When `pwc` is true then $I$ will b
 """
 
 # ╔═╡ 87d9be87-3bc7-4442-a396-fb501355fe8c
-condition3 = [infection_model3.I ~ infection_model3.thr] => [infection_model3.I ~ infection_model3.I - 0.999e6, infection_model3.thr ~ 1e9]
+condition3 = [infection_model3.I ~ infection_model3.thr] => [infection_model3.I ~ infection_model3.I - 999_000, infection_model3.thr ~ 1e9]
 
 # ╔═╡ 467834b5-0063-4e91-b446-2828a1d44d78
 md"""

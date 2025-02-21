@@ -185,7 +185,19 @@ u_guess = [osol[:C][end], osol[:P][end]]
 # ╔═╡ bf1ee7fb-027f-4b8b-8ce4-57a46ac1b4f4
 # ╠═╡ disabled = true
 #=╠═╡
-Ceq, Peq = solve(SteadyStateProblem(ODEProblem(soil_cont_plant_uptake, u_guess, tspan, params)))
+eq = solve(SteadyStateProblem(ODEProblem(soil_cont_plant_uptake, u_guess, tspan, params)))
+  ╠═╡ =#
+
+# ╔═╡ 9cd89fbe-1add-4ba1-beef-8936a83f6987
+# ╠═╡ disabled = true
+#=╠═╡
+Ceq = eq[:C]
+  ╠═╡ =#
+
+# ╔═╡ 3b8c6453-2a7b-4c10-beda-dacbd1edc6c6
+# ╠═╡ disabled = true
+#=╠═╡
+Peq = eq[:P]
   ╠═╡ =#
 
 # ╔═╡ 542d505f-8d65-4f68-8ac3-ee897b957b5e
@@ -228,4 +240,6 @@ Ceq, Peq = solve(SteadyStateProblem(ODEProblem(soil_cont_plant_uptake, u_guess, 
 # ╠═12af799d-54aa-4bde-8133-98c3b4dfe1e4
 # ╠═3647ca59-c09e-40f8-8a95-03741e198428
 # ╠═bf1ee7fb-027f-4b8b-8ce4-57a46ac1b4f4
+# ╠═9cd89fbe-1add-4ba1-beef-8936a83f6987
+# ╠═3b8c6453-2a7b-4c10-beda-dacbd1edc6c6
 # ╠═542d505f-8d65-4f68-8ac3-ee897b957b5e

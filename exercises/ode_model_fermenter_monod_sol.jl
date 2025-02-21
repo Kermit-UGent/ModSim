@@ -172,7 +172,14 @@ Then we make a so-called SteadyStateProblem based on the ODEProblem but now with
 """
 
 # ╔═╡ 1777503e-b793-4be2-b80b-b4edcd7041b5
-Seq1, Xeq1 = solve(SteadyStateProblem(ODEProblem(fermenter_monod, u_guess1, tspan, params)))
+# Seq1, Xeq1 = solve(SteadyStateProblem(ODEProblem(fermenter_monod, u_guess1, tspan, params)))
+eq1 = solve(SteadyStateProblem(ODEProblem(fermenter_monod, u_guess1, tspan, params)))
+
+# ╔═╡ 36312d33-909b-47a9-8fab-fc70950ff07e
+Seq1 = eq1[:S]
+
+# ╔═╡ 6cd388c4-f2a6-45d6-9b51-a1659b2dec07
+Xeq1 = eq1[:X]
 
 # ╔═╡ 1d5a2118-96e9-49b2-9931-5d4b201cb8f5
 md"""
@@ -306,7 +313,13 @@ Make and solve the steady state problem. Call the output values `Seq2` and `Xeq2
 
 # ╔═╡ 0b992750-a446-447b-b2a1-26658c11c0bf
 # Seq2, Xeq2 = missing                    # Uncomment and complete the instruction
-Seq2, Xeq2 = solve(SteadyStateProblem(ODEProblem(fermenter_monod, u_guess2, tspan, params_mod)))
+eq2 = solve(SteadyStateProblem(ODEProblem(fermenter_monod, u_guess2, tspan, params_mod)))
+
+# ╔═╡ e1e2e214-7bd9-4f00-b434-a63861dde1bf
+Seq2 = eq2[:S]
+
+# ╔═╡ dcaf1565-6d11-409c-aa80-e9f77fe729fd
+Xeq2 = eq2[:X]
 
 # ╔═╡ 4ed59602-ad9d-4aae-8a21-83dabbfd3846
 md"""
@@ -472,6 +485,8 @@ md"- Answer: missing"
 # ╠═8d96d79f-6ddb-4bba-a6ea-821588e13107
 # ╟─e8969045-27ac-460e-86a2-7494903534e8
 # ╠═1777503e-b793-4be2-b80b-b4edcd7041b5
+# ╠═36312d33-909b-47a9-8fab-fc70950ff07e
+# ╠═6cd388c4-f2a6-45d6-9b51-a1659b2dec07
 # ╟─1d5a2118-96e9-49b2-9931-5d4b201cb8f5
 # ╠═cb57997e-c3ec-47e0-b9a0-b10aa9f5608d
 # ╟─bb2d06f8-1940-4585-961a-54068da50e91
@@ -500,6 +515,8 @@ md"- Answer: missing"
 # ╠═f121efc5-4e64-4e82-8672-2765ad85443e
 # ╟─9fe054e0-cf21-49ba-a777-a8200b34b7dd
 # ╠═0b992750-a446-447b-b2a1-26658c11c0bf
+# ╠═e1e2e214-7bd9-4f00-b434-a63861dde1bf
+# ╠═dcaf1565-6d11-409c-aa80-e9f77fe729fd
 # ╟─4ed59602-ad9d-4aae-8a21-83dabbfd3846
 # ╠═47a63fd8-f805-4c7d-8695-c9ee6550f24f
 # ╟─4d962d0f-da41-405e-9438-733d5668cde3

@@ -369,12 +369,6 @@ md"
 Initialize vector `params_ex1` with parameter values:
 "
 
-# ╔═╡ e7f46917-72c7-4136-b45c-268ce85a5406
-# ╠═╡ disabled = true
-#=╠═╡
-α = 1
-  ╠═╡ =#
-
 # ╔═╡ e0a8a397-4500-47de-8be3-49d3174648b1
 md"""
 Create the ODE problem and store it in `oprob_ex1`:
@@ -577,7 +571,7 @@ Check the number of fatalities:
 
 # ╔═╡ a912f449-6c9d-4595-863f-a2ba523bad95
 # missing
-osol_ex2[:D][end]
+osol_ex2[:D][end]/osol_ex1[:D][end]-1   # 41% less deaths
 
 # ╔═╡ 089707c3-1df6-4799-a87b-0d4872a0267d
 md"""
@@ -668,7 +662,7 @@ osol_ex3_vac = solve(oprob_ex3, Tsit5(), saveat=0.5);
 
 # ╔═╡ 461eada9-5f9c-4439-8b65-226382b6d148
 md"""
-Compare the latter with the number of fatalities when no vaccination is/was available (cf. Exercise 2) by setting up a condition (a boolean expression return either `true` or `false`) here below where the final number of fatalities (with vaccination) divided by 10 is compared with (use larger than or smaller than) the number of fatalities (without vaccination):
+First, put the value of $b$ in Exercise 2 to $0.2$. Compare the latter with the number of fatalities when no vaccination is/was available (cf. Exercise 2) by setting up a condition (a boolean expression return either `true` or `false`) here below where the final number of fatalities (with vaccination) divided by 10 is compared with (use larger than or smaller than) the number of fatalities (without vaccination):
 """
 
 # ╔═╡ 0994d790-0fe8-46ab-bba2-a0a4ea466f64
@@ -734,7 +728,7 @@ end
 
 # ╔═╡ 3c094d93-65b9-427c-a2d0-ef6b2d7f5520
 md"""
-Check that the number of fatalities is indeed 10 times larger in the case without vaccination.
+Check the number of fatalities now and compare to the case without vaccination.
 """
 
 # ╔═╡ 47243051-bb8f-444a-aca5-fb686680ca8b
@@ -743,13 +737,13 @@ osol_ex3[:D][end]
 # ╔═╡ 817cdd07-cdef-4e57-8925-bbc01a29452c
 osol_ex2[:D][end]
 
-# ╔═╡ b38486fa-5fc6-4418-974b-9969b8345885
-osol_ex2[:D][end]/osol_ex3[:D][end]
+# ╔═╡ 57bdd356-ae37-4708-98bb-25e0dcf06a7b
+osol_ex3[:D][end]/osol_ex2[:D][end]-1   # 94% less deaths
 
 # ╔═╡ 93fa1da1-d9cd-4441-8fd4-26120327bdf6
 md"""
 !!! question
-	3. What can you say about the rate of infection? How would you measure this in the plot?
+	3. What can you say about the rate of infection in the case of no vaccination? How would you measure this in the plot?
 """
 
 # ╔═╡ 4d9f74e0-455e-44bb-bffa-57b5f65d0639
@@ -843,7 +837,6 @@ md"""
 # ╟─ad83a851-e424-4e8f-bae9-38b9283db2fa
 # ╟─b580ef9b-7d53-4bf0-8511-213920d59ee2
 # ╟─a2a109e3-ea74-4e74-91d0-6ea12ddf28d4
-# ╠═e7f46917-72c7-4136-b45c-268ce85a5406
 # ╠═27a4c4f5-0b2b-4d23-9bb0-a1a8ff6cfc4d
 # ╟─e0a8a397-4500-47de-8be3-49d3174648b1
 # ╠═7955722d-fc35-4cce-8bf2-ee40ee7fbc82
@@ -910,7 +903,7 @@ md"""
 # ╟─3c094d93-65b9-427c-a2d0-ef6b2d7f5520
 # ╠═47243051-bb8f-444a-aca5-fb686680ca8b
 # ╠═817cdd07-cdef-4e57-8925-bbc01a29452c
-# ╠═b38486fa-5fc6-4418-974b-9969b8345885
+# ╠═57bdd356-ae37-4708-98bb-25e0dcf06a7b
 # ╟─93fa1da1-d9cd-4441-8fd4-26120327bdf6
 # ╠═4d9f74e0-455e-44bb-bffa-57b5f65d0639
 # ╟─0b27b7cc-d7fa-4b16-80a4-23571e918c6b

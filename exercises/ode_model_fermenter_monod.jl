@@ -151,7 +151,13 @@ Then we make a so-called SteadyStateProblem based on the ODEProblem but now with
 """
 
 # ╔═╡ 1777503e-b793-4be2-b80b-b4edcd7041b5
-# Seq1, Xeq1 = missing
+# eq1 = missing
+
+# ╔═╡ b9b9c5f0-02fa-4544-8865-a07271e8941f
+# Seq1 = missing
+
+# ╔═╡ 0ddf9ea1-3f45-48b1-bb9c-5a08df45bd5b
+# Xeq1 = missing
 
 # ╔═╡ 1d5a2118-96e9-49b2-9931-5d4b201cb8f5
 md"""
@@ -270,7 +276,13 @@ Make and solve the steady state problem. Call the output values `Seq2` and `Xeq2
 """
 
 # ╔═╡ 0b992750-a446-447b-b2a1-26658c11c0bf
-# Seq2, Xeq2 = missing                    # Uncomment and complete the instruction
+# eq2 = missing                    # Uncomment and complete the instruction
+
+# ╔═╡ 7b985909-bc75-4c03-8949-b689e90c9fea
+# Seq2 = missing
+
+# ╔═╡ c4417b5c-a7cf-497b-8b7a-2a90ebe428f2
+# Xeq2 = missing
 
 # ╔═╡ 4ed59602-ad9d-4aae-8a21-83dabbfd3846
 md"""
@@ -411,6 +423,8 @@ md"- Answer: missing"
 # ╠═8d96d79f-6ddb-4bba-a6ea-821588e13107
 # ╟─e8969045-27ac-460e-86a2-7494903534e8
 # ╠═1777503e-b793-4be2-b80b-b4edcd7041b5
+# ╠═b9b9c5f0-02fa-4544-8865-a07271e8941f
+# ╠═0ddf9ea1-3f45-48b1-bb9c-5a08df45bd5b
 # ╟─1d5a2118-96e9-49b2-9931-5d4b201cb8f5
 # ╠═cb57997e-c3ec-47e0-b9a0-b10aa9f5608d
 # ╟─bb2d06f8-1940-4585-961a-54068da50e91
@@ -439,6 +453,8 @@ md"- Answer: missing"
 # ╠═f121efc5-4e64-4e82-8672-2765ad85443e
 # ╟─9fe054e0-cf21-49ba-a777-a8200b34b7dd
 # ╠═0b992750-a446-447b-b2a1-26658c11c0bf
+# ╠═7b985909-bc75-4c03-8949-b689e90c9fea
+# ╠═c4417b5c-a7cf-497b-8b7a-2a90ebe428f2
 # ╟─4ed59602-ad9d-4aae-8a21-83dabbfd3846
 # ╠═47a63fd8-f805-4c7d-8695-c9ee6550f24f
 # ╟─4d962d0f-da41-405e-9438-733d5668cde3

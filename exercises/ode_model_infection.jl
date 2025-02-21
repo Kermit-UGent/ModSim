@@ -630,7 +630,7 @@ Solve the ODE problem for (step wise) increasing values of $v$ and store the sol
 
 # ╔═╡ 461eada9-5f9c-4439-8b65-226382b6d148
 md"""
-Compare the latter with the number of fatalities when no vaccination is/was available (cf. Exercise 2) by setting up a condition (a boolean expression return either `true` or `false`) here below where the final number of fatalities (with vaccination) divided by 10 is compared with (use larger than or smaller than) the number of fatalities (without vaccination):
+First, put the value of $b$ in Exercise 2 to $0.2$. Compare the latter with the number of fatalities when no vaccination is/was available (cf. Exercise 2) by setting up a condition (a boolean expression return either `true` or `false`) here below where the final number of fatalities (with vaccination) divided by 10 is compared with (use larger than or smaller than) the number of fatalities (without vaccination):
 """
 
 # ╔═╡ 0994d790-0fe8-46ab-bba2-a0a4ea466f64
@@ -686,7 +686,7 @@ Plot the solutions:
 
 # ╔═╡ 6e213afb-fd4b-4ab9-8986-a319bee6be0c
 md"""
-Check that the number of fatalities is indeed 10 times larger in the case without vaccination.
+Check the number of fatalities now and compare to the case without vaccination.
 """
 
 # ╔═╡ 3af06996-bd43-4783-a5e0-3c11c23ca280
@@ -695,7 +695,7 @@ Check that the number of fatalities is indeed 10 times larger in the case withou
 # ╔═╡ 93400573-ad1f-408d-b514-854998e7836a
 md"""
 !!! question
-	3. What can you say about the rate of infection? How would you measure this in the plot?
+	3. What can you say about the rate of infection in the case of no vaccination? How would you measure this in the plot?
 """
 
 # ╔═╡ 008cc499-fce9-43e7-b969-2419b847d24c
