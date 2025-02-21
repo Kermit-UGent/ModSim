@@ -48,6 +48,11 @@ Note that the indentation is optional, and only used for readability.
 # ╔═╡ df1d7710-f666-46c4-9bca-2707a997eb83
 md"# `Catalyst` cheat sheet"
 
+# ╔═╡ 2f01e5cb-e080-4727-bbbe-1550cffae5af
+md"""
+!!! important
+	When running this notebook locally, deactivate or delete the above cell."""
+
 # ╔═╡ 19b4c4a9-8e6c-4a4e-ae8f-3506ef7d15ec
 md"""
 `Catalyst.jl` is a Julia package that provides a clean interface to
@@ -388,6 +393,7 @@ end
 # ╟─22cc8f5e-da25-48bb-8cbc-952e205d5640
 # ╟─df1d7710-f666-46c4-9bca-2707a997eb83
 # ╠═c3cccc9c-dbfc-11ef-31c5-07bc34711b2d
+# ╟─2f01e5cb-e080-4727-bbbe-1550cffae5af
 # ╠═fe5e5f00-638f-4ca3-a331-c746af53b6b4
 # ╟─19b4c4a9-8e6c-4a4e-ae8f-3506ef7d15ec
 # ╟─6c756d57-075b-446d-b88b-9934a57179bd
