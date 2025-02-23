@@ -448,12 +448,15 @@ We will create a slider for the $r$-values between $0.1$ and $1.0$, stepsize $0.
 """
 
 # ╔═╡ cd32beba-67cf-4b12-a77b-99f96263f0a4
-@bind r Slider(0.1:0.1:1, default=0.1, show_value=true)
+# @bind r Slider(0.1:0.1:1, default=0.1, show_value=true)
 
 # ╔═╡ ae38c663-0ee4-409e-bfca-5f13ed88b67d
 md"""
 We will create a new parameter value vector, ODE problem and solution object by putting `1` at the end of the corresponding variable names. In that way, the previous simulation results will be unaffected! The model, the initial conditions and the timespan are identical as before. In there we also use the variable `r` coupled to the slider.
 """
+
+# ╔═╡ b65e948d-b13a-4021-a545-b7912fd86e94
+@bind r Slider(0.1:0.1:1, default=0.1, show_value=true)
 
 # ╔═╡ d44da6c6-c93d-4c61-8125-9eee464c897e
 params1 = [:α => 0.08, :β => 1.0e-6, :r => r, :m => 0.4]
@@ -564,7 +567,7 @@ Suppose that when the number of infected individuals reaches $1\,000\,000$, then
 
 # ╔═╡ 5005a09d-a844-4f9d-a058-0d93583d5bab
 md"""
-Normally in a continuous event the value of one or more species can be changed when a certain condition is met. In our specific case we want the change in the species happening only once! So, if you want that the continuous event "when $I$ reaches $10^6$ then $999\,000$ is subtracted from $I$" happens only once, then we need to include a ficticious new *species* in our *reaction network model*. We will call this ficticious species `pwc` (a short for _**p**roceed **w**ith **c**ondition_) and we set its default value to `true`.
+Normally in a continuous event the value of one or more species can be changed when a certain condition is met. In our specific case we want the change in the species happening only once! So, if you want that the continuous event "when $I$ reaches $10^6$ then $999\,000$ is subtracted from $I$" happens only once, then we need to include a ficticious new *species* in our *reaction network model*. We will call this ficticious species `thr` (a short for _**thr**eshold_) and we set its default value to `1e6`.
 """
 
 # ╔═╡ f77d2d75-468f-4746-b81e-0bbbf33fc8d7
@@ -580,7 +583,7 @@ species(infection_model3)
 
 # ╔═╡ 30bcea84-f7ca-4907-9a0f-54934e1731d0
 md"""
-We create the condition in the following way. When `pwc` is true then $I$ will be changed and also `pwc` will become `false`, so that the condition happens only once. We assume hereby that $I$ will never reach $0$!
+We create the condition in the following way. When `thr` is `1e6` then $I$ will change at some point and also `thr` will become `1e9`, so that the condition happens only once. By the way, $I$ will never reach $1\,000\,000\,000$!
 """
 
 # ╔═╡ 87d9be87-3bc7-4442-a396-fb501355fe8c
@@ -616,7 +619,7 @@ Finally, the ODE problem can be solved. Notice that you need to make a deepcopy 
 """
 
 # ╔═╡ abe11178-7177-418c-98b4-da1afc56842e
-osol3 = solve(deepcopy(oprob3), Tsit5(), saveat=0.1)
+osol3 = solve(deepcopy(oprob3), Tsit5(), saveat=0.5)
 
 # ╔═╡ 23804c2a-d031-4025-92d3-5cdb74f87353
 md"""
@@ -653,7 +656,7 @@ md"""
 osol3[:S][end]/osol[:S][end] - 1   # 56% less infections  (wrt. example 1)
 
 # ╔═╡ c8986056-3b29-4574-a43d-d0e051a4bee9
-osol3[:R][end]/osol[:R][end] - 1   # 11% less recoveries (due to fewer infections)
+(osol3[:R][end] + 0.6*0.999e6)/osol[:R][end] - 1   # 1% less recoveries
 
 # ╔═╡ f5d23dba-02a9-4d27-8eb1-ff89d2902cdf
 md"""
@@ -752,6 +755,7 @@ md"""
 # ╠═d44da6c6-c93d-4c61-8125-9eee464c897e
 # ╠═00a72697-d36a-41cc-9eec-8e821829ce0e
 # ╠═cf39b4cf-9cd0-4755-80db-ca4aea7c1084
+# ╠═b65e948d-b13a-4021-a545-b7912fd86e94
 # ╠═52901bbf-e47b-4da1-95c4-f0869812398c
 # ╟─102b4fbc-23b1-46ed-bb72-124eb88517ce
 # ╟─ade413c2-d7d9-4250-8490-75534900a389

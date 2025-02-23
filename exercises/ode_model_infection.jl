@@ -315,7 +315,7 @@ osol3 = solve(deepcopy(oprob3), Tsit5(), saveat=0.5)
 
 # ╔═╡ 2b511237-7739-44e5-b6bd-26a2fdc76bb5
 begin
-	plot(osol3)
+	plot(osol3; idxs=[:S, :I, :D, :R])
 	plot!(osol; linestyle=:dash, label=:none, color=:grey, lw=0.5)
 end
 
@@ -338,7 +338,7 @@ md"""
 osol3[:S][end]/osol[:S][end] - 1 	# Infections have increased 56% (wrt. example 1)
 
 # ╔═╡ 801a038b-7485-40b6-b7a5-92b0b3c11c0e
-osol3[:S][end]/osol2[:S][end] - 1 	# Amount of population exposed decreased 79%
+(osol3[:R][end] + 0.6*0.999e6)/osol[:R][end] - 1   # 1% less recoveries
 
 # ╔═╡ 62adbc28-cec2-4da8-9842-2153563497d0
 md"""
@@ -569,7 +569,7 @@ The vaccination programme is launched $2$ days after the outbreak of the disease
 
 Assume that individuals are still being treated ($b = 0.2$ and $h = 0.5$). Extend the model obtained in the previous exercise for the launch of a vaccination campaign after the outbreak of the disease.
 
-Find out via trial and error what the minimum vaccination rate need to be so that the number of fatalities is $10$ times smaller after a period of $90$ days compared to those in absence of vaccination (cf. Exercise 2). Consider an initial step size in $v$ of $0.01$ and then fine tune with a step size of $0.001$.
+Find out via trial and error what the minimum vaccination rate need to be so that the number of fatalities is $10$ times smaller after a period of $90$ days compared to those in absence of vaccination (cf. Exercise 2).
 
 Use the same initial values and timespan as before.
 """
@@ -622,7 +622,7 @@ Create the ODE problem and store it in `oprob_ex3`:
 
 # ╔═╡ 69983b90-b6ef-4732-a4af-a772bb1364e5
 md"""
-Solve the ODE problem for (step wise) increasing values of $v$ and store the solution in `osol_ex3_vac`. Consider an initial step size in $v$ of $0.01$ and then fine tune with a step size of $0.001$.
+Solve the ODE problem for (step wise) increasing values of $v$ and store the solution in `osol_ex3_vac`.
 """
 
 # ╔═╡ 16211bc6-cd97-43c0-8faf-25bb490930b6
