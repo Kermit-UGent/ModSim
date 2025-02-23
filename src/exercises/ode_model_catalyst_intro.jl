@@ -223,7 +223,7 @@ osys = convert(ODESystem, infection_model)
 
 # ╔═╡ eeb25e50-165b-4e93-8397-5b09fe8e7242
 md"""
-Note that the model equations are essencially:
+Note that the model equations are essentially:
 
 $$\cfrac{dS(t)}{dt} = -\alpha \beta S(t) I(t)$$
 $$\cfrac{dI(t)}{dt} = \alpha \beta S(t) I(t) - r I(t)$$
