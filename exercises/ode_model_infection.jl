@@ -292,14 +292,14 @@ Suppose that when the number of infected individuals reaches $1\,000\,000$, then
 
 # ╔═╡ cbf0a768-f6ac-43fb-8d05-e7dac51d4cc0
 infection_model3 = @reaction_network begin
-	@species pwc(t)=true
+	@species thr(t)=1e6
 	α * β, S + I --> 2I
 	r * m, I --> D
 	r * (1 - m), I --> R
 end
 
 # ╔═╡ fee597e0-97cb-40bc-a5b9-166631e8b9f6
-condition3 = [infection_model3.I ~ 1e6*infection_model3.pwc] => [infection_model3.I ~ infection_model3.I - 0.999e6, infection_model3.pwc ~ false]
+condition3 = [infection_model3.I ~ infection_model3.thr] => [infection_model3.I ~ infection_model3.I - 999_000, infection_model3.thr ~ 1e9]
 
 # ╔═╡ 51363f3c-7aa9-48ed-808e-d1f7a4aadc0c
 @named infection_model3_c = ReactionSystem(equations(infection_model3), continuous_events=condition3)
