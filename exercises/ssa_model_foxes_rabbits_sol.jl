@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 9b9d35c4-9136-11ef-284a-d5964e231d9e
@@ -23,6 +23,9 @@ using Catalyst
 # ╔═╡ 92c50b0a-d9f1-45a9-9c8a-ced71a6ee967
 using DifferentialEquations, Plots
 
+# ╔═╡ e773ce20-2b91-4db4-8baa-aee131333f4e
+using Distributions
+
 # ╔═╡ 2a129f80-f4c2-4429-85e8-98d946fb3f36
 using PlutoUI; TableOfContents()
 
@@ -36,21 +39,21 @@ md"""
 md"""
 Rabbits live on some secluded territory. Their maximum growth rate coefficient is $r$ $[year^{-1}]$, and their population capacity is $R_m$ $[\#rabbits]$. The rabbits die of old age or sickness with a dying rate coefficient $d$ $[year^{-1}]$.
 
-At $t=0$, foxes intrude the territory and stay there. The foxes exclusively feed themselves with the rabbits. They hunt the rabbits at a rate proportional to the number of foxes (proportionality factor is $h$ $[year^{-1} \#foxes^{-1}]$). The population of foxes grows at a rate proportional to the number of rabbits (proportionality factor is $g$ $[year^{-1} \#rabbits^{-1}]$). The foxes die of old age or sickness with a dying rate coefficient $\delta$ $[year^{-1}]$.
+At $t=0$, foxes intrude the territory and stay there. The foxes exclusively feed themselves with the rabbits. They hunt the rabbits at a rate proportional to the number of foxes (proportionality factor is $h$ $[year^{-1} \#foxes^{-1}]$). Thereby, the yield factor for the foxes is $Y$ $[\#foxes\,(\#rabbits)^{-1}]$. The foxes die of old age or sickness with a dying rate coefficient $\delta$ $[year^{-1}]$.
 
-The initial number of rabbits on the territory is 89, the initial number of
-foxes intruding the territory is 2.
+The initial number of rabbits on the territory is $89$, the initial number of
+foxes intruding the territory is $2$.
 """
 
 # ╔═╡ 91e77fb0-cab3-4da7-8bc9-6f657df2497c
 md"""
 **Exercises:**
 
-1. Make simulations of the evolution of rabbits and foxes as a ODE problem in the time interval $[0, 10]\;years$.
+1. Make simulations of the evolution of rabbits and foxes as a ODE problem in the time interval $[0, 15]\;years$.
 
-2. Make simulations of the evolution of rabbits and foxes as a discrete (jump) problem in the time interval $[0, 10]\;years$.
+2. Make simulations of the evolution of rabbits and foxes as a discrete (jump) problem in the time interval $[0, 15]\;years$.
 
-Assume the following parameter values: $r = 18.4\;year^{-1}$, $R_m = 120\;(\#rabbits)$, $d = 2.0\;year^{-1}$, $h = 1.4\;year^{-1}(\#foxes)^{-1}$, $g = 0.05\;year^{-1}(\#rabbits)^{-1}$ and $\delta = 1.0\;year^{-1}$.
+Assume the following parameter values: $r = 18.4\;year^{-1}$, $R_m = 120\;(\#rabbits)$, $d = 2.0\;year^{-1}$, $h = 1.4\;year^{-1}(\#foxes)^{-1}$, $Y=0.036\;\#foxes\,(\#rabbits)^{-1}$ and $\delta = 1.0\;year^{-1}$.
 """
 
 # ╔═╡ d11b4e97-df16-4641-9e32-c7f2a098ffb7
@@ -59,7 +62,7 @@ Create a *reaction network object* model for the aforementioned problem. Name it
 
 Hitns:
 - Use the variable names `R` and `F` for the rabbits and foxes respectively.
-- Use the variable names `r`, `Rm`, `d`, `h`, `g` and `δ` for the parameters. 
+- Use the variable names `r`, `Rm`, `d`, `h`, `Y` and `δ` for the parameters. 
 """
 
 # ╔═╡ 6d49c334-76e0-4210-890b-e3e79097222d
@@ -70,16 +73,14 @@ Hitns:
 # 	  missing              # natural population growth of the rabbits
 #     missing              # deaths by age or sickness of the rabbits
 #     missing              # hunting of rabbits by the foxes
-#     missing              # gaining of foxes by hinting rabbits
 #     missing              # deaths by age or sickness of the foxes
 # end
 foxes_rabbits_rn = @reaction_network begin
     @species R(t)=89 F(t)=2
-    @parameters r=18.4 Rm=120 d=2.0 h=1.4 g=0.05 δ=1.0
+    @parameters r=18.4 Rm=120 d=2.0 h=1.4 Y=0.036 δ=1.0
 	r*(1 - R/Rm), R --> 2R     # natural population growth of the rabbits
     d, R --> 0                 # deaths by age or sickness of the rabbits
-	h*F, R --> 0               # hunting of rabbits by the foxes
-	g*R, F --> 2F              # gaining of foxes by hinting rabbits
+	h, F+R --> (1+Y)*F         # hunting of rabbits by the foxes
 	δ, F --> 0                 # deaths by age or sickness of the foxes
 end
 
@@ -108,16 +109,16 @@ Set the timespan for the simulation:
 
 # ╔═╡ 10f878d8-d2da-4701-b190-7a2feaa0c009
 # tspan = missing        # Uncomment and complete the instruction
-tspan = (0.0, 10.0)
+tspan = (0.0, 15.0)
 
 # ╔═╡ 1a835253-3677-4698-9347-d59937f9e7c0
 md"""
-Initialize a vector `params` with the parameter values:
+Initialize a vector `parms` with the parameter values:
 """
 
 # ╔═╡ 2bd4dd93-1be0-427b-b372-88cb9849a124
-# params = missing       # Uncomment and complete the instruction
-params = [:r=>18.4, :Rm=>120, :d=>2.0, :h=>1.4, :g=>0.05, :δ=>1.0]
+# parms = missing       # Uncomment and complete the instruction
+parms = [:r=>18.4, :Rm=>120, :d=>2.0, :h=>1.4, :Y=>0.036, :δ=>1.0]
 
 # ╔═╡ 4953f436-afed-4363-b840-956440fddc25
 md"""
@@ -131,7 +132,7 @@ Create the ODE problem and store it in `oprob`:
 
 # ╔═╡ 629126b3-0b6b-43f0-9142-2d4d7d6270d9
 # oprob = missing        # Uncomment and complete the instruction
-oprob = ODEProblem(foxes_rabbits_rn, u0, tspan, params)
+oprob = ODEProblem(foxes_rabbits_rn, u0, tspan, parms)
 
 # ╔═╡ 3c071a33-5092-42f7-80b2-63066bdf3f22
 md"""
@@ -163,7 +164,7 @@ Create a DiscreteProblem and store it in `dprob`:
 
 # ╔═╡ 581a5b6e-04a7-4fd1-9f69-a9cf8655a06c
 # dprob = missing                 # Uncomment and complete the instruction
-dprob = DiscreteProblem(foxes_rabbits_rn, u0, tspan, params)
+dprob = DiscreteProblem(foxes_rabbits_rn, u0, tspan, parms)
 
 # ╔═╡ 497fe4e8-b451-4dd7-b961-6e7968c6cb3d
 md"""
@@ -233,13 +234,19 @@ end
 
 # ╔═╡ 2eb41790-23ef-43fc-8b69-7dd9dbb9f820
 md"""
-Make a histogram so that you can have an idea of the distribution when the rabbits die out. Use `bins=range(0, 10, length=121)`.
+Make a histogram so that you can have an idea of the distribution when the rabbits die out. Use `bins=range(0, 15, length=151)`.
 """
 
 # ╔═╡ 1c8188de-e8b8-44ae-b0b6-7d490f3a15e8
 # missing              # Uncomment and complete the instruction
 # histogram(times, bins=range(0, 10, length=121))
-histogram(times, bins=range(0, 10, length=121), normalize=:pdf)
+histogram(times, bins=range(0, 15, length=151), normalize=:pdf)
+
+# ╔═╡ c544ec5f-e0cd-45e3-b32b-cd35152f2346
+mean(times)
+
+# ╔═╡ 2e498d7c-f3e3-4cfe-83dd-41e2cd3e4ced
+std(times)
 
 # ╔═╡ Cell order:
 # ╠═9b9d35c4-9136-11ef-284a-d5964e231d9e
@@ -247,6 +254,7 @@ histogram(times, bins=range(0, 10, length=121), normalize=:pdf)
 # ╠═e8dd4f61-4f51-4255-9193-62ea1368240b
 # ╠═c7c12802-f3e7-4e42-be3f-f91eabe432d8
 # ╠═92c50b0a-d9f1-45a9-9c8a-ced71a6ee967
+# ╠═e773ce20-2b91-4db4-8baa-aee131333f4e
 # ╠═2a129f80-f4c2-4429-85e8-98d946fb3f36
 # ╟─3a1a01f6-7f6e-411d-958b-0dce35b791ff
 # ╟─92a0efee-1e40-4080-aee2-831d98312176
@@ -284,3 +292,5 @@ histogram(times, bins=range(0, 10, length=121), normalize=:pdf)
 # ╠═a6bc48a8-3bbc-4abc-918b-da70eab39017
 # ╟─2eb41790-23ef-43fc-8b69-7dd9dbb9f820
 # ╠═1c8188de-e8b8-44ae-b0b6-7d490f3a15e8
+# ╠═c544ec5f-e0cd-45e3-b32b-cd35152f2346
+# ╠═2e498d7c-f3e3-4cfe-83dd-41e2cd3e4ced

@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 9b9d35c4-9136-11ef-284a-d5964e231d9e
@@ -36,21 +36,21 @@ md"""
 md"""
 Rabbits live on some secluded territory. Their maximum growth rate coefficient is $r$ $[year^{-1}]$, and their population capacity is $R_m$ $[\#rabbits]$. The rabbits die of old age or sickness with a dying rate coefficient $d$ $[year^{-1}]$.
 
-At $t=0$, foxes intrude the territory and stay there. The foxes exclusively feed themselves with the rabbits. They hunt the rabbits at a rate proportional to the number of foxes (proportionality factor is $h$ $[year^{-1} \#foxes^{-1}]$). The population of foxes grows at a rate proportional to the number of rabbits (proportionality factor is $g$ $[year^{-1} \#rabbits^{-1}]$). The foxes die of old age or sickness with a dying rate coefficient $\delta$ $[year^{-1}]$.
+At $t=0$, foxes intrude the territory and stay there. The foxes exclusively feed themselves with the rabbits. They hunt the rabbits at a rate proportional to the number of foxes (proportionality factor is $h$ $[year^{-1} \#foxes^{-1}]$). Thereby, the yield factor for the foxes is $Y$ $[\#foxes\,(\#rabbits)^{-1}]$. The foxes die of old age or sickness with a dying rate coefficient $\delta$ $[year^{-1}]$.
 
-The initial number of rabbits on the territory is 89, the initial number of
-foxes intruding the territory is 2.
+The initial number of rabbits on the territory is $89$, the initial number of
+foxes intruding the territory is $2$.
 """
 
 # ╔═╡ 91e77fb0-cab3-4da7-8bc9-6f657df2497c
 md"""
 **Exercises:**
 
-1. Make simulations of the evolution of rabbits and foxes as a ODE problem in the time interval $[0, 10]\;years$.
+1. Make simulations of the evolution of rabbits and foxes as a ODE problem in the time interval $[0, 15]\;years$.
 
-2. Make simulations of the evolution of rabbits and foxes as a discrete (jump) problem in the time interval $[0, 10]\;years$.
+2. Make simulations of the evolution of rabbits and foxes as a discrete (jump) problem in the time interval $[0, 15]\;years$.
 
-Assume the following parameter values: $r = 18.4\;year^{-1}$, $R_m = 120\;(\#rabbits)$, $d = 2.0\;year^{-1}$, $h = 1.4\;year^{-1}(\#foxes)^{-1}$, $g = 0.05\;year^{-1}(\#rabbits)^{-1}$ and $\delta = 1.0\;year^{-1}$.
+Assume the following parameter values: $r = 18.4\;year^{-1}$, $R_m = 120\;(\#rabbits)$, $d = 2.0\;year^{-1}$, $h = 1.4\;year^{-1}(\#foxes)^{-1}$, $Y=0.036\;\#foxes\,(\#rabbits)^{-1}$ and $\delta = 1.0\;year^{-1}$.
 """
 
 # ╔═╡ d11b4e97-df16-4641-9e32-c7f2a098ffb7
@@ -59,7 +59,7 @@ Create a *reaction network object* model for the aforementioned problem. Name it
 
 Hints:
 - Use the variable names `R` and `F` for the rabbits and foxes respectively.
-- Use the variable names `r`, `Rm`, `d`, `h`, `g` and `δ` for the parameters. 
+- Use the variable names `r`, `Rm`, `d`, `h`, `Y` and `δ` for the parameters. 
 """
 
 # ╔═╡ 6d49c334-76e0-4210-890b-e3e79097222d
@@ -70,7 +70,6 @@ Hints:
 # 	  missing              # natural population growth of the rabbits
 #     missing              # deaths by age or sickness of the rabbits
 #     missing              # hunting of rabbits by the foxes
-#     missing              # gaining of foxes by hinting rabbits
 #     missing              # deaths by age or sickness of the foxes
 # end
 
@@ -100,11 +99,11 @@ Set the timespan for the simulation:
 
 # ╔═╡ 1a835253-3677-4698-9347-d59937f9e7c0
 md"""
-Initialize a vector `params` with the parameter values:
+Initialize a vector `parms` with the parameter values:
 """
 
 # ╔═╡ 2bd4dd93-1be0-427b-b372-88cb9849a124
-# params = missing       # Uncomment and complete the instruction
+# parms = missing       # Uncomment and complete the instruction
 
 # ╔═╡ 4953f436-afed-4363-b840-956440fddc25
 md"""
@@ -200,7 +199,7 @@ Write a piece of code that solves the problem a $1000$ times and stores the time
 
 # ╔═╡ 2eb41790-23ef-43fc-8b69-7dd9dbb9f820
 md"""
-Make a histogram so that you can have an idea of the distribution when the rabbits die out. Use `bins=range(0, 10, length=121)`.
+Make a histogram so that you can have an idea of the distribution when the rabbits die out. Use `bins=range(0, 15, length=151)`.
 """
 
 # ╔═╡ 1c8188de-e8b8-44ae-b0b6-7d490f3a15e8
