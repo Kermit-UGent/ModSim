@@ -360,7 +360,7 @@ md"""
 md"""
 ### Exercise 1 - Influence of $\alpha$
 
-Evaluate the effect of a decreasing risk of infection after contact with an infected person, i.e. $r = 0.2$, $\beta = 0.1$ and $\alpha$ between $8\%$ and $20\%$.
+Evaluate the effect of a decreasing risk of infection after contact with an infected person, i.e. $r = 0.2$, $\beta = 10^{-6}$ and $\alpha$ between $8\%$ and $20\%$.
 
 Use the same initial values and timespan as before.
 """

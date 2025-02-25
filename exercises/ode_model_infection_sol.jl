@@ -359,7 +359,7 @@ md"""
 md"""
 ### Exercise 1 - Influence of $\alpha$
 
-Evaluate the effect of a decreasing risk of infection after contact with an infected person, i.e. $r = 0.2$, $\beta = 0.1$ and $\alpha$ between $8\%$ and $20\%$.
+Evaluate the effect of a decreasing risk of infection after contact with an infected person, i.e. $r = 0.2$, $\beta = 10^{-6}$ and $\alpha$ between $8\%$ and $20\%$.
 
 Use the same initial values and timespan as before.
 """
@@ -703,7 +703,7 @@ Create the ODE problem and store it in `oprob_ex3_c`:
 
 # ╔═╡ 7e4114d6-932a-4def-9bb5-b534072ea513
 # oprob_ex3_c = missing                # Uncomment and complete the instruction
-oprob_ex3_c = ODEProblem(infection_med_vac_c_com, u0, tspan, params_ex3)
+oprob_ex3_c = ODEProblem(infection_med_vac_c_com, u0, tspan, params_ex3);
 
 # ╔═╡ 1bf8bc58-6848-4783-a614-7ac11646de92
 md"""

@@ -114,7 +114,7 @@ Create the ODE problem and store it in `oprob`:
 
 # ╔═╡ 6f84b532-a718-4d42-9829-91366693b51c
 # oprob = missing        # Uncomment and complete the instruction
-oprob = ODEProblem(soil_cont_plant_uptake, u0, tspan, params)
+oprob = ODEProblem(soil_cont_plant_uptake, u0, tspan, params);
 
 # ╔═╡ ca65797f-a1dd-42dd-992c-ba067932a018
 md"""

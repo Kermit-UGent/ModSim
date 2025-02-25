@@ -115,7 +115,7 @@ Create the ODE problem and store it in `oprob`:
 
 # ╔═╡ 9432f90b-7141-4518-b6fd-d55a1389e14a
 # oprob = missing      # Uncomment and complete the instruction
-oprob = ODEProblem(birth_death, u0, tspan, params)
+oprob = ODEProblem(birth_death, u0, tspan, params);
 
 # ╔═╡ ab197ac7-413b-4305-8352-2723bf9f2aff
 md"""
@@ -198,7 +198,7 @@ Create the ODE problem and store it in `oprob2`:
 
 # ╔═╡ 65e24cee-06c3-4cb7-8f8c-61e02b7dcd29
 # oprob2 = missing                    # Uncomment and complete the instruction
-oprob2 = ODEProblem(birth_death2_com, u0, tspan, params)
+oprob2 = ODEProblem(birth_death2_com, u0, tspan, params);
 
 # ╔═╡ 9cab94b5-6d2d-4b5a-96f3-3b8eee1c61a1
 md"""

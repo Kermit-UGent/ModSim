@@ -141,7 +141,7 @@ Create the ODE problem and store it in `oprob1`:
 
 # ╔═╡ 04816732-3419-40e3-a927-d6e102949553
 # oprob1 = missing             # Uncomment and complete the instruction
-oprob1 = ODEProblem(anaerobic_fermentation1, u01, tspan1, params1)
+oprob1 = ODEProblem(anaerobic_fermentation1, u01, tspan1, params1);
 
 # ╔═╡ 9a517512-a7c0-4a92-a104-b19a8bf786c7
 md"""
@@ -280,7 +280,7 @@ Create the ODE problem and store it in `oprob2`:
 
 # ╔═╡ 18a3513f-8ecc-4c2f-bb39-5d0cb39a3d92
 # oprob2 = missing                 # Uncomment and complete the instruction
-oprob2 = ODEProblem(anaerobic_fermentation2, u02, tspan2, params2)
+oprob2 = ODEProblem(anaerobic_fermentation2, u02, tspan2, params2);
 
 # ╔═╡ 5318708e-3410-4675-8162-827c0c6e039c
 md"""
@@ -399,7 +399,7 @@ Create a new ODE problem.
 
 # ╔═╡ 16d0d671-464c-4de3-bd73-593e1a73168b
 # oprob3 = missing        # Uncomment and complete the instruction
-oprob3 = ODEProblem(anaerobic_fermentation3_c_com, u02, tspan2, params2)
+oprob3 = ODEProblem(anaerobic_fermentation3_c_com, u02, tspan2, params2);
 
 # ╔═╡ 66015536-5f23-45b5-8d57-f1d27d604f8c
 md"""

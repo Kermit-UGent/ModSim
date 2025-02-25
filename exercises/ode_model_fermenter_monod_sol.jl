@@ -121,7 +121,7 @@ Create the ODE problem and store it in `oprob`:
 
 # ╔═╡ ab2a9842-6a9c-46bd-812b-db01629d6a1c
 # oprob = missing           # Uncomment and complete the instruction
-oprob = ODEProblem(fermenter_monod, u0, tspan, params, combinatoric_ratelaws=false)
+oprob = ODEProblem(fermenter_monod, u0, tspan, params, combinatoric_ratelaws=false);
 
 # ╔═╡ b6a526bd-6ee5-442b-9fb8-3fbe1e280dd4
 md"""
@@ -254,7 +254,7 @@ Create the ODE problem and store it in `oprob2`:
 
 # ╔═╡ 7af72709-2f82-4971-8342-f02943f947c8
 # oprob2 = missing                      # Uncomment and complete the instruction
-oprob2 = ODEProblem(fermenter_monod2_com, u0, tspan, params)
+oprob2 = ODEProblem(fermenter_monod2_com, u0, tspan, params);
 
 # ╔═╡ e019f797-a6ad-4f8f-8f9e-69db00ed3c39
 md"""
@@ -408,7 +408,7 @@ Create the ODE problem and store it in `oprob3`:
 
 # ╔═╡ dd388e88-53af-48d3-800e-09b5c182a83b
 # oprob3 = missing                      # Uncomment and complete the instruction
-oprob3 = ODEProblem(fermenter_monod3_com, u0, tspan, params)
+oprob3 = ODEProblem(fermenter_monod3_com, u0, tspan, params);
 
 # ╔═╡ 5133d846-e6a6-4b50-9ce1-cb91cf04cbd1
 md"""

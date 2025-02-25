@@ -330,7 +330,7 @@ Next, before we can simulate our model, we bundle all the required information t
 "
 
 # ╔═╡ c6d2dd69-8c61-4a40-894f-664b2d2d14be
-oprob = ODEProblem(infection_model, u0, tspan, params)
+oprob = ODEProblem(infection_model, u0, tspan, params);
 
 # ╔═╡ 3c253bf3-886d-4e86-82ac-7751d23f342f
 md"""
@@ -513,7 +513,7 @@ Then we need to create a new ODE problem.
 """
 
 # ╔═╡ 4a6f357c-afd7-4b0d-b1d2-15f5c0e4298b
-oprob2 = ODEProblem(infection_model2_com, u0, tspan, params)
+oprob2 = ODEProblem(infection_model2_com, u0, tspan, params);
 
 # ╔═╡ e76e77be-9f15-4aa5-8506-cdb32a6ec9b1
 md"""
@@ -611,7 +611,7 @@ Then we need to create a new ODE problem.
 """
 
 # ╔═╡ e0562699-d065-4ae1-9c39-f9e0bf561fa3
-oprob3 = ODEProblem(infection_model3_c_com, u0, tspan, params)
+oprob3 = ODEProblem(infection_model3_c_com, u0, tspan, params);
 
 # ╔═╡ 6b3ea888-1238-46ae-9eaf-52e86c76bc1c
 md"""

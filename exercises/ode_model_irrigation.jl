@@ -138,7 +138,7 @@ Create the ODE problem and store it in `oprob`:
 """
 
 # ╔═╡ f222f889-d602-4654-9c90-a813738377c3
-# oprob = missing        # Uncomment and complete the instruction
+# oprob = missing;        # Uncomment and complete the instruction
 
 # ╔═╡ 18717738-ae99-4b41-8414-4c1823307dde
 md"""

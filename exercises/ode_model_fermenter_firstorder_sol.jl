@@ -136,7 +136,7 @@ Create the ODE problem and store it in `oprob`:
 
 # ╔═╡ ed56f8d6-2260-4829-9190-69b60b7d7599
 # oprob = missing
-oprob = ODEProblem(fermenter_firstorder_c_com, u0, tspan, params, combinatoric_ratelaws=false)
+oprob = ODEProblem(fermenter_firstorder_c_com, u0, tspan, params, combinatoric_ratelaws=false);
 
 # ╔═╡ 8b73b16b-7f7d-4d2e-a1c2-7e1adf2336e9
 md"""
