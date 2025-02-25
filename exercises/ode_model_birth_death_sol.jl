@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 4a3d066c-f5b1-11ee-0145-2da7c11147a5
@@ -115,7 +115,7 @@ Create the ODE problem and store it in `oprob`:
 
 # ╔═╡ 9432f90b-7141-4518-b6fd-d55a1389e14a
 # oprob = missing      # Uncomment and complete the instruction
-oprob = ODEProblem(birth_death, u0, tspan, params)
+oprob = ODEProblem(birth_death, u0, tspan, params);
 
 # ╔═╡ ab197ac7-413b-4305-8352-2723bf9f2aff
 md"""
@@ -144,6 +144,18 @@ Interpret the results. Ask yourself the following questions:
 
 # ╔═╡ f5718c08-c8aa-4d74-b70f-8c08c6decab2
 md"- Answer: missing"
+
+# ╔═╡ e26db23b-82ac-4a67-9580-a3125cd10fc8
+osol[:X][end]
+
+# ╔═╡ 50ec2f87-c10f-42c9-99bd-ad6ca496a6f7
+u_guess = [:X => osol[:X][end]]
+
+# ╔═╡ be84871f-dfc5-4cf9-98b5-8eab1472cd52
+sol_eq = solve(SteadyStateProblem(ODEProblem(birth_death, u_guess, tspan, params)))
+
+# ╔═╡ 8a768ce3-bc6f-4ce2-bd7f-34d6718bde1d
+sol_eq[:X]
 
 # ╔═╡ fe4526c8-4504-4d91-841a-a83aeef55fc7
 md"""
@@ -186,7 +198,7 @@ Create the ODE problem and store it in `oprob2`:
 
 # ╔═╡ 65e24cee-06c3-4cb7-8f8c-61e02b7dcd29
 # oprob2 = missing                    # Uncomment and complete the instruction
-oprob2 = ODEProblem(birth_death2_com, u0, tspan, params)
+oprob2 = ODEProblem(birth_death2_com, u0, tspan, params);
 
 # ╔═╡ 9cab94b5-6d2d-4b5a-96f3-3b8eee1c61a1
 md"""
@@ -207,7 +219,7 @@ Plot the results:
 plot(osol2)
 
 # ╔═╡ 86e7af42-acb4-45e4-9a05-1c3ee2733dae
-# osol2.u[end]
+osol2[:X][end]
 
 # ╔═╡ 1f869579-7019-4120-8d14-b38f48d05bdd
 md"""
@@ -256,6 +268,10 @@ md"- Answer: missing"
 # ╠═83e36e63-7e6b-4c17-8f7d-ed0e07f36fc5
 # ╟─5fc64787-795c-4e17-b751-cd3683f8016b
 # ╟─f5718c08-c8aa-4d74-b70f-8c08c6decab2
+# ╠═e26db23b-82ac-4a67-9580-a3125cd10fc8
+# ╠═50ec2f87-c10f-42c9-99bd-ad6ca496a6f7
+# ╠═be84871f-dfc5-4cf9-98b5-8eab1472cd52
+# ╠═8a768ce3-bc6f-4ce2-bd7f-34d6718bde1d
 # ╟─fe4526c8-4504-4d91-841a-a83aeef55fc7
 # ╟─1e869025-c537-4bf1-9c38-93e24b598156
 # ╠═1c5d8daa-5c7e-49ef-a6da-6459a1131320

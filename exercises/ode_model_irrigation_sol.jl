@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ f3ae43dc-f7e1-11ee-3615-695b9e85b621
@@ -112,7 +112,7 @@ params = [:k => 3.0, :Smax => 150.0, :v => 1.0e-3, :r => 5.0, :S₁res => 10.0]
 
 # ╔═╡ 493d0d3d-cc43-4c2e-931f-f4acbc2f41ae
 md"""
-Unpack the variables and parameters so that we can use them in an intuitive way to calculate to observables.
+Unpack the variables and parameters so that we can use them in an intuitive way the calculate to observables.
 """
 
 # ╔═╡ 67f62789-a5f0-4e05-a4fb-dbade2ad7891
@@ -153,7 +153,7 @@ Create the ODE problem and store it in `oprob`:
 
 # ╔═╡ f222f889-d602-4654-9c90-a813738377c3
 # oprob = missing        # Uncomment and complete the instruction
-oprob = ODEProblem(deepcopy(irrigation_mod_c_com), u0, tspan, params)
+oprob = ODEProblem(deepcopy(irrigation_mod_c_com), u0, tspan, params);
 
 # ╔═╡ 18717738-ae99-4b41-8414-4c1823307dde
 md"""
@@ -255,6 +255,6 @@ md"- Answer: missing"
 # ╟─3e1beea6-0fe4-4d77-9e5d-0ca78a662253
 # ╠═15f14688-cf6e-4562-bcca-d3d0774c2d5c
 # ╟─d1a9c363-3ef6-4bbb-a150-63b44f9e7cf1
-# ╠═63ca9bf9-8b49-41ee-a062-eecc54f88e28
+# ╟─63ca9bf9-8b49-41ee-a062-eecc54f88e28
 # ╟─85e8869e-5859-4b8f-a72d-f0c979191ec7
-# ╠═8b2459ca-9982-4c3a-b872-184c34289ec9
+# ╟─8b2459ca-9982-4c3a-b872-184c34289ec9

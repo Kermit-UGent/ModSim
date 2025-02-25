@@ -1,0 +1,139 @@
+\ProvidesPackage{beamerthemepresentationTemplateBiomathFClean}
+
+\mode<presentation>
+
+\newlength\margin
+\setlength\margin{0.05\beamer@paperwidth}
+\newlength\bannerwidth
+\setlength\bannerwidth{0.99\beamer@paperwidth}
+\newlength\bannertopmargin
+\setlength\bannertopmargin{0.05\beamer@paperheight}
+
+\setbeamersize{text margin left=1.5em,text margin right=1.5em}
+\beamertemplatenavigationsymbolsempty
+
+%Definition of new colors
+\definecolor{red}{RGB}{254,0,0}
+\definecolor{ugentblue}{RGB}{30,100,200}					% Pantone 534: global
+\definecolor{ugentyellow}{RGB}{255,210,0}					% Pantone 130: generic colour
+
+\definecolor{ugentwhite}{RGB}{255,255,255}
+
+%\definecolor{ugentblue}{RGB}{36,71,127}
+\definecolor{ugentyellowOUD}{RGB}{250,178,10}
+
+\definecolor{ugent-la}{RGB}{39,171,173}					% Pantone 3262c: Faculty of Bioscience Engineering
+\definecolor{ugent-fw}{RGB}{190,81,144}					% Pantone purple: Faculty of Pharmaceutical Sciences
+\colorlet{ugentalert}{red}
+\colorlet{ugentexample}{ugentblue}
+%Colors of different items
+\setbeamercolor{structure}{fg=ugentblue, bg = ugentblue}
+\setbeamercolor{normal text}{fg=ugentblue}
+\setbeamercolor{frametitle}{fg=ugentblue}
+\setbeamercolor{frame number in foot}{fg=ugentblue}
+\setbeamercolor{title}{fg=ugentwhite}
+\setbeamercolor{subtitle}{fg=ugentwhite}
+\setbeamercolor{author}{fg=ugentwhite}
+\setbeamercolor{alerted text}{fg=ugentalert}
+\setbeamercolor{block title}{use=structure,fg=white,bg=ugentblue}
+\setbeamercolor{block title alerted}{use=alerted text,fg=white,bg=ugentalert}
+\setbeamercolor{block title example}{use=example text,fg=white,bg=ugentexample}
+\setbeamercolor{block body}{fg=ugentblue,use=block title,bg=ugentblue!10!white}
+\setbeamercolor{block body alerted}{fg=ugentblue,use=block title alerted,bg=ugentalert!10!white}
+\setbeamercolor{block body example}{fg=ugentblue,use=block title example,bg=ugentexample!10!white}
+\setbeamercolor{title in head/foot}{fg=ugentblue, bg=white}
+\setbeamercolor{author in head/foot}{fg=ugentblue, bg=white}
+%Fontsize of different items
+\setbeamerfont{title}{size=\huge}
+\setbeamerfont{subtitle}{size=\Large}
+\setbeamerfont{frametitle}{size=\LARGE}
+\setbeamerfont{author}{size=\normalsize}
+\setbeamerfont{frame number in foot}{size=\scriptsize}
+%Images
+\pgfdeclareimage[width=\bannerwidth]{banner}{la-english.pdf}
+\pgfdeclareimage[width=\bannerwidth]{banner2}{la-english2.pdf}
+\pgfdeclareimage[width=0.1\bannerwidth]{logoBio}{logo_biomath}
+
+\setbeamercolor{title1}{bg=ugentblue}
+
+%Templates
+\setbeamertemplate{blocks}[rounded]
+
+\newcommand{\biomathlogo}{
+  \setlength{\TPHorizModule}{1pt}
+  \setlength{\TPVertModule}{1pt}
+  \begin{textblock}{1}(10,259)
+   \includegraphics[width=48pt,height=8pt]{logo_biomath}
+  \end{textblock}
+  }
+
+\setbeamertemplate{title page}
+{
+  \begin{picture}(320,250)(0,0)
+  \put(-21.5,208.5){\includegraphics[scale = 0.7]{icoon_UGent_BW_NL_RGB_2400_kleur.png}}
+  \put(-9.5,122){
+  \begin{minipage}{\paperwidth}
+
+  \begin{beamercolorbox}[ht =59mm, sep = 3ex]{title}
+
+  \usebeamerfont{title}\textbf{\inserttitle}\par
+  \usebeamerfont{subtitle}\insertsubtitle\par
+
+  \bigskip
+
+
+  \bigskip
+
+  \usebeamerfont{institute}\insertauthor\par
+  \usebeamerfont{date}\insertdate\par
+
+  \end{beamercolorbox}%
+  \end{minipage}%
+  }
+  \put(-21.5,-19){\includegraphics[scale = 0.7]{logo_UGent_NL_RGB_2400_kleur.png}}
+  \end{picture}
+}
+
+\setbeamertemplate{headline}{}
+
+\setbeamertemplate{frametitle}
+{
+  \begin{beamercolorbox}[right]{frame title}
+    \insertframetitle
+  \end{beamercolorbox}
+  \vspace{-.2cm}
+}
+
+\setbeamertemplate{footline}{
+	\hbox{
+		\begin{beamercolorbox}[wd=0.95\beamer@paperwidth,ht=4ex,dp=3ex,right]{date in head/foot}
+		    \insertframenumber{}/\inserttotalframenumber
+		\end{beamercolorbox}
+	}
+}
+
+%Special features for boxes
+\newcommand{\info}[2]{
+\begin{bclogo}[couleur=ugentblue!30,arrondi=0.2,ombre=false,couleurBarre=ugentblue!60!black!50, logo=\bcinfo,noborder=true]{#1}#2
+\end{bclogo}
+}
+\newcommand{\question}[2]{
+\begin{bclogo}[couleur=ugent-la!30,arrondi=0.2,ombre=false,couleurBarre=ugent-la!60!black!50,logo=\bcquestion,noborder=true]{#1}#2
+\end{bclogo}
+}
+\newcommand{\important}[2]{
+\begin{bclogo}[couleur = orange!30, arrondi = 0.2,ombre=false, couleurBarre=orange!60!black!50,logo=\bcattention,noborder=true]{#1}#2
+\end{bclogo}
+}
+\newcommand{\actions}[2]{
+\begin{bclogo}[couleur=ugentyellow!50!white,arrondi=0.2,ombre=false,couleurBarre=ugentyellow!60!black!50,logo=\bccrayon,noborder=true]{#1}#2
+\end{bclogo}
+}
+
+%\AtBeginDocument{
+%\begin{frame}[plain]
+%	\maketitle
+%\end{frame}
+%}
+
+\mode<all>
