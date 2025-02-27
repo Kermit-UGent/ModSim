@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -51,6 +51,11 @@ Assign the following noise scaling values:
 - `η = 0.10` for the main *reaction* (default value for `η`)
 - noise scaling of `0.05` for the *reaction* describing the inlet $S_{in}$
 - noise scaling of `0.0` for the remaining *reactions*
+"""
+
+# ╔═╡ 8e1a3734-d03c-4d0c-a808-a79bcaa7f899
+md"""
+The parameter values are $k =$ 0.2, $Y =$ 0.76, $Q =$ 2.0, $V =$ 40.0 and $S_{in} =$ 2.2$\;g/L$. Suppose that at $t=$0$\;h$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of 0.1$\;g/L$. Simulate the evolution of $S$ and $X$ during $120$ hours.
 """
 
 # ╔═╡ 6b627d84-b6a5-444d-8163-40a4cab181bd
@@ -142,6 +147,7 @@ Plot the results. Use as option again `ylim=(0.0,2.0)` and also `linealpha=0.5` 
 # ╟─959d6307-a30d-4ae7-970d-b2c7584c2c8f
 # ╟─98858b9c-d4f9-451f-a7b9-fcaa012ee28e
 # ╟─d2e2680c-01c6-449a-bb5f-7472bc1de243
+# ╟─8e1a3734-d03c-4d0c-a808-a79bcaa7f899
 # ╠═6b627d84-b6a5-444d-8163-40a4cab181bd
 # ╟─47ca3573-691c-4127-85b9-d5b5a1a23fbb
 # ╠═e1f11068-e489-4c54-a30d-981f5cb19b47

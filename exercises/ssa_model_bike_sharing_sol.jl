@@ -37,13 +37,13 @@ using PlutoUI; TableOfContents()
 
 # ╔═╡ 1f975552-b0b8-4830-8dcc-214574d4fc38
 md"""
-# Exercise: Modeling a simple Bike Share System
+# Exercise: Modeling a simple Bike Sharing System
 """
 
 # ╔═╡ d2f32eab-0b35-4794-9219-5bcbb4c069c5
 md"""
-Imagine a bike share system for students traveling between Olin College and Wellesley College, which are about three miles apart in eastern Massachusetts. Suppose the system contains 12 bikes and two bike racks, one at Olin and one at Wellesley, each with the capacity to hold 12 bikes. As students arrive, check out a bike, and ride to the other campus, the number of bikes in each location changes.
-Initially there are 10 bikes at Olin and, hence, 2 bikes at Wellesley. For this simple model, we will aslo assume that the changes in the number of bikes at both locations is instantenuously. The rate at which a bike is moved from Olin to Wellesley is denoted as $p_1$ ($\#bikes\;min^{-1}$); the rate at which a bike is moved from Wellesley to Olin is denoted as $p_2$ ($\#bikes\;min^{-1}$). Both processes are zeroth-order and we want to see the evolution of bikes during $1\,h = 60\,min$.
+Imagine a bike sharing system for students traveling between Olin College and Wellesley College, which are about three miles apart in eastern Massachusetts. Suppose the system contains 12 bikes and two bike racks, one at Olin and one at Wellesley, each with the capacity to hold 12 bikes. As students arrive, check out a bike, and ride to the other campus, the number of bikes in each location changes.
+Initially there are 10 bikes at Olin and, hence, 2 bikes at Wellesley. For this simple model, we will also assume that the changes in the number of bikes at both locations is instantaneous. The rate at which a bike is moved from Olin to Wellesley is denoted as $p_1$ ($\#bikes\;min^{-1}$); the rate at which a bike is moved from Wellesley to Olin is denoted as $p_2$ ($\#bikes\;min^{-1}$). Both processes are zeroth-order and we want to see the evolution of bikes during $1\,h = 60\,min$.
 
 This is a discreet and stochastic problem and you need to solve it with SSA.
 """
@@ -54,15 +54,17 @@ Create a *reaction network object* model for the aforementioned problem in order
 """
 
 # ╔═╡ 6c97bf81-ef32-45a4-aa7c-c8c26ba2d2c3
-# bike_sharing = @reaction_network begin
-# 	missing
-# 	...
-# end
 bike_sharing = @reaction_network begin
     @species O(t)=10 W(t)=2
 	p₁, O => W
 	p₂, W => O
 end
+
+# ╔═╡ 7227a95a-ba0c-44dc-b0b8-18d6bbf362e8
+md"""
+!!! tip "Tip"
+	Subscripts 1, 2, etc, can be visualized by typing, after the letter, a **backslash** followed by an **underscore** and then the **TAB** key. For example `p\_1` followed by the TAB key will result in `p₁`.
+"""
 
 # ╔═╡ 9c7ab7fb-7380-41a3-85ea-714478ade218
 md"""
@@ -70,7 +72,6 @@ Convert the system to a symbolic differential equation model and verify, by anal
 """
 
 # ╔═╡ 1536fe23-0f8d-4b86-98d2-076248b35954
-# osys = missing
 osys = convert(ODESystem, bike_sharing)
 
 # ╔═╡ e6e2ff5c-38eb-4ba3-b430-c9031483a0a5
@@ -79,7 +80,6 @@ Initialize a vector `u0` with the initial conditions:
 """
 
 # ╔═╡ ab6af765-1cde-4da8-bbc1-a5fab391db54
-# u0 = missing
 u0 = [:O => 10, :W => 2]
 
 # ╔═╡ 378878a0-5c09-4eb0-ac43-1031014ff12a
@@ -96,7 +96,6 @@ Create a slider for the variable `p₁` in the range of $0.0$ and $1.0$ with a s
 """
 
 # ╔═╡ 0d8f53f8-0a14-4ac6-bd0c-2190d4db0909
-# @bind p₁ missing
 @bind p₁ Slider(0.0:0.1:1, default=0.0, show_value=true)
 
 # ╔═╡ 08d43ac8-a973-4d7b-baf7-4c37e54cfe24
@@ -105,7 +104,6 @@ Initialize vector `parms` with parameter values, `p₁` is the slider value and 
 "
 
 # ╔═╡ e20e4dd8-bdbb-4005-af68-6bf7e4ec130e
-# parms = missing
 parms = [:p₁=>p₁, :p₂=>0.30]
 
 # ╔═╡ 238e1120-34af-4d57-8efa-aa80ab28a874
@@ -114,17 +112,15 @@ Create a DiscreteProblem and store it in `dprob`:
 """
 
 # ╔═╡ d4c45709-70c9-4ba0-8fb8-6b600473723d
-# dprob = missing
 dprob = DiscreteProblem(bike_sharing, u0, tspan, parms)
 
 # ╔═╡ d06fb076-76e4-4248-a940-96804ea68833
 md"""
-Create a JumpProblem and store it in `jdprob`. Use the simulation method `Direct()` and an additional option `save_positions=(false, false)`. The latter prohibits to save the values just before and after the jump event (later, when solving the problem we will namely use `saveat=1.0`).
+Create a JumpProblem and store it in `jdprob`. Use the simulation method `Direct()` and an additional option `save_positions=(false, false)` (for info about this, click [here](https://docs.sciml.ai/JumpProcesses/dev/jump_solve/#JumpProcesses.jl)). The latter prohibits to save the values just before and after the jump event (later, when solving the problem we will namely use `saveat=1.0`).
 """
 
 # ╔═╡ 7644adf4-d992-48b1-b40a-12fdf30f6cb5
 jdprob = JumpProblem(bike_sharing, dprob, Direct(), save_positions=(false, false));
-# https://docs.sciml.ai/JumpProcesses/dev/jump_solve/#JumpProcesses.jl
 
 # ╔═╡ 59d2d3e1-354b-4444-b8a1-16ad8ea2ba94
 md"""
@@ -137,9 +133,6 @@ Create the `condition` function.
 """
 
 # ╔═╡ 1511d269-9706-41b1-b8e2-f85ebcedc2d8
-# function condition(u, t, integrator)
-# 	missing
-# end
 function condition(u, t, integrator)
 	true
 end
@@ -155,16 +148,6 @@ Hints:
 """
 
 # ╔═╡ 3cac94d6-14ae-42f2-b0b6-f47d87cdb518
-# function affect!(integrator)
-# 	if missing
-# 		missing
-# 		missing
-# 	end
-# 	if missing
-# 		missing
-# 		missing
-# 	end
-# end
 function affect!(integrator)
 	if integrator.u[1] > 12
 		integrator.u[1] = 12
@@ -182,7 +165,6 @@ Create the discrete callback function. Store it in `cb`. Again use the option `s
 """
 
 # ╔═╡ f947c2d9-9123-422d-8972-157717c85b3c
-# cb = missing
 cb = DiscreteCallback(condition, affect!, save_positions=(false,false));
 
 # ╔═╡ 74708270-b1ec-48c7-af32-3b970b92c706
@@ -191,7 +173,6 @@ Solve the problem and store it in `jdsol`. Use the `SSAStepper()` stepping algor
 """
 
 # ╔═╡ 2b00df5d-994e-47a1-8068-c93ce3f1a618
-# jdsol = missing
 jdsol = solve(jdprob, SSAStepper(), saveat=1.0, callback=cb);
 
 # ╔═╡ 9d06c31e-3525-4889-a1de-3fe02413c7d8
@@ -200,7 +181,6 @@ Plot the solution.
 """
 
 # ╔═╡ 9a90f800-3669-4831-b50b-c5405bbb9a03
-# missing
 plot(jdsol, ylim=(0, 12))
 
 # ╔═╡ a554fd16-aa3d-48ca-8de6-5582725c27d8
@@ -225,7 +205,6 @@ You can inspect the actual number of bike values at Olin by using `jdsol[:O]`:
 """
 
 # ╔═╡ f8942b10-773a-4b22-baad-8004fba8bd34
-# missing
 jdsol[:O]
 
 # ╔═╡ 43d41284-053d-4dfe-8d5b-96be70c0495c
@@ -236,7 +215,6 @@ Compare in that way `jdsol[:O]` with `0`:
 """
 
 # ╔═╡ a999ae2a-7567-41e7-9c0c-e94fad6f5d46
-# missing
 jdsol[:O] .== 0
 
 # ╔═╡ 9ebb5b44-04d7-4b89-acdb-e40a245703d2
@@ -245,7 +223,6 @@ Furthermore, if you want the count the number of `true` values in the latter (he
 """
 
 # ╔═╡ 049de8d5-b221-452b-b2c4-9bc1e0c17f48
-# missing
 count(jdsol[:O] .== 0)
 
 # ╔═╡ a73a2853-1f48-4179-9771-083794d3f137
@@ -262,23 +239,6 @@ Use the layout below to fill in `mean_zero_counts`.
 """
 
 # ╔═╡ 682e9120-0e1c-4dfa-9ec6-66bb0a3f4374
-# begin
-# 	p_values = 0.0:0.1:1.0  # different p-values
-# 	mean_zero_counts = []   # vector to store the corresponding mean zero values
-# 	for p_val = p_values    # p_val will be each of the p_values
-# 		zero_counts_p_val = []  # vector to store the zeros for the 1000 simulations
-# 		for i = 1:1000          # do a 1000 simulations
-# 			# take a deepcopy and remake the problem for the specific p-value
-# 			jdprob_re = missing
-# 			# solve the problem
-# 			jdsol_re = missing
-# 			# append the number of zeros to zero_counts_p_val
-# 			append!(..., ...)
-# 		end
-# 		# append the mean number of zeros to mean_zero_counts
-# 		append!(..., ...)
-# 	end
-# end
 begin
 	p_values = 0.0:0.1:1.0  # different p-values
 	mean_zero_counts = []   # vector to store the corresponding mean zero values
@@ -303,7 +263,6 @@ Have a look at the mean zero counts by typing `mean_zero_counts`:
 """
 
 # ╔═╡ 5968317a-6c07-4655-8137-6702656bb3b4
-# missing
 mean_zero_counts
 
 # ╔═╡ ff9370d8-3395-4382-9f51-afa11748319e
@@ -312,7 +271,6 @@ Plot the mean zero counts as a function of the $p$-values.
 """
 
 # ╔═╡ 48be49d0-0b60-44f3-8152-1ca917a4232e
-# missing
 plot(p_values, mean_zero_counts)
 
 # ╔═╡ d6452915-bdf0-48f0-8c7d-3df83c7bce72
@@ -332,6 +290,7 @@ md"""
 # ╟─d2f32eab-0b35-4794-9219-5bcbb4c069c5
 # ╟─016842c9-9479-4061-a27e-9dc006121f23
 # ╠═6c97bf81-ef32-45a4-aa7c-c8c26ba2d2c3
+# ╟─7227a95a-ba0c-44dc-b0b8-18d6bbf362e8
 # ╟─9c7ab7fb-7380-41a3-85ea-714478ade218
 # ╠═1536fe23-0f8d-4b86-98d2-076248b35954
 # ╟─e6e2ff5c-38eb-4ba3-b430-c9031483a0a5

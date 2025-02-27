@@ -53,11 +53,6 @@ Assign the following noise scaling values:
 - noise scaling of `0.0` for the remaining *reactions*
 """
 
-# ╔═╡ f7941ddf-f1e7-41d1-9764-b644dfed68c0
-md"""
-The parameter values are $k =$ 0.2, $Y =$ 0.76, $Q =$ 2.0, $V =$ 40.0 and $S_{in} =$ 2.2$\;g/L$. Suppose that at $t=$0$\;h$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of 0.1$\;g/L$. Simulate the evolution of $S$ and $X$ during $120$ hours.
-"""
-
 # ╔═╡ 6b627d84-b6a5-444d-8163-40a4cab181bd
 fermenter_sde_secondorder = @reaction_network begin
     @parameters η=0.10
@@ -97,11 +92,13 @@ tspan = (0.0, 120.0)
 params = [:k => 0.2, :Y => 0.76, :Q => 2, :V => 40, :Sin => 2.2, :η => 0.10]
 
 # ╔═╡ b2973e86-d89f-476a-8c41-de25a9e5c69d
+#=╠═╡
 md"""
 Create the SDE problem and store it in `sprob`.\
 Hint:
 - Use the option: `combinatoric_ratelaws=false`
 """
+  ╠═╡ =#
 
 # ╔═╡ aeddc31e-9de2-4792-a2d8-59a14dfc8173
 sprob = SDEProblem(fermenter_sde_secondorder, u0, tspan, params, combinatoric_ratelaws=false);
@@ -156,7 +153,6 @@ plot(essol, ylim=(0.0,2.0), linealpha=0.5)
 # ╟─959d6307-a30d-4ae7-970d-b2c7584c2c8f
 # ╟─98858b9c-d4f9-451f-a7b9-fcaa012ee28e
 # ╟─d2e2680c-01c6-449a-bb5f-7472bc1de243
-# ╟─f7941ddf-f1e7-41d1-9764-b644dfed68c0
 # ╠═6b627d84-b6a5-444d-8163-40a4cab181bd
 # ╟─47ca3573-691c-4127-85b9-d5b5a1a23fbb
 # ╠═e1f11068-e489-4c54-a30d-981f5cb19b47

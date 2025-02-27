@@ -37,12 +37,12 @@ using PlutoUI; TableOfContents()
 
 # ╔═╡ 1f975552-b0b8-4830-8dcc-214574d4fc38
 md"""
-# Exercise: Modeling a simple Bike Share System
+# Exercise: Modeling a simple Bike Sharing System
 """
 
 # ╔═╡ d2f32eab-0b35-4794-9219-5bcbb4c069c5
 md"""
-Imagine a bike share system for students traveling between Olin College and Wellesley College, which are about three miles apart in eastern Massachusetts. Suppose the system contains 12 bikes and two bike racks, one at Olin and one at Wellesley, each with the capacity to hold 12 bikes. As students arrive, check out a bike, and ride to the other campus, the number of bikes in each location changes.
+Imagine a bike sharing system for students traveling between Olin College and Wellesley College, which are about three miles apart in eastern Massachusetts. Suppose the system contains 12 bikes and two bike racks, one at Olin and one at Wellesley, each with the capacity to hold 12 bikes. As students arrive, check out a bike, and ride to the other campus, the number of bikes in each location changes.
 Initially there are 10 bikes at Olin and, hence, 2 bikes at Wellesley. For this simple model, we will aslo assume that the changes in the number of bikes at both locations is instantenuously. The rate at which a bike is moved from Olin to Wellesley is denoted as $p_1$ ($\#bikes\;min^{-1}$); the rate at which a bike is moved from Wellesley to Olin is denoted as $p_2$ ($\#bikes\;min^{-1}$). Both processes are zeroth-order and we want to see the evolution of bikes during $1\,h = 60\,min$.
 
 This is a discreet and stochastic problem and you need to solve it with SSA.
@@ -58,6 +58,12 @@ Create a *reaction network object* model for the aforementioned problem in order
 # 	missing
 # 	...
 # end
+
+# ╔═╡ 6500aebf-70de-453b-bf0d-f47006aaa4e0
+md"""
+!!! tip "Tip"
+	Subscripts 1, 2, etc, can be visualized by typing, after the letter, a **backslash** followed by an **underscore** and then the **TAB** key. For example `p\_1` followed by the TAB key will result in `p₁`.
+"""
 
 # ╔═╡ 9c7ab7fb-7380-41a3-85ea-714478ade218
 md"""
@@ -283,6 +289,7 @@ md"""
 # ╟─d2f32eab-0b35-4794-9219-5bcbb4c069c5
 # ╟─016842c9-9479-4061-a27e-9dc006121f23
 # ╠═6c97bf81-ef32-45a4-aa7c-c8c26ba2d2c3
+# ╟─6500aebf-70de-453b-bf0d-f47006aaa4e0
 # ╟─9c7ab7fb-7380-41a3-85ea-714478ade218
 # ╠═1536fe23-0f8d-4b86-98d2-076248b35954
 # ╟─e6e2ff5c-38eb-4ba3-b430-c9031483a0a5

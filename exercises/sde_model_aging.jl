@@ -44,7 +44,7 @@ A possible model is the following differential equation:
 
 $$\cfrac{dX}{dt} = \mu t - \beta \cfrac{X}{X + \kappa}$$
 
-Lets denote $X$ in trillions [$tn$]. The term $\mu t$ stands for the procution of senescent cells, and the term $- \beta \cfrac{X}{X + \kappa}$ for the removal of senescent cells. The time $t$ is in years [$y$]. The coefficient $\eta$ [$tn/y^2$] is a proportionality factor for the production, $\beta$ [$tn/y$] is the removal rate coefficient and $\cfrac{X}{X + \kappa}$ [$-$] is the corresponding saturation factor, with $\kappa$ [$tn$] the amount of $X$ at which they inhibit half of their own removal rate.
+Lets denote the amount of senescent cells as $X$ in trillions [$tn$]. The term $\mu t$ stands for the procution of senescent cells, and the term $- \beta \cfrac{X}{X + \kappa}$ for the removal of senescent cells. The time $t$ is in years [$y$]. The coefficient $\eta$ [$tn/y^2$] is a proportionality factor for the production, $\beta$ [$tn/y$] is the removal rate coefficient and $\cfrac{X}{X + \kappa}$ [$-$] is the corresponding saturation factor, with $\kappa$ [$tn$] the amount of $X$ at which they inhibit half of their own removal rate.
 
 If this model was all there was, then all individuals would age at the same rate and die at the same age. The model does not explain why genetically identical organisms could differ in the number of senenscent cells. Therefore, we will introduce  noise in the model by treating it as a **Stochastic Differential Equation** (SDE) model, where noise will be added to both, production and removal processes.
 """
@@ -58,7 +58,7 @@ md"""
 md"""
 Implement the above ODE into a *reaction network object*, and name it `senescent_cells_rn`.
 
-Take a default initial value $X(t=0)=0.0$ for the *species* $X$, and default values of $\mu=0.00558$, $\beta=0.4464$, $\kappa=1.116$ for the *parameters* in the model. In addition to the parameters, take $\eta=0.1$ as the *default noise scaling* factor, and, furthermore, set the noise scaling to $0.5$ for the process exhibiting the saturating removal of damage.
+Take a default initial value $X(t=0)=$0.0 for the *species* $X$, and default values of $\mu=$0.00558, $\beta=$0.4464, $\kappa=$1.116 for the *parameters* in the model. In addition to the parameters, take $\eta=$0.1 as the *default noise scaling* factor, and, furthermore, set the noise scaling to 0.5 for the process exhibiting the saturating removal of damage.
 """
 
 # ╔═╡ 38edfb50-7d6f-4fcc-b328-95ecb26d6de1
@@ -86,7 +86,7 @@ md"""
 
 # ╔═╡ 98c1f94e-aea5-40c5-bee7-8df8794fedb3
 md"""
-Initialize a vector `u0` with the default initial condition, set the timespan for the simulation (we will simulate from $0\;y$ to $120\;y$), and initialize a vector `param` with the default parameter values. In that way, later, you can change the initial condition and the parameter values if you want to try other values.
+Initialize a vector `u0` with the default initial condition, set the timespan for the simulation (we will simulate from $0\;y$ to $120\;y$), and initialize a vector `parms` with the default parameter values. In that way, later, you can change the initial condition and the parameter values if you want to try other values.
 """
 
 # ╔═╡ 80db134e-bc57-41b0-8e1b-2ac6bff0c806
@@ -181,7 +181,7 @@ md"""
 !!! hints
 - The number of senescent cells of the `i`-th trajoctory can be accessed with: `essol.u[i][:X]`.
 - The index of the first element in the `i`-th trajectory that is greater than 5 can be found with: `findfirst(>(5), essol.u[i][:X])`.
-- An index is a valid index when it if not `nothing`.
+- An index is a valid index when it is not `nothing`.
 - The time at index position `j` can be accessed with `essol.u[i].t[j]`
 - Appending an element, e.g., `x` to an array `times` can be done as follow: `append!(times, x)`
 """
@@ -201,7 +201,7 @@ md"""
 
 # ╔═╡ 65edc40f-430f-4d1a-9062-17bf8e1d7d59
 md"""
-Make a histogram with the array `times`. Use `bins=range(0, 120, length=121)`.
+Make a histogram with the array `times`. Use `bins=range(0, 120, length=121)` or `bins=0:120`.
 """
 
 # ╔═╡ 17a51f9e-0adf-4802-8d13-c43eb7801bc7
