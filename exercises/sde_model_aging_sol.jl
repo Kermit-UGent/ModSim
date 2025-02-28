@@ -73,7 +73,7 @@ end
 
 # ╔═╡ 00a1a641-f959-4275-8ed6-7991761be26a
 md"""
-For information about the `mm` function, click [here](https://docs.sciml.ai/Catalyst/stable/api/#Catalyst.mm).
+You could use the `mm` function. For information about it, click [here](https://docs.sciml.ai/Catalyst/stable/api/#Catalyst.mm).
 """
 
 # ╔═╡ 51edb519-2086-45a5-a666-b5a58c51b5e8
@@ -114,7 +114,7 @@ Create the SDE problem.
 """
 
 # ╔═╡ 7d164cdf-fd63-4c85-b168-3279d6d658eb
-sprob = SDEProblem(senescent_cells_rn, u0, tspan, parms)
+sprob = SDEProblem(senescent_cells_rn, u0, tspan, parms);
 
 # ╔═╡ 9f9a616a-4353-4f9a-8da5-effe4d214ed0
 md"""
@@ -157,11 +157,14 @@ esprob = EnsembleProblem(sprob)
 
 # ╔═╡ 7d531f11-1a64-4b43-aa4f-04d282a615bd
 md"""
-Solve the ensemble problem. Use `EM()` as solver, take a time step `dt=0.1`, use the options `save_everystep=true`, and `trajectories=100`.
+Solve the ensemble problem. Use `EM()` as solver, take a time step `dt=0.1`, use the option `trajectories=100`.
 """
+#=
+Solve the ensemble problem. Use `EM()` as solver, take a time step `dt=0.1`, use the options `save_everystep=true`, and `trajectories=100`.
+=#
 
 # ╔═╡ 5aaf1395-9b7c-451f-b1a3-44e5ba3c4d6a
-essol = solve(esprob, EM(), dt=0.1, save_everystep=true, trajectories=100)
+essol = solve(esprob, EM(), dt=0.1, trajectories=100)
 
 # ╔═╡ c048528f-58a2-415d-a338-fc87302367b8
 md"""

@@ -116,7 +116,7 @@ Create the ODE problem and store it in `oprob`:
 """
 
 # ╔═╡ 629126b3-0b6b-43f0-9142-2d4d7d6270d9
-# oprob = missing        # Uncomment and complete the instruction
+# oprob = missing;        # Uncomment and complete the instruction
 
 # ╔═╡ 3c071a33-5092-42f7-80b2-63066bdf3f22
 md"""
@@ -145,7 +145,7 @@ Create a DiscreteProblem and store it in `dprob`:
 """
 
 # ╔═╡ 581a5b6e-04a7-4fd1-9f69-a9cf8655a06c
-# dprob = missing                 # Uncomment and complete the instruction
+# dprob = missing;                 # Uncomment and complete the instruction
 
 # ╔═╡ 497fe4e8-b451-4dd7-b961-6e7968c6cb3d
 md"""
@@ -153,7 +153,7 @@ Create a JumpProblem and store it in `jdprob`. Use the simulation method `Direct
 """
 
 # ╔═╡ 74e91495-998e-48a0-b14a-9d7be2c6410d
-# jdprob = missing                # Uncomment and complete the instruction
+# jdprob = missing;                # Uncomment and complete the instruction
 
 # ╔═╡ 9c9f097b-2a84-4383-843c-0cdc1b40e061
 md"""
@@ -199,7 +199,7 @@ Write a piece of code that solves the problem a $1000$ times and stores the time
 
 # ╔═╡ 2eb41790-23ef-43fc-8b69-7dd9dbb9f820
 md"""
-Make a histogram so that you can have an idea of the distribution when the rabbits die out. Use `bins=range(0, 15, length=151)`.
+Make a histogram so that you can have an idea of the distribution when the rabbits die out. Use `bins=range(0, 15, length=151)` or `bins=0:0.1:15`.
 """
 
 # ╔═╡ 1c8188de-e8b8-44ae-b0b6-7d490f3a15e8

@@ -112,7 +112,7 @@ Create a DiscreteProblem and store it in `dprob`:
 """
 
 # ╔═╡ d4c45709-70c9-4ba0-8fb8-6b600473723d
-dprob = DiscreteProblem(bike_sharing, u0, tspan, parms)
+dprob = DiscreteProblem(bike_sharing, u0, tspan, parms);
 
 # ╔═╡ d06fb076-76e4-4248-a940-96804ea68833
 md"""

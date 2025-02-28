@@ -71,6 +71,11 @@ Take a default initial value $X(t=0)=$0.0 for the *species* $X$, and default val
 #     missing
 # end
 
+# ╔═╡ 8358d849-87ac-4d22-b2f9-86c957a1691b
+md"""
+You could use the `mm` function. For information about it, click [here](https://docs.sciml.ai/Catalyst/stable/api/#Catalyst.mm).
+"""
+
 # ╔═╡ 51edb519-2086-45a5-a666-b5a58c51b5e8
 md"""
 Convert this *reaction model* into a symbolic differential equation model and verify that you get the correct differential equation as mentioned above.
@@ -109,7 +114,7 @@ Create the SDE problem.
 """
 
 # ╔═╡ 7d164cdf-fd63-4c85-b168-3279d6d658eb
-# sprob = missing                # Uncomment and complete the instruction
+# sprob = missing;                # Uncomment and complete the instruction
 
 # ╔═╡ 9f9a616a-4353-4f9a-8da5-effe4d214ed0
 md"""
@@ -152,7 +157,7 @@ Create an `EnsembleProblem` based on `sprob`.
 
 # ╔═╡ 7d531f11-1a64-4b43-aa4f-04d282a615bd
 md"""
-Solve the ensemble problem. Use `EM()` as solver, take a time step `dt=0.1`, use the options `save_everystep=true`, and `trajectories=100`.
+Solve the ensemble problem. Use `EM()` as solver, take a time step `dt=0.1`, use the option `trajectories=100`.
 """
 
 # ╔═╡ 5aaf1395-9b7c-451f-b1a3-44e5ba3c4d6a
@@ -285,6 +290,7 @@ md"- Answer: missing"
 # ╟─d917e75d-eefb-415f-ba45-2f1d7c62d63c
 # ╟─7bda135b-2e0a-425f-b30c-e5a09dbb8a4a
 # ╠═38edfb50-7d6f-4fcc-b328-95ecb26d6de1
+# ╟─8358d849-87ac-4d22-b2f9-86c957a1691b
 # ╟─51edb519-2086-45a5-a666-b5a58c51b5e8
 # ╠═b3dd11e4-1209-46f3-a47a-07b54c5e9d77
 # ╟─0524da26-35cb-4846-b7ef-f5842ae5db74

@@ -70,6 +70,11 @@ The parameter values are $k =$ 0.2, $Y =$ 0.76, $Q =$ 2.0, $V =$ 40.0 and $S_{in
 # ╔═╡ 47ca3573-691c-4127-85b9-d5b5a1a23fbb
 md"""
 Convert the system to a symbolic differential equation model and verify, by analyzing the differential equation, that your model is correctly implemented.
+
+Hint:
+- Use the option: `combinatoric_ratelaws=false`
+
+For information about this option, click [here](https://docs.sciml.ai/Catalyst/stable/introduction_to_catalyst/introduction_to_catalyst/#introduction_to_catalyst_ratelaws).
 """
 
 # ╔═╡ e1f11068-e489-4c54-a30d-981f5cb19b47
@@ -92,7 +97,7 @@ Set the timespan for the simulation:
 # tspan = missing    # Uncomment and complete the instruction
 
 # ╔═╡ a4d28c40-e315-4bb9-87a5-2b45dd633e5f
-# params = missing    # Uncomment and complete the instruction
+# parms = missing    # Uncomment and complete the instruction
 
 # ╔═╡ aeddc31e-9de2-4792-a2d8-59a14dfc8173
 # sprob = missing      # Uncomment and complete the instruction
@@ -131,7 +136,7 @@ Solve the `EnsembleProblem` using the same solver (and time step) as before, for
 
 # ╔═╡ 26746cab-d3e7-4a01-bbbd-9fcb49ef652f
 md"""
-Plot the results. Use as option again `ylim=(0.0,2.0)` and also `linealpha=0.5` to modify the line boldness.
+Plot the results. Use as option again `ylim=(0.0,2.0)` and also `linealpha=0.5` (or `la=0.5`) to modify the line boldness.
 """
 
 # ╔═╡ 4fcc1d0a-9d30-4056-b8a3-3d802edc42e5

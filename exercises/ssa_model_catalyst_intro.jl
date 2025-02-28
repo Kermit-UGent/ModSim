@@ -247,7 +247,7 @@ We create a DiscreteProblem by calling the `DiscreteProblem` function. Applying 
 """
 
 # ╔═╡ e2f215e7-8d20-4e72-9e0b-cc0ce150e55b
-dprob = DiscreteProblem(infection_model, u0, tspan, params)
+dprob = DiscreteProblem(infection_model, u0, tspan, params);
 
 # ╔═╡ d061c4e2-8fbb-4ac5-95cf-c37d2916e669
 md"""
