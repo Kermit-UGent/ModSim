@@ -135,14 +135,10 @@
 \frame{
 \frametitle{Stochastic differential equations}
 \large
-ODEs
+ODEs vs SDEs
 \begin{itemize}
-\item model dynamics of \textbf{deterministic} system
-\end{itemize}
-
-SDEs
-\begin{itemize}
-\item model dynamics of a system with a \textbf{noisy component}
+\item ODEs: model dynamics of \textbf{deterministic} system
+\item SDEs: model dynamics of a system with a \textbf{noisy component}
 \end{itemize}
 \vfill
 SDEs can generate trends with \textbf{random fluctuations}, e.g., in:
@@ -170,23 +166,23 @@ Suitable for temperature, pressure, price, very large number of species.
 
 \frame{
 \frametitle{Stochastic differential equations}
-\Large
+\Large \medskip
 In many natural systems, the noisiness originates from \textbf{Brownian motion}:
 
 \begin{figure}
 	\includegraphics[width=0.5\textwidth]{figs/single_brownian_motion.png}
 \end{figure}
 
-Motion is the result of random collisions with surrounding particles.
+$\blacktriangleright$ Motion is the result of random collisions with surrounding particles.
 
 }
 
 
 \frame{
 \frametitle{Stochastic differential equations}
-\large
-Brownian motion can be modelled by a \textbf{Wiener process}.\\
-{\small A stochastic process representing a stochastic variable $W(t)$ through time:}
+\large \medskip
+Brownian motion can be modelled by a \textbf{Wiener process}.\\ \smallskip
+{\small $\blacktriangleright$ A stochastic process representing a stochastic variable $W(t)$ through time:}
 $$
 W(t + \tau) - W(t) \sim N(0, \sqrt{\tau})
 $$
@@ -204,16 +200,20 @@ Generates continuous functions and $W(t)$ is a real value (${\rm I\!R}$).
 \frametitle{Stochastic differential equations}
 \Large
 
-A stochastic differential equation contains a deterministic part (ODE) and a stochastic part (Wiener process):
+A stochastic differential equation contains two parts: 
+\begin{itemize}
+	\item a deterministic part (ODE)
+	\item a stochastic part (Wiener process)
+\end{itemize}
 \vfill
 $$
 d Y(t) = \mu(Y(t), t)dt + \sigma(Y(t), t)dW_t
 $$
 \vfill
-During the numerical calculation the variable $Y(t)$ is changing in small steps where
+In the numerical calculation, the variable $Y(t)$ changes in small steps. At every step, two terms are added:
 \begin{enumerate}
-\item every step we add $\mu(Y(t), t)dt$, and then 
-\item a bit of noise $dW_t$ proportional to $\sigma(Y(t), t)$
+\item $\mu(Y(t), t)dt$ is added to the previous step,  
+\item some noise $dW_t$ proportional to $\sigma(Y(t), t)$.
 \end{enumerate}
 
 
@@ -228,8 +228,10 @@ Many phenomena involve discrete variables, e.g.:
 \item small population of animals
 \item reactions involving a limited number of species
 \item traffic monitoring
-\item standing in a queues
+\item standing in a queue
 \end{itemize}
+
+\bigskip
 
 Variables are represented by natural numbers (${\rm I\!N}$).
 
@@ -248,12 +250,12 @@ Variables are represented by natural numbers (${\rm I\!N}$).
 \frame{
 \frametitle{Discrete Jump Equations}
 \large
-\textbf{The Gillespie algorithme}
+\textbf{The Gillespie algorithm} \medskip
 \begin{itemize}
-\item The Gillespie algorithm is a way to simulate the \textit{random}, \textit{discrete events} in a system that evolves through jumps (or reactions).
+\item This method is a way to simulate the \textit{random}, \textit{discrete events} in a system that evolves through jumps (or reactions).
 \item It is widely used in chemical kinetics and population dynamics when modeling systems where changes happen at random times rather than continuously.
 \item Since the process is stochastic (random), the time to the next event is not fixed but follows an \textbf{exponential distribution}.
-\item Each reaction has a certain likelihood of occurring, depending on its rate which also depend on the number of reactants).
+\item Each reaction has a certain likelihood of occurring, depending on its rate which also depends on the number of reactants.
 \end{itemize}
 
 }
@@ -303,7 +305,7 @@ The following notebooks are the subjects for today:\vspace*{2mm}
 \begin{itemize}
 \item \texttt{sde\_model\_catalyst\_intro.jl} (introduction) \vspace*{2mm}
 \item \texttt{sde\_model\_fermenter\_secondorder.jl}
-\item \texttt{sde\_model\_aging.jl} \vspace*{2mm}
+\item \texttt{sde\_model\_aging.jl} \vspace*{2mm} \bigskip
 \item \texttt{ssa\_model\_catalyst\_intro.jl} (introduction) \vspace*{2mm}
 \item \texttt{ssa\_model\_foxes\_rabbits}
 \item \texttt{ssa\_model\_bike\_sharing.jl}
