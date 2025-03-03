@@ -115,7 +115,7 @@
 	\item Stochastic Differential Equations (SDE)
 	\item Discrete Jump Equations (DJE) \bigskip
 	\end{itemize}
-	\item Example exercises
+	\item Example exercises (infection model)
 	\begin{itemize}
 		\large
 		\item Solving SDE problems with Catalyst 
@@ -127,7 +127,7 @@
 		\item Fermenter - Second order kinetics (SDE)
 		\item Aging and saturated repair (SDE)
 		\item Foxes and rabbits (DJE)
-		\item A simple bike share system (DJE)
+		\item A simple bike sharing system (DJE)
 	\end{enumerate}
 \end{itemize}
 }
@@ -210,7 +210,7 @@ $$
 d Y(t) = \mu(Y(t), t)dt + \sigma(Y(t), t)dW_t
 $$
 \vfill
-In the numerical calculation, the variable $Y(t)$ changes in small steps. At every step, two terms are added:
+In the numerical integration, the variable $Y(t)$ changes in small steps. At every step, two terms are added:
 \begin{enumerate}
 \item $\mu(Y(t), t)dt$ is added to the previous step,  
 \item some noise $dW_t$ proportional to $\sigma(Y(t), t)$.
@@ -252,8 +252,8 @@ Variables are represented by natural numbers (${\rm I\!N}$).
 \large
 \textbf{The Gillespie algorithm} \medskip
 \begin{itemize}
-\item This method is a way to simulate the \textit{random}, \textit{discrete events} in a system that evolves through jumps (or reactions).
-\item It is widely used in chemical kinetics and population dynamics when modeling systems where changes happen at random times rather than continuously.
+\item This method is a way to simulate the \textit{random}, \textit{discrete events} in a system that evolves through \textbf{jumps} (or reactions).
+\item It is widely used in chemical kinetics and population dynamics when modeling systems where \textbf{changes happen at random times} rather than continuously.
 \item Since the process is stochastic (random), the time to the next event is not fixed but follows an \textbf{exponential distribution}.
 \item Each reaction has a certain likelihood of occurring, depending on its rate which also depends on the number of reactants.
 \end{itemize}
@@ -272,7 +272,7 @@ Variables are represented by natural numbers (${\rm I\!N}$).
 	\vfill %\pause
 	\item Simulating systems as discrete jump problems
 	\vfill %\pause
-	\item Plotting distributions/histograms from simulations
+	\item Plotting distributions/histograms
   \end{enumerate}
   }
 }
@@ -319,10 +319,10 @@ The following notebooks are the subjects for today:\vspace*{2mm}
 \large
 We will use the infection model to illustrate the following:
 \begin{itemize}
-\item Implementation of the system as a \textit{reaction network} object including a noise scaling parameter
+\item Implementation of the system as a \textit{reaction network} object including a \textit{noise scaling} parameter
 \item Simulation of the system as an SDE-problem
-\item Simulating the system as an ensemble problem
-\item Introducing a discrete callback function
+\item Simulating the system as an \textit{ensemble problem}
+\item Introducing a \textit{discrete callback} function
 \item Analysing the results from an ensemble problem
 \end{itemize}
 }
@@ -337,7 +337,7 @@ Notebook: \texttt{sde\_model\_catalyst\_intro.jl}
 The infection model:
 
 \begin{figure}
-	\includegraphics[width=0.6\textwidth]{figs/infection_model.png}
+\includegraphics[width=0.6\textwidth]{figs/infection_model.png}
 \end{figure}
 }
 
@@ -349,8 +349,16 @@ The infection model:
 Notebook: \texttt{ode\_model\_fermenter\_secondorder.jl}
 
 \begin{figure}
-	\includegraphics[width=0.5\textwidth]{figs/fermenter_model.png}
+\begin{minipage}{0.6\textwidth}
+\centering
+\includegraphics[width=0.8\textwidth]{figs/fermenter_model.png}
+\end{minipage}%
+\begin{minipage}{0.4\textwidth}
+\centering
+$$r = k S X$$
+\end{minipage}
 \end{figure}
+
 }
 
 
@@ -389,6 +397,17 @@ Our simple model has two features:
 $$
 \cfrac{dX}{dt} = \mu t - \beta \cfrac{X}{X + \kappa}
 $$
+}
+
+
+\frame{
+\frametitle{Discrete Jump Problems}
+\large
+We will use the infection model to illustrate the following:
+\begin{itemize}
+\item Simulation of the system as an Discrete Jump problem
+\item Extracting information from multiple simulations
+\end{itemize}
 }
 
 
