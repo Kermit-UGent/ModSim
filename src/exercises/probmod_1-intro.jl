@@ -1,6 +1,17 @@
 ### A Pluto.jl notebook ###
 # v0.20.4
 
+#> [frontmatter]
+#> order = "16"
+#> title = "3. ProbMod intro"
+#> date = "2025-03-07"
+#> tags = ["exercises"]
+#> description = "Introduction to the sampling practicals"
+#> layout = "layout.jlhtml"
+#> 
+#>     [[frontmatter.author]]
+#>     name = "Bram Spanoghe"
+
 using Markdown
 using InteractiveUtils
 
@@ -9,6 +20,9 @@ using Pkg; Pkg.activate("..");
 
 # ╔═╡ 8307092d-368d-441d-8315-3dc312026534
 using Turing, StatsPlots
+
+# ╔═╡ d86c5cc5-5353-4b04-b1d2-06527c85b2db
+using PlutoUI; TableOfContents()
 
 # ╔═╡ aeb0aef0-b2ee-11ef-3cca-7f80b487ea17
 md"# Sampling notebook #1: Intro"
@@ -79,40 +93,6 @@ md"""
 	Hint: there should be an inverse tangent function somewhere down the line.
 """
 
-# ╔═╡ 5acc6791-7cb6-4a31-a28d-649e761329ee
-md"## Copy-paste example"
-
-# ╔═╡ f3a73486-485a-4c69-b3db-2153b5a06bd8
-md"""This section showcases the most essential code for the first practical. The next sections explain it in detail. 
-
-The code is wrapped in a `let` block so Pluto won't complain about the same variable names being used again in the next section.
-"""
-
-# ╔═╡ 51f9b6f9-9415-4030-82a6-32f9742bf7f5
-let
-	n_samples = 1000
-
-	@model function distances()
-		x ~ Uniform(-1, 1)
-		y ~ Uniform(-1, 1)
-		dist = sqrt(x^2 + y^2)
-		return dist
-	end
-
-	dist_model = distances();
-	sp_dists = [dist_model() for sample_idx in 1:n_samples];
-	sp_inside = sp_dists .<= 1;
-	prob_inside = mean(sp_inside)
-	println("Pi is estimated as $(4 * prob_inside)") 
-
-	dist_chain = sample(dist_model, Prior(), n_samples);
-	sp_dists2 = generated_quantities(dist_model, dist_chain);
-	sp_x = dist_chain[:x]
-	sp_y = dist_chain[:y]
-	scatter(sp_x, sp_y, group = vec(sp_dists2 .<= 1),
-		legend = false, aspect_ratio = :equal)
-end
-
 # ╔═╡ ccdcfa65-a02f-4110-a664-36090c3291d8
 md"## Explanation"
 
@@ -166,7 +146,7 @@ md"We can use this to generate a large number of samples and make estimations ab
 n_samples = 1_000
 
 # ╔═╡ 1012cee3-e574-43d9-b6ed-c9aa8a5ec552
-sp_dists = [dist_model() for sample_idx in 1:n_samples];
+sp_dists = [dist_model() for sample_idx in 1:n_samples]
 
 # ╔═╡ 4084cee7-1d2d-4fc0-8226-d9d416bb4eec
 histogram(sp_dists, title = "Distances of points to origin", bins = 20, legend = nothing)
@@ -175,7 +155,7 @@ histogram(sp_dists, title = "Distances of points to origin", bins = 20, legend =
 md"Currently, we have samples of the distance to the origin. We can easily transform these to samples of being inside the circle or not, and subsequently estimate the desired probability."
 
 # ╔═╡ 1df2ac6a-fa56-47e2-8c10-2a5d4da3a475
-sp_inside = sp_dists .<= 1; # the circle has a radius of 1
+sp_inside = sp_dists .<= 1 # the circle has a radius of 1
 
 # ╔═╡ 418e1de5-74ad-47d5-8500-4996a86c8e53
 md"""
@@ -214,8 +194,29 @@ md"""
 An alternate way to generate a number of samples from our model is to use the `sample` function. Rather than getting samples of the function's output, this returns sampled values of _all the random variables_.
 """
 
+# ╔═╡ 609af082-ffcc-4e8f-99ab-825b451d6d2b
+md"""
+The inputs for the function `sample` are:
+- the Turing model.
+- the sampler.
+- the desired amount of samples. 
+The second argument, the choice of sampler, is mostly important when doing **inference**, as we'll see in practical 4. When we want to simply sample from the model's priors without any inference, we use the `Prior()` sampler.
+"""
+
 # ╔═╡ 8ef27c2f-31fe-4411-9d2f-a65041e07641
 dist_chain = sample(dist_model, Prior(), n_samples)
+
+# ╔═╡ 469a3fad-b491-4ee6-88a9-cfc47c78700a
+md"""
+!!! note
+	The `lp` column in the above output of `sample` is the **log probability** of that sample. This example uses 2 continuous distributions with an interval of size 2, so the value is always the same: 
+	$\text{ln}(P(X = x) * P(Y = y)) = \text{ln}(1/2 * 1/2) = \text{ln}(1/4) = -1.39$
+"""
+
+# ╔═╡ 95d50ada-1d2b-47af-8447-c6a465e59025
+md"""
+The samples are visualised below:
+"""
 
 # ╔═╡ ee6a2c1d-5522-4870-a0e1-664f8ccd5d8f
 scatter(dist_chain[:x], dist_chain[:y], aspect_ratio = :equal, label = "Dart locations")
@@ -227,16 +228,16 @@ md"The sample values of a random variable can be acquired by indexing the result
 dist_chain[:x] # or dist_chain["x"]
 
 # ╔═╡ eb4b6d56-1e41-4e75-914b-8e7444afb288
-md"This can be useful for making plots, for example"
+md"This can be useful for making plots, for example."
 
 # ╔═╡ 3bfaf571-2aa8-4b13-8c48-e8434407597b
 md"What if we want the function's return value too? We could calculate it based on our random variables by hand as `sqrt.(dist_chain[:x].^2 + dist_chain[:y].^2)`, or use the `generated_quantities` function."
 
 # ╔═╡ 0dcc8d6f-3ab2-429d-bcf4-f022ea5d0124
-sp_dists_alt = generated_quantities(dist_model, dist_chain);
+sp_dists_alt = generated_quantities(dist_model, dist_chain)
 
 # ╔═╡ 5a8adeb4-46cf-486f-adda-24661a79b2e9
-sp_inside_alt = sp_dists_alt .<= 1;
+sp_inside_alt = sp_dists_alt .<= 1
 
 # ╔═╡ 28c48f45-726e-4352-b3b2-416dbab9cb0d
 scatter(dist_chain[:x], dist_chain[:y], aspect_ratio = :equal, groups = vec(sp_inside_alt), label = ["Outside of circle" "Inside of circle"]) 
@@ -265,10 +266,19 @@ end
 distloop_model = distances_loop();
 
 # ╔═╡ 330531d8-c0cf-4d0f-84b3-42acf9e30b39
-sp_loop = [distloop_model() for i in 1:n_samples];
+sp_loop = [distloop_model() for i in 1:n_samples]
 
 # ╔═╡ 9d786f74-73de-4fe3-8842-fa394641ce29
 4*mean(sp_loop .<= 1)
+
+# ╔═╡ 9ae88cb6-d74a-4d28-ae5f-e1cf325b6acb
+md"If you want to retrieve one of the random variables using `sample`, you can simply index the output as follows:"
+
+# ╔═╡ eb295f23-1afd-4966-a55d-ba10b3f9b72b
+loop_chain = sample(distloop_model, Prior(), n_samples);
+
+# ╔═╡ f62cf74f-4572-4374-84c6-79b502feacb4
+loop_chain["coords[1]"]
 
 # ╔═╡ 6faecd7e-fa99-4616-86c5-2561985f98a1
 md"### Working with Distributions"
@@ -321,21 +331,57 @@ sp_inside_noturing = sp_dists_noturing .<= 1
 
 end
 
+# ╔═╡ 5acc6791-7cb6-4a31-a28d-649e761329ee
+md"## The essentials"
+
+# ╔═╡ f3a73486-485a-4c69-b3db-2153b5a06bd8
+md"""
+The most essential code for the first practical is reiterated here without long explanations to provide an easy reference for making the practical exercises.
+
+Side note: the code is wrapped in a `let` block so Pluto won't complain about the same variable names being used again.
+"""
+
+# ╔═╡ 51f9b6f9-9415-4030-82a6-32f9742bf7f5
+let
+	n_samples = 1000
+
+	@model function distances()
+		x ~ Uniform(-1, 1)
+		y ~ Uniform(-1, 1)
+		dist = sqrt(x^2 + y^2)
+		return dist
+	end
+
+	dist_model = distances(); # instantiate model
+	sp_dists = [dist_model() for sample_idx in 1:n_samples]; 
+		# make sample (= steekproef or `sp`)
+	sp_inside = sp_dists .<= 1; 
+		# transform into sample of whether point is inside the circle
+	prob_inside = mean(sp_inside) # =(amount of points in circle)/(amount of points)
+	println("Pi is estimated as $(4 * prob_inside)") 
+
+	# alternative way of generating the same sample
+	dist_chain = sample(dist_model, Prior(), n_samples);
+	sp_dists2 = generated_quantities(dist_model, dist_chain);
+	sp_x = dist_chain[:x] # this method allows recovery of stochastic variables
+	sp_y = dist_chain[:y]
+	scatter(sp_x, sp_y, group = vec(sp_dists2 .<= 1),
+		legend = false, aspect_ratio = :equal) # which is nice for plotting
+end
+
 # ╔═╡ Cell order:
 # ╟─aeb0aef0-b2ee-11ef-3cca-7f80b487ea17
 # ╟─30957e05-85b8-4106-9635-82a5c11d9825
 # ╟─13636a8a-8c31-4397-8a7d-5cd7f899d7a5
 # ╠═a2410616-5a17-403c-aa2f-dc93c2633c7f
 # ╠═8307092d-368d-441d-8315-3dc312026534
+# ╠═d86c5cc5-5353-4b04-b1d2-06527c85b2db
 # ╟─9f89e350-199f-4875-947b-61df653ffc19
 # ╟─2e544855-16b8-4794-9ba7-70a1e7209dd2
 # ╟─88b3087c-f78a-4df4-a9dc-5696bf4052d5
 # ╟─78f872c6-013b-4ad1-966f-9e0ce3288019
 # ╟─bde6033f-15a8-4716-a41e-080f5d48e9d6
 # ╟─1724e4e4-18d2-430d-a8b0-11f5891b09a3
-# ╟─5acc6791-7cb6-4a31-a28d-649e761329ee
-# ╟─f3a73486-485a-4c69-b3db-2153b5a06bd8
-# ╠═51f9b6f9-9415-4030-82a6-32f9742bf7f5
 # ╟─ccdcfa65-a02f-4110-a664-36090c3291d8
 # ╟─43e8f794-fec2-4ce4-9306-2fc8a9565343
 # ╟─ed788556-1627-4e9a-b901-e532272a8265
@@ -361,7 +407,10 @@ end
 # ╟─19162953-a1d6-4b3b-962e-947e36b032c5
 # ╟─c79118af-a437-4979-a857-a6c84e1f789a
 # ╟─55206a66-fda0-4299-95f0-6dcc32287f3a
+# ╟─609af082-ffcc-4e8f-99ab-825b451d6d2b
 # ╠═8ef27c2f-31fe-4411-9d2f-a65041e07641
+# ╟─469a3fad-b491-4ee6-88a9-cfc47c78700a
+# ╟─95d50ada-1d2b-47af-8447-c6a465e59025
 # ╟─ee6a2c1d-5522-4870-a0e1-664f8ccd5d8f
 # ╟─563e0fa0-25b9-4b36-b213-c952199caa32
 # ╠═3994fc44-5fda-47dc-8cc6-e2550d9c237d
@@ -376,6 +425,9 @@ end
 # ╠═c50b7bb9-57e9-4f86-a0fa-0a68488b2fa9
 # ╠═330531d8-c0cf-4d0f-84b3-42acf9e30b39
 # ╠═9d786f74-73de-4fe3-8842-fa394641ce29
+# ╟─9ae88cb6-d74a-4d28-ae5f-e1cf325b6acb
+# ╠═eb295f23-1afd-4966-a55d-ba10b3f9b72b
+# ╠═f62cf74f-4572-4374-84c6-79b502feacb4
 # ╟─6faecd7e-fa99-4616-86c5-2561985f98a1
 # ╟─9621ceec-c532-4ef5-883d-da67af13bfa1
 # ╟─996e876a-8e2d-44d4-bd3a-7a8d4fd8c6ea
@@ -387,3 +439,6 @@ end
 # ╠═b577685b-00fb-4869-b930-1ec6cd163f7d
 # ╟─03ebb0a1-4fff-4d87-8d86-4d409d09363d
 # ╠═48fe2927-8c79-4482-8edc-21d8e0819619
+# ╟─5acc6791-7cb6-4a31-a28d-649e761329ee
+# ╟─f3a73486-485a-4c69-b3db-2153b5a06bd8
+# ╠═51f9b6f9-9415-4030-82a6-32f9742bf7f5

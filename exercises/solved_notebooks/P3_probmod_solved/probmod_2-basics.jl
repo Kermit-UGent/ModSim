@@ -10,6 +10,9 @@ using Pkg; Pkg.activate("..")
 # ╔═╡ 4cfd4721-e29a-4270-8d15-021bcc966eb1
 using Turing, StatsPlots
 
+# ╔═╡ c88b8a8e-751c-43fd-b1d9-cf6ae2089a15
+using PlutoUI; TableOfContents()
+
 # ╔═╡ e4cb065e-12c6-4f1c-8497-1013fa9411d6
 md"# Sampling notebook #2: Basics"
 
@@ -30,7 +33,7 @@ Let `X ∼ Poisson(10)` and `Y ~ Poisson(X)`.
 """
 
 # ╔═╡ def27d26-2205-4a66-94f3-eddbc17483bf
-md"### 1"
+md"### 1: Plots"
 
 # ╔═╡ ff38df99-f843-414d-8e45-b46e06a65c22
 @model function doublepoisson()
@@ -55,7 +58,7 @@ plot(Poisson(10))
 histogram(spY)
 
 # ╔═╡ 13989ba4-bcf8-4fdd-8aee-ab58c8905bc9
-md"### 2"
+md"### 2: Probabilities"
 
 # ╔═╡ 09a87037-9f4f-4dd9-bb6c-fe717db39ea6
 probXY1 = mean(3 .< spY .<= 10)
@@ -64,7 +67,7 @@ probXY1 = mean(3 .< spY .<= 10)
 probXY2 = mean(spY.^2 .> 100)
 
 # ╔═╡ c243ca59-191d-4905-825e-6d7825a3c8a4
-md"### 3"
+md"### 3: Variances"
 
 # ╔═╡ 04cc5b42-7ab2-4055-a959-ba894c598f69
 spX = dpchain[:X];
@@ -92,7 +95,7 @@ Let `U ~ Uniform(0, 4)`, `V ∼ Normal(U, 1)` and `W ~ TriangularDist(0, 4, U)`.
 """
 
 # ╔═╡ 9e5cc347-c74f-46a3-9534-c5ad812844bf
-md"### 1"
+md"### 1: Histogram"
 
 # ╔═╡ 47a43282-3892-4a9a-94b7-c359fa74e12b
 @model function combinations()
@@ -120,7 +123,7 @@ spVW = abs.(spV - spW)
 histogram(spVW)
 
 # ╔═╡ faa105b6-0700-4f4d-92fe-2bb72a4d6e44
-md"### 2"
+md"### 2: Probabilities"
 
 # ╔═╡ b4f156df-0b9c-495a-b95b-000c7f166243
 probVW1 = mean(spV .> spW)
@@ -129,12 +132,12 @@ probVW1 = mean(spV .> spW)
 probVW2 = mean(spV .* spW .>= 10)
 
 # ╔═╡ 4decd959-aeb9-47d4-a381-14bbf4dbc5ab
-md"### 3"
+md"### 3: Independence"
 
 # ╔═╡ aa953baa-5105-49d7-82e6-94ca462624f7
 md"""
 !!! hint
-	One way to disprove independence is showing that $E[V] \neq E[V \mid W \leq w]$ for any value $w$.
+	One way to prove dependence is showing that $E[V] \neq E[V \mid W \leq w]$ for at least one value $w$.
 """
 
 # ╔═╡ b2999f6e-2dbd-44ab-a303-97234f665d33
@@ -159,13 +162,13 @@ You can choose between your 2 mightiest spells:
 # ╔═╡ 747e3c0a-357a-448a-b479-d0fcbe44a6c0
 md"""
 !!! questions
-    - What are the probabilities of either attack doing the job? 
-    - Plot a histogram of the damage of both attacks.
-	- What is the probability of watercube dealing more damage than dirtprism?
+    1. What is the probability that Watercube does the job? Also plot a histogram of its damage. 
+    1. Do the same for Dirtprism.
+	1. What is the probability that watercube deals more damage than dirtprism?
 """
 
-# ╔═╡ eda95f45-083a-4e65-b57e-bd9890da1f9c
-md"### 4d20"
+# ╔═╡ 0e16af61-c4d4-4574-85e2-508f3952b3ce
+md"### 1: Watercube"
 
 # ╔═╡ 36477423-5628-4ed3-b54d-9a050557f6b7
 @model function watercube()
@@ -191,8 +194,8 @@ p_watercube_kills = mean(sp_w .>= 50)
 # ╔═╡ bc5f5d70-e269-45f9-867b-a00876ce8c40
 histogram(sp_w, bins = 30)
 
-# ╔═╡ a1b933ac-5d1b-4800-a6e8-e942846b19d8
-md"### 20d4"
+# ╔═╡ 44a2cabc-aca9-4bb7-af9d-cd735c424d7b
+md"### 2: Dirtprism"
 
 # ╔═╡ 6b009ba3-83a8-4176-86d4-dd9f70ed29ec
 @model function dirtprism()
@@ -217,7 +220,7 @@ p_dirtprism_kills = mean(sp_d .>= 50)
 histogram(sp_d, bins = 30)
 
 # ╔═╡ 49790a8f-9f53-4ba7-9543-d6a879b520e0
-md"### Comparison"
+md"### 3: Comparison"
 
 # ╔═╡ 6e098cb6-eddd-4924-a184-c2578dc28473
 p_watercube_is_better = mean(sp_w .> sp_d)
@@ -235,7 +238,7 @@ md"""
 You can make the following assumptions
 - The age $A$ of a random chicken (in years) is discrete and Uniformly distributed between 0 and 12.
 - The number of eggs $N$ an $A$-year old chicken lays in a year is Poisson distributed with mean $300 - 20 \, A$.
-- The probability of an $A$-year old chicken's egg having a double yolk $P$ is distributed as a `Beta(1, 800 + 100*A)`.
+- The probability $P$ of an $A$-year old chicken's egg having a double yolk is distributed as a `Beta(1, 800 + 100*A)`.
 """
 
 # ╔═╡ 6e020801-983d-4ebc-a0e9-b5dd58f66c55
@@ -252,7 +255,7 @@ md"""
 	P ~ Beta(1, 800 + 100*A)
 
 	doubles ~ Binomial(N, P)
-	return sum(doubles)
+	return doubles
 end
 
 # ╔═╡ 834139c2-29bf-4882-bd73-1f89ad9f3803
@@ -305,6 +308,8 @@ count_occurences([5, 107, 364, 5, 5, 364]) # three 5's, one 107 and two 364's
 
 # ╔═╡ da48e557-e3a5-47a6-89e7-4168eb23cf9d
 @model function birthdays(n_students)
+	# number of students used as an input to the function so you can solve the question for any number of students - this was not asked but it's nice
+	
 	bdays = zeros(n_students)
 	for bday_idx in eachindex(bdays)
 		bdays[bday_idx] ~ DiscreteUniform(1, 365)
@@ -349,6 +354,7 @@ E_triplebday = p_triplebday * 365 # The expected value of the amount of triple b
 # ╟─e4cb065e-12c6-4f1c-8497-1013fa9411d6
 # ╠═7d4d4d20-b323-11ef-0926-b14785cb9ab5
 # ╠═4cfd4721-e29a-4270-8d15-021bcc966eb1
+# ╠═c88b8a8e-751c-43fd-b1d9-cf6ae2089a15
 # ╟─7026f66f-9076-4aef-ada9-198450ef5da6
 # ╟─bb682b51-c3ac-4e31-9b79-4c13212d84e5
 # ╟─def27d26-2205-4a66-94f3-eddbc17483bf
@@ -386,13 +392,13 @@ E_triplebday = p_triplebday * 365 # The expected value of the amount of triple b
 # ╟─9740ea64-cd4f-46b1-a741-02e392280601
 # ╟─187854bb-9e30-454d-9e03-cccf77aebb6b
 # ╟─747e3c0a-357a-448a-b479-d0fcbe44a6c0
-# ╟─eda95f45-083a-4e65-b57e-bd9890da1f9c
+# ╟─0e16af61-c4d4-4574-85e2-508f3952b3ce
 # ╠═36477423-5628-4ed3-b54d-9a050557f6b7
 # ╠═02bc37e2-5cf6-404a-b3fe-b2120671adb2
 # ╠═97021710-4b26-4a1c-a794-265c9559ce4d
 # ╠═c0cd75bd-2a46-4f62-a59a-9bb8d47d45f2
 # ╠═bc5f5d70-e269-45f9-867b-a00876ce8c40
-# ╟─a1b933ac-5d1b-4800-a6e8-e942846b19d8
+# ╟─44a2cabc-aca9-4bb7-af9d-cd735c424d7b
 # ╠═6b009ba3-83a8-4176-86d4-dd9f70ed29ec
 # ╠═83afb3c1-9e6a-4d18-b0c7-05ed0173df40
 # ╠═700cc645-1123-4c8a-821e-1ae4fe8b0674

@@ -1,6 +1,17 @@
 ### A Pluto.jl notebook ###
 # v0.20.4
 
+#> [frontmatter]
+#> order = "18"
+#> title = "3. ProbMod advanced"
+#> date = "2025-03-07"
+#> tags = ["exercises"]
+#> description = "Advanced sampling exercises"
+#> layout = "layout.jlhtml"
+#> 
+#>     [[frontmatter.author]]
+#>     name = "Bram Spanoghe"
+
 using Markdown
 using InteractiveUtils
 
@@ -22,7 +33,7 @@ using Pkg; Pkg.activate("..");
 # ╔═╡ 80bc0e86-5ad3-4d61-9600-8dc05b86599d
 using Turing, StatsPlots
 
-# ╔═╡ ef3cbcb1-0649-4fcb-8936-8f1ca0f46dc4
+# ╔═╡ fe68a4dd-038c-4f94-a4f0-48933ff2fa87
 using PlutoUI; TableOfContents()
 
 # ╔═╡ 52a38b60-178b-4a1d-ac32-e73fafd339f9
@@ -59,7 +70,7 @@ md"""
 # ╔═╡ cec8b8e8-850e-4549-97fc-71eb35b8334b
 md"### 1: Droplet Prior"
 
-# ╔═╡ 8ea07dc1-0a0f-491e-b24a-dc8655a14791
+# ╔═╡ bebe6f6b-9603-4062-8685-363ed7ff3dcb
 md"""
 !!! tip
 	A simple way of representing the distribution of P0 is through a mixture model.
@@ -72,14 +83,7 @@ md"""
 """
 
 # ╔═╡ eb6dc4e7-e779-4bfc-b865-3defa3894181
-dropletdist = MixtureModel([Poisson(10), Poisson(30)], [0.75, 0.25]);
-
-# ╔═╡ 6517d682-b524-42e3-8a13-78ed5c1ce0dc
-plot(dropletdist) # plot gives wrong result, the lines should stack
-
-# ╔═╡ 60eabb68-7d65-4f78-97d9-b1e20c2dbd0a
-rand(dropletdist, 10000) |> histogram 
-	# plotting a histogram of random samples gives a better result
+dropletdist = missing;
 
 # ╔═╡ 107533fc-b300-4b8d-bea2-a3aa6a37938d
 md"### 2: Probability"
@@ -98,40 +102,39 @@ logistic(t, P0, r, K) =  K / (1 + (K - P0)/P0 * exp(-r*t))
 # ╔═╡ 976cfb96-3196-4a61-bd5f-e4f5d24ba1e9
 @model function petrigrowth()
 	P0 ~ dropletdist
-    r ~ LogNormal(0.0, 0.3)
-	K ~ Normal(1e5, 1e4)
+    r ~ missing
+	K ~ missing
 
-	logfun = t -> logistic(t, P0, r, K)
+	logfun = missing
     return logfun
 end
 
 # ╔═╡ 4345b3dd-0731-4dd5-a319-627b4f91306e
-petri_model = petrigrowth();
+petri_model = missing
 
 # ╔═╡ 9d747eef-a883-49b3-acb7-f0d077a2b902
-chain_petri = sample(petri_model, Prior(), 2000);
+chain_petri = missing
 
 # ╔═╡ ce8b53c3-0af1-4e9a-ad80-6fd7a2bf020b
-logfuns = generated_quantities(petri_model, chain_petri);
+logfuns = missing
 
 # ╔═╡ e1d0c5d5-2b7a-4af4-a7ac-e1ca46e665c8
-sp_petri = [logfun(8.0) for logfun in logfuns];
+sp_petri = missing
 
 # ╔═╡ e3092915-a083-425e-8fa1-b7bf370abc8a
-prob_splittable = mean((sp_petri .>= 1e4) .&& (sp_petri .<= 1e5))
+prob_splittable = missing
 
 # ╔═╡ e4f42f16-5cce-4fc2-aa01-8971f37c710e
 md"### 3: Plot"
 
-# ╔═╡ 6253f255-e92d-4b5a-9d89-d4fe384fc438
+# ╔═╡ 2b39e0bd-91cd-456e-9053-7b8fe5a395fb
 md"""
 !!! tip
-	Plotting a function `myfun` is as simple as entering `plot(myfun)`. The same syntax applies if `myfun` is a vector of functions. However, don't forget it was asked to plot only **100** functions.
+	Plotting a function `myfun` is as simple as entering `plot(myfun)`. The same syntax applies if `myfun` is a vector of functions. However, don't forget it was asked to plot only **100** growth curves.
 """
 
-# ╔═╡ 14a8bc88-e10e-42d1-a4c0-7f3ebc5512a9
-plot(logfuns[1:100], color = :violet, alpha = 0.3, label = false, xlims = (0, 12))
-	# extra arguments are for making the plot prettier but are not required
+# ╔═╡ d6c193d7-9fe2-413b-801f-ebc33c772ee9
+missing # plot
 
 # ╔═╡ c8941726-9e81-47fc-9b7e-cb3b5c0c61ca
 md"# 2: Attraction"
@@ -165,29 +168,27 @@ F = \frac{1}{r^2}
 ```
 """
 
-# ╔═╡ 058d2a08-7d40-46c5-8c5b-2b5ce9d2eb18
+# ╔═╡ ceeeee76-e31c-4429-8ed0-e1c503433dbf
 md"""
 !!! questions
 	1. What is the estimated net force between the two cubes? Is this the same as if you had treated the cubes as point masses?
 	1. How many samples do you need to estimate this force reliably? Define a reliable estimator as one having a standard deviation of 0.1. Visualise the distribution of the estimator.
 """
 
-# ╔═╡ 3cd12379-5e7f-4f5d-a7bb-8b3a9d2e8497
+# ╔═╡ 9be28327-d87f-4d50-bbcc-91e799f14dbf
 md"### 1: Net Force"
 
 # ╔═╡ 06d0e92f-1f07-41fd-b6ee-e94eb539627d
 @model function cubeforce()
-    x1 ~ Uniform(0, 1)
-    y1 ~ Uniform(0, 1)
-    z1 ~ Uniform(0, 1)
+    x1 ~ missing
+    y1 ~ missing
+    z1 ~ missing
 
-	x2 ~ Uniform(1.1, 2.1)
-    y2 ~ Uniform(0, 1)
-    z2 ~ Uniform(0, 1)
+	x2 ~ missing
+    y2 ~ missing
+    z2 ~ missing
 
-	r_squared = (x1 - x2)^2 + (y1 - y2)^2 + (z1 - z2)^2
-	G = 1 # for simplicity
-	F = G / r_squared
+	F = missing
 	
     return F
 end
@@ -195,51 +196,48 @@ end
 # ╔═╡ 43119060-bd35-4c4c-8831-d5c5df1d8dd5
 cubemodel = cubeforce();
 
-# ╔═╡ d5229ed1-8473-42e5-b1f9-98fb547d3e85
-force_sp = [cubemodel() for _ in 1:2000];
+# ╔═╡ d26ad946-2bb4-4383-860f-d601903ce1be
+force_sp = missing
 
-# ╔═╡ 1ce8f808-b917-4831-89b4-4c318f05724d
-force_average = mean(force_sp)
+# ╔═╡ 7b117453-0875-4b41-a228-866c6c0a8208
+force_average = missing
 
-# ╔═╡ 420120c3-1c8c-46e4-a7c0-0f2405dd159a
-pointmass_force = 1 / 1.1^2
+# ╔═╡ b28cfbae-2fac-4b38-b234-53f71e381bcd
+pointmass_force = missing # (doesn't require Turing, only maths)
 
-# ╔═╡ a324a615-7066-4dbb-9410-95e1e1c46ac4
-histogram(force_sp)
-
-# ╔═╡ 6d9209da-2c98-454e-88e6-32fe667efff7
+# ╔═╡ 304d6052-6d3d-487c-8c01-dab259276d6f
 md"### 2: Variance of Estimator"
 
 # ╔═╡ e38e8f51-90db-4136-84e2-f06cd03d502a
-@bind required_samples Slider(10:10:200, default = 140, show_value = true)
-	# manually change until standard deviation is about 0.1
+@bind required_samples Slider(10:10:200, show_value = true)
 
-# ╔═╡ 788f60fc-b1a1-4635-a36a-f954738bcffc
-estimator = mean([cubemodel() for _ in 1:required_samples])
+# ╔═╡ b753fa82-28ab-46d1-9085-4c65301db046
+estimator = mean([cubemodel() for _ in 1:required_samples]) 
+	# a single estimation of the force given `required_samples` samples
 
-# ╔═╡ a7e975a9-beb5-4169-9d22-3e970be2838b
-estimator_sp = [mean([cubemodel() for _ in 1:required_samples]) for _ in 1:2000];
+# ╔═╡ 55cf127f-5534-4926-955a-487ea9553b70
+estimator_sp = missing 
+	# a sample of estimations given `required_samples` samples
 
-# ╔═╡ 7ff5cb25-47bd-432f-a404-359abaf44e3a
-estimator_sp_σ = std(estimator_sp)
+# ╔═╡ f6a67c1e-3677-4e51-b6dd-5d11a5146ea7
+estimator_sp_σ = missing
+	# standard deviation of the force estimator
 
-# ╔═╡ 99c7f6d6-eada-491b-b966-fdb1195fc111
-histogram(estimator_sp)
+# ╔═╡ 45f0813b-c4c9-4f13-8d66-1e58293c4422
+missing # histogram
 
 # ╔═╡ Cell order:
 # ╟─52a38b60-178b-4a1d-ac32-e73fafd339f9
 # ╠═886c7932-da4b-45cc-ba73-8047389e4895
 # ╠═80bc0e86-5ad3-4d61-9600-8dc05b86599d
-# ╠═ef3cbcb1-0649-4fcb-8936-8f1ca0f46dc4
+# ╠═fe68a4dd-038c-4f94-a4f0-48933ff2fa87
 # ╟─116b840c-e766-4ff6-aafa-0977fb122992
 # ╟─415b5ba8-3f6d-46ea-8f89-19fa7c0e74f9
 # ╟─3691d6aa-c717-46e8-b8b3-f4aa56c9f761
 # ╟─749cacb9-b73d-470e-bf58-5550db5de7e0
 # ╟─cec8b8e8-850e-4549-97fc-71eb35b8334b
-# ╟─8ea07dc1-0a0f-491e-b24a-dc8655a14791
+# ╟─bebe6f6b-9603-4062-8685-363ed7ff3dcb
 # ╠═eb6dc4e7-e779-4bfc-b865-3defa3894181
-# ╠═6517d682-b524-42e3-8a13-78ed5c1ce0dc
-# ╠═60eabb68-7d65-4f78-97d9-b1e20c2dbd0a
 # ╟─107533fc-b300-4b8d-bea2-a3aa6a37938d
 # ╟─38c5b9cd-0baf-4a62-912e-4993614ddbf3
 # ╠═bde57599-1dca-41a4-94aa-498da72c2012
@@ -250,23 +248,22 @@ histogram(estimator_sp)
 # ╠═e1d0c5d5-2b7a-4af4-a7ac-e1ca46e665c8
 # ╠═e3092915-a083-425e-8fa1-b7bf370abc8a
 # ╟─e4f42f16-5cce-4fc2-aa01-8971f37c710e
-# ╟─6253f255-e92d-4b5a-9d89-d4fe384fc438
-# ╠═14a8bc88-e10e-42d1-a4c0-7f3ebc5512a9
+# ╟─2b39e0bd-91cd-456e-9053-7b8fe5a395fb
+# ╠═d6c193d7-9fe2-413b-801f-ebc33c772ee9
 # ╟─c8941726-9e81-47fc-9b7e-cb3b5c0c61ca
 # ╟─431023df-3724-4325-b0ac-96dbf5e4fd20
 # ╟─599ac984-ef1d-4c7a-8e87-9d4ddb1aa710
 # ╟─bb8e4cd6-6106-4d3f-9e35-0dfd8b2c45f5
-# ╟─058d2a08-7d40-46c5-8c5b-2b5ce9d2eb18
-# ╟─3cd12379-5e7f-4f5d-a7bb-8b3a9d2e8497
+# ╟─ceeeee76-e31c-4429-8ed0-e1c503433dbf
+# ╟─9be28327-d87f-4d50-bbcc-91e799f14dbf
 # ╠═06d0e92f-1f07-41fd-b6ee-e94eb539627d
 # ╠═43119060-bd35-4c4c-8831-d5c5df1d8dd5
-# ╠═d5229ed1-8473-42e5-b1f9-98fb547d3e85
-# ╠═1ce8f808-b917-4831-89b4-4c318f05724d
-# ╠═420120c3-1c8c-46e4-a7c0-0f2405dd159a
-# ╠═a324a615-7066-4dbb-9410-95e1e1c46ac4
-# ╟─6d9209da-2c98-454e-88e6-32fe667efff7
+# ╠═d26ad946-2bb4-4383-860f-d601903ce1be
+# ╠═7b117453-0875-4b41-a228-866c6c0a8208
+# ╠═b28cfbae-2fac-4b38-b234-53f71e381bcd
+# ╟─304d6052-6d3d-487c-8c01-dab259276d6f
 # ╠═e38e8f51-90db-4136-84e2-f06cd03d502a
-# ╠═788f60fc-b1a1-4635-a36a-f954738bcffc
-# ╠═a7e975a9-beb5-4169-9d22-3e970be2838b
-# ╠═7ff5cb25-47bd-432f-a404-359abaf44e3a
-# ╠═99c7f6d6-eada-491b-b966-fdb1195fc111
+# ╠═b753fa82-28ab-46d1-9085-4c65301db046
+# ╠═55cf127f-5534-4926-955a-487ea9553b70
+# ╠═f6a67c1e-3677-4e51-b6dd-5d11a5146ea7
+# ╠═45f0813b-c4c9-4f13-8d66-1e58293c4422

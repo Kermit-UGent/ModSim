@@ -1,6 +1,17 @@
 ### A Pluto.jl notebook ###
 # v0.20.4
 
+#> [frontmatter]
+#> order = "17"
+#> title = "3. ProbMod basics"
+#> date = "2025-03-07"
+#> tags = ["exercises"]
+#> description = "Basic sampling exercises"
+#> layout = "layout.jlhtml"
+#> 
+#>     [[frontmatter.author]]
+#>     name = "Bram Spanoghe"
+
 using Markdown
 using InteractiveUtils
 

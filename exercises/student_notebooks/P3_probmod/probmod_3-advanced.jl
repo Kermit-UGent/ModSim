@@ -20,7 +20,10 @@ end
 using Pkg; Pkg.activate("..");
 
 # ╔═╡ 80bc0e86-5ad3-4d61-9600-8dc05b86599d
-using Turing, StatsPlots, PlutoUI
+using Turing, StatsPlots
+
+# ╔═╡ fe68a4dd-038c-4f94-a4f0-48933ff2fa87
+using PlutoUI; TableOfContents()
 
 # ╔═╡ 52a38b60-178b-4a1d-ac32-e73fafd339f9
 md"# Sampling notebook #3: Advanced"
@@ -54,19 +57,25 @@ md"""
 """
 
 # ╔═╡ cec8b8e8-850e-4549-97fc-71eb35b8334b
-md"### 1"
+md"### 1: Droplet Prior"
 
-# ╔═╡ dbccef02-51e7-48dd-9dab-be44db064100
+# ╔═╡ bebe6f6b-9603-4062-8685-363ed7ff3dcb
 md"""
 !!! tip
-	A simple way of representing the distribution of P0 is through a mixture model. Look up the documentation of `MixtureModel` for how to make one in Turing.
+	A simple way of representing the distribution of P0 is through a mixture model.
+	Mixture models are a way of modeling something that has a chance to be from different, simple distributions. 
+	
+	If you wanted to model a variable that has a 0.8 chance of being from a `Normal(0, 1)` and a 0.2 chance of being from an `Exponential(10)`, you would model it as follows in Turing:
+	`MixtureModel([Normal(0, 1), Exponential(10)], [0.8, 0.2])`
+
+	For the interested reader, mixture models are explained in more detail in theory section `4.5.2`.
 """
 
 # ╔═╡ eb6dc4e7-e779-4bfc-b865-3defa3894181
 dropletdist = missing;
 
 # ╔═╡ 107533fc-b300-4b8d-bea2-a3aa6a37938d
-md"### 2"
+md"### 2: Probability"
 
 # ╔═╡ 38c5b9cd-0baf-4a62-912e-4993614ddbf3
 md"""
@@ -105,10 +114,16 @@ sp_petri = missing
 prob_splittable = missing
 
 # ╔═╡ e4f42f16-5cce-4fc2-aa01-8971f37c710e
-md"### 3"
+md"### 3: Plot"
+
+# ╔═╡ 2b39e0bd-91cd-456e-9053-7b8fe5a395fb
+md"""
+!!! tip
+	Plotting a function `myfun` is as simple as entering `plot(myfun)`. The same syntax applies if `myfun` is a vector of functions. However, don't forget it was asked to plot only **100** growth curves.
+"""
 
 # ╔═╡ d6c193d7-9fe2-413b-801f-ebc33c772ee9
-missing # plots
+missing # plot
 
 # ╔═╡ c8941726-9e81-47fc-9b7e-cb3b5c0c61ca
 md"# 2: Attraction"
@@ -146,11 +161,11 @@ F = \frac{1}{r^2}
 md"""
 !!! questions
 	1. What is the estimated net force between the two cubes? Is this the same as if you had treated the cubes as point masses?
-	1. How many samples do you need to estimate this force reliably? Define a reliable estimator as one having a standard deviation of 10% of the mean value. Visualise the distribution of the estimator.
+	1. How many samples do you need to estimate this force reliably? Define a reliable estimator as one having a standard deviation of 0.1. Visualise the distribution of the estimator.
 """
 
 # ╔═╡ 9be28327-d87f-4d50-bbcc-91e799f14dbf
-md"### 1"
+md"### 1: Net Force"
 
 # ╔═╡ 06d0e92f-1f07-41fd-b6ee-e94eb539627d
 @model function cubeforce()
@@ -180,7 +195,7 @@ force_average = missing
 pointmass_force = missing # (doesn't require Turing, only maths)
 
 # ╔═╡ 304d6052-6d3d-487c-8c01-dab259276d6f
-md"### 2"
+md"### 2: Variance of Estimator"
 
 # ╔═╡ e38e8f51-90db-4136-84e2-f06cd03d502a
 @bind required_samples Slider(10:10:200, show_value = true)
@@ -194,7 +209,7 @@ estimator_sp = missing
 	# a sample of estimations given `required_samples` samples
 
 # ╔═╡ f6a67c1e-3677-4e51-b6dd-5d11a5146ea7
-estimator_σ = missing
+estimator_sp_σ = missing
 	# standard deviation of the force estimator
 
 # ╔═╡ 45f0813b-c4c9-4f13-8d66-1e58293c4422
@@ -204,12 +219,13 @@ missing # histogram
 # ╟─52a38b60-178b-4a1d-ac32-e73fafd339f9
 # ╠═886c7932-da4b-45cc-ba73-8047389e4895
 # ╠═80bc0e86-5ad3-4d61-9600-8dc05b86599d
+# ╠═fe68a4dd-038c-4f94-a4f0-48933ff2fa87
 # ╟─116b840c-e766-4ff6-aafa-0977fb122992
 # ╟─415b5ba8-3f6d-46ea-8f89-19fa7c0e74f9
 # ╟─3691d6aa-c717-46e8-b8b3-f4aa56c9f761
 # ╟─749cacb9-b73d-470e-bf58-5550db5de7e0
 # ╟─cec8b8e8-850e-4549-97fc-71eb35b8334b
-# ╟─dbccef02-51e7-48dd-9dab-be44db064100
+# ╟─bebe6f6b-9603-4062-8685-363ed7ff3dcb
 # ╠═eb6dc4e7-e779-4bfc-b865-3defa3894181
 # ╟─107533fc-b300-4b8d-bea2-a3aa6a37938d
 # ╟─38c5b9cd-0baf-4a62-912e-4993614ddbf3
@@ -221,6 +237,7 @@ missing # histogram
 # ╠═e1d0c5d5-2b7a-4af4-a7ac-e1ca46e665c8
 # ╠═e3092915-a083-425e-8fa1-b7bf370abc8a
 # ╟─e4f42f16-5cce-4fc2-aa01-8971f37c710e
+# ╟─2b39e0bd-91cd-456e-9053-7b8fe5a395fb
 # ╠═d6c193d7-9fe2-413b-801f-ebc33c772ee9
 # ╟─c8941726-9e81-47fc-9b7e-cb3b5c0c61ca
 # ╟─431023df-3724-4325-b0ac-96dbf5e4fd20
