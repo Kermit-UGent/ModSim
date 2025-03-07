@@ -10,6 +10,9 @@ using Pkg; Pkg.activate("..")
 # ╔═╡ 4cfd4721-e29a-4270-8d15-021bcc966eb1
 using Turing, StatsPlots
 
+# ╔═╡ 73c2a5db-4019-4d91-b5f1-7ba378cb8c84
+using PlutoUI; TableOfContents()
+
 # ╔═╡ e4cb065e-12c6-4f1c-8497-1013fa9411d6
 md"# Sampling notebook #2: Basics"
 
@@ -30,7 +33,7 @@ Let `X ∼ Poisson(10)` and `Y ~ Poisson(X)`.
 """
 
 # ╔═╡ def27d26-2205-4a66-94f3-eddbc17483bf
-md"### 1"
+md"### 1: Plots"
 
 # ╔═╡ ff38df99-f843-414d-8e45-b46e06a65c22
 @model function doublepoisson()
@@ -52,7 +55,7 @@ spY = missing
 histogram(spY)
 
 # ╔═╡ 13989ba4-bcf8-4fdd-8aee-ab58c8905bc9
-md"### 2"
+md"### 2: Probabilities"
 
 # ╔═╡ 39e4f3eb-b7a9-4ece-846f-eb02dbd77860
 probXY1 = missing
@@ -61,7 +64,7 @@ probXY1 = missing
 probXY2 = missing
 
 # ╔═╡ c243ca59-191d-4905-825e-6d7825a3c8a4
-md"### 3"
+md"### 3: Variances"
 
 # ╔═╡ aedd0fe8-da3e-4463-b0cf-7c4f9a22db52
 varXcondY = missing
@@ -84,7 +87,7 @@ Let `U ~ Uniform(0, 4)`, `V ∼ Normal(U, 1)` and `W ~ TriangularDist(0, 4, U)`.
 """
 
 # ╔═╡ 9e5cc347-c74f-46a3-9534-c5ad812844bf
-md"### 1"
+md"### 1: Histogram"
 
 # ╔═╡ 47a43282-3892-4a9a-94b7-c359fa74e12b
 @model function combinations()
@@ -97,7 +100,7 @@ end
 spVW = missing
 
 # ╔═╡ faa105b6-0700-4f4d-92fe-2bb72a4d6e44
-md"### 2"
+md"### 2: Probabilities"
 
 # ╔═╡ 97aec4a9-2954-4967-bc15-c0123bac2e75
 probVW1 = missing
@@ -106,12 +109,12 @@ probVW1 = missing
 probVW2 = missing
 
 # ╔═╡ 4decd959-aeb9-47d4-a381-14bbf4dbc5ab
-md"### 3"
+md"### 3: Independence"
 
 # ╔═╡ aa953baa-5105-49d7-82e6-94ca462624f7
 md"""
 !!! hint
-	One way to disprove independence is showing that $E[V] \neq E[V \mid W \leq w]$ for any value $w$.
+	One way to prove dependence is showing that $E[V] \neq E[V \mid W \leq w]$ for at least one value $w$.
 """
 
 # ╔═╡ 9740ea64-cd4f-46b1-a741-02e392280601
@@ -130,13 +133,13 @@ You can choose between your 2 mightiest spells:
 # ╔═╡ 747e3c0a-357a-448a-b479-d0fcbe44a6c0
 md"""
 !!! questions
-    - What are the probabilities of either attack doing the job? 
-    - Plot a histogram of the damage of both attacks.
-	- What is the probability of watercube dealing more damage than dirtprism?
+    1. What is the probability that Watercube does the job? Also plot a histogram of its damage. 
+    1. Do the same for Dirtprism.
+	1. What is the probability that watercube deals more damage than dirtprism?
 """
 
 # ╔═╡ eda95f45-083a-4e65-b57e-bd9890da1f9c
-md"### 4d20"
+md"### 1: Watercube"
 
 # ╔═╡ 36477423-5628-4ed3-b54d-9a050557f6b7
 @model function watercube()
@@ -159,7 +162,7 @@ p_watercube_kills = missing
 missing # histogram
 
 # ╔═╡ a1b933ac-5d1b-4800-a6e8-e942846b19d8
-md"### 20d4"
+md"### 2: Dirtprism"
 
 # ╔═╡ 6b009ba3-83a8-4176-86d4-dd9f70ed29ec
 @model function dirtprism()
@@ -179,7 +182,7 @@ p_dirtprism_kills = missing
 missing # histogram
 
 # ╔═╡ 49790a8f-9f53-4ba7-9543-d6a879b520e0
-md"### Comparison"
+md"### 3: Comparison"
 
 # ╔═╡ 9271b6df-fa3e-4b79-8f0f-48a3b1287b42
 p_watercube_is_better = missing
@@ -197,7 +200,7 @@ md"""
 You can make the following assumptions
 - The age $A$ of a random chicken (in years) is discrete and Uniformly distributed between 0 and 12.
 - The number of eggs $N$ an $A$-year old chicken lays in a year is Poisson distributed with mean $300 - 20 \, A$.
-- The probability of an $A$-year old chicken's egg having a double yolk $P$ is distributed as a `Beta(1, 800 + 100*A)`.
+- The probability $P$ of an $A$-year old chicken's egg having a double yolk is distributed as a `Beta(1, 800 + 100*A)`.
 """
 
 # ╔═╡ 6e020801-983d-4ebc-a0e9-b5dd58f66c55
@@ -247,10 +250,16 @@ count_occurences(vec) = [count(==(element), vec) for element in unique(vec)]
 # ╔═╡ 0a6ff75d-fbc7-48a1-924b-e16d2654749c
 count_occurences([5, 107, 364, 5, 5, 364]) # three 5's, one 107 and two 364's
 
+# ╔═╡ 2925bb92-32f8-415d-960f-b0a60a1037b8
+@model function birthdays()
+	missing
+end
+
 # ╔═╡ Cell order:
 # ╟─e4cb065e-12c6-4f1c-8497-1013fa9411d6
 # ╠═7d4d4d20-b323-11ef-0926-b14785cb9ab5
 # ╠═4cfd4721-e29a-4270-8d15-021bcc966eb1
+# ╠═73c2a5db-4019-4d91-b5f1-7ba378cb8c84
 # ╟─7026f66f-9076-4aef-ada9-198450ef5da6
 # ╟─bb682b51-c3ac-4e31-9b79-4c13212d84e5
 # ╟─def27d26-2205-4a66-94f3-eddbc17483bf
@@ -305,3 +314,4 @@ count_occurences([5, 107, 364, 5, 5, 364]) # three 5's, one 107 and two 364's
 # ╟─da44d18c-8be3-446e-a5c2-905af545d2c6
 # ╠═52cf545a-d7c7-41d8-ad89-617d2f8b3eb9
 # ╠═0a6ff75d-fbc7-48a1-924b-e16d2654749c
+# ╠═2925bb92-32f8-415d-960f-b0a60a1037b8
