@@ -28,7 +28,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ 886c7932-da4b-45cc-ba73-8047389e4895
-using Pkg; Pkg.activate("..");
+using Pkg; Pkg.activate("../../pluto-deployment-environment");
 
 # ╔═╡ 80bc0e86-5ad3-4d61-9600-8dc05b86599d
 using Turing, StatsPlots

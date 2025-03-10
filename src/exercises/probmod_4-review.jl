@@ -16,7 +16,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 882b942c-a5ae-445d-a946-6eb8cddc423e
-using Pkg; Pkg.activate("..")
+using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ aa2737db-f89f-4e08-9abe-0a86e8880c19
 using Turing, StatsPlots
