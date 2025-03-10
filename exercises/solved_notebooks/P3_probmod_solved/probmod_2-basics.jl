@@ -60,6 +60,16 @@ histogram(spY)
 # ╔═╡ 13989ba4-bcf8-4fdd-8aee-ab58c8905bc9
 md"### 2: Probabilities"
 
+# ╔═╡ fff486bd-0d3e-4bee-9264-acf7cb50b847
+md"""
+!!! tip
+	When comparing a vector of values to a single number, don't forget to use `.` to execute operations element-wise in Julia!
+	
+	✅ `spY .< 1` compares every element of `spY` to `1`
+	
+	❌ `spY < 1` compares an entire vector with a single number → errors :(
+"""
+
 # ╔═╡ 09a87037-9f4f-4dd9-bb6c-fe717db39ea6
 probXY1 = mean(3 .< spY .<= 10)
 
@@ -68,6 +78,14 @@ probXY2 = mean(spY.^2 .> 100)
 
 # ╔═╡ c243ca59-191d-4905-825e-6d7825a3c8a4
 md"### 3: Variances"
+
+# ╔═╡ 601cd057-f066-4d28-9345-ad955a7037e1
+md"""
+!!! hint
+	To create a sample of $X$ that is conditional on some value(s) of $Y$, you can start from a sample of $X$ and select only those elements for which the corresponding sample of $Y$ has the conditioned value(s).
+
+	In other words, you'll need to index `spX` based on `spY` (and vice versa for $\text{var}(Y ∣ X)$). 
+"""
 
 # ╔═╡ 04cc5b42-7ab2-4055-a959-ba894c598f69
 spX = dpchain[:X];
@@ -134,10 +152,12 @@ probVW2 = mean(spV .* spW .>= 10)
 # ╔═╡ 4decd959-aeb9-47d4-a381-14bbf4dbc5ab
 md"### 3: Independence"
 
-# ╔═╡ aa953baa-5105-49d7-82e6-94ca462624f7
+# ╔═╡ a465722f-49f9-4d37-9a2b-00d1120f5c06
 md"""
 !!! hint
-	One way to prove dependence is showing that $E[V] \neq E[V \mid W \leq w]$ for at least one value $w$.
+	One way to prove dependence is showing that $E[V] \neq E[V \mid W \leq w]$ for at least one value $w$. 
+
+	If the expected value of $V$ can change based on some information about $W$, they can't be independent!
 """
 
 # ╔═╡ b2999f6e-2dbd-44ab-a303-97234f665d33
@@ -169,6 +189,12 @@ md"""
 
 # ╔═╡ 0e16af61-c4d4-4574-85e2-508f3952b3ce
 md"### 1: Watercube"
+
+# ╔═╡ 13cdd6ee-04ec-4085-8083-3d52e88aa35c
+md"""
+!!! hint
+	Consider the humble `DiscreteUniform` distribution. Not sure how it works? Open the **🔍 Live Docs** at the bottom right of the screen for more information
+"""
 
 # ╔═╡ 36477423-5628-4ed3-b54d-9a050557f6b7
 @model function watercube()
@@ -244,8 +270,19 @@ You can make the following assumptions
 # ╔═╡ 6e020801-983d-4ebc-a0e9-b5dd58f66c55
 md"""
 !!! questions
-    - If someone hands you a random chicken, what is the probability it will lay 2 or more double eggs in a year? 
-    - Compare the distributions of double eggs for 1-year old and 3-year old chickens.
+    1. If someone hands you a random chicken, what is the probability it will lay 2 or more double eggs in a year? 
+    1. Compare the distributions of double eggs for 1-year old and 3-year old chickens.
+"""
+
+# ╔═╡ 6ebe676b-aee6-459b-bcda-de0fe14418a3
+md"### 1: Probability"
+
+# ╔═╡ 34aad3d6-9deb-4298-b613-bf3a616f2b31
+md"""
+!!! hint
+	In this exercise, the output variable (the number of double-yolked eggs) is **also a random variable**! In other words, it also follows some distribution.
+
+	When considering what distribution, consider that each of the $N$ eggs represents a "trial" with a $P$ chance of success for a double yolk.
 """
 
 # ╔═╡ 2b3d930f-53d9-4869-9e4a-86a1a681b9d8
@@ -271,6 +308,9 @@ sp_egg = generated_quantities(egg_model, chain_egg);
 p_multiple_double_eggs = mean(sp_egg .>= 2) 
 	# a ~2% chance for two or more double eggs in one year
 
+# ╔═╡ 80e3544e-86ec-469c-be44-77f94fabfc28
+md"### 2: Histograms"
+
 # ╔═╡ 6fb5fe92-9f05-4567-8d6e-046528336d27
 chicken_ages = chain_egg[:A];
 
@@ -294,9 +334,9 @@ md"""
 	What is the probability that, in a class of 150 students, 3 or more share a birthday?
 """
 
-# ╔═╡ da44d18c-8be3-446e-a5c2-905af545d2c6
+# ╔═╡ 29438eef-a725-4873-9372-194f2f899f12
 md"""
-!!! note
+!!! tip
 	You can solve this (among other possibilities) using either a for-loop and the `count_occurences` function given below, or the `Multinomial` distribution.
 """
 
@@ -365,9 +405,11 @@ E_triplebday = p_triplebday * 365 # The expected value of the amount of triple b
 # ╠═90835b5d-9705-43d0-b449-09cde57d5394
 # ╠═431d9be9-edfc-48fb-9df7-6a2b961fe4b4
 # ╟─13989ba4-bcf8-4fdd-8aee-ab58c8905bc9
+# ╟─fff486bd-0d3e-4bee-9264-acf7cb50b847
 # ╠═09a87037-9f4f-4dd9-bb6c-fe717db39ea6
 # ╠═2e2f203a-34a6-4feb-8aa1-8a1c97a09165
 # ╟─c243ca59-191d-4905-825e-6d7825a3c8a4
+# ╟─601cd057-f066-4d28-9345-ad955a7037e1
 # ╠═04cc5b42-7ab2-4055-a959-ba894c598f69
 # ╠═597d97fb-cfbe-4cff-bfbb-57df9a2f42aa
 # ╠═6ca31280-a997-4e84-98bb-e7784d0c555c
@@ -386,13 +428,14 @@ E_triplebday = p_triplebday * 365 # The expected value of the amount of triple b
 # ╠═b4f156df-0b9c-495a-b95b-000c7f166243
 # ╠═f7eb6faf-8884-4fea-9974-330d7fd555aa
 # ╟─4decd959-aeb9-47d4-a381-14bbf4dbc5ab
-# ╟─aa953baa-5105-49d7-82e6-94ca462624f7
+# ╟─a465722f-49f9-4d37-9a2b-00d1120f5c06
 # ╠═b2999f6e-2dbd-44ab-a303-97234f665d33
 # ╠═5ea80b00-941a-4226-87cb-66da7ee7d76d
 # ╟─9740ea64-cd4f-46b1-a741-02e392280601
 # ╟─187854bb-9e30-454d-9e03-cccf77aebb6b
 # ╟─747e3c0a-357a-448a-b479-d0fcbe44a6c0
 # ╟─0e16af61-c4d4-4574-85e2-508f3952b3ce
+# ╟─13cdd6ee-04ec-4085-8083-3d52e88aa35c
 # ╠═36477423-5628-4ed3-b54d-9a050557f6b7
 # ╠═02bc37e2-5cf6-404a-b3fe-b2120671adb2
 # ╠═97021710-4b26-4a1c-a794-265c9559ce4d
@@ -410,18 +453,21 @@ E_triplebday = p_triplebday * 365 # The expected value of the amount of triple b
 # ╟─372436c4-262f-49b8-b1cf-626b043542bf
 # ╟─20111742-008a-44c3-8c27-62791cce3e1e
 # ╟─6e020801-983d-4ebc-a0e9-b5dd58f66c55
+# ╟─6ebe676b-aee6-459b-bcda-de0fe14418a3
+# ╟─34aad3d6-9deb-4298-b613-bf3a616f2b31
 # ╠═2b3d930f-53d9-4869-9e4a-86a1a681b9d8
 # ╠═834139c2-29bf-4882-bd73-1f89ad9f3803
 # ╠═ed67949b-c7b3-46c2-af99-ab64dbef4065
 # ╠═64d04ed9-6548-4251-8a4e-11b31e8f3143
 # ╠═00fd5517-5232-4d88-8ab0-3a0eb925eb3e
+# ╟─80e3544e-86ec-469c-be44-77f94fabfc28
 # ╠═6fb5fe92-9f05-4567-8d6e-046528336d27
 # ╠═fe87f9ee-a07c-4b4c-b89d-c3bb4ee7ee7f
 # ╠═9d9b4091-cf44-46e6-b81b-74663c9c8dfe
 # ╟─ff06c070-50a2-43d0-9729-1c47e728ff52
 # ╟─6ac2238a-16fd-4a8d-b779-8627d87367ed
 # ╟─01648616-bf50-4f66-82fc-eaae3de22a38
-# ╟─da44d18c-8be3-446e-a5c2-905af545d2c6
+# ╟─29438eef-a725-4873-9372-194f2f899f12
 # ╠═52cf545a-d7c7-41d8-ad89-617d2f8b3eb9
 # ╠═0a6ff75d-fbc7-48a1-924b-e16d2654749c
 # ╠═da48e557-e3a5-47a6-89e7-4168eb23cf9d

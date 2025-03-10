@@ -15,8 +15,8 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ a2410616-5a17-403c-aa2f-dc93c2633c7f
-using Pkg; Pkg.activate("../../pluto-deployment-environment");
+# ╔═╡ f7cb8633-3b78-4203-92e0-37150d5dcd18
+using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 8307092d-368d-441d-8315-3dc312026534
 using Turing, StatsPlots
@@ -131,7 +131,7 @@ md"Calling this function will return a Turing model:"
 dist_model = distances();
 
 # ╔═╡ f88af70b-0af7-48f5-91dd-39d1bb42f409
-md"### Solving the question"
+md"### Sampling the model output"
 
 # ╔═╡ 03840c86-2d22-4288-a202-93f4d141ec47
 md"There's a number of things we can do with the model. The most simple is calling it, which will give the return value of the function after sampling a value for all random variables, here `x` and `y`."
@@ -187,7 +187,7 @@ md"""
 """
 
 # ╔═╡ c79118af-a437-4979-a857-a6c84e1f789a
-md"### Keeping track of the random variables"
+md"### Sampling everything with `sample`"
 
 # ╔═╡ 55206a66-fda0-4299-95f0-6dcc32287f3a
 md"""
@@ -230,6 +230,9 @@ dist_chain[:x] # or dist_chain["x"]
 # ╔═╡ eb4b6d56-1e41-4e75-914b-8e7444afb288
 md"This can be useful for making plots, for example."
 
+# ╔═╡ 8c3f32ac-c4fd-416f-a798-bbfe9977e5fc
+md"#### The `generated_quantities` function"
+
 # ╔═╡ 3bfaf571-2aa8-4b13-8c48-e8434407597b
 md"What if we want the function's return value too? We could calculate it based on our random variables by hand as `sqrt.(dist_chain[:x].^2 + dist_chain[:y].^2)`, or use the `generated_quantities` function."
 
@@ -244,7 +247,7 @@ scatter(dist_chain[:x], dist_chain[:y], aspect_ratio = :equal, groups = vec(sp_i
 # Note: The `sample` method returns matrices. For plotting, vectors are often preferred, which is why we convert `sp_inside_alt` to a vector here.
 
 # ╔═╡ ab230de4-767f-43e8-8bdc-054234852715
-md"### Dealing with many variables"
+md"### For-loops for many variables"
 
 # ╔═╡ bf0904ce-fb72-4a39-a57b-1c99c8e9c82e
 md"A common problem when defining the problem as a Turing model is many random variables being involved, often with the same distribution. Turing allows variables to be defined in a for-loop for this reason.
@@ -254,9 +257,10 @@ Consider the circle example again but using a loop this time, which can easily b
 
 # ╔═╡ 4c54bccf-c674-41da-be15-edac57f96ee9
 @model function distances_loop()
-	coords = zeros(2)
-	for i in eachindex(coords)
-		coords[i] ~ Uniform(-1, 1)
+	coords = zeros(2) # initiatilize a vector of length 2 filled with zeros
+	for i in 1:length(coords)
+		coords[i] ~ Uniform(-1, 1) 
+			# assign every element of the vector a random variable
 	end
 
 	dist = sqrt(sum(coords.^2))
@@ -373,7 +377,7 @@ end
 # ╟─aeb0aef0-b2ee-11ef-3cca-7f80b487ea17
 # ╟─30957e05-85b8-4106-9635-82a5c11d9825
 # ╟─13636a8a-8c31-4397-8a7d-5cd7f899d7a5
-# ╠═a2410616-5a17-403c-aa2f-dc93c2633c7f
+# ╠═f7cb8633-3b78-4203-92e0-37150d5dcd18
 # ╠═8307092d-368d-441d-8315-3dc312026534
 # ╠═d86c5cc5-5353-4b04-b1d2-06527c85b2db
 # ╟─9f89e350-199f-4875-947b-61df653ffc19
@@ -415,6 +419,7 @@ end
 # ╟─563e0fa0-25b9-4b36-b213-c952199caa32
 # ╠═3994fc44-5fda-47dc-8cc6-e2550d9c237d
 # ╟─eb4b6d56-1e41-4e75-914b-8e7444afb288
+# ╟─8c3f32ac-c4fd-416f-a798-bbfe9977e5fc
 # ╟─3bfaf571-2aa8-4b13-8c48-e8434407597b
 # ╠═0dcc8d6f-3ab2-429d-bcf4-f022ea5d0124
 # ╠═5a8adeb4-46cf-486f-adda-24661a79b2e9

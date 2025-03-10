@@ -15,7 +15,7 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 7d4d4d20-b323-11ef-0926-b14785cb9ab5
+# ╔═╡ 84d9771c-75b1-4d22-a1cd-b9078866a836
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 4cfd4721-e29a-4270-8d15-021bcc966eb1
@@ -56,9 +56,6 @@ end
 # ╔═╡ 42c18a70-efb3-436b-83bb-b586280d4a4e
 dpmodel = doublepoisson();
 
-# ╔═╡ 5949d5f0-f93d-4088-8ca1-ce230562f046
-dpchain = missing
-
 # ╔═╡ b22a18d5-f70b-42a5-a09e-3de515148a6d
 spY = missing
 
@@ -68,6 +65,16 @@ histogram(spY)
 # ╔═╡ 13989ba4-bcf8-4fdd-8aee-ab58c8905bc9
 md"### 2: Probabilities"
 
+# ╔═╡ aba42086-224f-44a0-b616-f8f651afdd18
+md"""
+!!! tip
+	When comparing a vector of values to a single number, don't forget to use `.` to execute operations element-wise in Julia!
+	
+	✅ `spY .< 1` compares every element of `spY` to `1`
+	
+	❌ `spY < 1` compares an entire vector with a single number → errors :(
+"""
+
 # ╔═╡ 39e4f3eb-b7a9-4ece-846f-eb02dbd77860
 probXY1 = missing
 
@@ -76,6 +83,17 @@ probXY2 = missing
 
 # ╔═╡ c243ca59-191d-4905-825e-6d7825a3c8a4
 md"### 3: Variances"
+
+# ╔═╡ 137a1727-08ab-4455-ad8e-88bbead80845
+md"""
+!!! hint
+	To create a sample of $X$ that is conditional on some value(s) of $Y$, you can start from a sample of $X$ and select only those elements for which the corresponding sample of $Y$ has the conditioned value(s).
+
+	In other words, you'll need to index `spX` based on `spY` (and vice versa for $\text{var}(Y ∣ X)$). 
+"""
+
+# ╔═╡ 263048e5-206c-499e-836c-bfe489ed9b74
+spX = missing;
 
 # ╔═╡ aedd0fe8-da3e-4463-b0cf-7c4f9a22db52
 varXcondY = missing
@@ -125,7 +143,9 @@ md"### 3: Independence"
 # ╔═╡ aa953baa-5105-49d7-82e6-94ca462624f7
 md"""
 !!! hint
-	One way to prove dependence is showing that $E[V] \neq E[V \mid W \leq w]$ for at least one value $w$.
+	One way to prove dependence is showing that $E[V] \neq E[V \mid W \leq w]$ for at least one value $w$. 
+
+	If the expected value of $V$ can change based on some information about $W$, they can't be independent!
 """
 
 # ╔═╡ 9740ea64-cd4f-46b1-a741-02e392280601
@@ -152,6 +172,12 @@ md"""
 # ╔═╡ eda95f45-083a-4e65-b57e-bd9890da1f9c
 md"### 1: Watercube"
 
+# ╔═╡ 4fefa78b-746d-4e25-baee-d791eb22d930
+md"""
+!!! hint
+	Consider the humble `DiscreteUniform` distribution. Not sure how it works? Open the **🔍 Live Docs** at the bottom right of the screen for more information
+"""
+
 # ╔═╡ 36477423-5628-4ed3-b54d-9a050557f6b7
 @model function watercube()
     roll1 ~ missing
@@ -159,7 +185,7 @@ md"### 1: Watercube"
 	roll3 ~ missing
 	roll4 ~ missing
 
-    dicesum = missing
+    dicesum = roll1 + roll2 + roll3 + roll4
     return dicesum
 end
 
@@ -177,9 +203,9 @@ md"### 2: Dirtprism"
 
 # ╔═╡ 6b009ba3-83a8-4176-86d4-dd9f70ed29ec
 @model function dirtprism()
-	# there is a faster option than writing out `rollx ~ ...` 20 times!
+	# check the "For-loops for many variables" section from the intro notebook!
 	
-	dicesum = missing
+	dicesum = missing # consider the `sum` function
 	return dicesum
 end
 
@@ -203,7 +229,7 @@ md"## 4: Super eggs"
 
 # ╔═╡ 372436c4-262f-49b8-b1cf-626b043542bf
 md"""
-When a chicken lays an egg, there's a small chance it contains two egg yolks. This chance, as well as the number of eggs a chicken lays per year, go down as the chicken gets older. 
+When a chicken lays an egg, there's a small chance it contains two egg yolks. This chance, as well as the number of eggs a chicken lays per year, go down as the chicken gets older.
 """
 
 # ╔═╡ 20111742-008a-44c3-8c27-62791cce3e1e
@@ -217,8 +243,19 @@ You can make the following assumptions
 # ╔═╡ 6e020801-983d-4ebc-a0e9-b5dd58f66c55
 md"""
 !!! questions
-    - If someone hands you a random chicken, what is the probability it will lay 2 or more double eggs in a year? 
-    - Compare the distributions of double eggs for 1-year old and 3-year old chickens.
+    1. If someone hands you a random chicken, what is the probability it will lay 2 or more double eggs in a year? 
+    1. Compare the distributions of double eggs for 1-year old and 3-year old chickens.
+"""
+
+# ╔═╡ 98fcfcef-bf63-4eae-a325-ed4cef6d4fdd
+md"### 1: Probability"
+
+# ╔═╡ a0341046-c14a-494d-a9bd-a60c207c9e76
+md"""
+!!! hint
+	In this exercise, the output variable (the number of double-yolked eggs) is **also a random variable**! In other words, it also follows some distribution.
+
+	When considering what distribution, consider that each of the $N$ eggs represents a "trial" with a $P$ chance of success for a double yolk.
 """
 
 # ╔═╡ 2b3d930f-53d9-4869-9e4a-86a1a681b9d8
@@ -228,6 +265,9 @@ end
 
 # ╔═╡ 49d274f7-5810-48b1-8954-22b6a0941a47
 p_multiple_double_eggs = missing
+
+# ╔═╡ 8dcdc5d7-07b5-4041-b955-485b6f830b75
+md"### 2: Histograms"
 
 # ╔═╡ cee7c02a-62db-4181-8321-b8bea8fb9339
 missing # histogram 1
@@ -251,7 +291,7 @@ md"""
 
 # ╔═╡ da44d18c-8be3-446e-a5c2-905af545d2c6
 md"""
-!!! note
+!!! tip
 	You can solve this (among other possibilities) using either a for-loop and the `count_occurences` function given below, or the `Multinomial` distribution.
 """
 
@@ -268,7 +308,7 @@ end
 
 # ╔═╡ Cell order:
 # ╟─e4cb065e-12c6-4f1c-8497-1013fa9411d6
-# ╠═7d4d4d20-b323-11ef-0926-b14785cb9ab5
+# ╠═84d9771c-75b1-4d22-a1cd-b9078866a836
 # ╠═4cfd4721-e29a-4270-8d15-021bcc966eb1
 # ╠═73c2a5db-4019-4d91-b5f1-7ba378cb8c84
 # ╟─7026f66f-9076-4aef-ada9-198450ef5da6
@@ -276,13 +316,15 @@ end
 # ╟─def27d26-2205-4a66-94f3-eddbc17483bf
 # ╠═ff38df99-f843-414d-8e45-b46e06a65c22
 # ╠═42c18a70-efb3-436b-83bb-b586280d4a4e
-# ╠═5949d5f0-f93d-4088-8ca1-ce230562f046
 # ╠═b22a18d5-f70b-42a5-a09e-3de515148a6d
 # ╠═34bd60df-272f-49d7-9346-fb4d125fe89b
 # ╟─13989ba4-bcf8-4fdd-8aee-ab58c8905bc9
+# ╟─aba42086-224f-44a0-b616-f8f651afdd18
 # ╠═39e4f3eb-b7a9-4ece-846f-eb02dbd77860
 # ╠═acca0e39-612f-43b8-9c25-74c143041978
 # ╟─c243ca59-191d-4905-825e-6d7825a3c8a4
+# ╟─137a1727-08ab-4455-ad8e-88bbead80845
+# ╠═263048e5-206c-499e-836c-bfe489ed9b74
 # ╠═aedd0fe8-da3e-4463-b0cf-7c4f9a22db52
 # ╠═7ef53a87-e5df-4724-b896-3d1d46214c68
 # ╠═ce9e2ce2-26e0-4f17-adf5-c922ba98239d
@@ -300,6 +342,7 @@ end
 # ╟─187854bb-9e30-454d-9e03-cccf77aebb6b
 # ╟─747e3c0a-357a-448a-b479-d0fcbe44a6c0
 # ╟─eda95f45-083a-4e65-b57e-bd9890da1f9c
+# ╟─4fefa78b-746d-4e25-baee-d791eb22d930
 # ╠═36477423-5628-4ed3-b54d-9a050557f6b7
 # ╠═02bc37e2-5cf6-404a-b3fe-b2120671adb2
 # ╠═b5886255-5c1d-4d84-b7ee-6c690fa526dc
@@ -315,8 +358,11 @@ end
 # ╟─372436c4-262f-49b8-b1cf-626b043542bf
 # ╟─20111742-008a-44c3-8c27-62791cce3e1e
 # ╟─6e020801-983d-4ebc-a0e9-b5dd58f66c55
+# ╟─98fcfcef-bf63-4eae-a325-ed4cef6d4fdd
+# ╟─a0341046-c14a-494d-a9bd-a60c207c9e76
 # ╠═2b3d930f-53d9-4869-9e4a-86a1a681b9d8
 # ╠═49d274f7-5810-48b1-8954-22b6a0941a47
+# ╟─8dcdc5d7-07b5-4041-b955-485b6f830b75
 # ╠═cee7c02a-62db-4181-8321-b8bea8fb9339
 # ╠═6b3227c5-78aa-4031-b321-f938757d5ad8
 # ╟─ff06c070-50a2-43d0-9729-1c47e728ff52
