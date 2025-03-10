@@ -27,8 +27,8 @@ macro bind(def, element)
     #! format: on
 end
 
-# ╔═╡ 886c7932-da4b-45cc-ba73-8047389e4895
-using Pkg; Pkg.activate("../../pluto-deployment-environment");
+# ╔═╡ df95b3d0-9f2d-4267-ad8c-837c7848a871
+using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 80bc0e86-5ad3-4d61-9600-8dc05b86599d
 using Turing, StatsPlots
@@ -228,7 +228,7 @@ missing # histogram
 
 # ╔═╡ Cell order:
 # ╟─52a38b60-178b-4a1d-ac32-e73fafd339f9
-# ╠═886c7932-da4b-45cc-ba73-8047389e4895
+# ╠═df95b3d0-9f2d-4267-ad8c-837c7848a871
 # ╠═80bc0e86-5ad3-4d61-9600-8dc05b86599d
 # ╠═fe68a4dd-038c-4f94-a4f0-48933ff2fa87
 # ╟─116b840c-e766-4ff6-aafa-0977fb122992
