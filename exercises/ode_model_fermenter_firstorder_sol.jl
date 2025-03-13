@@ -33,11 +33,16 @@ md"""
 In a fermenter reactor biomass $X$ grows on substrate $S$. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. Inside the reactor, biomass, with a concentration of $X$ [$g/L$], is produced through first-order kinetics (first-order in $S$):
 
 $$\begin{eqnarray*}
-% S \xrightarrow[\quad\quad]{\beta} Y \, X
-S \xrightarrow[\quad\quad]{\text{r}} Y \, X \quad\quad\quad\quad r = \beta \, S
+S \xrightarrow[\quad\quad]{\beta} Y \, X
 \end{eqnarray*}$$
 
-with $\beta$ [$h^{-1}$] the reaction rate constant, and $Y$ [$gX/gS$] the yield coefficient which is defined here by the amount of produced biomass by consumption of one unit of substrate. Futhermore, the reactor is drained with an outlet flow $Q$ [$L/h$], which consist of the current concentrations of substrate $S$ [$g/L$] and biomass $X$ [$g/L$] inside the reactor. The volume $V$ [$L$] of the reactor content is kept constant by setting $Q_{in} = Q$.
+with $\beta$ [$h^{-1}$] the reaction rate constant, and $Y$ [$gX/gS$] the yield coefficient which is defined here by the amount of produced biomass by consumption of one unit of substrate. The reaction rate is actually:
+
+$$\begin{eqnarray*}
+r = \beta \, S
+\end{eqnarray*}$$
+
+Futhermore, the reactor is drained with an outlet flow $Q$ [$L/h$], which consist of the current concentrations of substrate $S$ [$g/L$] and biomass $X$ [$g/L$] inside the reactor. The volume $V$ [$L$] of the reactor content is kept constant by setting $Q_{in} = Q$.
 """
 
 # ╔═╡ f1350528-07a5-4860-ad2d-627588186abc
@@ -47,12 +52,6 @@ Create a *reaction network object* model for the aforementioned problem in order
 
 
 # ╔═╡ 331a34f4-89d4-4193-896c-c14ab0bf04e7
-# Uncomment and complete the instruction
-# fermenter_firstorder = @reaction_network begin
-#     missing        # Y*X is created from one S at a rate β
-#     missing        # S is created at a rate Q/V*Sin
-#     missing        # S and X are degraded at a rate Q/V*S
-# end
 fermenter_firstorder = @reaction_network begin
     β, S --> Y*X        # Y*X is created from one S at a rate β
 	# β*S, S => Y*X        # Y*X is created from one S at a rate β
@@ -66,7 +65,6 @@ Convert the system to a symbolic differential equation model and verify, by anal
 """
 
 # ╔═╡ ec9cb3bd-f5ed-4ab0-9b3d-b875692227ac
-# osys = missing           # Uncomment and complete the instruction
 osys = convert(ODESystem, fermenter_firstorder, combinatoric_ratelaws=false)
 
 # ╔═╡ 67117a27-dcea-4b43-b962-9ad9fd07f4f4
@@ -81,7 +79,6 @@ Initialize a vector `u₀` with the initial conditions:
 """
 
 # ╔═╡ 4b556cf0-8fad-434d-be56-dc1848d898ae
-# u0 = missing            # Uncomment and complete the instruction
 u0 = [:S => 0.1068, :X => 1.6746]
 
 # ╔═╡ ea55d648-7575-43c3-a385-5f4979996ef2
@@ -90,7 +87,6 @@ Set the timespan for the simulation:
 """
 
 # ╔═╡ 1365c12e-e662-4858-983b-02ba94cd9f0d
-# tspan = missing         # Uncomment and complete the instruction
 tspan = (0.0, 120.0)
 
 # ╔═╡ 3941bd60-a83c-4f72-84b3-28e28cb845d0
@@ -99,7 +95,6 @@ Initialize a vector `params` with the parameter values:
 """
 
 # ╔═╡ d6c1316a-cf96-43d1-854a-f25925cf4a55
-# params = missing         # Uncomment and complete the instruction
 params = [:β => 0.98, :Y => 0.80, :Q => 2, :V => 40, :Sin => 2.2]
 
 # ╔═╡ eeb8ec6e-154e-4fe9-8b5b-edbe71914985
@@ -108,7 +103,6 @@ Create the *condition* that contains the timepoint for the sudden change in $S_{
 """
 
 # ╔═╡ 7ca8efaa-97b6-46f2-b4d3-6ca8aa97dda7
-# condition = missing
 condition = [20] => [fermenter_firstorder.Sin ~ 3.4]
 
 # ╔═╡ d864bfc3-05b2-483b-9a55-da026931703f
@@ -117,7 +111,6 @@ Make a new *reaction system* where the discrete event is included. Name it `ferm
 """
 
 # ╔═╡ d758b918-d184-473f-9b9e-ed6da7b0f088
-# @named fermenter_firstorder_c = missing
 @named fermenter_firstorder_c = ReactionSystem(equations(fermenter_firstorder), discrete_events=condition)
 
 # ╔═╡ ef596d8c-efdc-4b5c-9584-335d799acfe8
@@ -126,7 +119,6 @@ Complete the new *reaction system*. Name it `fermenter_firstorder_c_com`.
 """
 
 # ╔═╡ c07b3121-4c27-454c-b9e4-7dfa27371ebd
-# fermenter_firstorder_c_com = missing
 fermenter_firstorder_c_com = complete(fermenter_firstorder_c)
 
 # ╔═╡ c6e81f41-a244-48c9-9d18-b3b9e0984fbb
@@ -135,7 +127,6 @@ Create the ODE problem and store it in `oprob`:
 """
 
 # ╔═╡ ed56f8d6-2260-4829-9190-69b60b7d7599
-# oprob = missing
 oprob = ODEProblem(fermenter_firstorder_c_com, u0, tspan, params, combinatoric_ratelaws=false);
 
 # ╔═╡ 8b73b16b-7f7d-4d2e-a1c2-7e1adf2336e9
@@ -144,7 +135,6 @@ Solve the ODE problem. Make a deepcopy and use `Tsit5()` and `saveat=0.5`. Store
 """
 
 # ╔═╡ 433db8d1-f038-4e7b-9133-90bfeccabd07
-# osol = missing
 osol = solve(deepcopy(oprob), Tsit5(), saveat=0.5)
 
 # ╔═╡ fc824241-f718-46a8-b50b-a680470c062b
@@ -153,7 +143,6 @@ Plot the results:
 """
 
 # ╔═╡ e2609226-5f2f-4802-89e3-0efeac740081
-# missing
 plot(osol)
 
 # ╔═╡ 5fa47281-4c1f-4b8e-ab99-c92f4dc7ec65

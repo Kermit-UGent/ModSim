@@ -33,11 +33,16 @@ md"""
 In a fermenter reactor biomass $X$ grows on substrate $S$. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. Inside the reactor, biomass, with a concentration of $X$ [$g/L$], is produced through first-order kinetics (first-order in $S$):
 
 $$\begin{eqnarray*}
-% S \xrightarrow[\quad\quad]{\beta} Y \, X
-S \xrightarrow[\quad\quad]{\text{r}} Y \, X \quad\quad\quad\quad r = \beta \, S
+S \xrightarrow[\quad\quad]{\beta} Y \, X
 \end{eqnarray*}$$
 
-with $\beta$ [$h^{-1}$] the reaction rate constant, and $Y$ [$gX/gS$] the yield coefficient which is defined here by the amount of produced biomass by consumption of one unit of substrate. Futhermore, the reactor is drained with an outlet flow $Q$ [$L/h$], which consist of the current concentrations of substrate $S$ [$g/L$] and biomass $X$ [$g/L$] inside the reactor. The volume $V$ [$L$] of the reactor content is kept constant by setting $Q_{in} = Q$.
+with $\beta$ [$h^{-1}$] the reaction rate constant, and $Y$ [$gX/gS$] the yield coefficient which is defined here by the amount of produced biomass by consumption of one unit of substrate. The reaction rate is actually:
+
+$$\begin{eqnarray*}
+r = \beta \, S
+\end{eqnarray*}$$
+
+Futhermore, the reactor is drained with an outlet flow $Q$ [$L/h$], which consist of the current concentrations of substrate $S$ [$g/L$] and biomass $X$ [$g/L$] inside the reactor. The volume $V$ [$L$] of the reactor content is kept constant by setting $Q_{in} = Q$.
 """
 
 # ╔═╡ f1350528-07a5-4860-ad2d-627588186abc

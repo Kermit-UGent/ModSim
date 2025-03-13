@@ -33,13 +33,12 @@ md"""
 In a fermenter reactor biomass grows on substrate. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. Inside the reactor, biomass, with a concentration of $X$ [$g/L$], is produced through **Monod** kinetics:
 
 $$\begin{eqnarray*}
-%S  \xrightarrow[\quad\quad]{\beta} Y \, X
-S \xrightarrow[\quad\quad]{r} Y \, X \quad\quad\quad\quad r = \mu \, X
+S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s}
 \end{eqnarray*}$$
 
-where
+The quantity
 
-$$\mu = \mu_{max} \, \cfrac{S}{S + K_s}$$
+$$\mu = k\,S = \mu_{max} \, \cfrac{S}{S + K_s}$$
 
 is called the specific growth rate [$h^{-1}$]. Therein, $\mu_{max}$ is the maximum speficic growth rate, and $K_s$ [$g/L$] is the so-called *half-velocity constant* (i.e. the value of $S$ when $\mu/\mu_{max} = 0.5$). Futhermore, $Y$ [$gX/gS$] is the yield coefficient which is defined here by the amount of produced biomass by consumption of one unit of substrate. The reactor is drained with an outlet flow $Q$ [$L/h$], which consist of the current concentrations of substrate $S$ [$g/L$] and biomass $X$ [$g/L$] inside the reactor. The volume $V$ [$L$] of the reactor content is kept constant by setting $Q_{in} = Q$.
 """
@@ -48,23 +47,19 @@ is called the specific growth rate [$h^{-1}$]. Therein, $\mu_{max}$ is the maxim
 md"""
 Create a *reaction network object* model for the aforementioned problem in order to simulate the evolution of substrate $S$ and biomass $X$ with time. Name it `fermenter_monod`.
 
-Tip: The specific growth rate $\mu = \mu_{max} \, \cfrac{S}{S + K_s}$ can be implemented with `mm(S, μmax, Ks)`. The function `mm` stands for the Michaelis-Menten kinetics, whcih is equivalent to Monod kinetics.
+If you want to use the specific growth rate $\mu = \mu_{max} \, \cfrac{S}{S + K_s}$ in your reaction model, it can be implemented with `mm(S, μmax, Ks)`. The function `mm` stands for the Michaelis-Menten kinetics, whcih is equivalent to Monod kinetics.
 """
 
 # ╔═╡ 331a34f4-89d4-4193-896c-c14ab0bf04e7
-# fermenter_monod = @reaction_network begin
-#     ...        # Y*X is created from one S at a rate mm(S, μmax, Ks)*X
-#     ...        # S is created at a rate Q/V*Sin
-#     ...        # S and X are degraded at a rate Q/V*S
-# end
 fermenter_monod = @reaction_network begin
+	# When S and X meet, then Y*X + X are created:
+	μmax/(S + Ks), S + X --> (1 + Y)*X
+	# Alternative:
 	# Y*X is created from one S at a rate X*mm(S, μmax, Ks)
 	# Note that we have used S => Y*X instead of S --> Y*X because otherwise
 	# with --> an additional multiplication with S will occur.
-	mm(S, μmax, Ks)*X, S => Y*X
-	# Alternatively, when S and X meet, then Y*X + X are created:
-	# μmax/(S + Ks), S + X --> (1 + Y)*X
-    Q/V, (S, X) --> 0           # S and X are degraded at a rate Q/V*S
+	# mm(S, μmax, Ks)*X, S => Y*X
+    Q/V, (S, X) --> 0           # S and X are degraded at rates Q/V*S and Q/V*X
     Q/V*Sin, 0 --> S            # S is created at a rate Q/V*Sin 
 end
 
@@ -79,7 +74,6 @@ Keep in mind that `mm(S, μmax, Ks)` stands for $\mu_{max} \, \cfrac{S}{S + K_s}
 """
 
 # ╔═╡ ec9cb3bd-f5ed-4ab0-9b3d-b875692227ac
-# osys = missing
 osys = convert(ODESystem, fermenter_monod, combinatoric_ratelaws=false)
 
 # ╔═╡ 67117a27-dcea-4b43-b962-9ad9fd07f4f4
@@ -93,7 +87,6 @@ Initialize a vector `u0` with the initial conditions:
 """
 
 # ╔═╡ 4b556cf0-8fad-434d-be56-dc1848d898ae
-# u0 = missing            # Uncomment and complete the instruction
 u0 = [:S => 0.0, :X => 0.0005]
 
 # ╔═╡ ea55d648-7575-43c3-a385-5f4979996ef2
@@ -102,7 +95,6 @@ Set the timespan for the simulation:
 """
 
 # ╔═╡ 1365c12e-e662-4858-983b-02ba94cd9f0d
-# tspan = missing         # Uncomment and complete the instruction
 tspan = (0.0, 200.0)
 
 # ╔═╡ 3941bd60-a83c-4f72-84b3-28e28cb845d0
@@ -111,7 +103,6 @@ Initialize a vector `param` with the parameter values:
 """
 
 # ╔═╡ d6c1316a-cf96-43d1-854a-f25925cf4a55
-# params = missing         # Uncomment and complete the instruction
 params = [:μmax => 0.40, :Ks => 0.015, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.02]
 
 # ╔═╡ 4926b941-c3b6-4804-b4a4-11e13e5186f2
@@ -120,7 +111,6 @@ Create the ODE problem and store it in `oprob`:
 """
 
 # ╔═╡ ab2a9842-6a9c-46bd-812b-db01629d6a1c
-# oprob = missing           # Uncomment and complete the instruction
 oprob = ODEProblem(fermenter_monod, u0, tspan, params, combinatoric_ratelaws=false);
 
 # ╔═╡ b6a526bd-6ee5-442b-9fb8-3fbe1e280dd4
@@ -131,7 +121,6 @@ Solve the ODE problem. Use `Tsit5()` and `saveat=0.5`. Store the solution in `os
 """
 
 # ╔═╡ 1f62e66d-571f-41ca-9f02-f36a8ca10ab9
-# osol1 = missing           # Uncomment and complete the instruction
 osol1 = solve(oprob, Tsit5(), saveat=0.5)
 
 # ╔═╡ 37ced6e3-b435-4546-a720-a1ec1af23a65
@@ -140,7 +129,6 @@ Plot the results:
 """
 
 # ╔═╡ d609bed4-94cf-4167-80fe-924501a5835c
-# missing             # Uncomment and complete the instruction
 plot(osol1)
 
 # ╔═╡ 3c638fc4-8ebc-4e26-984e-b4513035287e
@@ -150,7 +138,6 @@ Tip: use something like: `(osol1[...][...], osol1[...][...])`
 """
 
 # ╔═╡ 25ef069e-5a08-4e85-acea-a5b64e0890f6
-# missing              # Uncomment and complete the instruction
 (osol1[:S][end], osol1[:X][end])
 
 # ╔═╡ d8234337-7516-4817-8ce5-194af694e3e3
@@ -168,12 +155,11 @@ u_guess1 = [:S => osol1[:S][end], :X => osol1[:X][end]]
 
 # ╔═╡ e8969045-27ac-460e-86a2-7494903534e8
 md"""
-Then we make a so-called SteadyStateProblem based on the ODEProblem but now with `u_guess1` as initial conditions! Finally we use `solve` to solve the steady state problem. The outputs are the steady state values for $S$ and $X$ which we have denoted as `Seq1` and `Xeq1`.
+Then we make a so-called SteadyStateProblem (similar to the ODEProblem) but now with `u_guess1` as initial conditions and without `tspan`! Finally we use `solve` to solve the steady state problem. The outputs are the steady state values for $S$ and $X$ which we have denoted as `Seq1` and `Xeq1`.
 """
 
 # ╔═╡ 1777503e-b793-4be2-b80b-b4edcd7041b5
-# Seq1, Xeq1 = solve(SteadyStateProblem(ODEProblem(fermenter_monod, u_guess1, tspan, params)))
-eq1 = solve(SteadyStateProblem(ODEProblem(fermenter_monod, u_guess1, tspan, params)))
+eq1 = solve(SteadyStateProblem(fermenter_monod, u_guess1, params))
 
 # ╔═╡ 36312d33-909b-47a9-8fab-fc70950ff07e
 Seq1 = eq1[:S]
@@ -226,7 +212,6 @@ Create the *condition* that contains the timepoint for the sudden change in $S_{
 """
 
 # ╔═╡ c85e505d-99c6-4616-b7c1-42c05b4894fc
-# condition2 = missing               # Uncomment and complete the instruction
 condition2 = [100] => [fermenter_monod.Sin ~ 0.022]
 
 # ╔═╡ 7c96bead-9f7b-4e84-abb9-9b6651208667
@@ -235,7 +220,6 @@ Make a new *reaction system* where the discrete event is included. Name it `ferm
 """
 
 # ╔═╡ 439dbeef-55b9-4fa4-aef5-fa0bb5a2ccf1
-# @named fermenter_monod2 = missing     # Uncomment and complete the instruction
 @named fermenter_monod2 = ReactionSystem(equations(fermenter_monod), discrete_events=condition2)
 
 # ╔═╡ 43614c69-3fb5-4bef-b2a2-9805a5545fb8
@@ -244,7 +228,6 @@ Complete the new *reaction system*. Name it `fermenter_monod2_com`.
 """
 
 # ╔═╡ 532306b5-2a71-4fcf-93ac-9dc52457a3f9
-# fermenter_monod2_com = missing        # Uncomment and complete the instruction
 fermenter_monod2_com = complete(fermenter_monod2)
 
 # ╔═╡ 9e8f4500-0b6a-47f0-a1f5-a74daea9d117
@@ -253,7 +236,6 @@ Create the ODE problem and store it in `oprob2`:
 """
 
 # ╔═╡ 7af72709-2f82-4971-8342-f02943f947c8
-# oprob2 = missing                      # Uncomment and complete the instruction
 oprob2 = ODEProblem(fermenter_monod2_com, u0, tspan, params);
 
 # ╔═╡ e019f797-a6ad-4f8f-8f9e-69db00ed3c39
@@ -262,7 +244,6 @@ Solve the ODE problem. Make a deepcopy and use `Tsit5()` and `saveat=0.5`. Store
 """
 
 # ╔═╡ 5f77450b-aa96-41b0-8017-a3d29fd7023a
-# osol2 = missing               # Uncomment and complete the instruction
 osol2 = solve(deepcopy(oprob2), Tsit5(), saveat=0.5)
 
 # ╔═╡ 310a78a5-94ce-4a29-b7a1-37831ce5c64e
@@ -285,7 +266,6 @@ Tip: use something like: `(osol2[...][...], osol2[...][...])`
 """
 
 # ╔═╡ 196edf3a-b220-4a54-8137-b136b509617e
-# (osol2[...][...], osol2[...][...])   # Uncomment and complete the instruction
 (osol2[:S][end], osol2[:X][end])
 
 # ╔═╡ 3c7bf6f2-4ffd-4678-a930-94cf1322ba9f
@@ -294,7 +274,6 @@ Initialize a vector `u_guess2` with the final values for $S$ and $X$:
 """
 
 # ╔═╡ 56eaa343-03b6-4cae-868b-e5c36ac66546
-# u_guess2 = missing                    # Uncomment and complete the instruction
 u_guess2 = [:S => osol2[:S][end], :X => osol2[:X][end]]
 
 # ╔═╡ 4d8c05d8-ee29-4cb8-84cd-4342cb1db289
@@ -303,7 +282,6 @@ Initialize a vector `param_mod` with the parameter values. Notice that all param
 """
 
 # ╔═╡ f121efc5-4e64-4e82-8672-2765ad85443e
-# params_mod = missing                   # Uncomment and complete the instruction
 params_mod = [:μmax => 0.40, :Ks => 0.015, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.02]
 
 # ╔═╡ 9fe054e0-cf21-49ba-a777-a8200b34b7dd
@@ -312,8 +290,7 @@ Make and solve the steady state problem. Call the output values `Seq2` and `Xeq2
 """
 
 # ╔═╡ 0b992750-a446-447b-b2a1-26658c11c0bf
-# Seq2, Xeq2 = missing                    # Uncomment and complete the instruction
-eq2 = solve(SteadyStateProblem(ODEProblem(fermenter_monod, u_guess2, tspan, params_mod)))
+eq2 = solve(SteadyStateProblem(fermenter_monod, u_guess2, params_mod))
 
 # ╔═╡ e1e2e214-7bd9-4f00-b434-a63861dde1bf
 Seq2 = eq2[:S]
@@ -327,7 +304,6 @@ Inspect those values.
 """
 
 # ╔═╡ 47a63fd8-f805-4c7d-8695-c9ee6550f24f
-# missing                                 # Uncomment and complete the instruction
 (Seq2, Xeq2)
 
 # ╔═╡ 4d962d0f-da41-405e-9438-733d5668cde3
@@ -380,7 +356,6 @@ Create the *condition* that contains the timepoint for the sudden change in $Q$.
 """
 
 # ╔═╡ 6e771231-abf1-41c0-9aa8-ac7220f2a9cd
-# condition3 = missing             # Uncomment and complete the instruction
 condition3 = [100] => [fermenter_monod.Q ~ 2*fermenter_monod.Q]
 
 # ╔═╡ 97b0de4f-c300-44f1-97fc-804d3263d8b5
@@ -389,7 +364,6 @@ Make a new *reaction system* where the discrete event is included. Name it `ferm
 """
 
 # ╔═╡ 837e27f1-a2d8-4d2c-aaa5-e82b6761e4fd
-# @named fermenter_monod3 = missing    # Uncomment and complete the instruction
 @named fermenter_monod3 = ReactionSystem(equations(fermenter_monod), discrete_events=condition3)
 
 # ╔═╡ d8002843-03c6-4fa4-b8e5-b42eac27588c
@@ -398,7 +372,6 @@ Complete the new *reaction system*. Name it `fermenter_monod3_com`.
 """
 
 # ╔═╡ 508f1dfe-3a92-4d80-b48d-e84a8738f97f
-# fermenter_monod3_com =missing        # Uncomment and complete the instruction
 fermenter_monod3_com = complete(fermenter_monod3)
 
 # ╔═╡ 5d4c2573-4e57-455b-bdcc-1cee79b08ce2
@@ -407,7 +380,6 @@ Create the ODE problem and store it in `oprob3`:
 """
 
 # ╔═╡ dd388e88-53af-48d3-800e-09b5c182a83b
-# oprob3 = missing                      # Uncomment and complete the instruction
 oprob3 = ODEProblem(fermenter_monod3_com, u0, tspan, params);
 
 # ╔═╡ 5133d846-e6a6-4b50-9ce1-cb91cf04cbd1
@@ -416,7 +388,6 @@ Solve the ODE problem. Make a deepcopy and use `Tsit5()` and `saveat=0.5`. Store
 """
 
 # ╔═╡ b3bc3348-a524-41e6-9fdb-865055246cd9
-# osol3 = missing                  # Uncomment and complete the instruction
 osol3 = solve(deepcopy(oprob3), Tsit5(), saveat=0.5)
 
 # ╔═╡ 39ef225d-3222-4998-bfd4-5ff88f74a0f9
@@ -425,7 +396,6 @@ Plot the results:
 """
 
 # ╔═╡ 76849cf5-170b-452b-acdd-c4017feaad18
-# missing                          # Uncomment and complete the instruction
 plot(osol3)
 
 # ╔═╡ 040f040f-aa28-442e-9f44-2a897e22ed4f

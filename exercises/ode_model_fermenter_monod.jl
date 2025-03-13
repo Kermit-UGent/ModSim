@@ -33,13 +33,12 @@ md"""
 In a fermenter reactor biomass grows on substrate. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. Inside the reactor, biomass, with a concentration of $X$ [$g/L$], is produced through **Monod** kinetics:
 
 $$\begin{eqnarray*}
-%S  \xrightarrow[\quad\quad]{\beta} Y \, X
-S \xrightarrow[\quad\quad]{r} Y \, X \quad\quad\quad\quad r = \mu \, X
+S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s}
 \end{eqnarray*}$$
 
-where
+The quantity
 
-$$\mu = \mu_{max} \, \cfrac{S}{S + K_s}$$
+$$\mu = k\,S = \mu_{max} \, \cfrac{S}{S + K_s}$$
 
 is called the specific growth rate [$h^{-1}$]. Therein, $\mu_{max}$ is the maximum speficic growth rate, and $K_s$ [$g/L$] is the so-called *half-velocity constant* (i.e. the value of $S$ when $\mu/\mu_{max} = 0.5$). Futhermore, $Y$ [$gX/gS$] is the yield coefficient which is defined here by the amount of produced biomass by consumption of one unit of substrate. The reactor is drained with an outlet flow $Q$ [$L/h$], which consist of the current concentrations of substrate $S$ [$g/L$] and biomass $X$ [$g/L$] inside the reactor. The volume $V$ [$L$] of the reactor content is kept constant by setting $Q_{in} = Q$.
 """
@@ -48,14 +47,14 @@ is called the specific growth rate [$h^{-1}$]. Therein, $\mu_{max}$ is the maxim
 md"""
 Create a *reaction network object* model for the aforementioned problem in order to simulate the evolution of substrate $S$ and biomass $X$ with time. Name it `fermenter_monod`.
 
-Tip: The specific growth rate $\mu = \mu_{max} \, \cfrac{S}{S + K_s}$ can be implemented with `mm(S, μmax, Ks)`. The function `mm` stands for the Michaelis-Menten kinetics, whcih is equivalent to Monod kinetics.
+If you want to use the specific growth rate $\mu = \mu_{max} \, \cfrac{S}{S + K_s}$ in your reaction model, it can be implemented with `mm(S, μmax, Ks)`. The function `mm` stands for the Michaelis-Menten kinetics, whcih is equivalent to Monod kinetics.
 """
 
 # ╔═╡ 331a34f4-89d4-4193-896c-c14ab0bf04e7
 # fermenter_monod = @reaction_network begin
-#     ...        # Y*X is created from one S at a rate mm(S, μmax, Ks)*X
-#     ...        # S is created at a rate Q/V*Sin
-#     ...        # S and X are degraded at a rate Q/V*S
+#     missing    # When S and X meet, then Y*X + X are created
+#     missing    # S is created at a rate Q/V*Sin
+#     missing    # S and X are degraded at a rate Q/V*S
 # end
 
 # ╔═╡ 55746566-2d46-4475-851a-02b7fad87a1a
@@ -147,7 +146,7 @@ First, we initialize a vector `u_guess1` with the final values for $S$ and $X$:
 
 # ╔═╡ e8969045-27ac-460e-86a2-7494903534e8
 md"""
-Then we make a so-called SteadyStateProblem based on the ODEProblem but now with `u_guess1` as initial conditions! Finally we use `solve` to solve the steady state problem. The outputs are the steady state values for $S$ and $X$ which we have denoted as `Seq1` and `Xeq1`.
+Then we make a so-called SteadyStateProblem (similar to the ODEProblem) but now with `u_guess1` as initial conditions and without `tspan`! Finally we use `solve` to solve the steady state problem. The outputs are the steady state values for $S$ and $X$ which we have denoted as `Seq1` and `Xeq1`.
 """
 
 # ╔═╡ 1777503e-b793-4be2-b80b-b4edcd7041b5

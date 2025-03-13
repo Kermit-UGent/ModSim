@@ -396,19 +396,15 @@ Make a slider for $\alpha$ in the range of $0.08$ and $0.20$ with a step of $0.0
 """
 
 # ╔═╡ 85e81822-2ea6-4d05-b879-1791bff255b9
-# missing                  # Uncomment and complete the instruction
 @bind α Slider(0.08:0.02:0.20, default=0.08, show_value=true)
 
 # ╔═╡ 27a4c4f5-0b2b-4d23-9bb0-a1a8ff6cfc4d
-# params_ex1 = missing      # Uncomment and complete the instruction
 params_ex1 = [:α => α, :β => 1.0e-6, :r => 0.2, :m => 0.4]
 
 # ╔═╡ 7955722d-fc35-4cce-8bf2-ee40ee7fbc82
-# oprob_ex1 = missing;     # Uncomment and complete the instruction
 oprob_ex1 = ODEProblem(infection_model, u0, tspan, params_ex1);
 
 # ╔═╡ f7b09e96-cf30-4bd0-841b-46621df693ab
-# osol_ex1 = missing;       # Uncomment and complete the instruction
 osol_ex1 = solve(oprob_ex1, Tsit5(), saveat=0.5);
 
 # ╔═╡ e7947165-b244-4ff6-bdf3-61d03aefe696
@@ -417,7 +413,6 @@ Plot the solutions:
 """
 
 # ╔═╡ adc0aa15-e0a9-4549-9609-967a9dc78b78
-# missing                   # Uncomment and complete the instruction
 plot(osol_ex1, ylim=(0.0, 1.0e7))
 
 # ╔═╡ c14d45b8-3af1-4e05-b10a-081ccd62a34d
@@ -473,11 +468,6 @@ Set-up the new *reaction network/model* and name it `infection_med`:
 """
 
 # ╔═╡ e4087441-7d0d-4716-b9fa-eef45e9f3b87
-# infection_med = @reaction_network begin  # Uncomment and complete the instruction
-# 	α * β, S + I --> 2I
-# 	..., I --> D
-# 	(..., ...), I --> R
-# end
 infection_med = @reaction_network begin
 	α * β, S + I --> 2I
 	(1 - b) * m * r, I --> D
@@ -490,7 +480,6 @@ Convert to an ODE system. Check the differential equations and make sure you und
 """
 
 # ╔═╡ 2a66417b-79a2-4909-bd89-5650c49b9411
-# osys_ex2 = missing       # Uncomment and complete the instruction
 osys_ex2 = convert(ODESystem, infection_med)
 
 # ╔═╡ 35956a99-5729-4bf7-bf09-b2232fc958da
@@ -517,15 +506,12 @@ Change the value of $b$ in the `params_ex2` vector to visualize the effect in th
 @bind b Slider(0:0.2:1, default=0.2, show_value=true)
 
 # ╔═╡ cc31567f-631b-41b9-aa2d-3408ca951bcf
-# params_ex2 = missing       # Uncomment and complete the instruction
 params_ex2 = [:α => 0.08, :β => 1.0e-6, :b => b, :m => 0.4, :r => 0.2, :h => 0.5]
 
 # ╔═╡ ec08adb2-561c-4f17-a0b5-019d7b1f1098
-# oprob_ex2 = missing       # Uncomment and complete the instruction
 oprob_ex2 = ODEProblem(infection_med, u0, tspan, params_ex2);
 
 # ╔═╡ 67668918-624e-4adf-be5d-6fdbc62555f6
-# osol_ex2 = missing        # Uncomment and complete the instruction
 osol_ex2 = solve(oprob_ex2, Tsit5(), saveat=0.5);
 
 # ╔═╡ 832f984a-176d-4187-8476-5026d29a63d8
@@ -535,7 +521,6 @@ Plot the solutions:
 
 # ╔═╡ 5f9a9838-099d-457f-9402-915f42d0cd33
 begin
-	# missing          # Uncomment and complete the instruction
 	plot(osol_ex2)
 	plot!(osol_ex1; linestyle=:dash, label=:none, color=:grey, lw=0.5)
 end
@@ -570,7 +555,6 @@ Check the number of fatalities:
 """
 
 # ╔═╡ a912f449-6c9d-4595-863f-a2ba523bad95
-# missing
 osol_ex2[:D][end]/osol_ex1[:D][end]-1   # 41% less deaths
 
 # ╔═╡ 089707c3-1df6-4799-a87b-0d4872a0267d
@@ -601,13 +585,6 @@ Set-up the new *reaction network/model* and name it `infection_med_vac`:
 """
 
 # ╔═╡ a1795123-876b-4bd3-ac3a-711367b500d1
-# Uncomment and complete the instruction
-# infection_med_vac = @reaction_network begin
-# 	α * β, S + I --> 2I
-# 	..., I --> D
-# 	(..., ...), I --> R
-# 	..., ... --> ...
-# end
 infection_med_vac = @reaction_network begin
 	α * β, S + I --> 2I
 	(1 - b) * m * r, I --> D
@@ -621,7 +598,6 @@ Convert to an ODE system. Check the differential equations and make sure you und
 """
 
 # ╔═╡ 710fe13c-bd43-4d1e-867e-72330722ac1e
-# osys_ex3 = missing       # Uncomment and complete the instruction
 osys_ex3 = convert(ODESystem, infection_med_vac)
 
 # ╔═╡ 0274fbd8-c025-4e36-bbb0-f65f21b962c7
@@ -645,19 +621,15 @@ Make a slider and bind it to the variable `v`. Use a range $[0.0, 0.1]$, step si
 """
 
 # ╔═╡ 2943b515-fb4b-45a2-88dd-d0267ec95b09
-# missing                # Uncomment and complete the instruction
 @bind v Slider(0.0:0.001:0.1, default=0.0, show_value=true)
 
 # ╔═╡ 34c4d746-45f7-43c4-a0f0-6e570373a35d
-# params_ex3 = missing    # Uncomment and complete the instruction
 params_ex3 = [:α => 0.08, :β => 1.0e-6, :b => 0.2, :m => 0.4, :r => 0.2, :h => 0.5, :v => v]
 
 # ╔═╡ c61ae8b6-2324-43fa-a5ae-274a919af559
-# oprob_ex3 = missing       # Uncomment and complete the instruction
 oprob_ex3 = ODEProblem(infection_med_vac, u0, tspan, params_ex3);
 
 # ╔═╡ 16211bc6-cd97-43c0-8faf-25bb490930b6
-# osol_ex3_no_vac = missing;   # Uncomment and complete the instruction
 osol_ex3_vac = solve(oprob_ex3, Tsit5(), saveat=0.5);
 
 # ╔═╡ 461eada9-5f9c-4439-8b65-226382b6d148
@@ -666,7 +638,6 @@ First, put the value of $b$ in Exercise 2 to $0.2$. Compare the latter with the 
 """
 
 # ╔═╡ 0994d790-0fe8-46ab-bba2-a0a4ea466f64
-# missing                     # Uncomment and complete the instruction
 osol_ex2[:D][end]/10 > osol_ex3_vac[:D][end]
 
 # ╔═╡ 8bb5dafd-6c26-4634-8be4-c2963efba056
@@ -675,7 +646,6 @@ Once you have found the required value of $v$ launch the vaccination programme $
 """
 
 # ╔═╡ 26c77206-fe3c-45c5-a627-f2b346c66be7
-# condition_ex3 = missing     # Uncomment and complete the instruction
 condition_ex3 = [2.0] => [infection_med_vac.v ~ 0.046]
 
 # ╔═╡ 527e55a8-1744-4c40-a412-054bed6d77f0
@@ -684,7 +654,6 @@ Make a new *reaction system* where the discrete event is included. Name it `infe
 """
 
 # ╔═╡ ceae9947-ed0f-4975-a944-cc938cf22dde
-# @named infection_med_vac_c = missing    # Uncomment and complete the instruction
 @named infection_med_vac_c = ReactionSystem(equations(infection_med_vac), discrete_events=condition_ex3)
 
 # ╔═╡ 6e767e36-f54e-4472-881a-ab04ad9c9d09
@@ -693,7 +662,6 @@ Complete the new *reaction system*. Name it `infection_med_vac_c_com`.
 """
 
 # ╔═╡ 870c9d65-2229-40b7-9959-59afecb4f3bf
-# infection_med_vac_c_com = missing      # Uncomment and complete the instruction
 infection_med_vac_c_com = complete(infection_med_vac_c)
 
 # ╔═╡ 93ca3970-bebd-4192-bc62-6ca08d58a6c2
@@ -702,7 +670,6 @@ Create the ODE problem and store it in `oprob_ex3_c`:
 """
 
 # ╔═╡ 7e4114d6-932a-4def-9bb5-b534072ea513
-# oprob_ex3_c = missing                # Uncomment and complete the instruction
 oprob_ex3_c = ODEProblem(infection_med_vac_c_com, u0, tspan, params_ex3);
 
 # ╔═╡ 1bf8bc58-6848-4783-a614-7ac11646de92
@@ -711,7 +678,6 @@ Solve the ODE problem. Make a deepcopy and use `Tsit5()` and `saveat=0.5`. Store
 """
 
 # ╔═╡ 8814c42b-16c7-466a-8ad8-58ee1c0921b2
-# osol_ex3 = missing                   # Uncomment and complete the instruction
 osol_ex3 = solve(deepcopy(oprob_ex3_c), Tsit5(), saveat=0.5);
 
 # ╔═╡ 25158ea5-1930-4fee-aab4-490b475d8635
@@ -721,7 +687,6 @@ Plot the solutions:
 
 # ╔═╡ ed9472a0-09c9-4d1c-8f1d-1b7d87b97640
 begin
-	# missing          # Uncomment and complete the instruction
 	plot(osol_ex3)
 	plot!(osol_ex2; linestyle=:dash, label=:none, color=:grey, lw=0.5)
 end
