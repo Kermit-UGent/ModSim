@@ -37,7 +37,8 @@ In a fermenter reactor biomass grows on substrate. The reactor is fed with a inl
 
 $$\begin{eqnarray*}
 %S \xrightarrow[\quad\quad]{\beta} Y \, X
-S \xrightarrow[\quad\quad]{r} Y \, X \quad\quad\quad\quad r = k \, S\,X
+%S \xrightarrow[\quad\quad]{r} Y \, X \quad\quad\quad\quad r = k \, S\,X
+S + X \xrightarrow[\quad\quad]{k} X + YX % \, X \quad\quad\quad\quad r = k \, S\,X
 \end{eqnarray*}$$
 
 with $k$ [$L\,gS^{-1}h^{-1}$] the reaction rate constant, and $Y$ [$gX/gS$] the yield coefficient which is defined here by the amount of produced biomass by consumption of one unit of substrate. Futhermore, the reactor is drained with an outlet flow $Q$ [$L/h$], which consist of the current concentrations of substrate $S$ [$g/L$] and biomass $X$ [$g/L$] inside the reactor. The volume $V$ [$L$] of the reactor content is kept constant by setting $Q_{in} = Q$.
