@@ -53,12 +53,12 @@ begin
 	hline!([1.0], color = :blue, label = "Road 2", linewidth = 2)
 end
 
-# ╔═╡ 46d3214c-e724-4b98-bc1f-5b9913d2b14a
+# ╔═╡ 3408aa2b-adb9-49f6-8408-4d74fef84319
 md"""
 At some point `t_switch` ∈ [0, 10], the car switches from lane 1 to lane 2. We can describe the model as follows:
 - If `t <= t_switch`, then `y ~ Normal(0.0, σ)`,
 - If `t > t_switch`, then `y ~ Normal(1.0, σ)`,
-with `σ` some (small) noise parameter.
+with `σ` a noise parameter, of which you only know that it's probably small.
 """
 
 # ╔═╡ 0bdac14c-db71-47b5-95d5-d83fb1e68cab
@@ -87,7 +87,8 @@ md"""
 # ╔═╡ 70fd793a-3ce3-446f-adc1-65ce0a68e48a
 @model function cars(ts)
 	t_switch ~ Uniform(0, 10)
-	σ ~ Exponential(1.0)
+	σ ~ Exponential(10.0) 
+		# or something similar that expresses "its positive and probably around 0"
 	
 	ys_obs = zeros(length(ts))
 	for pointidx in 1:length(ts)
@@ -241,7 +242,7 @@ md"Changing to all continuous distributions made the inference much higher quali
 # ╠═90f185f3-91d4-4ee7-8de3-b76251c0c169
 # ╠═599ae818-fb28-4803-b720-9fcf2bb162b7
 # ╟─b2da9dc3-006c-49d0-81a7-6375a2dc6872
-# ╟─46d3214c-e724-4b98-bc1f-5b9913d2b14a
+# ╟─3408aa2b-adb9-49f6-8408-4d74fef84319
 # ╟─0bdac14c-db71-47b5-95d5-d83fb1e68cab
 # ╟─9e3db8b6-5466-48b6-9ca9-0d24515b9de3
 # ╟─cc0d6b32-6f12-46b8-915f-8a471317c35e
