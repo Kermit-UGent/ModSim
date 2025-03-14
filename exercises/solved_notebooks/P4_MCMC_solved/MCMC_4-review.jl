@@ -42,7 +42,7 @@ md"""
 
 # ╔═╡ be7dbb0f-299a-4925-b4c4-20eb6ce6e4af
 md"""
-Consider below the coordinates of marked hornets, as well as their return times.
+Consider below the coordinates of feeder stations with the return times of the hornets marked there.
 """
 
 # ╔═╡ c1850e64-9e2c-46fb-b7cd-22e8af81d3aa
@@ -54,14 +54,14 @@ scatter(xs, ys, label = "wasp locations", marker_z = ts, title = "Locations of w
 # ╔═╡ 484b56ec-57b2-496d-a5cf-1b1c0da97c58
 md"""
 !!! question
-	Where is the hornet nest located? You may assume the nest is somewhere within the plot's boundaries.
+	Where is the hornet nest located? You may assume the nest is somewhere within the plot's boundaries, and the flight speed of a wasp is around 5 to 10 m/s.
 """
 
 # ╔═╡ ac0496d3-aa62-4c07-8233-16fe67c52b24
 @model function horenaars(xs, ys, ts)
     x_nest ~ Uniform(0, 1000)
     y_nest ~ Uniform(0, 1000)
-    v_wasp ~ Gamma(8)
+    v_wasp ~ Gamma(8) # or something similar
 
     for i in eachindex(ts)
 		dist = sqrt((xs[i] - x_nest)^2 + (ys[i] - y_nest)^2)
@@ -86,9 +86,9 @@ y_nest_sp = chain[:y_nest];
 
 # ╔═╡ 0c6be1fa-bff5-495b-90e0-90dabe03105a
 begin
-	scatter(x_nest_sp, y_nest_sp, opacity = 0.1, color = :blue, label = "Estimated nest locations", xlims = (0, 1000), ylims = (0, 1000));
+	scatter(x_nest_sp, y_nest_sp, opacity = 0.1, color = :blue, label = "Estimated nest locations", xlims = (0, 1000), ylims = (0, 1000), markershape = :square);
 	scatter!(xs, ys, color = :orange, label = "wasp locations", marker_z = ts)
-	scatter!(true_location[1:1], true_location[2:2], color = RGB(0, 1, 0), label = "True nest location")
+	scatter!(true_location[1:1], true_location[2:2], color = RGB(0, 1, 0), label = "True nest location", markershape = :square)
 end
 
 # ╔═╡ Cell order:

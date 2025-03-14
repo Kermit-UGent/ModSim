@@ -10,38 +10,59 @@ using Pkg; Pkg.activate("..")
 # ╔═╡ 45bc5b66-c81b-4afb-8a7e-51aff9609c62
 using Turing, StatsPlots
 
+# ╔═╡ 9daad9dc-b092-4845-a276-ed3a24249924
+using PlutoUI; TableOfContents()
+
 # ╔═╡ 41dc8060-cf5e-11ef-26f9-892577e77af0
 md"# Inference notebook #2: Basics"
 
 # ╔═╡ 299ba93b-0fc0-4bb3-9a2c-a571ce571f1b
 md"## 1: Mole burrow"
 
-# ╔═╡ 957386c5-775c-47f7-9a38-e1630e548689
+# ╔═╡ 0d068aa6-f7c9-4a75-8382-cfbc903efc5b
 md"""
 Consider a mole's underground tunnel network of length `X` (in m). Now and then the mole makes a new molehill somewhere randomly above its tunnel, the locations of which we denote `Y`.
+"""
 
-We can formulate this as `X ~ Exponential(1000)` and `Y ~ Uniform(0, X)`.
+# ╔═╡ 5d4e269d-bd5a-422e-9547-099e04b8eedf
+md"""
+                  Y1                                Y2   Y3
+                  /\ 								/\   /\              <- molehills
+    =================================================================    <- ground
+                   |                                 |    |
+             ------------------------------------------------            <- tunnel
+             0                                              X
+"""
+
+# ╔═╡ 7abeb4d3-4648-4d8b-9383-de5213c8cc41
+md"""
+We're no mole experts, but for our prior information we can suppose a mole would not make a tunnel much longer than a few 100 m (probably a lot shorter).
+
+We can formulate this as `X ~ Exponential(100)` and `Y ~ Uniform(0, X)`.
 
 !!! questions
 	1. Plot the prior of `X`. Is it diffuse or informative?
 	1. Estimate `E[Y]`.
 	1. Estimate `E[X|Y = 3]` and compare it with the prior expected value `E[X]`.
 	1. Plot the histogram of `X` given `Y = 3.0`.
-	1. Plot the histogram of `X` again, but now given the following values for `Y`: `[3.0, 1.5, 0.9, 5.7]`.
+	1. You come back a day later and find even more molehills! You now measure the following values for `Y`: `[3.0, 1.5, 0.9, 5.7]`. How long do you estimate the tunnel given this extra information?
 """
 
 # ╔═╡ 47aa2304-d312-40e9-b9c6-7c79a7d64de4
-md"### 1"
+md"### 1: Prior plot"
 
 # ╔═╡ 78c9ce62-e375-48ac-8083-55ee085c61de
-missing # plot
+X_prior = missing
+
+# ╔═╡ c64b346a-059d-4bbe-b166-80116260e19b
+missing # plot above
 
 # ╔═╡ 78eb7779-f182-4419-b5d8-79a2f5c5d6da
-md"### 2"
+md"### 2: Unconditional expected value of Y"
 
 # ╔═╡ 3decb2ec-210a-4b2f-842d-6fd40dd3f77b
 @model function mole()
-	X ~ missing
+	X ~ X_prior
 	Y ~ missing
 	return Y
 end
@@ -56,7 +77,7 @@ spY = missing
 E_Y = missing
 
 # ╔═╡ 8777b133-7d7c-4a85-b89c-2f00093e9984
-md"### 3"
+md"### 3: Conditional expected value of X"
 
 # ╔═╡ 9695ee7e-359b-489c-962b-1bf84b052371
 cond_mole = missing
@@ -64,37 +85,44 @@ cond_mole = missing
 # ╔═╡ 014538da-b5ef-41c8-b799-2c000b4c9134
 molechain = missing
 
+# ╔═╡ 977d0406-f154-4b87-b9c6-cafe4809a4a6
+missing # plot molechain
+
+# ╔═╡ af4811ce-c6e7-458a-8f89-0562355b3eb0
+spXcondY = missing
+
 # ╔═╡ fd540765-95e5-4071-81f7-e689b06cad0c
-E_Xcond3 = missing
+E_XcondY = missing
 
 # ╔═╡ 5521933a-a42e-4a67-94b9-84eab52ddf07
 E_X = missing
 
-# ╔═╡ ca3e730c-a940-4c76-93eb-70ae4aa0e008
-md"### 4"
+# ╔═╡ 9403c355-dce8-4aa9-80a3-824ea6193905
+md"### 4: Conditional distribution of X"
 
 # ╔═╡ bedd99ca-4285-4c3d-87e2-c22d414f8f07
-missing # plot
+# histogram
 
-# ╔═╡ eda00c08-de49-4d2d-acc4-ba6e21ff0b11
-md"### 5"
+# ╔═╡ 21743f62-c7f5-4171-8277-0667edb71c56
+md"### 5: Conditional distribution of X (with more data)"
 
 # ╔═╡ b2b16c34-e12a-4bea-8098-313d01913bbf
 @model function mole2()
-	missing
+	X ~ X_prior
+	Ys = missing
+	for i in missing
+		Ys[i] ~ missing
+	end
 end
 
 # ╔═╡ 26a245d2-c5b6-484d-bdf7-541948ff06ad
 Y_obs = [3.0, 1.5, 0.9, 5.7]
 
-# ╔═╡ 2f5c14e9-709a-40ec-a6cb-ddd870cc1a60
-mole_cond2 = missing
+# ╔═╡ dc6aadff-7cff-4a9a-a967-32cd322b2696
+missing # (some lines of code)
 
-# ╔═╡ 7f90e18d-9af8-42fa-984b-aaa7c8c458b5
-molechain2 = missing
-
-# ╔═╡ 977b9563-0f3d-4d5a-b413-018558a65e9a
-missing # plot
+# ╔═╡ ea2235f0-0cfc-4603-b027-d0a1bc6fa2c1
+# I estimate the tunnel to be about (MISSING) long
 
 # ╔═╡ 951d0913-1a52-4d5b-b5bb-168487e50ab2
 md"## 2: Potatoes"
@@ -103,7 +131,7 @@ md"## 2: Potatoes"
 md"""
 Consider a number of potatoes `N` each with an average weight `W`. You weigh them together on an old balance to get an estimate of their total weight `T`.
 
-We can formulate this as `N ~ Poisson(10)`, `W ~ Uniform(150, 250)`  and `T ~ Normal(N*W, 50)`.
+Suppose the following priors: `N ~ Poisson(10)`, `W ~ Uniform(150, 250)`  and the following relationship between expected - and actual outcome: `T ~ Normal(N*W, 50)`.
 
 !!! questions
 	1. Plot a histogram of `N` given `T = 1200`.
@@ -112,24 +140,48 @@ We can formulate this as `N ~ Poisson(10)`, `W ~ Uniform(150, 250)`  and `T ~ No
 """
 
 # ╔═╡ 5f8322ca-0ded-4750-8ad6-e66e8280daca
-md"### 1"
+md"### 1: Conditional distribution of N"
 
 # ╔═╡ ec479be9-0d8a-4c8d-97c9-6f64d861924c
 @model function potatoes()
-	missing
+	N ~ missing
+	W ~ missing
+	T ~ missing
 end
 
-# ╔═╡ 8fd7925a-c27c-4bcf-a7c8-6d251149528c
-missing # plot
+# ╔═╡ 438893d1-3107-493c-9299-d8813658a698
+potato_model = missing
+
+# ╔═╡ dd7d84b0-1f20-4478-96ba-b3f4e9df1d2c
+potato_cond = missing
+
+# ╔═╡ accca8d7-8822-49ae-8588-7259da82e37a
+potato_chain = missing
+	# be careful with your choice of sampling algorithm! are all priors continuous?
+
+# ╔═╡ 519a952b-f040-4588-8acd-1cfaab88c4da
+# plot chain
+
+# ╔═╡ 57adc714-cdd1-46cf-a4ea-d0fb04924e1e
+# histogram of N
 
 # ╔═╡ 0fddec58-67d9-4dec-a72d-445675fa46a6
-md"### 2"
+md"### 2: Probability"
 
 # ╔═╡ b77d8796-9065-4c61-be21-3dc292b94492
 p_potato1 = missing
 
 # ╔═╡ 5bde987a-3f5c-4ff7-96a0-9e174f73fdfb
-md"### 3"
+md"### 3: Probability (with more data)"
+
+# ╔═╡ abffd02e-b917-4e9e-a94d-de197e1b0fc3
+potato_cond2 = missing # alternative conditioned model now also given `W = 220`
+
+# ╔═╡ 5b30d91a-7039-4d2a-bcf7-3a990622fd2a
+pota2_chain = missing
+
+# ╔═╡ 27939d84-d6e1-47b2-a939-5038c6bdcb48
+# plot chain
 
 # ╔═╡ 744cf31f-89c0-44e8-a6fb-0f4dcea04e5d
 p_potato2 = missing
@@ -139,7 +191,9 @@ md"## 3: Lights out"
 
 # ╔═╡ a3c26839-2acc-49d8-98c4-3a7142dd6512
 md"""
-You use 4 of the same LED light in your room. Let `μ` be the **average** lifespan of your LED lights (in khr or 1000 hours) and `L`ᵢ the lifespan of the `i`-th LED light.
+You use 4 of the same LED light in your room. Define:
+-  $μ$ the **average** lifespan of your LED lights (in khr or 1000 hours) 
+-  $Lᵢ$ the lifespan of the `i`-th LED light.
 
 Assume that `μ ~ LogNormal(log(40), 0.5)`.
 """
@@ -154,7 +208,7 @@ md"""
 """
 
 # ╔═╡ 7df97000-5cf0-4a29-b3c3-f867403f4318
-md"### 1"
+md"### 1: Unconditional expected value"
 
 # ╔═╡ 0fe475dd-411e-474e-9524-ef9fcceed7af
 lights_prior = missing
@@ -163,17 +217,27 @@ lights_prior = missing
 E_mu = missing
 
 # ╔═╡ 308cb1f5-e26b-43b2-be4d-9eabd68b3670
-md"### 2"
+md"### 2: Choice of distribution"
+
+# ╔═╡ 738b4097-56e1-4921-9195-2d535c78ae73
+md"""
+!!! note
+	See theory p. 96 for an overview of elementary distributions.
+"""
 
 # ╔═╡ d797cb9b-430b-4d1d-8ded-21959a7cb3a9
 # A sensible distribution for the lifespan of a LED-light is (missing)
 
 # ╔═╡ cd37e5fc-ae9a-429d-844d-4b450b187b5e
-md"### 3"
+md"### 3: Conditional expected value"
 
 # ╔═╡ 126d3954-c77d-4c98-abe0-fd87d14e6265
 @model function lights()
-	missing
+	μ ~ lights_prior
+	lifespans = missing
+	for i in missing
+		lifespans[i] ~ missing
+	end
 end
 
 # ╔═╡ 37bf6ca5-e42b-406e-94d6-bcd1e706e2bd
@@ -183,7 +247,13 @@ L_obs = [16, 20, 23, 41]
 E_mu_cond = missing
 
 # ╔═╡ 9a168680-9d96-466f-ba75-122d6a391501
-md"### 4 🌟🌟🌟"
+md"### 4 🌟🌟🌟: Working with censored data"
+
+# ╔═╡ ab6331a3-676e-45e6-b5be-e9c4154ea071
+md"""
+!!! note
+	This question is way above the exam's difficulty level. Don't feel bad if you can't find the answer right away!
+"""
 
 # ╔═╡ 1f35d962-a249-4be7-9a96-17eb83fca7d8
 md"""
@@ -192,7 +262,7 @@ md"""
 """
 
 # ╔═╡ 8fc58fa4-b005-4f32-9eae-a8143582a1ae
-@model function lights_censored(n, time_observed)
+@model function lights_censored(time_observed)
 	missing
 end
 
@@ -222,7 +292,7 @@ md"""
 """
 
 # ╔═╡ b477b212-83a2-42f0-a616-52516e152d48
-md"### 1"
+md"### 1: Prior distribution given `fs1`"
 
 # ╔═╡ 23056f1e-128e-463e-a80f-56299397022e
 md"""
@@ -237,25 +307,48 @@ lengthdist = missing
 missing # plot
 
 # ╔═╡ 8e030a06-5104-4c5b-b1f2-f86464e66502
-md"### 2"
+md"### 2: Conditional expected value"
 
 # ╔═╡ 6ebf3a16-0e6a-491f-8280-b4327ed52cf0
 len_obs = [94.0, 88.7, 89.6, 69.8, 52.8, 84.0, 89.3, 66.4, 95.1, 81.6]
 
 # ╔═╡ b15de91a-fc48-4cdc-a35f-6453a9a59982
 @model function fishmixture()
-	missing
+	fs1 ~ missing # fraction of species 1
+	fishlendist = missing
+	
+	fishlens = missing
+	for i in missing
+		fishlens[i] ~ fishlendist
+	end
 end
+
+# ╔═╡ 94a9e163-f7c0-4d22-8d37-5641bc49eb6b
+fishmodel = missing
+
+# ╔═╡ 40d460d2-1f2b-4d33-ba74-9a9d1e48f9ec
+fishchain = missing # don't forget to plot to check convergence
 
 # ╔═╡ 819ed364-4bc9-43ec-aa50-b965c8f1c826
 fs1_est = missing
 
 # ╔═╡ 952a941a-8703-45a3-aac1-a290a181e8c5
-md"### 3🌟"
+md"### 3🌟: Conditional expected value (spicy)"
 
 # ╔═╡ 8629d049-b9fd-4e9e-9b55-401a3069e956
 @model function fishmixture🌟()
-	missing
+	fs1 ~ missing # fraction of species 1
+	
+	fishlens = missing
+	isspecies1 = missing
+	for i in missing
+		isspecies1[i] ~ missing
+		if isspecies1[i] == 1.0
+			fishlens[i] ~ missing
+		else
+			fishlens[i] ~ missing
+		end
+	end
 end
 
 # ╔═╡ 483cbe4d-64d3-4b16-b6fc-e97b21f174a6
@@ -320,7 +413,7 @@ end
 scatter([x1, x2, x3], [y1, y2, y3])
 
 # ╔═╡ 7eedb74d-eee1-4cf0-b2bf-5febf474edd2
-md"### 1"
+md"### 1: All points"
 
 # ╔═╡ 84d27c98-9513-4ae3-8101-621c083a1b01
 @model function circle(σ=0.25)
@@ -366,7 +459,7 @@ begin
 end
 
 # ╔═╡ 0a140d2a-a24b-48df-9af8-7fa5d586a26f
-md"### 2"
+md"### 2: Some points"
 
 # ╔═╡ b7649523-fd40-4fe3-8d86-fc2cb2c8c488
 circle1 = missing # given one point
@@ -408,10 +501,14 @@ end
 # ╟─41dc8060-cf5e-11ef-26f9-892577e77af0
 # ╠═94c6f31d-1a43-4221-b60c-1fa0ef8738b8
 # ╠═45bc5b66-c81b-4afb-8a7e-51aff9609c62
+# ╠═9daad9dc-b092-4845-a276-ed3a24249924
 # ╟─299ba93b-0fc0-4bb3-9a2c-a571ce571f1b
-# ╟─957386c5-775c-47f7-9a38-e1630e548689
+# ╟─0d068aa6-f7c9-4a75-8382-cfbc903efc5b
+# ╟─5d4e269d-bd5a-422e-9547-099e04b8eedf
+# ╟─7abeb4d3-4648-4d8b-9383-de5213c8cc41
 # ╟─47aa2304-d312-40e9-b9c6-7c79a7d64de4
 # ╠═78c9ce62-e375-48ac-8083-55ee085c61de
+# ╠═c64b346a-059d-4bbe-b166-80116260e19b
 # ╟─78eb7779-f182-4419-b5d8-79a2f5c5d6da
 # ╠═3decb2ec-210a-4b2f-842d-6fd40dd3f77b
 # ╠═76dd814d-0d9b-4f7e-aff8-990da57d052b
@@ -420,24 +517,32 @@ end
 # ╟─8777b133-7d7c-4a85-b89c-2f00093e9984
 # ╠═9695ee7e-359b-489c-962b-1bf84b052371
 # ╠═014538da-b5ef-41c8-b799-2c000b4c9134
+# ╠═977d0406-f154-4b87-b9c6-cafe4809a4a6
+# ╠═af4811ce-c6e7-458a-8f89-0562355b3eb0
 # ╠═fd540765-95e5-4071-81f7-e689b06cad0c
 # ╠═5521933a-a42e-4a67-94b9-84eab52ddf07
-# ╟─ca3e730c-a940-4c76-93eb-70ae4aa0e008
+# ╟─9403c355-dce8-4aa9-80a3-824ea6193905
 # ╠═bedd99ca-4285-4c3d-87e2-c22d414f8f07
-# ╟─eda00c08-de49-4d2d-acc4-ba6e21ff0b11
+# ╟─21743f62-c7f5-4171-8277-0667edb71c56
 # ╠═b2b16c34-e12a-4bea-8098-313d01913bbf
 # ╠═26a245d2-c5b6-484d-bdf7-541948ff06ad
-# ╠═2f5c14e9-709a-40ec-a6cb-ddd870cc1a60
-# ╠═7f90e18d-9af8-42fa-984b-aaa7c8c458b5
-# ╠═977b9563-0f3d-4d5a-b413-018558a65e9a
+# ╠═dc6aadff-7cff-4a9a-a967-32cd322b2696
+# ╠═ea2235f0-0cfc-4603-b027-d0a1bc6fa2c1
 # ╟─951d0913-1a52-4d5b-b5bb-168487e50ab2
 # ╟─49035a16-c419-4531-b157-a5ab357b44fe
 # ╟─5f8322ca-0ded-4750-8ad6-e66e8280daca
 # ╠═ec479be9-0d8a-4c8d-97c9-6f64d861924c
-# ╠═8fd7925a-c27c-4bcf-a7c8-6d251149528c
+# ╠═438893d1-3107-493c-9299-d8813658a698
+# ╠═dd7d84b0-1f20-4478-96ba-b3f4e9df1d2c
+# ╠═accca8d7-8822-49ae-8588-7259da82e37a
+# ╠═519a952b-f040-4588-8acd-1cfaab88c4da
+# ╠═57adc714-cdd1-46cf-a4ea-d0fb04924e1e
 # ╟─0fddec58-67d9-4dec-a72d-445675fa46a6
 # ╠═b77d8796-9065-4c61-be21-3dc292b94492
 # ╟─5bde987a-3f5c-4ff7-96a0-9e174f73fdfb
+# ╠═abffd02e-b917-4e9e-a94d-de197e1b0fc3
+# ╠═5b30d91a-7039-4d2a-bcf7-3a990622fd2a
+# ╠═27939d84-d6e1-47b2-a939-5038c6bdcb48
 # ╠═744cf31f-89c0-44e8-a6fb-0f4dcea04e5d
 # ╟─ed7c5547-bd82-4ca7-bf51-dd1c201d88af
 # ╟─a3c26839-2acc-49d8-98c4-3a7142dd6512
@@ -446,12 +551,14 @@ end
 # ╠═0fe475dd-411e-474e-9524-ef9fcceed7af
 # ╠═db77b90b-33b5-4d70-8229-b4c7d74fa96c
 # ╟─308cb1f5-e26b-43b2-be4d-9eabd68b3670
+# ╟─738b4097-56e1-4921-9195-2d535c78ae73
 # ╠═d797cb9b-430b-4d1d-8ded-21959a7cb3a9
 # ╟─cd37e5fc-ae9a-429d-844d-4b450b187b5e
 # ╠═126d3954-c77d-4c98-abe0-fd87d14e6265
 # ╠═37bf6ca5-e42b-406e-94d6-bcd1e706e2bd
 # ╠═c49955c7-7082-4261-b4db-0056b5c637f1
 # ╟─9a168680-9d96-466f-ba75-122d6a391501
+# ╟─ab6331a3-676e-45e6-b5be-e9c4154ea071
 # ╟─1f35d962-a249-4be7-9a96-17eb83fca7d8
 # ╠═8fc58fa4-b005-4f32-9eae-a8143582a1ae
 # ╠═410521d8-f767-4c4e-b19b-25cf31ec0f36
@@ -465,6 +572,8 @@ end
 # ╟─8e030a06-5104-4c5b-b1f2-f86464e66502
 # ╠═6ebf3a16-0e6a-491f-8280-b4327ed52cf0
 # ╠═b15de91a-fc48-4cdc-a35f-6453a9a59982
+# ╠═94a9e163-f7c0-4d22-8d37-5641bc49eb6b
+# ╠═40d460d2-1f2b-4d33-ba74-9a9d1e48f9ec
 # ╠═819ed364-4bc9-43ec-aa50-b965c8f1c826
 # ╟─952a941a-8703-45a3-aac1-a290a181e8c5
 # ╠═8629d049-b9fd-4e9e-9b55-401a3069e956

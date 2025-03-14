@@ -42,7 +42,7 @@ md"""
 
 # ╔═╡ bfb49d79-772d-4066-bd96-14143a1b5eeb
 md"""
-Consider below the coordinates of marked hornets, as well as their return times.
+Consider below the coordinates of feeder stations with the return times of the hornets marked there.
 """
 
 # ╔═╡ c1850e64-9e2c-46fb-b7cd-22e8af81d3aa
@@ -69,9 +69,9 @@ y_nest_sp = missing # vector with possible values of the nest's y-coordinate
 
 # ╔═╡ 511f27c3-7cdb-426f-b794-85897ff44135
 begin
-	scatter(x_nest_sp, y_nest_sp, opacity = 0.1, color = :blue, label = "Estimated nest locations", xlims = (0, 1000), ylims = (0, 1000));
+	scatter(x_nest_sp, y_nest_sp, opacity = 0.1, color = :blue, label = "Estimated nest locations", xlims = (0, 1000), ylims = (0, 1000), markershape = :square);
 	scatter!(xs, ys, color = :orange, label = "wasp locations", marker_z = ts)
-	scatter!(true_location[1:1], true_location[2:2], color = RGB(0, 1, 0), label = "True nest location")
+	scatter!(true_location[1:1], true_location[2:2], color = RGB(0, 1, 0), label = "True nest location", markershape = :square)
 end
 
 # ╔═╡ Cell order:

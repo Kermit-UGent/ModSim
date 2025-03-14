@@ -58,7 +58,7 @@ md"""
 At some point `t_switch` ∈ [0, 10], the car switches from lane 1 to lane 2. We can describe the model as follows:
 - If `t <= t_switch`, then `y ~ Normal(0.0, σ)`,
 - If `t > t_switch`, then `y ~ Normal(1.0, σ)`,
-with `σ` some (small) noise parameter.
+with `σ` a noise parameter, of which you only know that it's probably small.
 """
 
 # ╔═╡ 0bdac14c-db71-47b5-95d5-d83fb1e68cab
