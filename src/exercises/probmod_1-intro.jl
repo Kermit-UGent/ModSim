@@ -346,6 +346,8 @@ Side note: the code is wrapped in a `let` block so Pluto won't complain about th
 """
 
 # ╔═╡ 51f9b6f9-9415-4030-82a6-32f9742bf7f5
+# ╠═╡ disabled = true
+#=╠═╡
 let
 	n_samples = 1000
 
@@ -372,6 +374,7 @@ let
 	scatter(sp_x, sp_y, group = vec(sp_dists2 .<= 1),
 		legend = false, aspect_ratio = :equal) # which is nice for plotting
 end
+  ╠═╡ =#
 
 # ╔═╡ Cell order:
 # ╟─aeb0aef0-b2ee-11ef-3cca-7f80b487ea17
