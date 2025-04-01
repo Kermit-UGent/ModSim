@@ -50,12 +50,12 @@ The initial concentrations and the parameter values are summarised in the follow
 |:--------:|:--------:|:--------:|:---------:|:---------:|:---------:|:--------:|
 |   $5.0$  |   $50$   |  $0.4$   |   $3.0$   |   $5.2$   |  $0.10$   |   $1.2$  |
 
-The amount of organic waste that is being breakdown by the microorganisms depends on the flow rate $q$. First (Part 1), we will simulate the system with the parameters given above. Second (Part 2), we will optimize the value of the flow rate $q$ so that the concentration of organic waste in the tank is at most $0.28\; kg\,m^{-3}$.
+The amount of organic waste that is being broken down by the microorganisms depends on the flow rate $q$. First (Part 1), we will simulate the system with the parameters given above. Secondly (Part 2), we will optimize the value of the flow rate $q$ so that the concentration of organic waste in the tank is at most $0.28\; kg\,m^{-3}$.
 """
 
 # ╔═╡ c0c83df7-a9cc-4bde-b6ec-038a423b0d90
 md"""
-## Part 1
+## Part 1 - Simulation
 
 In this part, we will simulate the system with the parameters given above.
 """
@@ -69,8 +69,8 @@ md"""
 md"""
 Create a *reaction network object* model for the aforementioned problem. Name it `wastewater_treatment`.
 
-Tips:
-- You can use the repressive Michaelis-Menten function `mmr(C, r, Ks)` for $r\cfrac{K_s}{K_s+C}$.
+!!! tip
+	You can use the repressive Michaelis-Menten function `mmr(C, r, Ks)` for $r\cfrac{K_s}{K_s+C}$.
 """
 
 # ╔═╡ 8708de16-3532-4352-b211-c092f95c82d3
@@ -167,13 +167,11 @@ Plot the results. Use `ylim=(0, 3)` and `lw=2` (or `linewidth=2`) as options.
 # Uncomment and complete the instruction
 # begin
 #     missing
-#     plot!([tspan[1], tspan[2]], [0.28, 0.28],
-# 		ls=:dash, lw=2, lc=:green, lab="C=0.28")
+#     hline!([0.28], ls=:dash, lw=2, lc=:green, lab="C=0.28")
 # end
 begin
     plot(osol, ylim=(0, 3), lw=2)
-    plot!([tspan[1], tspan[2]], [0.28, 0.28],
-		ls=:dash, lw=2, lc=:green, lab="C=0.28")
+	hline!([0.28], ls=:dash, lw=2, lc=:green, lab="C=0.28")
 end
 
 # ╔═╡ a0e735ad-09c2-4aa8-bc41-b294a9d56ea8
@@ -187,14 +185,14 @@ osol[:C][end]
 
 # ╔═╡ 7eb5df9c-a475-4812-81c3-e43484c82242
 md"""
-## Part 2
+## Part 2 - Optimization
 
 In this part, we will optimize the value of the flow rate $q$ so that the concentration of organic waste in the tank is at most $0.28\; kg\,m^{-3}$.
 """
 
 # ╔═╡ 5a695734-677f-4bf6-a703-8e22382b7529
 md"""
-Declare the Turing model function. Sample the flow rate $q$ prior from an uniform distribution in the range $[0, 5]\;kg\,m^{-3}$. Suppose therein that the desired end value of the organic waste (i.e. $0.28\; kg\,m^{-3}$) is normally distributed with  mean the end value obtained from the solution and standard deviation $10^{-3}\; kg\,m^{-3}$.
+First, declare the Turing model function. Sample the flow rate $q$ prior from an uniform distribution in the range $[0, 5]\;kg\,m^{-3}$. Suppose therein that the desired final value of the organic waste (i.e. $0.28\; kg\,m^{-3}$) is normally distributed with  mean the end value obtained from the solution and standard deviation $10^{-3}\; kg\,m^{-3}$.
 """
 
 # ╔═╡ b6bac48a-4a3d-47e4-90ea-788ca20dadff
@@ -229,7 +227,7 @@ C_val = 0.28
 
 # ╔═╡ 70cafd87-63f7-4674-ae49-43d422fdeae7
 md"""
-Provide the time measurements to the defined function and instantly condition the model with the desired value:
+Now condition the model with the desired value:
 """
 
 # ╔═╡ ee108190-2dbc-42e0-b58b-aaa9fd985e66
@@ -280,26 +278,30 @@ osol_opt = solve(oprob_opt, Tsit5(), saveat=0.1)
 
 # ╔═╡ 82809c26-4cab-405e-8107-a8a43e81f699
 md"""
-Plot $C$ and $X$ simulated with the optimized parameter value. Use `ylim=(0, 3)` and `lw=2` (or `linewidth=2`) as options. The dashed line indicates $C = 0.28\; kg\,m^{-3}$.
+Plot $C$ and $X$ simulated with both the initial and the optimized parameter values. Use `ylim=(0, 3)` and `lw=2` (or `linewidth=2`) as options. The dashed line indicates $C = 0.28\; kg\,m^{-3}$.
 """
 
 # ╔═╡ 81429279-4190-41d1-a72a-20da0ce90528
 # Uncomment and complete the instruction
 # begin
 #     missing
-#     plot!([tspan[1], tspan[2]], [C_val, C_val],
-# 		ls=:dash, lw=2, lc=:green, lab="C=0.28")
+# 	  plot!(osol, ls=:dash, lw=1, lab=:none)
+#     hline!([0.28], ls=:dash, lw=2, lc=:green, lab="C=0.28")
 # end
 begin
     plot(osol_opt, ylim=(0, 3), lw=2)
-    plot!([tspan[1], tspan[2]], [C_val, C_val],
-		ls=:dash, lw=2, lc=:green, lab="C=0.28")
+	plot!(osol, ls=:dash, lw=1, lab=:none)
+    hline!([0.28], ls=:dash, lw=2, lc=:green, lab="C=0.28")
 end
 
 # ╔═╡ 6589acfd-1d81-4c10-adea-34ca7fa1ab5d
 md"""
-Draw your conclusion.
+!!! question 
+	Does the value of $C$ respect now the limit in the concentration? Draw your conclusion.
+"""
 
+# ╔═╡ 7c7d99b9-77b9-4c08-a74e-54eaa7d187ec
+md"""
 - Conclusion: missing
 """
 
@@ -354,3 +356,4 @@ Draw your conclusion.
 # ╟─82809c26-4cab-405e-8107-a8a43e81f699
 # ╠═81429279-4190-41d1-a72a-20da0ce90528
 # ╟─6589acfd-1d81-4c10-adea-34ca7fa1ab5d
+# ╠═7c7d99b9-77b9-4c08-a74e-54eaa7d187ec

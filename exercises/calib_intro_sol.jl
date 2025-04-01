@@ -41,7 +41,7 @@ md"""
 
 # ╔═╡ 3cb0a166-ac53-4c3f-9832-e93742040cfb
 md"""
-In the models discussed in the previous sessions, i.e., the values of all parameters were known. In reality, the value of a parameter often need to be calibrated, i.e., estimated from experimental data. During this parameter estimation one attempts to find the set of parameter values for which the model predictions are as close as possible to the collected experimental data.
+In the models discussed in the previous sessions, i.e., the values of all parameters were known. In reality, the value of a parameter often needs to be calibrated, i.e., estimated from experimental data. During this parameter estimation one attempts to find the set of parameter values for which the model predictions are as close as possible to the collected experimental data.
 """
 
 # ╔═╡ 987f0a4d-e416-4ceb-adbe-3dcdca9d0996
@@ -57,7 +57,7 @@ One caveat with the MAP method is that it only considers the most likely point w
 
 # ╔═╡ 75efff36-8da7-4d04-afa2-a2f8324bc103
 md"""
-In this notebook we will calibrate the different parameters involved in the grass growth models with either MLE, MAP or MCMC. To illustrate this concept, we first revisit the three simple models modelling the grass growth yield.
+In this notebook we will calibrate the different parameters involved in the grass growth models with either MLE, MAP or MCMC. To illustrate this concept, we first go through three simple models for grass growth yield.
 """
 
 # ╔═╡ 3dcb9c9d-370b-4031-b7c0-cee80742557a
@@ -73,7 +73,7 @@ In this notebook, three different models will be used, each modelling the yield 
 - Exponential growth model: $\cfrac{dW}{dt} = \mu \left( W_f - W \right)$
 - Gompertz growth model: $\cfrac{dW}{dt} = \left( \mu - D \ln(W) \right) W$
 
-with output $W$ the grass yield, and $W_f$, $\mu$ and $D$ parameters. The table below show the parameter values and the initial condition that will be used as initial values for the optimization algorithm:
+with output $W$ the grass yield, and $W_f$, $\mu$ and $D$ parameters. The table below shows the parameter values and the initial condition that will be used as initial values for the optimization algorithm:
 
 |             | $\mu$      | $W_f$       | $D$          | $W_0$          |
 |:----------- |:----------:|:-----------:|:------------:|:------------:|
@@ -91,11 +91,6 @@ In each of the three models we will use the following timespan:
 
 # ╔═╡ 5b320989-3e0b-447b-bc9a-25fb221ce609
 tspan = (0.0, 100.0)   # this will be the same for the three models
-
-# ╔═╡ 2481cd4f-0efc-4450-ab3d-4a5492597f36
-md"""
-Variables containing the initial condition and parameters values will be defined later in the objective function.
-"""
 
 # ╔═╡ 9a5bc72b-346d-4e95-a873-783037ed98bc
 md"""
@@ -141,7 +136,7 @@ md"""
 
 # ╔═╡ b2b433ed-0266-4bea-a7e8-32adba542d4c
 md"""
-Assume that the measured grass yields (of a certain plant type) are the following:
+Assume that the measured grass yields (of a certain plant type) over time are the following:
 """
 
 # ╔═╡ 7c966a66-0091-4b81-9a7e-02ccd0d3db10
@@ -174,6 +169,9 @@ scatter(t_meas, W_meas, title="Grass growth data",
                         xlabel="t",
                         xlims=(0, 100),
                         ylims=(0, 14))
+
+# ╔═╡ ee32ecfe-519a-4603-bdd9-a1452593e31d
+savefig("calibration.png")
 
 # ╔═╡ d75246d4-e03b-4684-be7d-4bcfb61ed7ef
 md"""
@@ -255,7 +253,7 @@ md"""
 
 # ╔═╡ 47bd729c-4851-42f7-a03f-6ceacd3c717e
 md"""
-We will use the MLE (Maximum Likelihood Estimation) method here and store the optimization results in `results_log_mle`.
+We will use the MLE (Maximum Likelihood Estimation) method here and store the optimization results in `results_log_mle`. If you get an error the first time, try running the optimization again.
 """
 
 # ╔═╡ dff0f8c6-1fed-4ef7-a6d3-2c8f345ed724
@@ -334,7 +332,7 @@ md"""
 
 # ╔═╡ 6f0e91d0-6b99-4cf1-8145-523589a21e89
 md"""
-We will use the MAP (Maximum A Posterior) method here and store the optimization results in `results_log_map`.
+We will use the MAP (Maximum A Posterior) method here and store the optimization results in `results_log_map`. Try running the optimization once again if you get an error.
 """
 
 # ╔═╡ 209742ca-36bb-42a5-bf8a-291a40c47757
@@ -348,9 +346,17 @@ You can visualize a summary of the optimized parameters by piping them to `coeft
 # ╔═╡ a93a7eeb-aad1-49f3-a05f-1512adb08b6b
 coeftable(results_log_map)
 
+# ╔═╡ d408be0d-2522-4a4e-8a36-33ab42ed68a0
+md"""
+You can compare the optimized values by both methods now and find that results are quite similar:
+"""
+
+# ╔═╡ c1737a69-dc3a-4e08-90cc-9dc499dc4e93
+coeftable(results_log_mle)
+
 # ╔═╡ ccc66805-efce-4f25-b76b-7cff23901ba4
 md"""
-You can obtain the actual optimized values using the function `coef` on the results object in conjunction by calling the parameters by name preceded by a colon. Here we assign the optimized parameter values to some suitable variable names:
+Next, you can obtain the actual optimized values using the function `coef` on the results object in conjunction by calling the parameters by name preceded by a colon. Here we assign the optimized parameter values to some suitable variable names:
 """
 
 # ╔═╡ 57ef7d03-a6dc-40da-858d-5f9b9be613cd
@@ -419,6 +425,14 @@ We will use Markov chain Monte Carlo (MCMC) method in combination with the No U-
 # ╔═╡ 0c047043-3284-422a-9c88-2f4f4c170edf
 results_log_nuts = sample(growth_log_cond_mod, NUTS(), 1000)
 
+# ╔═╡ 3d7b518d-82f2-4894-a964-0b9c76f0f3e6
+md"""
+You can plot the sampled chain results to verify the form of the pdf for the estimated parameters:
+"""
+
+# ╔═╡ 866402ca-47ce-4a24-a963-34cd15f8483b
+plot(results_log_nuts)
+
 # ╔═╡ 19c362cb-2764-41c9-a571-2e8e2bfcde93
 summarize(results_log_nuts)
 
@@ -474,11 +488,11 @@ osol_opt3_log = solve(oprob_opt3_log, Tsit5(), saveat=0.5)
 
 # ╔═╡ 8a382a8e-e433-4b17-9649-aac81ebc20f4
 md"""
-Optionally, you can get 100 sampled solutions from the posterior parameter distributions in the following way. We will plot these together with the solution based on the mean (optimized) values for the parameters.
+Optionally, you can get 200 sampled solutions from the posterior parameter distributions in the following way. We will plot these together with the solution based on the mean (optimized) values for the parameters.
 """
 
 # ╔═╡ ba62d7fe-e30e-4e7b-a9c1-0ddd39abc42c
-osol_log_sampled = generated_quantities(growth_log_cond_mod, results_log_nuts[1:10:1000]);
+osol_log_sampled = generated_quantities(growth_log_cond_mod, results_log_nuts[1:5:1000]);
 
 # ╔═╡ 7346a003-aa05-41e3-a420-c97c1994cf3c
 md"""
@@ -487,10 +501,10 @@ Finally, we plot $W$ simulated with the optimized initial value and parameter va
 
 # ╔═╡ 20a6f165-449a-42cc-9565-f342a7535422
 begin
-	h = plot(title="Fit + posterior")       # Make empty plot and return handle to it
-	# We first plot the 20 sampled solutions (this is optional!)
+	h = plot(title="Fit + posterior")   # Make empty plot and return handle
+	# We first plot the 200 sampled solutions (this is optional!)
 	for i in eachindex(osol_log_sampled)
-		plot!(h, osol_log_sampled[i], color=:blue, opacity=0.2, label=false)
+		plot!(h, osol_log_sampled[i], color=:skyblue, alpha=0.2, label=false)
 	end
 	# Now we plot the solution based on the mean (optimized) values
 	plot!(h, osol_opt3_log, label="Logistic growth", xlabel="t",
@@ -588,12 +602,15 @@ growth_exp_cond_mod = growth_exp_fun(t_meas) | (W_s = W_meas,)
 
 # ╔═╡ eee55784-a641-445e-be75-0b19e2a94754
 md"""
-Optimize the priors ($\sigma_W$, $W_0$, $\mu$ and $W_f$). Do this with `MLE` method and Nelder-Mead. Store the optimization results in `results_exp_mle`.
+Optimize the priors ($\sigma_W$, $W_0$, $\mu$ and $W_f$). Do this with both the `MLE` and `MAP` methods and the Nelder-Mead algorithm. Store the optimization results in `results_exp_mle` and `results_exp_map`.
 """
 
 # ╔═╡ 7844e4f5-3c7d-4b4b-beee-970c998c67a6
 # results_exp_mle = missing          # Uncomment and complete the instruction
 results_exp_mle = optimize(growth_exp_cond_mod, MLE(), NelderMead())
+
+# ╔═╡ a7fc5f89-0341-4de2-962b-935c6d2f1f9d
+results_exp_map = optimize(growth_exp_cond_mod, MAP(), NelderMead())
 
 # ╔═╡ c81d0140-3f4e-4eb4-8a77-1f48c5e0ecbf
 md"""
@@ -603,6 +620,9 @@ Visualize a summary of the optimized parameters.
 # ╔═╡ 7456455b-4f31-488f-990f-6ce534038e08
 # missing              # Uncomment and complete the instruction
 coeftable(results_exp_mle)
+
+# ╔═╡ 4b057098-4dd8-438a-8699-f0f792f70370
+coeftable(results_exp_map)
 
 # ╔═╡ b10c2ce4-d363-429c-a64c-ec29652137a5
 md"""
@@ -644,18 +664,27 @@ Set up parameter values with optimized parameter values:
 # params_opt_exp = missing       # Uncomment and complete the instruction
 params_opt_exp = [:μ => μ_opt_exp, :Wf => Wf_opt_exp]
 
+# ╔═╡ d9dc60a4-0f2b-4d20-bd85-ac691baf584a
+params_opt_exp2 = [:μ => coef(results_exp_map)[:μ], :Wf => coef(results_exp_map)[:Wf]]
+
 # ╔═╡ 25be4255-0888-4ecd-a2fd-d66402c5cb50
 md"""
-Create an ODEProblem and solve it. Use `Tsit5()` and `saveas=0.5`.
+Create an ODEProblem and solve it. Solve it using `Tsit5()` and `saveat=0.5`.
 """
 
 # ╔═╡ 36e8a174-d526-45ee-b3c6-88d698ad5d5f
 # oprob_opt_exp = missing        # Uncomment and complete the instruction
 oprob_opt_exp = ODEProblem(growth_exp, u0_opt_exp, tspan, params_opt_exp)
 
+# ╔═╡ cb343602-7cf8-4025-8be0-1c63ebee488b
+oprob_opt_exp2 = ODEProblem(growth_exp, [:W => coef(results_exp_map)[:W0]], tspan, params_opt_exp2)
+
 # ╔═╡ 7594147d-b3da-4e0d-896d-41baacb6d7be
 # osol_opt_exp = missing       # Uncomment and complete the instruction
 osol_opt_exp = solve(oprob_opt_exp, Tsit5(), saveat=0.5)
+
+# ╔═╡ 28d04c4c-82ba-4166-90c7-c676e9c7c483
+osol_opt_exp2 = solve(oprob_opt_exp2, Tsit5(), saveat=0.5);
 
 # ╔═╡ 8e047be9-f0f0-4a75-91b5-c523f55f8c67
 md"""
@@ -669,9 +698,11 @@ Plot $W$ simulated with the optimized initial value and parameter values togethe
 # missing
 # end
 begin
-	plot(osol_opt_exp, label="Exponential growth", xlabel="t",
-		xlims=(0, 100),ylims=(0, 14))
-	scatter!(t_meas, W_meas, label="Yield")
+	plot(osol_opt_exp, label="MLE", xlabel="t",
+		xlims=(0, 100), ylims=(0, 14), lw=2)
+	plot!(osol_opt_exp, label="MAP", lw=2, ls=:dash)
+	scatter!(t_meas, W_meas, label="Data")
+	title!("Exponential growth")
 end
 
 # ╔═╡ 785d500b-f8ea-446a-9952-2a5fd5d83d24
@@ -755,7 +786,7 @@ growth_gom_cond_mod = growth_gom_fun(t_meas) | (W_s = W_meas,)
 
 # ╔═╡ aba74ee0-0163-4e15-8b49-d8dcad4839f7
 md"""
-Optimize the priors ($\sigma_W$, $W_0$, $\mu$ and $D$). Do this with `MAP` method and Nelder-Mead. Store the optimization results in `results_gom_map`.
+Optimize the priors ($\sigma_W$, $W_0$, $\mu$ and $D$). Do this now with `MAP` method and Nelder-Mead. Store the optimization results in `results_gom_map`.
 """
 
 # ╔═╡ 0eda4142-1aaf-4e17-bd78-857e13e94acd
@@ -813,7 +844,7 @@ params_opt_gom = [:μ => μ_opt_gom, :D => D_opt_gom]
 
 # ╔═╡ 48bc085c-9ce6-4752-a5a9-a814f803f571
 md"""
-Create an ODEProblem and solve it. Use `Tsit5()` and `saveas=0.5`.
+Create an ODEProblem and solve it. Use the solver `Tsit5()` and `saveat=0.5`.
 """
 
 # ╔═╡ 5b9b2e5b-9deb-4ff6-a923-b15b8b08f0c9
@@ -837,13 +868,14 @@ Finally, we plot $W$ simulated with the optimized initial value and parameter va
 # end
 begin
 	plot(osol_opt_gom, label="Gompertz growth", xlabel="t",
-		xlims=(0, 100), ylims=(0, 14))
+		xlims=(0, 100), ylims=(0, 14), lw=2)
 	scatter!(t_meas, W_meas, label="Yield")
 end
 
 # ╔═╡ f0b4772d-a72b-44e0-a3a1-ba9ad4c4dfeb
 md"""
-Which grass growth model fits best these data? How can you prove this numerically?
+!!! question
+	Which grass growth model fits best these data? How can you prove this numerically?
 """
 
 # ╔═╡ 7e98a771-52bb-484e-82ab-2e42e7cb4053
@@ -866,7 +898,6 @@ md"- Answer: missing"
 # ╟─7a14aa59-6e6f-4266-a0b3-84ab55f2efc5
 # ╟─85cd60a8-b448-4375-9b6d-399c4336c319
 # ╠═5b320989-3e0b-447b-bc9a-25fb221ce609
-# ╟─2481cd4f-0efc-4450-ab3d-4a5492597f36
 # ╟─9a5bc72b-346d-4e95-a873-783037ed98bc
 # ╠═ba56adb1-9405-40d5-be48-4273b42ab145
 # ╠═6e3e53ea-4fe7-4a34-8b00-cbf8d63a3203
@@ -885,6 +916,7 @@ md"- Answer: missing"
 # ╠═bab8119a-7fe7-4c6b-abb9-5885a88b55ae
 # ╟─ef06cc43-510b-4ff9-b0b7-1c7fc267e9b1
 # ╠═cb2bc6ee-4211-47e1-9956-5cf1b0c0671d
+# ╠═ee32ecfe-519a-4603-bdd9-a1452593e31d
 # ╟─d75246d4-e03b-4684-be7d-4bcfb61ed7ef
 # ╟─dd3a32f1-bdb6-44a3-acbe-f4269725c9e4
 # ╠═88dd0342-3678-40a2-a432-661e5410e5cf
@@ -921,6 +953,8 @@ md"- Answer: missing"
 # ╠═209742ca-36bb-42a5-bf8a-291a40c47757
 # ╟─07efb21a-0dac-46d5-b9e1-8f4757c6cedf
 # ╠═a93a7eeb-aad1-49f3-a05f-1512adb08b6b
+# ╟─d408be0d-2522-4a4e-8a36-33ab42ed68a0
+# ╠═c1737a69-dc3a-4e08-90cc-9dc499dc4e93
 # ╟─ccc66805-efce-4f25-b76b-7cff23901ba4
 # ╠═57ef7d03-a6dc-40da-858d-5f9b9be613cd
 # ╠═62bd2e58-343a-4155-a65e-cf326d0975f4
@@ -938,6 +972,8 @@ md"- Answer: missing"
 # ╟─29170e2a-9916-438e-92ca-9f4783397b5e
 # ╟─7ff9fe52-156b-4a92-9058-781670de3abb
 # ╠═0c047043-3284-422a-9c88-2f4f4c170edf
+# ╟─3d7b518d-82f2-4894-a964-0b9c76f0f3e6
+# ╠═866402ca-47ce-4a24-a963-34cd15f8483b
 # ╠═19c362cb-2764-41c9-a571-2e8e2bfcde93
 # ╠═93db47b2-34e8-43b4-beac-b5620fd444e7
 # ╠═68c71cd2-6cdc-4b80-b6e7-75bfea344295
@@ -970,8 +1006,10 @@ md"- Answer: missing"
 # ╠═fff17cf7-173d-4f64-94a9-4bf46acc882d
 # ╟─eee55784-a641-445e-be75-0b19e2a94754
 # ╠═7844e4f5-3c7d-4b4b-beee-970c998c67a6
+# ╠═a7fc5f89-0341-4de2-962b-935c6d2f1f9d
 # ╟─c81d0140-3f4e-4eb4-8a77-1f48c5e0ecbf
 # ╠═7456455b-4f31-488f-990f-6ce534038e08
+# ╠═4b057098-4dd8-438a-8699-f0f792f70370
 # ╟─b10c2ce4-d363-429c-a64c-ec29652137a5
 # ╠═23b629a6-6866-416a-a768-9617ce6301db
 # ╠═8788082d-f5d1-4385-8037-a0d360a841c7
@@ -981,9 +1019,12 @@ md"- Answer: missing"
 # ╠═30602ff1-041b-4fca-bf8e-55ff57df9e37
 # ╟─881011be-6434-416f-915b-3333e8dea32f
 # ╠═5602b88a-07f8-438b-994c-65f11e17a0ba
+# ╠═d9dc60a4-0f2b-4d20-bd85-ac691baf584a
 # ╟─25be4255-0888-4ecd-a2fd-d66402c5cb50
 # ╠═36e8a174-d526-45ee-b3c6-88d698ad5d5f
+# ╠═cb343602-7cf8-4025-8be0-1c63ebee488b
 # ╠═7594147d-b3da-4e0d-896d-41baacb6d7be
+# ╠═28d04c4c-82ba-4166-90c7-c676e9c7c483
 # ╟─8e047be9-f0f0-4a75-91b5-c523f55f8c67
 # ╠═1a9587aa-2356-48df-abcc-2ce874fa5d24
 # ╟─785d500b-f8ea-446a-9952-2a5fd5d83d24

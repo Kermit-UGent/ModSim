@@ -33,7 +33,7 @@ md"""
 
 # ╔═╡ 595ea8ee-bc67-4696-9232-982612fb554d
 md"""
-In one of the previous practica we were introduced to a fermenter in which biomass $X$ [$g/L$] grows by breaking down substrate $S$ [$g/L$]. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. This process was modelled using Monod kinetics, resulting in the model below:
+In one of the previous practicals we were introduced to a fermenter in which biomass $X$ [$g/L$] grows by breaking down substrate $S$ [$g/L$]. The reactor is fed with an inlet flow rate $Q_{in}$ [$L/h$], which consists of a (manipulable) inlet concentration of substrate $S_{in}$ [$g/L$]. This process was modelled using Monod kinetics, resulting in the model below:
 
 $$\begin{eqnarray*}
 S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s}
@@ -78,7 +78,7 @@ $$\begin{eqnarray*}
 
 # ╔═╡ b7b7d58f-d406-4596-b834-ced6d8fada83
 md"""
-Suppose that during an experiment measurement data has been collected of the substrate $S$ and biomass $X$ concentration at an interval of $5\;h$ within $100\;h$:
+Suppose that during an experiment measurement data have been collected of the substrate $S$ and biomass $X$ concentration at an interval of $5\;h$ within $100\;h$:
 """
 
 # ╔═╡ 99c6f31a-0968-4804-9980-71fcc1af1f49
@@ -115,7 +115,7 @@ We have previously used the following parameter values:
 -  $\mu_{max} = 0.40\;h^{-1}$, $K_s = 0.015\;g/L$, $S_{in} = 0.22\;g/L$
 -  $Y = 0.67$, $Q = 2.0\;L/h$, $V = 40.0\;L$
 
-Furthermore, suppose that at $t = 0\;h$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of $0.0005\;g/L$.
+Furthermore, suppose that at $t = 0\;h$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concentration of $0.0005\;g/L$.
 
 Calibrate the parameter values for $\mu_{max}$ and $K_s$ using the aforementioned measurement data for $S$ and $X$ in a timespan of $[0, 100]\,h$. Take the values above as initial values for $\mu_{max}$ and $K_s$.
 """
@@ -178,11 +178,11 @@ Provide the time measurements to the defined function and instantly condition th
 
 # ╔═╡ 6a508a62-61b9-4273-8e45-b26f594e8da9
 # fermenter_cond_mod = missing       # Uncomment and complete the instruction
-fermenter_cond_mod = fermenter_fun(t_meas) | (S_s = S_meas, X_s = X_meas,)
+fermenter_cond_mod = fermenter_fun(t_meas) | (S_s = S_meas, X_s = X_meas)
 
 # ╔═╡ 63420055-55f8-4def-8b0e-11ea61483010
 md"""
-Optimize the priors ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$). Do this with `MLE` method and Nelder-Mead. Store the optimization results in `results_mle`.
+Optimize the priors ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$). Do this with `MLE` method and Nelder-Mead. Store the optimization results in `results_mle`. If necessary, run the optimization again if you get any errors.
 """
 
 # ╔═╡ d52c9da8-d8a4-4db0-ac6d-6d16ccf4775c
@@ -236,11 +236,11 @@ oprob_opt = ODEProblem(fermenter_monod, u0, tspan, params_opt, combinatoric_rate
 
 # ╔═╡ f45e8124-e942-438e-99c5-3032ccc01454
 # osol_opt = missing          # Uncomment and complete the instruction
-osol_opt = solve(oprob_opt, Tsit5(), saveat=0.5)
+osol_opt = solve(oprob_opt, Tsit5(), saveat=0.5);
 
 # ╔═╡ 5a39b0e0-1ea1-4854-8e68-66d0d4bbf25c
 md"""
-Plot $S$ and $X$ simulated with the optimized parameter values together with the measured data.
+Plot $S$ and $X$ simulated with the optimal and initial parameter values together with the measured data. We can do this to compare the found values with the initial ones and detect possible errors.
 """
 
 # ╔═╡ d0156099-ad03-4711-ac0f-94882fb78266
@@ -251,18 +251,29 @@ Plot $S$ and $X$ simulated with the optimized parameter values together with the
 # 	missing
 # end
 begin
-	plot(osol_opt, labels=["S sim" "X sim"], xlabel="t")
+	plot(osol_opt, labels=["S sim" "X sim"], xlabel="t", lw=2)
+	osol = solve(oprob, Tsit5(), saveat=0.5);
+	plot!(osol, labels=["S init" "X init"], ls=:dash)
 	scatter!(t_meas, S_meas, label="S meas", color=:blue)
 	scatter!(t_meas, X_meas, label="X meas", color=:red)
 end
 
-# ╔═╡ d7e1f24a-f0f0-44d9-a3b8-6c074d273bdc
+# ╔═╡ 257ae1a9-6264-4122-80be-8022b4b7500c
 md"""
-Do your simulations fit well the measurements?
+!!! question
+	How do the found optimal parameter values compare to the original values? *Or in other words*: what is the impact to be expected when we simulate the fermenter with the optimal values?
 """
 
-# ╔═╡ 49cf442e-0c6a-433f-96c0-e10b29bf86a9
-md"- Answer: missing"
+# ╔═╡ 43cdfb9d-1874-4b42-b350-545029a5f725
+md"""
+- Answer: 
+"""
+
+# ╔═╡ 22a6aeb4-559c-4f69-82fd-d021f68e1f17
+md"""
+!!! hint
+	Think of the meaning of the estimated parameters and their impact on the variables $S$ and $X$.
+"""
 
 # ╔═╡ Cell order:
 # ╠═245ca9d0-10f9-11ef-0ef6-a73594e96db9
@@ -309,5 +320,6 @@ md"- Answer: missing"
 # ╠═f45e8124-e942-438e-99c5-3032ccc01454
 # ╟─5a39b0e0-1ea1-4854-8e68-66d0d4bbf25c
 # ╠═d0156099-ad03-4711-ac0f-94882fb78266
-# ╟─d7e1f24a-f0f0-44d9-a3b8-6c074d273bdc
-# ╠═49cf442e-0c6a-433f-96c0-e10b29bf86a9
+# ╟─257ae1a9-6264-4122-80be-8022b4b7500c
+# ╠═43cdfb9d-1874-4b42-b350-545029a5f725
+# ╟─22a6aeb4-559c-4f69-82fd-d021f68e1f17

@@ -113,13 +113,13 @@ We can make a scatter plot of the measured data for both $S_1$ and $S_2$ for the
 
 # ╔═╡ cef4b9a8-b5bf-4a2d-8a8f-5d8f85534859
 begin
-  scatter(t_meas, S1_meas1, label="S1 meas", color=:blue, title="Experment 1")
+  scatter(t_meas, S1_meas1, label="S1 meas", color=:blue, title="Experiment 1")
   scatter!(t_meas, S2_meas1, label="S2 meas", color=:red, ylims=(0, 150))
 end
 
 # ╔═╡ fc2cabd7-e778-4211-bf87-b5c11ca054c9
 begin
-  scatter(t_meas, S1_meas2, label="S1 meas", color=:blue, title="Experment 2")
+  scatter(t_meas, S1_meas2, label="S1 meas", color=:blue, title="Experiment 2")
   scatter!(t_meas, S2_meas2, label="S2 meas", color=:red, ylims=(0, 150))
 end
 
@@ -150,7 +150,7 @@ oprob = ODEProblem(irrigation_mod, u0, tspan, params)
 
 # ╔═╡ 923d04ce-b4d2-44b0-afff-7062c4628ad0
 md"""
-Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$. Use `InverseGamma` for the standard deviations of the measurements and `LogNormal` for `k` and a `Uniform` (between 100 and 200) for `Smax`.
+Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$. Use `InverseGamma` for the standard deviations of the measurements, `LogNormal` for $k$ and `Uniform` (between 100 and 200) for $Smax$.
 """
 
 # ╔═╡ 481eb8b9-5de2-4f68-b06a-ec18e054c9f5
@@ -174,13 +174,13 @@ Declare the Turing model. Make sure you take both experiments into account for o
 	Smax ~ Uniform(100, 200)
 	params = [:k => k, :Smax => Smax, :v => 1e-3, :r => 5.0, :S1res => 10.0]
 	u0 = [:S1 => 0.0, :S2 => 0.0]
-	oprob = ODEProblem(irrigation_mod, u0, tspan, params)
-	osol1 = solve(oprob, Tsit5(), saveat=t_meas)
+	oprob1 = ODEProblem(irrigation_mod, u0, tspan, params)
+	osol1 = solve(oprob1, Tsit5(), saveat=t_meas)
 	S1_s1 ~ MvNormal(osol1[:S1], σ_S1^2 * I)
 	S2_s1 ~ MvNormal(osol1[:S2], σ_S2^2 * I)
 	u0 = [:S1 => 140.0, :S2 => 135.0]
-	oprob = ODEProblem(irrigation_mod, u0, tspan, params)
-	osol2 = solve(oprob, Tsit5(), saveat=t_meas)
+	oprob2 = ODEProblem(irrigation_mod, u0, tspan, params)
+	osol2 = solve(oprob2, Tsit5(), saveat=t_meas)
 	S1_s2 ~ MvNormal(osol2[:S1], σ_S1^2 * I)
 	S2_s2 ~ MvNormal(osol2[:S2], σ_S2^2 * I)
 end
@@ -265,7 +265,7 @@ osol1_opt = solve(oprob1_opt, Tsit5(), saveat=0.5)
 # end
 begin
   plot(osol1_opt, labels=["S1 sim" "S2 sim"], xlabel="t")
-  scatter!(t_meas, S1_meas1, label="S1 meas1", color=:blue, title="Experment 1")
+  scatter!(t_meas, S1_meas1, label="S1 meas1", color=:blue, title="Experiment 1")
   scatter!(t_meas, S2_meas1, label="S2 meas1", color=:red)
 end
 
@@ -295,13 +295,14 @@ osol2_opt = solve(oprob2_opt, Tsit5(), saveat=0.5)
 # end
 begin
   plot(osol2_opt, labels=["S1 sim" "S2 sim"], xlabel="t")
-  scatter!(t_meas, S1_meas2, label="S1 meas2", color=:blue, title="Experment 2")
+  scatter!(t_meas, S1_meas2, label="S1 meas2", color=:blue, title="Experiment 2")
   scatter!(t_meas, S2_meas2, label="S2 meas2", color=:red)
 end
 
 # ╔═╡ 3c243670-2ba7-4396-8c6d-084726636741
 md"""
-Do your simulations fit well the measurements?
+!!! question
+	Do your simulations fit well the measurements?
 """
 
 # ╔═╡ 1aeb0d86-b276-4bd6-9811-faf4a297ae6f
