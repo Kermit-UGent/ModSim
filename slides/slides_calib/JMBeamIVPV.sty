@@ -1,0 +1,156 @@
+%\ProvidesPackage{beamerthemesplit}[2003/10/29 ver 0.92]
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+
+% Copyright 2003 by Till Tantau <tantau@cs.tu-berlin.de>.
+%
+% This program can be redistributed and/or modified under the terms
+% of the LaTeX Project Public License Distributed from CTAN
+% archives in directory macros/latex/base/lppl.txt.
+
+\mode<presentation> % or \mode<article> for handouts
+
+\newcommand{\conference}
+{\text{IVPV}}
+\newcommand{\authorshort}
+{\text{Joris FA Meys}}
+\newcommand{\email}
+{\text{e-mail: joris.meys@UGent.be}}
+
+\beamertemplatelargetitlepage
+\beamertemplatelargepartpage
+\beamertemplatelargeframetitle
+\beamertemplateplaintoc
+\beamertemplatelargeblocks
+%\beamertemplatenavigationsymbolsempty
+%\usealerttemplate{\color{beamerstructure}}{} %set alert color equal to beamerstructure color
+\usenavigationsymbolstemplate{\vbox{%
+%  \hbox{\insertslidenavigationsymbol}
+  \hbox{\insertframenavigationsymbol}
+  %\hbox{\insertsubsectionnavigationsymbol}
+  %\hbox{\insertsectionnavigationsymbol}
+  %\hbox{\insertdocnavigationsymbol}
+  %\hbox{\insertbackfindforwardnavigationsymbol}
+  }}
+
+\usesectionheadtemplate
+  {\hfill\color{white}\tiny\textbf{\insertsectionhead}}
+  {\hfill\color{white!50!black}\tiny\textbf{\insertsectionhead}}
+
+\usesubsectionheadtemplate
+  {\color{white}\tiny\textbf{\insertsubsectionhead}}
+  {\color{white!50!structure}\tiny\textbf{\insertsubsectionhead}}
+
+                                % Head
+\ifbeamer@compress
+\useheadtemplate{%
+  \vbox{%
+    \tiny%
+    \setbox\beamer@linebox=\hbox to\paperwidth{%
+      \insertsectionnavigationhorizontal{.5\paperwidth}{\hskip0pt plus1filll}{}%
+      \insertsubsectionnavigationhorizontal{.5\paperwidth}{}{\hskip0pt plus1filll}\hfil}%
+    \ht\beamer@linebox=2.625ex
+    \dp\beamer@linebox=0pt
+    \setbox\beamer@linebox=\vbox{\box\beamer@linebox\vskip1.125ex}%
+    \hbox to\textwidth{%
+      {\color{black}\hskip-\Gm@lmargin\vrule width.5\paperwidth height\ht\beamer@linebox
+      \color{structure}\vrule width.5\paperwidth height\ht\beamer@linebox\hskip-\paperwidth\hskip\Gm@lmargin}%
+    \hskip-\Gm@lmargin\box\beamer@linebox\hfill\hskip-\Gm@rmargin
+    }%
+  }%
+}
+\else
+\useheadtemplate{%
+  \vbox{%
+    \tiny%
+    \beamer@tempdim=2.4375ex%
+    \ifnum\beamer@subsectionmax<\beamer@sectionmax%
+    \multiply\beamer@tempdim by\beamer@sectionmax%
+    \else%
+    \multiply\beamer@tempdim by\beamer@subsectionmax%
+    \fi%
+    \advance\beamer@tempdim by 1.125ex%
+    \setbox\beamer@linebox=\hbox to\paperwidth{%
+      \vbox to \beamer@tempdim{\vfil\insertsectionnavigation{.5\paperwidth}\vfil}%
+      \vbox to \beamer@tempdim{\vfil\insertsubsectionnavigation{.5\paperwidth}\vfil}\hfill}%
+      %\vbox to \beamer@tempdim{\vfil\hyperlinkslideprev{\insertreturnsymbol}\vfil}\hfill}%
+	\hbox to\textwidth{%
+      {\color{black}\hskip-\Gm@lmargin\vrule width.5\paperwidth
+      height\ht\beamer@linebox\color{structure}\vrule width.5\paperwidth
+      height\ht\beamer@linebox\hskip-\paperwidth\hskip\Gm@lmargin}%
+     \hskip-\Gm@lmargin\box\beamer@linebox\hfill\hskip-\Gm@rmargin%
+      }%
+  }%
+}
+\fi
+
+
+\usefoottemplate{%
+  \vbox{\tiny%
+  \hbox{%
+  \setbox\beamer@linebox=\hbox to\paperwidth{%
+   \hyperlinkslideprev{\hbox to.5\paperwidth{\hfill\tiny\color{white}\vspace{1.7cm}\textbf{\conference}\hskip.3cm}}%
+    \hyperlinkslidenext{\hbox to.5\paperwidth{\hskip.3cm\tiny\color{white}\textbf{\authorshort \hfill\hfill \hfill  \hfill \hfill \hfill  \insertframenumber/\inserttotalframenumber}\hfill}}\hfill}%
+  \ht\beamer@linebox=2.625ex%
+  \dp\beamer@linebox=0pt%
+  \setbox\beamer@linebox=\vbox{\box\beamer@linebox\vskip1.125ex}%
+  \color{black}\hskip-\Gm@lmargin\vrule width.5\paperwidth
+  height\ht\beamer@linebox\color{structure}\vrule width.5\paperwidth
+  height\ht\beamer@linebox\hskip-\paperwidth% 
+  \hbox{\box\beamer@linebox\hfill}\hfill\hskip-\Gm@rmargin}}}
+
+\usetitlepagetemplate{
+   \vbox{%
+    \tiny%
+    \beamer@tempdim=2.4375ex%
+    \ifnum\beamer@subsectionmax<\beamer@sectionmax%
+    \multiply\beamer@tempdim by\beamer@sectionmax%
+    \else%
+    \multiply\beamer@tempdim by\beamer@subsectionmax%
+    \fi%
+    \advance\beamer@tempdim by 1.125ex%
+    \setbox\beamer@linebox=\hbox to\paperwidth{%
+      \vbox to \beamer@tempdim{\vfil}%
+      \vbox to \beamer@tempdim{\vfil}\hfill}%
+      %\vbox to \beamer@tempdim{\vfil\hyperlinkslideprev{\insertreturnsymbol}\vfil}\hfill}%
+      \hbox to\textwidth{%
+      {\color{black}\hskip-\Gm@lmargin\vrule width.5\paperwidth
+      height\ht\beamer@linebox\color{structure}\vrule width.5\paperwidth
+      height\ht\beamer@linebox\hskip-\paperwidth\hskip\Gm@lmargin}%
+     \hskip-\Gm@lmargin\box\beamer@linebox\hfill\hskip-\Gm@rmargin%
+      }%
+  }%
+
+%
+\beamerline{\hspace{1cm}\parbox[l][3cm][c]{0.5\paperwidth}{\includegraphics[height=1.5cm]{ruglogo.png}}
+\parbox[r][3cm][c]{.5\textwidth}{\flushright{{\begin{center}\bf BIOMATH\\\tiny Department of Applied Mathematics,\\Biometrics and Process Control\end{center}}}}}
+  \vskip0pt plus 1filll
+
+    \begin{center}
+    \Large{\color{beamerstructure}{\inserttitle}}\\
+    \vspace{0.3cm}
+    \small \insertauthor\\
+    \vspace{0.6cm}
+    \insertsubtitle\\
+    \vspace{0.15cm} 
+    \insertdate
+  \end{center}
+  \vskip0pt plus 1filll
+
+  \vbox{\tiny%
+  \hbox{%
+  \setbox\beamer@linebox=\hbox to\paperwidth{%
+   \hyperlinkslideprev{\hbox to.5\paperwidth{\hfill\tiny\color{white}\vspace{1.7cm}\textbf{BIOMATH, Coupure Links 653, 9000 Gent,Belgium}\hskip.3cm}}%
+    \hyperlinkslidenext{\hbox to.5\paperwidth{\hskip.3cm\tiny\color{white}\textbf{\email}\hfill}}\hfill}%
+  \ht\beamer@linebox=2.625ex%
+  \dp\beamer@linebox=0pt%
+  \setbox\beamer@linebox=\vbox{\box\beamer@linebox\vskip1.125ex}%
+  \color{black}\hskip-\Gm@lmargin\vrule width.5\paperwidth
+  height\ht\beamer@linebox\color{structure}\vrule width.5\paperwidth
+  height\ht\beamer@linebox\hskip-\paperwidth% 
+  \hbox{\box\beamer@linebox\hfill}\hfill\hskip-\Gm@rmargin}}
+
+%gepruts kan nuttig zijn om uit te leren: vb colorbox paperwidth hyperlink kleur:beamerstructure
+%\beamerline{\colorbox{black}{\parbox[b][.18cm][c]{.5\paperwidth}{\hbox to.484\paperwidth{\hfill\tiny\bf\color{white}BIOMATH, Coupure Links 653, 9000 Gent,Belgium\hskip.3cm}}}\hyperlinkslidenext{\colorbox{beamerstructure}{\parbox[b][0.18cm][c]{.5\paperwidth}{\hbox to.5\paperwidth{\hskip.3cm\tiny\bf\color{white}e-mail: joris.meys@biomath.ugent.be\hfill}}}}}
+}
+\mode
+<all>
