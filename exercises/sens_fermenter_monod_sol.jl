@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 55cdebd2-0881-11ef-2722-91de1447877a
@@ -36,13 +36,8 @@ md"""
 In one of the previous practica we were introduced to a fermenter in which biomass $X$ [$g/L$] grows by breaking down substrate $S$ [$g/L$]. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. This process was modelled using Monod kinetics, resulting in the model below:
 
 $$\begin{eqnarray*}
-%S \xrightarrow[\quad\quad]{\beta} Y \, X
-S \xrightarrow[\quad\quad]{r} Y \, X \quad\quad\quad\quad r = \mu \, X
+S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s}
 \end{eqnarray*}$$
-
-where
-
-$$\mu = \mu_{max} \, \cfrac{S}{S + K_s}$$
 """
 
 # ╔═╡ 6ec6da23-853b-4129-94cf-67b5cadb1f95
@@ -52,9 +47,12 @@ The *reaction network object* model for this problem could be defined as:
 
 # ╔═╡ 935ca610-7a7a-4692-8908-fc26abb880b4
 fermenter_monod = @reaction_network begin
-	mm(S, μmax, Ks)*X, S => Y*X
-    Q/V, (S, X) --> ∅
-    Q/V*Sin, ∅ --> S
+    μmax/(S+Ks), S + X --> (1 + Y)*X
+    # Alternatives:
+    # mm(S, μmax, Ks)*X, S => Y*X
+	# mm(S, μmax, Ks)*X, S + X => (1 + Y)*X
+    Q/V, (S, X) --> 0
+    Q/V*Sin, 0 --> S
 end
 
 # ╔═╡ 79e6056a-881c-442f-8989-5bc284d3d777
@@ -74,25 +72,17 @@ $$\begin{eqnarray*}
 md"""
 Convert the system to a symbolic differential equation model and verify, by analyzing the differential equation, that your model is correctly implemented.
 
-Keep in mind that `mm(S, μmax, Ks)` stands for $\mu_{max} \, \cfrac{S}{S + K_s}$.
+In case you want to use the `mm` function, keep in mind that `mm(S, μmax, Ks)` stands for $\mu_{max} \, \cfrac{S}{S + K_s}$.
 """
 
 # ╔═╡ 7f8b7a2e-bc65-4b51-ad59-bd7ac98604dd
 # osys = missing                    # Uncomment and complete the instruction
 osys = convert(ODESystem, fermenter_monod)
 
-# ╔═╡ 911b22bf-4cec-455d-a7f7-967bb55afea9
-md"""
-Check out the order of the parameters:
-"""
-
-# ╔═╡ be15ae00-163c-44e5-bc33-e939ec63ed05
-# missing                           # Uncomment and complete the instruction
-parameters(fermenter_monod)
-
 # ╔═╡ 55f1d688-0c53-481b-9965-5e92ca87ad83
 md"""
-The parameter values are $\mu_{max} = 0.40$, $K_s = 0.015$, $Y = 0.67$, $Q = 2.0$, $V = 40.0$ and $S_{in} = 0.022\;g/L$. Suppose that at $t$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of $0.0005\;g/L$. Compute the following in a timespan of $[0, 100]\,h$:
+The parameter values are $\mu_{max} = 0.40$, $K_s = 0.015$, $Y = 0.67$, $Q = 2.0$, $V = 40.0$ and $S_{in} = 0.022\;g/L$. Suppose that at $t$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of $0.0005\;g/L$.\
+Compute the following in a timespan of $[0, 100]\,h$:
 
 - The sensitivities of $S$ and $X$ on $\mu_{max}$, $K_s$ and $S_{in}$.
 
@@ -144,8 +134,8 @@ Create the ODE problem and store it in `oprob`. Next, solve the ODE problem usin
 """
 
 # ╔═╡ 8b2f23f6-80b2-4e63-942e-e5cd17d8ba72
-# oprob = missing              # Uncomment and complete the instruction
-oprob = ODEProblem(fermenter_monod, u0, tspan, params)
+# oprob = missing;              # Uncomment and complete the instruction
+oprob = ODEProblem(fermenter_monod, u0, tspan, params);
 
 # ╔═╡ 89a31c32-88a4-479f-a688-ffcb75ee8e91
 # osol = missing                # Uncomment and complete the instruction
@@ -163,15 +153,20 @@ Write a solution function with as argument a vector of the parameters (that you 
 # ╔═╡ 9622f7ca-f71a-4ad9-a309-d7d10a1c3e3b
 # Uncomment and complete the instruction
 # function fermenter_monod_sim(params)
-# 	missing
-# 	...
+	# μmax, Ks, Sin = missing
+	# u0 = missing
+	# tspan = missing
+	# params = missing
+	# oprob = missing;
+	# osol = missing
+	# return missing
 # end
 function fermenter_monod_sim(params)
 	μmax, Ks, Sin = params
 	u0 = [:S => 0.0, :X => 0.0005]
 	tspan = (0.0, 100.0)
 	params = [:μmax => μmax, :Ks => Ks, :Y => 0.67, :Q => 2, :V => 40, :Sin => Sin]
-	oprob = ODEProblem(fermenter_monod, u0, tspan, params) # , combinatoric_ratelaws=false
+	oprob = ODEProblem(fermenter_monod, u0, tspan, params, combinatoric_ratelaws=false)
 	osol = solve(oprob, Tsit5(), saveat=0.5)
 	return osol
 end
@@ -235,12 +230,12 @@ Extract the (absolute) sensitivities of the outputs on the different parameters.
 # 	sens_S_on_μmax = missing
 # 	sens_S_on_Ks   = missing
 # 	sens_S_on_Sin  = missing
-# end
+# end;
 begin
 	sens_S_on_μmax = sens_S[:, 1]
 	sens_S_on_Ks   = sens_S[:, 2]
 	sens_S_on_Sin  = sens_S[:, 3]
-end
+end;
 
 # ╔═╡ f806c243-9032-46b7-add3-4714344691c7
 # Uncomment and complete the instruction
@@ -248,12 +243,12 @@ end
 # 	sens_X_on_μmax = missing
 # 	sens_X_on_Ks   = missing
 # 	sens_X_on_Sin  = missing
-# end
+# end;
 begin
 	sens_X_on_μmax = sens_X[:, 1]
 	sens_X_on_Ks   = sens_X[:, 2]
 	sens_X_on_Sin  = sens_X[:, 3]
-end
+end;
 
 # ╔═╡ 5bf3a62d-d2aa-4653-8ee8-e90caa9504e8
 md"""
@@ -271,7 +266,7 @@ begin
 	sens_S_on_μmax_rel = sens_S_on_μmax .* μmax ./ S_sim
 	sens_S_on_Ks_rel   = sens_S_on_Ks .* Ks ./ S_sim
 	sens_S_on_Sin_rel  = sens_S_on_Sin .* Sin ./ S_sim
-end
+end;
 
 # ╔═╡ b6c57444-547c-4e82-8526-6a30566e07c5
 # Uncomment and complete the instruction
@@ -279,12 +274,12 @@ end
 # 	sens_X_on_μmax_rel = missing
 # 	sens_X_on_Ks_rel   = missing
 # 	sens_X_on_Sin_rel  = missing
-# end
+# end;
 begin
 	sens_X_on_μmax_rel = sens_X_on_μmax .* μmax ./ X_sim
 	sens_X_on_Ks_rel   = sens_X_on_Ks .* Ks ./ X_sim
 	sens_X_on_Sin_rel  = sens_X_on_Sin .* Sin ./ X_sim
-end
+end;
 
 # ╔═╡ 5388c2a7-5a11-4da8-be09-46045cde8a4e
 md"""
@@ -297,14 +292,29 @@ plot(t_vals, [sens_S_on_Sin_rel, sens_X_on_Sin_rel], title="Normalized sensitivi
 
 # ╔═╡ d41375ef-6958-4705-a417-4c6a491232ee
 md"""
-Interpret your results. Try to answer the following question(s):
-- Which output variable $S$ or $X$ is most sensitive on $S_{in}$ in steady state?
-    - Answer: missing
-- Why is the sensitivity function of $S$ on $S_{in}$ at first positive but then becomes zero?
-    - Answer: missing
+!!! question "Questions"
+	Interpret your results. Try to answer the following question(s):
 """
+
+# ╔═╡ f6be14f3-e0d0-41dc-bc7b-54174b1ea5ea
+md"""
+Which output variable $S$ or $X$ is most sensitive on $S_{in}$ in steady state?
+"""
+
+# ╔═╡ b2583ee2-412b-4a0a-a4d0-fe476e0510e5
+md"- Answer: missing"
 #=
 - X is most sensitive on Sin because the higher Sin, the more X can be produced.
+=#
+
+# ╔═╡ dbbf694b-942a-4757-a255-f67b208ba03b
+md"""
+Why is the sensitivity function of $S$ on $S_{in}$ at first positive but then becomes zero?
+"""
+
+# ╔═╡ f10ac0f2-6b14-4805-b649-56c63f5b523a
+md"- Answer: missing"
+#=
 - In the beginning the substrate S is positively affected by Sin because S enters the tank through Sin and only little biomass X is present, so the biomass cannot consume the substrate very fast.
 =#
 
@@ -317,19 +327,42 @@ Plot the sensitivity functions of $S$ on $\mu_{max}$, $K_s$ and $S_{in}$. Provid
 # missing                  # Uncomment and complete the instruction
 plot(t_vals, [sens_S_on_μmax_rel, sens_S_on_Ks_rel, sens_S_on_Sin_rel], title="Normalized sensitivities", label=["S on μmax" "S on Ks" "S on Sin"], xlabel="Time (hours)", linewidth=2)
 
+# ╔═╡ 260ede0e-2584-4fe9-ae92-69990ca8f854
+md"""
+!!! question "Questions"
+	Interpret your results. Try to answer the following question(s):
+"""
+
 # ╔═╡ ff86a29f-9308-473b-aa1c-dfd4af8179c7
 md"""
-Interpret your results. Try to answer the following question(s):
-- Which parameter $\mu_{max}$, $K_s$ or $S_{in}$ affects the output $S$ the most in steady state?
-    - Answer: missing
-- Why is the sensitivity function of $S$ on $K_s$ positive?
-    - Answer: missing
-- Why is the sensitivity function of $S$ on $\mu_{max}$ negative?
-    - Answer: missing
+Which parameter $\mu_{max}$, $K_s$ or $S_{in}$ affects the output $S$ the most in steady state?
 """
+
+# ╔═╡ 555228b2-8075-49ac-a7ef-f51aa51dd95d
+md"- Answer: missing"
 #=
 - It seems like μmax is affecting S the most in steady state and its influence is negative, hence, the larger μmax, the smaller S.
+=#
+
+# ╔═╡ dc8ef7cb-ae97-401c-9a25-12439e4363c6
+md"""
+Why is the sensitivity function of $S$ on $K_s$ positive?
+"""
+
+# ╔═╡ 66712fb2-50ea-41be-bcca-305319d158e9
+md"- Answer: missing"
+#=
 - The sensitivity function of S on Ks is positive, because the larger Ks, the smaller the reaction rate r (S => Y*X). Hence, less X will be produced, so less S will be consumed. Remember that r = μmax*S*X/(S + Ks) and Ks is in the denominator.
+=#
+
+# ╔═╡ 6704e43b-30bc-4168-93db-fb853c9761fa
+md"""
+Why is the sensitivity function of $S$ on $\mu_{max}$ negative?
+"""
+
+# ╔═╡ 4d2094d8-98b3-4ac9-9612-942b5cd18ce0
+md"- Answer: missing"
+#=
 - The sensitivity function of S on μmax is negative, because the larger μmax, the larger the reaction rate r (S => Y*X). Hence, more X will be produced, so more S will be consumed. Remember that r = μmax*S*X/(S + Ks) and μmax is in the numerator.
 =#
 
@@ -342,19 +375,42 @@ Plot the sensitivity functions of $X$ on $\mu_{max}$, $K_s$ and $S_{in}$. Provid
 # missing
 plot(t_vals, [sens_X_on_μmax_rel, sens_X_on_Ks_rel, sens_X_on_Sin_rel], title="Normalized sensitivities", label=["X on μmax" "X on Ks" "X on Sin"], xlabel="Time (hours)", linewidth=2)
 
+# ╔═╡ 0355bbf6-853d-4bd8-b32f-98fdbd2b761c
+md"""
+!!! question "Questions"
+	Interpret your results. Try to answer the following question(s):
+"""
+
 # ╔═╡ 355ca6a7-466b-4969-ab48-28e2257f9810
 md"""
-Interpret your results. Try to answer the following question(s):
-- Which parameter $\mu_{max}$, $K_s$ or $S_{in}$ affects the output $X$ the most in steady state?
-    - Answer: missing
-- Why is the sensitivity function of $X$ on $K_s$ negative?
-    - Answer: missing
-- Why is the sensitivity function of $X$ on $\mu_{max}$ positive?
-    - Answer: missing
+Which parameter $\mu_{max}$, $K_s$ or $S_{in}$ affects the output $X$ the most in steady state?
 """
+
+# ╔═╡ 4e08baf1-eeb6-49be-9751-204dd9ae1103
+md"- Answer: missing"
 #=
 - It seems like Sin is affecting X the most in steady state and its influence is positive, hence, the larger Sin, the larger X.
+=#
+
+# ╔═╡ 22e98c77-0e9f-444a-a2f0-b940940996b7
+md"""
+Why is the sensitivity function of $X$ on $K_s$ negative?
+"""
+
+# ╔═╡ 91795413-c9a2-43cb-a7b0-d9e055e1cf94
+md"- Answer: missing"
+#=
 - The sensitivity function of X on Ks is negative, because the larger Ks, the smaller the reaction rate r (S => Y*X). Hence, less X will be produced. Remember that r = μmax*S*X/(S + Ks) and Ks is in the denominator.
+=#
+
+# ╔═╡ 182e0c2b-9aa4-4514-96e8-b6a9f53b371b
+md"""
+Why is the sensitivity function of $X$ on $\mu_{max}$ positive?
+"""
+
+# ╔═╡ 05ec320e-ac87-45af-904e-5d69639e1f27
+md"- Answer: missing"
+#=
 - The sensitivity function of X on μmax is positive, because the larger μmax, the larger the reaction rate r (S => Y*X). Hence, more X will be produced. Remember that r = μmax*S*X/(S + Ks) and μmax is in the numerator.
 =#
 
@@ -373,8 +429,6 @@ Interpret your results. Try to answer the following question(s):
 # ╟─fa93e2c3-8b43-418e-ba24-406645b2e397
 # ╟─06730f54-7293-43f2-b772-84eec3e5528a
 # ╠═7f8b7a2e-bc65-4b51-ad59-bd7ac98604dd
-# ╟─911b22bf-4cec-455d-a7f7-967bb55afea9
-# ╠═be15ae00-163c-44e5-bc33-e939ec63ed05
 # ╟─55f1d688-0c53-481b-9965-5e92ca87ad83
 # ╟─6c4e3c09-4b84-4f5c-8739-2ac18e6f2af6
 # ╠═2ee277e5-ce4a-4ade-be0e-9bba7a4dc08c
@@ -410,9 +464,25 @@ Interpret your results. Try to answer the following question(s):
 # ╟─5388c2a7-5a11-4da8-be09-46045cde8a4e
 # ╠═db840c76-a6c6-49fb-a0bb-d9149f947bc0
 # ╟─d41375ef-6958-4705-a417-4c6a491232ee
+# ╟─f6be14f3-e0d0-41dc-bc7b-54174b1ea5ea
+# ╠═b2583ee2-412b-4a0a-a4d0-fe476e0510e5
+# ╟─dbbf694b-942a-4757-a255-f67b208ba03b
+# ╠═f10ac0f2-6b14-4805-b649-56c63f5b523a
 # ╟─be89600a-4927-4afc-9813-d8a70adb2852
 # ╠═c0223da4-9959-48d0-b607-633b2e82986c
+# ╟─260ede0e-2584-4fe9-ae92-69990ca8f854
 # ╟─ff86a29f-9308-473b-aa1c-dfd4af8179c7
+# ╠═555228b2-8075-49ac-a7ef-f51aa51dd95d
+# ╟─dc8ef7cb-ae97-401c-9a25-12439e4363c6
+# ╠═66712fb2-50ea-41be-bcca-305319d158e9
+# ╟─6704e43b-30bc-4168-93db-fb853c9761fa
+# ╠═4d2094d8-98b3-4ac9-9612-942b5cd18ce0
 # ╟─16a84fdb-8ce2-45b9-bfb7-7f4e1284a1d7
 # ╠═53134149-0bf7-41c1-9b35-e5037744211f
+# ╟─0355bbf6-853d-4bd8-b32f-98fdbd2b761c
 # ╟─355ca6a7-466b-4969-ab48-28e2257f9810
+# ╠═4e08baf1-eeb6-49be-9751-204dd9ae1103
+# ╟─22e98c77-0e9f-444a-a2f0-b940940996b7
+# ╠═91795413-c9a2-43cb-a7b0-d9e055e1cf94
+# ╟─182e0c2b-9aa4-4514-96e8-b6a9f53b371b
+# ╠═05ec320e-ac87-45af-904e-5d69639e1f27

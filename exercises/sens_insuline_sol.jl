@@ -1,23 +1,25 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
 
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
+    #! format: off
     quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
     end
+    #! format: on
 end
 
 # ╔═╡ 7bc363b0-9415-4954-807f-81a308bde531
 begin
 	import Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 52b28a4c-b0bb-11ef-2841-17ecfb596676
@@ -60,11 +62,11 @@ The following plot gives a fairly realistic response of insulin production as a 
 plot(f_insulin, 0, 30, xlab="G (mmol/L)", ylab="f(G)", title="Insulin production rate")
 
 # ╔═╡ 75a5b5d9-f8d7-4728-83dc-03dde502dcfb
-md"Below is a reaction network implementing this model. All parameters are set to 1 for didactic purposes." 
+md"Below is a reaction network implementing this model. All parameters are set to 1.0 for didactic purposes." 
 
 # ╔═╡ f62c2b4a-a9e8-472b-b07b-44072da08ee8
 glucose_insuline_circuit = @reaction_network begin
-	@parameters q=1 s=1 γ=1 m=1 B=1 Ks=1.0
+	@parameters q=1.0 s=1.0 γ=1.0 m=1.0 B=1.0 Ks=1.0
 	m, 0 --> G
 	s * I, G --> 0
 	B * hill(G, q, Ks, 2), 0 --> I
@@ -82,11 +84,11 @@ convert(ODESystem, glucose_insuline_circuit)
 
 # ╔═╡ 3c1465d2-0886-4b74-baee-55c7dad41f9a
 md"""
-Simulate the system over a time interval of $0$ to $10$ hours with $m=1$ for various initial glucose concentrations (e.g., between $0.1$ and $5$) by means of the variable `G0` bound to the slider just here below. Use an initial insuline concentration of $0.0$.
+Simulate the system over a time interval of $0.0$ to $10.0$ hours with $m=1.0$ for various initial glucose concentrations (e.g., between $0.1$ and $5.0$) by means of the variable `G0` bound to the slider just here below. Use an initial insuline concentration of $0.0$.
 """
 
 # ╔═╡ 5bac69d1-0bd4-41bd-b15d-5ca6292a31e4
-@bind G0 Slider(0.1:0.1:5, default=1, show_value=true)
+@bind G0 Slider(0.1:0.1:5.0, default=1.0, show_value=true)
 
 # ╔═╡ 6ccd5ecc-5579-4ce5-9425-d1bbae0bc5ba
 G0
@@ -109,12 +111,17 @@ Plot the results. Use thereby `ylim=(0.0, 5.5)`.
 # missing              # Uncomment and complete the instruction
 plot(sol1, ylim=(0.0, 5.5))
 
-# ╔═╡ 0133ab41-2c8c-4147-9594-1ad238833a9e
-md"""
-What are the steady state concentrations for the two species? Does this depend on initial glucose levels (given enough time)?
+# ╔═╡ 68bdcedb-42b7-4fa8-8252-c2fbaa6e0187
 
-- Answer: missing
+
+# ╔═╡ 8c7784df-1f6d-41e3-8548-7311710e599e
+md"""
+!!! question "Question"
+	What are the steady state concentrations for the two species? Does this depend on initial glucose levels (given enough time)?
 """
+
+# ╔═╡ 0133ab41-2c8c-4147-9594-1ad238833a9e
+md"- Answer: missing"
 
 # ╔═╡ 479e0f11-e18e-4523-8d24-b2026acdeaef
 md"""
@@ -141,7 +148,15 @@ Calculate the steady-state values of glucose and insuline.
 
 # ╔═╡ 3dae761f-5fb6-4f1c-a440-d2c21a6edb17
 # Gw, Iw = missing      # Uncomment and complete the instruction
-Gw, Iw = solve(SteadyStateProblem(ODEProblem(glucose_insuline_circuit, u1_guess, (0., 10.), [])))
+eq = solve(SteadyStateProblem(glucose_insuline_circuit, u1_guess, []))
+
+# ╔═╡ d48a6bfc-b533-41ca-a0de-df0af5738536
+# Geq = missing
+Geq = eq[:G]
+
+# ╔═╡ 087015da-d85d-4ebb-861a-b89e93a4055c
+# Ieq = missing
+Ieq = eq[:I]
 
 # ╔═╡ 314aa77c-5906-4772-94c5-f0b7cf648de0
 md"""
@@ -149,8 +164,8 @@ Check ou the steady state values for glucose and insulin.
 """
 
 # ╔═╡ 3b56f88c-0ca8-4f33-8516-11e639cb6a1a
-# missing               # Uncomment and complete the instruction
-(Gw, Iw)
+# (missing, missing)               # Uncomment and complete the instruction
+(Geq, Ieq)
 
 # ╔═╡ 00db9d76-c4dd-450d-b7e3-cf87f8bfeffb
 # ╠═╡ disabled = true
@@ -217,7 +232,7 @@ Up to now, we set $s$, the insulin sensitivity to $1$. This parameter represents
 
 # ╔═╡ 53addc28-7c87-4c79-ad8f-4a41a3ca5f19
 md"""
-We make a slider so that s can get values between 0.1 and 5 in step of 0.1.
+We make a slider so that s can get values between 0.1 and 5.0 in step of 0.1.
 """
 
 # ╔═╡ 69e21e9b-7d0e-44e3-8b33-ee7102dadadf
@@ -322,7 +337,7 @@ The growth rate of the $\beta$-cells follows a sigmoid shape, being negative whe
 """
 
 # ╔═╡ 4d95e77b-fab0-454b-8319-1fe83e12f9e9
-plot(μ, 0, 30, xlab="G", label="μ(G)", title="Glucose-dependend growth rate")
+plot(μ, xlim=(0, 30), xlab="G", label="μ(G)", title="Glucose-dependend growth rate")
 
 # ╔═╡ ea46f5f9-47a8-4641-a7e3-08a1a29cd04f
 md"""
@@ -359,8 +374,8 @@ Create the aforementioned robust version of a *reaction network object*.
 # 	...
 # end
 glucose_insuline_circuit_robust = @reaction_network begin
-	@parameters q=1 s=1 γ=1 m=1 Ks=1.0
-	@species B(t)=1
+	@parameters q=1.0 s=1.0 γ=1.0 m=1.0 Ks=1.0
+	@species B(t)=1.0
 	m, 0 --> G
 	s * I, G --> 0
 	B * hill(G, q, Ks, 2), 0 --> I
@@ -486,13 +501,17 @@ sens_G_rel_robust(s_robust)
 # ╠═f050b32e-1a14-4d5e-9fb3-5dbc4dfbf79c
 # ╟─cfbbfe48-a2c3-4691-9fac-b0a18f99222c
 # ╠═7e35b56b-44a0-46df-a812-f5fb437b672e
-# ╟─0133ab41-2c8c-4147-9594-1ad238833a9e
+# ╠═68bdcedb-42b7-4fa8-8252-c2fbaa6e0187
+# ╟─8c7784df-1f6d-41e3-8548-7311710e599e
+# ╠═0133ab41-2c8c-4147-9594-1ad238833a9e
 # ╟─479e0f11-e18e-4523-8d24-b2026acdeaef
 # ╠═824677b4-6533-453f-909f-bf04fe4bf5d9
 # ╟─cef7f30d-43ef-4f2c-8bf3-35c140d237ce
 # ╠═9d3ba8bd-e9c3-4bb6-957d-c7f8211a2cda
 # ╟─3f5e2195-da93-40fb-88ec-9e85a7bb6c24
 # ╠═3dae761f-5fb6-4f1c-a440-d2c21a6edb17
+# ╠═d48a6bfc-b533-41ca-a0de-df0af5738536
+# ╠═087015da-d85d-4ebb-861a-b89e93a4055c
 # ╟─314aa77c-5906-4772-94c5-f0b7cf648de0
 # ╠═3b56f88c-0ca8-4f33-8516-11e639cb6a1a
 # ╠═00db9d76-c4dd-450d-b7e3-cf87f8bfeffb
