@@ -339,7 +339,7 @@ docs/site/
 Manifest.toml
 
 # images are by default ignored, force add them if you must
-*.png
+#*.png
 *.jpg
 *.svg
 .DS_Store
