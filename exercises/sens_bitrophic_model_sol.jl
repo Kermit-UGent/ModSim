@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ fd357fe0-0920-11ef-02e4-25a84575c6a2
@@ -133,7 +133,7 @@ Create the ODE problem and store it in `oprob`. Next, solve the ODE problem usin
 
 # ╔═╡ 1c185585-7c7a-4073-85f5-8300d3fe19e4
 # oprob = missing       # Uncomment and complete the instruction
-oprob = ODEProblem(bitrophic_model, u0, tspan, params)
+oprob = ODEProblem(bitrophic_model, u0, tspan, params);
 
 # ╔═╡ 2f1b4426-7235-4caf-84ed-ec6e04eaa34a
 # osol = missing        # Uncomment and complete the instruction
@@ -143,20 +143,42 @@ osol = solve(oprob, Tsit5(), saveat=0.5)
 # missing               # Uncomment and complete the instruction
 plot(osol)
 
+# ╔═╡ fc1ae98d-0126-4eb3-86e6-20342acf0340
+md"""
+!!! question "Questions"
+	Interpret your results. Try to answer the following question(s):
+"""
+
 # ╔═╡ 81c6198f-5f69-4d78-b67c-b6e283a6c3b1
 md"""
-Interpret the simulations results. Ask yourself the following questions:
-
 1. What happens to $C$ and $A$ during the first 30 days?
-    - Answer: missing
-2. Why does $C$ starts to decline around day 40?
-    - Answer: missing
-3. What happen to $C$ and $A$ from day 50 on, do they finally reach steady state values?
-    - Answer: missing
 """
+
+# ╔═╡ 9c42da1d-f80a-4ad5-bc4f-caec9a1dadb6
+md"- Answer: missing"
 #=
 1. C is increasing strongly while A remains relatively weak and constant.
+=#
+
+# ╔═╡ cd1ea360-4fa0-47ee-95ea-5a34dbd0aff9
+md"""
+2. Why does $C$ starts to decline around day 40?
+"""
+
+# ╔═╡ 047cc4df-1c6c-4371-a6e9-fe83a402b342
+md"- Answer: missing"
+#=
 2. Around t=40, A starts to increase (use the option ylim=(0, 300) in plot to see this). As A increase, then C will decline.
+=#
+
+# ╔═╡ b75a8e32-39c2-41dd-95ff-5cb6de30199b
+md"""
+3. What happen to $C$ and $A$ from day 50 on, do they finally reach steady state values?
+"""
+
+# ╔═╡ c9caecc4-8d14-4885-b087-54a9226be597
+md"- Answer: missing"
+#=
 3. They will somehow start to oscillate around their steady state values. They finally reach steady state values.
 =#
 
@@ -168,15 +190,20 @@ Write a solution function with as argument a vector of the parameters (that you 
 # ╔═╡ 2a858811-9ffd-4dc7-84ba-f7a59421753f
 # Uncomment and complete the instruction
 # function bitrophic_model_sim(params)
-# 	missing
-# 	...
+	# θ, ϕ, p = missing
+	# u0 = missing
+	# tspan = missing
+	# params = missing
+	# oprob = missing
+	# osol = missing
+	# return missing
 # end
 function bitrophic_model_sim(params)
 	θ, ϕ, p = params
-    u0 = [:C => 100, :A => 0.5]
-    tspan = (0.0, 200.0)
-    params = [:θ => θ, :k => 4000.0, :f => 0.001, :ϕ => ϕ, :p => p, :μ => 0.1]
-    oprob = ODEProblem(bitrophic_model, u0, tspan, params)
+	u0 = [:C => 100, :A => 0.5]
+	tspan = (0.0, 200.0)
+	params = [:θ => θ, :k => 4000.0, :f => 0.001, :ϕ => ϕ, :p => p, :μ => 0.1]
+	oprob = ODEProblem(bitrophic_model, u0, tspan, params)
 	osol = solve(oprob, Tsit5(), saveat=0.5)
 	return osol
 end
@@ -300,17 +327,30 @@ Plot the sensitivity functions of $C$ and $A$ on $\theta$. Provide a suitable ti
 # missing       # Uncomment and complete the instruction
 plot(t_vals, [sens_C_on_θ_rel, sens_A_on_θ_rel], title="Normalized sensitivities", label=["C on θ" "A on θ"], xlabel="Time (days)")
 
+# ╔═╡ c6eb2f89-2737-4eb0-8fec-dd87ea962051
+md"""
+!!! question "Questions"
+	Interpret your results. Try to answer the following question(s):
+"""
+
 # ╔═╡ a8257414-2d6a-4913-9f05-6369c62189e8
 md"""
-Interpret your results. Try to answer the following question(s):
-
-- In steady state, does $\theta$ have any influence on $C$? Explain why this could be.
-    - Answer: missing
-- In steady state, why does $\theta$ have a positive effect on $A$? Explain why this could be.
-    - Answer: missing
+1. In steady state, does $\theta$ have any influence on $C$? Explain why this could be.
 """
+
+
+# ╔═╡ 68264b8a-a89f-465b-bedb-1b85e960a25e
+md"- Answer: missing"
+
+# ╔═╡ f84e6cdd-be44-464e-865b-24feca38df0f
+md"""
+2. In steady state, why does $\theta$ have a positive effect on $A$? Explain why this could be.
+"""
+
+# ╔═╡ a7d513eb-66b3-4167-b799-74a37718a315
+md"- Answer: missing"
 #=
-Answer for both questions: theta seems to have no influence on C in steady state. This could be because if theta increases, then the growth rate of C increases resulting in more crops, but then this will also result in more voracious insects (positive effect on A from θ) which will feed on the increased number of crops resulting in cancelling out the increase of the crops.
+Answer for both questions: θ seems to have no influence on C in steady state. This could be because if θ increases, then the growth rate of C increases resulting in more crops, but then this will also result in more voracious insects (positive effect on A from θ) which will feed on the increased number of crops resulting in cancelling out the increase of the crops.
 If you calculated analytically the steady state for C and A (call them Cw and Aw), then you will get:
 Cw = (1+p)*μ/(ϕ*f) and Aw = (θ/f)*(1-Cw/k)
 you can see that Cw is independend on θ, while Aw is proportional to θ
@@ -334,17 +374,31 @@ Plot the sensitivity functions of $C$ and $A$ on $p$. Provide a suitable title (
 # missing            # Uncomment and complete the instruction
 plot(t_vals, [sens_C_on_p_rel, sens_A_on_p_rel], title="Normalized sensitivities", label=["C on p" "A on p"], xlabel="Time (days)")
 
-# ╔═╡ 869a9dc3-8227-4c6e-8901-198cafb489e2
+# ╔═╡ 75309ee6-17b6-4ebb-b21c-a5e4a2a97510
 md"""
-Interpret your results. Try to answer the following question(s):
-
-1. In steady state, does $\phi$ have a positive or negative effect on $C$? Explain why this could be.
-    - Answer: missing
-2. In steady state, does $p$ have a positive or negative effect on $C$? Explain why this could be.
-    - Answer: missing
+!!! question "Questions"
+	Interpret your results. Try to answer the following question(s):
 """
+
+# ╔═╡ 08eaa553-7b74-4f02-9328-b23add528c06
+md"""
+1. In steady state, does $\phi$ have a positive or negative effect on $C$? Explain why this could be.
+"""
+
+# ╔═╡ a299b51b-1b7b-4420-9f91-bfe1d8c43158
+md"- Answer: missing"
 #=
 1. ϕ has a negative influence on C This makes sense because ϕ is the yield factor for the varocious insects, the larger ϕ, the more insects and hence less crops.
+=#
+
+# ╔═╡ 58afee9f-1157-45b1-99d9-f796b474975a
+md"""
+2. In steady state, does $p$ have a positive or negative effect on $C$? Explain why this could be.
+"""
+
+# ╔═╡ 24d198c3-9fd2-4ea3-8ab1-c7f027af78be
+md"- Answer: missing"
+#=
 2. The factor p contributes to the amount of pesticides, hence if p is increased, A will decrease and hence C will increase.
 =#
 
@@ -377,7 +431,13 @@ Interpret your results. Try to answer the following question(s):
 # ╠═1c185585-7c7a-4073-85f5-8300d3fe19e4
 # ╠═2f1b4426-7235-4caf-84ed-ec6e04eaa34a
 # ╠═63b33638-b967-43a7-b6ff-f6912f9a12e3
+# ╟─fc1ae98d-0126-4eb3-86e6-20342acf0340
 # ╟─81c6198f-5f69-4d78-b67c-b6e283a6c3b1
+# ╠═9c42da1d-f80a-4ad5-bc4f-caec9a1dadb6
+# ╟─cd1ea360-4fa0-47ee-95ea-5a34dbd0aff9
+# ╠═047cc4df-1c6c-4371-a6e9-fe83a402b342
+# ╟─b75a8e32-39c2-41dd-95ff-5cb6de30199b
+# ╠═c9caecc4-8d14-4885-b087-54a9226be597
 # ╟─aa07ac11-1d6e-41ea-885d-1a6ae38bd58d
 # ╠═2a858811-9ffd-4dc7-84ba-f7a59421753f
 # ╟─e911dc09-c56a-42ed-9a09-9c4bba1aa5f6
@@ -399,9 +459,17 @@ Interpret your results. Try to answer the following question(s):
 # ╠═c2b5c2c4-3aa6-466d-b106-d0d7aef43bdf
 # ╟─3814640e-ed0b-48a1-b4ac-6b7f04d899f3
 # ╠═bbe8980e-441d-4ac6-abc5-88ff77de9f24
+# ╟─c6eb2f89-2737-4eb0-8fec-dd87ea962051
 # ╟─a8257414-2d6a-4913-9f05-6369c62189e8
+# ╠═68264b8a-a89f-465b-bedb-1b85e960a25e
+# ╟─f84e6cdd-be44-464e-865b-24feca38df0f
+# ╠═a7d513eb-66b3-4167-b799-74a37718a315
 # ╟─882f2f6b-eb58-4c8f-877e-76e460900c0c
 # ╠═f76e5c58-12fc-4b2d-8718-e15144fbef98
 # ╟─0bd84cf5-c0a2-4bb2-b5f4-f16da6eaab04
 # ╠═cb02ebf8-aee5-47a2-9496-6f63fc123147
-# ╟─869a9dc3-8227-4c6e-8901-198cafb489e2
+# ╟─75309ee6-17b6-4ebb-b21c-a5e4a2a97510
+# ╟─08eaa553-7b74-4f02-9328-b23add528c06
+# ╠═a299b51b-1b7b-4420-9f91-bfe1d8c43158
+# ╟─58afee9f-1157-45b1-99d9-f796b474975a
+# ╠═24d198c3-9fd2-4ea3-8ab1-c7f027af78be

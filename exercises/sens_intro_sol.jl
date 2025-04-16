@@ -46,14 +46,14 @@ Sensitivity functions indicate how sensitive the model output is to a change in 
 
 # ╔═╡ 7b58f2f9-cb93-4a20-bf90-62a9006b57d6
 md"""
-The sensitivity function that measures how sensitive output $y_j$ is to changes in parameter $\theta_i$ is given by the partial derivative
+The sensitivity function that measures how sensitive output $y_i$ is to changes in parameter $\theta_j$ is given by the partial derivative
 
-$$\cfrac{\partial \hat{y}_i(\theta)}{\partial \theta_j}\tag{1}$$
+$$S_{ij} = \cfrac{\partial \hat{y}_i(\theta)}{\partial \theta_j}\tag{1}$$
 """
 
 # ╔═╡ abd70f04-1bf8-454f-869a-0d8082d68453
 md"""
-Expression $(1)$ is sometimes referred to as the *absolute sensitivity*. Try to understand why the above expression $(1)$ does indeed give us the information we were promised in the first paragraph. How will we be able to see from the value determined by the above expression $(1)$ that whether or not output $y_j$ is sensitive to a change in $\theta_i$?
+Expression $(1)$ is sometimes referred to as the *absolute sensitivity*. Try to understand why the above expression $(1)$ does indeed give us the information we were promised in the first paragraph. How will we be able to see from the value determined by the above expression $(1)$ that whether or not output $\hat{y}_i$ is sensitive to a change in $\theta_j$?
 """
 
 # ╔═╡ e76aedec-69f2-4301-b015-6960e4503c42
@@ -68,14 +68,14 @@ $$\cfrac{\partial \hat{y}_i(\theta)}{\partial \theta_j} \approx \cfrac{\hat{y}_i
 
 # ╔═╡ 25d3ef62-382c-455c-92bb-fadfc650c5a6
 md"""
-Thus, to calculate the sensitivity function numerically, the model is evaluated for the parameter values $\theta_i$ and $\theta_i+\Delta\theta_i$ and the difference between these evaluations is taken.
+Thus, to calculate the sensitivity function numerically, the model is evaluated for the parameter values $\theta_j$ and $\theta_j+\Delta\theta_j$ and the difference between these evaluations is taken.
 """
 
 # ╔═╡ 2a544bef-d7fe-4300-bc59-69e6f7429304
 md"""
 Since quantity $(1)$ is dependent on the units, a *normalized* variant is often used:
 
-$$\cfrac{\partial \hat{y}_i(\theta)}{\partial \theta_j} \cdot \cfrac{\theta_j}{\hat{y}_i} \tag{2}$$
+$$s_{ij} = \cfrac{\partial \hat{y}_i(\theta)}{\partial \theta_j} \cdot \cfrac{\theta_j}{\hat{y}_i} \tag{2}$$
 
 The interpretation of $(2)$ is how much the output changes per cent if the parameter is increased by one per cent. It assumes positive model outputs and parameters, which is often the case for biochemical models.
 
