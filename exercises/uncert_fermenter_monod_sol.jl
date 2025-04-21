@@ -33,7 +33,7 @@ md"""
 
 # ╔═╡ c44e10f3-8452-4a60-b840-f4a7e6ec3238
 md"""
-In one of the previous practica we were introduced to a fermenter in which biomass $X$ [$g/L$] grows by breaking down substrate $S$ [$g/L$]. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. This process was modelled using Monod kinetics, resulting in the model below:
+In one of the previous practicals we were introduced to a fermenter in which biomass $X$ [$g/L$] grows by breaking down substrate $S$ [$g/L$]. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. This process was modelled using Monod kinetics, resulting in the model below:
 
 $$\begin{eqnarray*}
 S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s}
@@ -77,7 +77,7 @@ Assume the uncertainties in the following parameter values:
 -  $K_s = 0.015 \pm 0.003 \;g/L$
 -  $S_{in} = 0.022 \pm 0.004\;g/L$
 
-and that the uncertainty in the other parameters values: $Y = 0.67$, $Q = 2.0\;L/h$, $V = 40.0\;L$ are negligible. Suppose that at $t$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of $0.0005\;g/L$. Perform an uncertainty analysis by plotting the uncertainty bands on the simulation results of $S$ and $X$ in a timespan of $[0, 100]\,h$.
+and that the uncertainty in the other parameters values: $Y = 0.67$, $Q = 2.0\;L/h$, $V = 40.0\;L$ are negligible. Suppose that at $t=0$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of $0.0005\;g/L$. Perform an uncertainty analysis by plotting the uncertainty bands on the simulation results of $S$ and $X$ in a timespan of $[0, 100]\,h$.
 
 Interpret your results.
 """
@@ -146,8 +146,8 @@ In order to do that, analyse the effect on the uncertainty bands for $S$ and $X$
 
 # ╔═╡ ff3e6f75-c02b-4530-8b9a-6ff40915cb5c
 md"""
-!!! conclusion "Conclusions"
-	Draw your conclusions:
+!!! question
+	Draw your conclusions.
 """
 
 # ╔═╡ 33b4d1c8-5da2-4490-afe9-4778e11d3cc9

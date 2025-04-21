@@ -86,7 +86,7 @@ We will illustrate how to compute the error bars, due to model parameter uncerta
 
 # ╔═╡ 9d3192bc-ee69-44a1-9273-06b8a55c60ef
 md"""
-### Uncertainty analysis of the logistic growth model
+## Uncertainty analysis of the logistic growth model
 
 We will start by modelling our system and simulating using the aforementioned parameters values and uncertainties, initial condition and timespan.
 """
@@ -149,7 +149,7 @@ md"""
 
 # ╔═╡ b4c76f21-9839-4db5-b952-43869d3a1efe
 md"""
-#### Study case 1
+### Study case 1
 """
 
 # ╔═╡ 6ab73fc5-7315-4ec6-a3ee-9b5c689ce82e
@@ -186,12 +186,12 @@ plot(osol1_uncert_log)
 
 # ╔═╡ 9b30b23b-6e92-49cf-bf93-e12a187fa2ba
 md"""
-When thinking back of the sensitivity of $W$ to the parameter $\mu$, we saw that the corresponding sensitivity function had a maximum around $t=33\;s$. Looking at the above plot with error bars, we can see that de largest error bars (largest uncentrainty in the output variable) occurs at the timepoints where the sensitivity is strongest.
+When thinking back of the sensitivity of $W$ to the parameter $\mu$, we saw that the corresponding sensitivity function had a maximum around $t=33\;s$. Looking at the above plot with error bars, we can see that the largest error bars (largest uncertainty in the output variable) occurs at the time points where the sensitivity is strongest.
 """
 
 # ╔═╡ 86f8d937-c42a-47ff-a0f6-6cae9d637fcf
 md"""
-#### Study case 2
+### Study case 2
 """
 
 # ╔═╡ 0755ea1c-50a0-4c8a-9adc-be2d63948a10
@@ -228,12 +228,12 @@ plot(osol2_uncert_log)
 
 # ╔═╡ b8896997-ddec-4d4a-a7c4-0e1008089d1b
 md"""
-When thinking back of the sensitivity of $W$ to the parameter $W_f$, we saw that the corresponding sensitivity function was strongest in the tail of the curve around the steady state value. Looking at the above plot with error bars, we can see that de largest error bars (largest uncentrainty in the output variable) occurs at the tail of the curve where the sensitivity is strongest.
+When thinking back of the sensitivity of $W$ to the parameter $W_f$, we saw that the corresponding sensitivity function was strongest in the tail of the curve around the steady state value. Looking at the above plot with error bars, we can see that the largest error bars (largest uncertainty in the output variable) occurs at the tail of the curve where the sensitivity is strongest.
 """
 
 # ╔═╡ 5522a5c2-ff7e-4093-86d0-ffb879fcc6e8
 md"""
-#### Study case 3
+### Study case 3
 """
 
 # ╔═╡ 5e3da6ca-656e-41ad-ba04-bf3d6b51939d
@@ -270,7 +270,7 @@ plot(osol_uncert_log)
 
 # ╔═╡ c181d973-4fcc-4fbe-b37c-5f71dd33b0d2
 md"""
-Now you have the combined effect of the uncertainty in the parameter $\mu$ as well as in the parameter $W_f$.
+Now we see the combined effect of uncertainty in both parameters, $\mu$ and $W_f$.
 """
 
 # ╔═╡ e9f49fbc-d877-4db7-b320-a2db964ecaaa

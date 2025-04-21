@@ -33,7 +33,7 @@ md"""
 
 # ╔═╡ 5ffe7dcb-620d-4f22-95fe-2f77cda6fbe7
 md"""
-In one of the previous practica we were introduced to a fermenter in which biomass $X$ [$g/L$] grows by breaking down substrate $S$ [$g/L$]. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. This process was modelled using Monod kinetics, resulting in the model below:
+In one of the previous practicals we were introduced to a fermenter in which biomass $X$ [$g/L$] grows by breaking down substrate $S$ [$g/L$]. The reactor is fed with an inlet flow rate $Q_{in}$ [$L/h$], which consists of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. This process was modelled using Monod kinetics, resulting in the model below:
 
 $$\begin{eqnarray*}
 S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s}
@@ -81,15 +81,15 @@ osys = convert(ODESystem, fermenter_monod)
 
 # ╔═╡ 55f1d688-0c53-481b-9965-5e92ca87ad83
 md"""
-The parameter values are $\mu_{max} = 0.40$, $K_s = 0.015$, $Y = 0.67$, $Q = 2.0$, $V = 40.0$ and $S_{in} = 0.022\;g/L$. Suppose that at $t$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of $0.0005\;g/L$.\
+The parameter values are $\mu_{max} = 0.40$, $K_s = 0.015$, $Y = 0.67$, $Q = 2.0$, $V = 40.0$ and $S_{in} = 0.022\;g/L$. Suppose that at $t=0$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of $0.0005\;g/L$.\
 Compute the following in a timespan of $[0, 100]\,h$:
 
-- The sensitivities of $S$ and $X$ on $\mu_{max}$, $K_s$ and $S_{in}$.
+- The sensitivities of $S$ and $X$ wrt. $\mu_{max}$, $K_s$ and $S_{in}$.
 
 Plot the following:
-- A figure with the sensitivity functions of $S$ and $X$ on $S_{in}$.
-- A figure with the sensitivity functions of $S$ on $\mu_{max}$, $K_s$ and $S_{in}$.
-- A figure with the sensitivity functions of $X$ on $\mu_{max}$, $K_s$ and $S_{in}$.
+- A figure with the sensitivity functions of $S$ and $X$ wrt. $S_{in}$.
+- A figure with the sensitivity functions of $S$ wrt. $\mu_{max}$, $K_s$ and $S_{in}$.
+- A figure with the sensitivity functions of $X$ wrt. $\mu_{max}$, $K_s$ and $S_{in}$.
 
 Interpret your results.
 """
@@ -147,7 +147,7 @@ plot(osol)
 
 # ╔═╡ 693844d0-3858-4861-bae0-b47e78809f17
 md"""
-Write a solution function with as argument a vector of the parameters (that you want the sensitivity on), and that returns the outputs.
+Write a solution function with as argument a vector of the parameters (with the values for which we want to calculate the sensitivity), and that returns the outputs.
 """
 
 # ╔═╡ 9622f7ca-f71a-4ad9-a309-d7d10a1c3e3b
@@ -173,7 +173,7 @@ end
 
 # ╔═╡ 4a5971b1-f4d0-43b6-805f-e17f5052ae92
 md"""
-Make two functions based on the solution function that each returns a single output, hence, one function that returns the output $S$, and another function that returns the output $X$.
+Make two functions based on the solution function, where each returns a single output; hence, one function that returns the output $S$, and another function that returns the output $X$.
 """
 
 # ╔═╡ f40c6402-3c28-4a7d-b629-83507a9f29bd
@@ -283,33 +283,37 @@ end;
 
 # ╔═╡ 5388c2a7-5a11-4da8-be09-46045cde8a4e
 md"""
-Plot the sensitivity functions of $S$ and $X$ on $S_{in}$. Provide a suitable title (`title="..."`), labels (`label=["..." "..."]`) and an x-label (`xlabel="..."`), and set the line width to 2 (`linewidth=...`).
+Plot the sensitivity functions of $S$ and $X$ wrt. $S_{in}$. Provide a suitable title (`title="..."`), labels (`label=["..." "..."]`) and an x-label (`xlabel="..."`), and set the line width to 2 (`linewidth=...`).
 """
 
 # ╔═╡ db840c76-a6c6-49fb-a0bb-d9149f947bc0
 # missing               # Uncomment and complete the instruction
 plot(t_vals, [sens_S_on_Sin_rel, sens_X_on_Sin_rel], title="Normalized sensitivities", label=["S on Sin" "X on Sin"], xlabel="Time (hours)", linewidth=2)
 
+# ╔═╡ 02314e9f-6186-4c97-9b28-03a4a1a15668
+maximum(sens_X_on_Sin_rel)
+
 # ╔═╡ d41375ef-6958-4705-a417-4c6a491232ee
 md"""
-!!! question "Questions"
-	Interpret your results. Try to answer the following question(s):
+Interpret your results. Try to answer the following question(s):
 """
 
 # ╔═╡ f6be14f3-e0d0-41dc-bc7b-54174b1ea5ea
 md"""
-Which output variable $S$ or $X$ is most sensitive on $S_{in}$ in steady state?
+!!! question
+	Which output variable, $S$ or $X$, is most sensitive to $S_{in}$ in steady state?
 """
 
 # ╔═╡ b2583ee2-412b-4a0a-a4d0-fe476e0510e5
 md"- Answer: missing"
 #=
-- X is most sensitive on Sin because the higher Sin, the more X can be produced.
+- X is most sensitive wrt. Sin because the higher Sin, the more X can be produced.
 =#
 
 # ╔═╡ dbbf694b-942a-4757-a255-f67b208ba03b
 md"""
-Why is the sensitivity function of $S$ on $S_{in}$ at first positive but then becomes zero?
+!!! question
+	Why is the sensitivity function of $S$ wrt. $S_{in}$ at first positive but then becomes zero?
 """
 
 # ╔═╡ f10ac0f2-6b14-4805-b649-56c63f5b523a
@@ -320,7 +324,7 @@ md"- Answer: missing"
 
 # ╔═╡ be89600a-4927-4afc-9813-d8a70adb2852
 md"""
-Plot the sensitivity functions of $S$ on $\mu_{max}$, $K_s$ and $S_{in}$. Provide a suitable title (`title="..."`), labels (`label=["..." "..." "..."]`) and an x-label (`xlabel="..."`), and set the line width to 2 (`linewidth=...`).
+Plot the sensitivity functions of $S$ wrt. $\mu_{max}$, $K_s$ and $S_{in}$. Provide a suitable title (`title="..."`), labels (`label=["..." "..." "..."]`) and an x-label (`xlabel="..."`), and set the line width to 2 (`linewidth=...`).
 """
 
 # ╔═╡ c0223da4-9959-48d0-b607-633b2e82986c
@@ -329,13 +333,13 @@ plot(t_vals, [sens_S_on_μmax_rel, sens_S_on_Ks_rel, sens_S_on_Sin_rel], title="
 
 # ╔═╡ 260ede0e-2584-4fe9-ae92-69990ca8f854
 md"""
-!!! question "Questions"
-	Interpret your results. Try to answer the following question(s):
+Interpret your results. Try to answer the following question(s):
 """
 
 # ╔═╡ ff86a29f-9308-473b-aa1c-dfd4af8179c7
 md"""
-Which parameter $\mu_{max}$, $K_s$ or $S_{in}$ affects the output $S$ the most in steady state?
+!!! question
+	Which parameter, $\mu_{max}$, $K_s$ or $S_{in}$, affects the output $S$ the most in steady state? Why is this?
 """
 
 # ╔═╡ 555228b2-8075-49ac-a7ef-f51aa51dd95d
@@ -344,26 +348,28 @@ md"- Answer: missing"
 - It seems like μmax is affecting S the most in steady state and its influence is negative, hence, the larger μmax, the smaller S.
 =#
 
-# ╔═╡ dc8ef7cb-ae97-401c-9a25-12439e4363c6
-md"""
-Why is the sensitivity function of $S$ on $K_s$ positive?
-"""
-
-# ╔═╡ 66712fb2-50ea-41be-bcca-305319d158e9
-md"- Answer: missing"
-#=
-- The sensitivity function of S on Ks is positive, because the larger Ks, the smaller the reaction rate r (S => Y*X). Hence, less X will be produced, so less S will be consumed. Remember that r = μmax*S*X/(S + Ks) and Ks is in the denominator.
-=#
-
 # ╔═╡ 6704e43b-30bc-4168-93db-fb853c9761fa
 md"""
-Why is the sensitivity function of $S$ on $\mu_{max}$ negative?
+!!! question
+	Why is the sensitivity function of $S$ wrt. $\mu_{max}$ negative?
 """
 
 # ╔═╡ 4d2094d8-98b3-4ac9-9612-942b5cd18ce0
 md"- Answer: missing"
 #=
 - The sensitivity function of S on μmax is negative, because the larger μmax, the larger the reaction rate r (S => Y*X). Hence, more X will be produced, so more S will be consumed. Remember that r = μmax*S*X/(S + Ks) and μmax is in the numerator.
+=#
+
+# ╔═╡ dc8ef7cb-ae97-401c-9a25-12439e4363c6
+md"""
+!!! question
+	Why is the sensitivity function of $S$ wrt. $K_s$ positive? Does this correspond to the meaning of the half-saturation constant $K_s$ or substrate concentration that allows to achieve half the maximum growth rate? *In other words: do higher values of $K_s$ support growth at low substrate concentrations?*
+"""
+
+# ╔═╡ 66712fb2-50ea-41be-bcca-305319d158e9
+md"- Answer: missing"
+#=
+- The sensitivity function of S on Ks is positive, because the larger Ks, the smaller the reaction rate r (S => Y*X). Hence, less X will be produced, so less S will be consumed. Remember that r = μmax*S*X/(S + Ks) and Ks is in the denominator.
 =#
 
 # ╔═╡ 16a84fdb-8ce2-45b9-bfb7-7f4e1284a1d7
@@ -377,13 +383,13 @@ plot(t_vals, [sens_X_on_μmax_rel, sens_X_on_Ks_rel, sens_X_on_Sin_rel], title="
 
 # ╔═╡ 0355bbf6-853d-4bd8-b32f-98fdbd2b761c
 md"""
-!!! question "Questions"
-	Interpret your results. Try to answer the following question(s):
+Interpret your results. Try to answer the following question(s):
 """
 
 # ╔═╡ 355ca6a7-466b-4969-ab48-28e2257f9810
 md"""
-Which parameter $\mu_{max}$, $K_s$ or $S_{in}$ affects the output $X$ the most in steady state?
+!!! question
+	Which parameter, $\mu_{max}$, $K_s$ or $S_{in}$, affects the output $X$ the most in steady state?
 """
 
 # ╔═╡ 4e08baf1-eeb6-49be-9751-204dd9ae1103
@@ -392,26 +398,28 @@ md"- Answer: missing"
 - It seems like Sin is affecting X the most in steady state and its influence is positive, hence, the larger Sin, the larger X.
 =#
 
-# ╔═╡ 22e98c77-0e9f-444a-a2f0-b940940996b7
-md"""
-Why is the sensitivity function of $X$ on $K_s$ negative?
-"""
-
-# ╔═╡ 91795413-c9a2-43cb-a7b0-d9e055e1cf94
-md"- Answer: missing"
-#=
-- The sensitivity function of X on Ks is negative, because the larger Ks, the smaller the reaction rate r (S => Y*X). Hence, less X will be produced. Remember that r = μmax*S*X/(S + Ks) and Ks is in the denominator.
-=#
-
 # ╔═╡ 182e0c2b-9aa4-4514-96e8-b6a9f53b371b
 md"""
-Why is the sensitivity function of $X$ on $\mu_{max}$ positive?
+!!! question
+	Why is the sensitivity function of $X$ wrt. $\mu_{max}$ positive? How does this compare to substrate $S$?
 """
 
 # ╔═╡ 05ec320e-ac87-45af-904e-5d69639e1f27
 md"- Answer: missing"
 #=
 - The sensitivity function of X on μmax is positive, because the larger μmax, the larger the reaction rate r (S => Y*X). Hence, more X will be produced. Remember that r = μmax*S*X/(S + Ks) and μmax is in the numerator.
+=#
+
+# ╔═╡ 22e98c77-0e9f-444a-a2f0-b940940996b7
+md"""
+!!! question
+	Why is the sensitivity function of $X$ wrt. $K_s$ negative? Compare it to that of substrate $S$.
+"""
+
+# ╔═╡ 91795413-c9a2-43cb-a7b0-d9e055e1cf94
+md"- Answer: missing"
+#=
+- The sensitivity function of X on Ks is negative, because the larger Ks, the smaller the reaction rate r (S => Y*X). Hence, less X will be produced. Remember that r = μmax*S*X/(S + Ks) and Ks is in the denominator.
 =#
 
 # ╔═╡ Cell order:
@@ -463,6 +471,7 @@ md"- Answer: missing"
 # ╠═b6c57444-547c-4e82-8526-6a30566e07c5
 # ╟─5388c2a7-5a11-4da8-be09-46045cde8a4e
 # ╠═db840c76-a6c6-49fb-a0bb-d9149f947bc0
+# ╠═02314e9f-6186-4c97-9b28-03a4a1a15668
 # ╟─d41375ef-6958-4705-a417-4c6a491232ee
 # ╟─f6be14f3-e0d0-41dc-bc7b-54174b1ea5ea
 # ╠═b2583ee2-412b-4a0a-a4d0-fe476e0510e5
@@ -473,16 +482,16 @@ md"- Answer: missing"
 # ╟─260ede0e-2584-4fe9-ae92-69990ca8f854
 # ╟─ff86a29f-9308-473b-aa1c-dfd4af8179c7
 # ╠═555228b2-8075-49ac-a7ef-f51aa51dd95d
-# ╟─dc8ef7cb-ae97-401c-9a25-12439e4363c6
-# ╠═66712fb2-50ea-41be-bcca-305319d158e9
 # ╟─6704e43b-30bc-4168-93db-fb853c9761fa
 # ╠═4d2094d8-98b3-4ac9-9612-942b5cd18ce0
+# ╟─dc8ef7cb-ae97-401c-9a25-12439e4363c6
+# ╠═66712fb2-50ea-41be-bcca-305319d158e9
 # ╟─16a84fdb-8ce2-45b9-bfb7-7f4e1284a1d7
 # ╠═53134149-0bf7-41c1-9b35-e5037744211f
 # ╟─0355bbf6-853d-4bd8-b32f-98fdbd2b761c
 # ╟─355ca6a7-466b-4969-ab48-28e2257f9810
 # ╠═4e08baf1-eeb6-49be-9751-204dd9ae1103
-# ╟─22e98c77-0e9f-444a-a2f0-b940940996b7
-# ╠═91795413-c9a2-43cb-a7b0-d9e055e1cf94
 # ╟─182e0c2b-9aa4-4514-96e8-b6a9f53b371b
 # ╠═05ec320e-ac87-45af-904e-5d69639e1f27
+# ╟─22e98c77-0e9f-444a-a2f0-b940940996b7
+# ╠═91795413-c9a2-43cb-a7b0-d9e055e1cf94

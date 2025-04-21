@@ -49,7 +49,7 @@ At the beginning of a season, $100\;kg$ of the crop and $0.5\;kg$ of insects per
 
 # ╔═╡ 87508f87-42d7-44e7-a0fb-415e6d7190c2
 md"""
-Set up a *reaction network* model by analysing the terms in the above differential equations and simulate the evolution of $C$ and $A$ for $200$ days. Next, perform a sensitivity analysis of $C$ and $A$ to the parameters $\theta$, $\phi$ and $p$.
+Set up a *reaction network* model by analysing the terms in the above differential equations and simulate the evolution of $C$ and $A$ for $200$ days. Next, perform a sensitivity analysis of $C$ and $A$ wrt. the parameters $\theta$, $\phi$ and $p$.
 """
 
 # ╔═╡ eeb52e5e-f57b-4746-bbfc-7f043fc50e96
@@ -145,13 +145,13 @@ plot(osol)
 
 # ╔═╡ fc1ae98d-0126-4eb3-86e6-20342acf0340
 md"""
-!!! question "Questions"
-	Interpret your results. Try to answer the following question(s):
+Interpret your results. Try to answer the following question(s):
 """
 
 # ╔═╡ 81c6198f-5f69-4d78-b67c-b6e283a6c3b1
 md"""
-1. What happens to $C$ and $A$ during the first 30 days?
+!!! question
+	1. What happens to $C$ and $A$ during the first 30 days?
 """
 
 # ╔═╡ 9c42da1d-f80a-4ad5-bc4f-caec9a1dadb6
@@ -162,7 +162,8 @@ md"- Answer: missing"
 
 # ╔═╡ cd1ea360-4fa0-47ee-95ea-5a34dbd0aff9
 md"""
-2. Why does $C$ starts to decline around day 40?
+!!! question
+	2. Why does $C$ starts to decline around day 40?
 """
 
 # ╔═╡ 047cc4df-1c6c-4371-a6e9-fe83a402b342
@@ -173,7 +174,8 @@ md"- Answer: missing"
 
 # ╔═╡ b75a8e32-39c2-41dd-95ff-5cb6de30199b
 md"""
-3. What happen to $C$ and $A$ from day 50 on, do they finally reach steady state values?
+!!! question
+	3. What happens to $C$ and $A$ from day 50 on, do they finally reach steady state values?
 """
 
 # ╔═╡ c9caecc4-8d14-4885-b087-54a9226be597
@@ -329,13 +331,13 @@ plot(t_vals, [sens_C_on_θ_rel, sens_A_on_θ_rel], title="Normalized sensitiviti
 
 # ╔═╡ c6eb2f89-2737-4eb0-8fec-dd87ea962051
 md"""
-!!! question "Questions"
-	Interpret your results. Try to answer the following question(s):
+Interpret your results. Try to answer the following question(s):
 """
 
 # ╔═╡ a8257414-2d6a-4913-9f05-6369c62189e8
 md"""
-1. In steady state, does $\theta$ have any influence on $C$? Explain why this could be.
+!!! question
+	1. In steady state, does $\theta$ have any influence on $C$? Explain why this could be.
 """
 
 
@@ -344,7 +346,8 @@ md"- Answer: missing"
 
 # ╔═╡ f84e6cdd-be44-464e-865b-24feca38df0f
 md"""
-2. In steady state, why does $\theta$ have a positive effect on $A$? Explain why this could be.
+!!! question
+	2. In steady state, why does $\theta$ have a positive effect on $A$? Explain why this could be.
 """
 
 # ╔═╡ a7d513eb-66b3-4167-b799-74a37718a315
@@ -376,13 +379,13 @@ plot(t_vals, [sens_C_on_p_rel, sens_A_on_p_rel], title="Normalized sensitivities
 
 # ╔═╡ 75309ee6-17b6-4ebb-b21c-a5e4a2a97510
 md"""
-!!! question "Questions"
-	Interpret your results. Try to answer the following question(s):
+Interpret your results. Try to answer the following question(s):
 """
 
 # ╔═╡ 08eaa553-7b74-4f02-9328-b23add528c06
 md"""
-1. In steady state, does $\phi$ have a positive or negative effect on $C$? Explain why this could be.
+!!! question
+	1. In steady state, does $\phi$ have a positive or negative effect on $C$? Explain why this could be.
 """
 
 # ╔═╡ a299b51b-1b7b-4420-9f91-bfe1d8c43158
@@ -393,7 +396,8 @@ md"- Answer: missing"
 
 # ╔═╡ 58afee9f-1157-45b1-99d9-f796b474975a
 md"""
-2. In steady state, does $p$ have a positive or negative effect on $C$? Explain why this could be.
+!!! question
+	2. In steady state, does $p$ have a positive or negative effect on $C$? Explain why this could be.
 """
 
 # ╔═╡ 24d198c3-9fd2-4ea3-8ab1-c7f027af78be

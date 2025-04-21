@@ -33,7 +33,7 @@ md"""
 
 # ╔═╡ 8f795d92-b842-4392-8bc3-956080fcc6a8
 md"""
-In one of the previous practica we were introduced to a bitrophic model in which the dynamic relationship between a field crop $C$ and a voracious insect population $A$ within an ecosystem was modelled.
+In one of the previous practicals we were introduced to a bitrophic model in which the dynamic relationship between a field crop $C$ and a voracious insect population $A$ within an ecosystem was modelled.
 
 $$\begin{eqnarray*}
 \frac{dC}{dt} &= \theta C \left(1-\frac{C}{k}\right)-fCA \\
@@ -91,6 +91,9 @@ params_uncert = [:θ => 0.20±0.02, :k => 4000.0, :f => 0.001, :ϕ => 0.20±0.02
 # params_uncert = [:θ => 0.20, :k => 4000.0, :f => 0.001, :ϕ => 0.20±0.02, :p => 3.0, :μ => 0.1]
 # params_uncert = [:θ => 0.20, :k => 4000.0, :f => 0.001, :ϕ => 0.20, :p => 3.0±0.2, :μ => 0.1]
 
+# ╔═╡ ff76c3e0-396c-4b01-b979-2b95644203a0
+
+
 # ╔═╡ 6893ccdb-7f6c-4ec9-8d6b-520e784acd03
 md"""
 We create the corresponding ODE problem and store it in `oprob_uncert`:
@@ -130,8 +133,8 @@ In order to do that, analyse the effect on the uncertainty bands for $C$ and $A$
 
 # ╔═╡ 42817641-cca5-47d7-b1f3-57181a207bf4
 md"""
-!!! conclusion "Conclusions"
-	Draw your conclusions:
+!!! question
+	Draw your conclusions.
 """
 
 # ╔═╡ d7cddaef-c1b9-431f-9835-94cece962ca3
@@ -154,6 +157,7 @@ md"- Answer: missing"
 # ╠═146855a0-5cda-4783-89af-7918c067e952
 # ╟─4e8fea9e-e16c-4b17-8a6c-52bd8721cfd8
 # ╠═0588cc16-a4b1-4b3f-8ba9-742680996e11
+# ╠═ff76c3e0-396c-4b01-b979-2b95644203a0
 # ╟─6893ccdb-7f6c-4ec9-8d6b-520e784acd03
 # ╠═60a6fb20-93d2-47d3-8ee1-3087d48c569d
 # ╟─0739d816-0456-4cc2-beb7-2e926cf2e229

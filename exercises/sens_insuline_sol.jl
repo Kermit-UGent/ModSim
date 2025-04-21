@@ -337,7 +337,7 @@ The growth rate of the $\beta$-cells follows a sigmoid shape, being negative whe
 """
 
 # ╔═╡ 4d95e77b-fab0-454b-8319-1fe83e12f9e9
-plot(μ, xlim=(0, 30), xlab="G", label="μ(G)", title="Glucose-dependend growth rate")
+plot(μ, xlim=(0, 30), xlab="G", label="μ(G)", title="Glucose-dependent growth rate")
 
 # ╔═╡ ea46f5f9-47a8-4641-a7e3-08a1a29cd04f
 md"""

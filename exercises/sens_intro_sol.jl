@@ -41,7 +41,7 @@ md"""
 
 # ╔═╡ c41894dd-0f6c-483f-b19f-dbf8148f776f
 md"""
-Sensitivity functions indicate how sensitive the model output is to a change in parameter values. When a model output is very sensitive to a certain parameter, a small change in the value of this parameter will have a large influence on the value of the model output. Sensitivity functions thus provide important information about the model and are implicitely used to estimate parameters and explicitely in the context of optimal experimental design.
+Sensitivity functions indicate how sensitive the model output is to a change in parameter values. When a model output is very sensitive to a certain parameter, a small change in the value of this parameter will have a large influence on the value of the model output. Sensitivity functions thus provide important information about the model and are implicitly used to estimate parameters and explicitly in the context of optimal experimental design.
 """
 
 # ╔═╡ 7b58f2f9-cb93-4a20-bf90-62a9006b57d6
@@ -53,7 +53,10 @@ $$S_{ij} = \cfrac{\partial \hat{y}_i(\theta)}{\partial \theta_j}\tag{1}$$
 
 # ╔═╡ abd70f04-1bf8-454f-869a-0d8082d68453
 md"""
-Expression $(1)$ is sometimes referred to as the *absolute sensitivity*. Try to understand why the above expression $(1)$ does indeed give us the information we were promised in the first paragraph. How will we be able to see from the value determined by the above expression $(1)$ that whether or not output $\hat{y}_i$ is sensitive to a change in $\theta_j$?
+Expression $(1)$ is sometimes referred to as the *absolute sensitivity*. Try to understand why the above expression $(1)$ does indeed give us the information we were promised in the first paragraph. 
+
+!!! question
+	How will we be able to see from the value determined by the above expression $(1)$ whether or not output $\hat{y}_i$ is sensitive to a change in $\theta_j$? What is then the meaning of a negative sensitivity?
 """
 
 # ╔═╡ e76aedec-69f2-4301-b015-6960e4503c42
@@ -77,14 +80,14 @@ Since quantity $(1)$ is dependent on the units, a *normalized* variant is often 
 
 $$s_{ij} = \cfrac{\partial \hat{y}_i(\theta)}{\partial \theta_j} \cdot \cfrac{\theta_j}{\hat{y}_i} \tag{2}$$
 
-The interpretation of $(2)$ is how much the output changes per cent if the parameter is increased by one per cent. It assumes positive model outputs and parameters, which is often the case for biochemical models.
+The interpretation of $(2)$ is how much the output changes per cent if the parameter is increased by one per cent. It assumes positive (nonzero) model outputs and parameters, which is often the case for biochemical models.
 
 Using the normalized variant allows you to compare all possible sensitivity functions with each other.
 """
 
 # ╔═╡ 7107a3a9-15ef-488e-8709-52a6444d0e1c
 md"""
-We now calculate and interpret sensitivity functions for some given models. To illustrate the concepts, we first consider three simple models modelling the growth of grass.
+We now calculate and interpret sensitivity functions for some given models. To illustrate these concepts, we first consider three simple models describing the growth of grass.
 """
 
 # ╔═╡ 04e95855-7c4a-4d2c-b836-c5dde291adad
@@ -100,7 +103,7 @@ In this notebook, three different models will be used, each modelling the yield 
 - Exponential growth model: $\cfrac{dW}{dt} = \mu \left( W_f - W \right)$
 - Gompertz growth model: $\cfrac{dW}{dt} = \left( \mu - D \ln(W) \right) W$
 
-with output $W$ the grass yield, and $W_f$, $\mu$ and $D$ parameters. The table below show some typical values for the parameters:
+with output $W$ the grass yield, and $W_f$, $\mu$ and $D$ parameters. The table below shows some typical values for the parameters:
 
 |             | $\mu$      | $W_f$       | $D$          |
 |:----------- |:----------:|:-----------:|:------------:|
@@ -113,7 +116,7 @@ We will use an initial condition of $W_0 = 2.0$ for each and a simulation time o
 
 # ╔═╡ 8d55bc42-1f8f-4bc1-b9fa-e8152fc125ce
 md"""
-We will illustrate how to compute the local nomalized sensitivity functions for the logistic model. The same will be left as exercises below for the exponential and gompertz models.
+We will illustrate how to compute the local normalized sensitivity functions for the logistic model. The same will be left as exercises below for the exponential and Gompertz models.
 
 **Important:**
 - We will use consequently `_log`, `_exp` and `_gom` appended to relevant variables names in order to indicate their model origin **and** to prevent cell-disabling that occurs when using the same variables names in these Notebooks.
@@ -200,7 +203,7 @@ In order to compute the local sensitivity functions, we will need to load the `F
 
 # ╔═╡ 4aa73da9-a394-4ca3-a839-d076eb3c3d7f
 md"""
-We need to write a solution function with as argument a vector of the parameters (that you want the sensitivity on), and that returns the solution (time vector and outputs).
+We need to write a solution function with as argument a vector of the parameters (those values for which we want to calculate the sensitivity), and that returns the solution (time vector and outputs).
 """
 
 # ╔═╡ bc201b61-0f58-49d2-a20b-4f18c42fcc96
@@ -215,7 +218,7 @@ end
 
 # ╔═╡ 11f15a0e-2958-4075-928c-5a24bcc00c69
 md"""
-Next, we will need to make a function based on the solution function that returns a single output.
+Next, we will need to make a function that returns a single output based on the solution function.
 """
 
 # ╔═╡ d0f3197f-3094-4f6e-b33c-e5b74e0947f6
@@ -228,12 +231,15 @@ Now make a time vector that is the same as the time vector from the solution.
 
 # ╔═╡ 71f897a6-1e91-412b-ad58-c5f1e7cd1adb
 t_vals_log = 0:0.5:100.0
-# Alternative:
+# Alternatives:
 # t_vals_log = tspan[1]:0.5:tspan[2]
+
+# ╔═╡ f9f30a2b-04bd-4563-bd3d-8ec7129ca2e7
+t_log = growth_sim_log([μ_log, Wf_log])[:t]
 
 # ╔═╡ b3b97b57-a4f7-4cb6-80c8-6ad893ade75d
 md"""
-Compute the single output with the given parameter values. his will give us exactly the same output that we simulated before in a familiar way.
+Compute the single output with the given parameter values. This will give us exactly the same output that we simulated before in a familiar way.
 """
 
 # ╔═╡ 99864b21-3db0-4d60-a84e-8e96db4de4ae
@@ -241,7 +247,7 @@ W_log = growth_sim_W_log([μ_log, Wf_log])
 
 # ╔═╡ 344eb3a7-8614-4349-a536-62d9acef6bda
 md"""
-Use the function `ForwardDiff.jacobian` to compute the sensitivities. This function takes two arguments: the solution function and a vector with the parameter values.
+Use now the function `ForwardDiff.jacobian` to compute the sensitivities. This function takes two arguments: the solution function and a vector with the parameter values.
 """
 
 # ╔═╡ 670ccfa4-24fa-4167-a46a-2a48dc19538b
@@ -249,9 +255,9 @@ sens_W_log = ForwardDiff.jacobian(growth_sim_W_log, [μ_log, Wf_log])
 
 # ╔═╡ c262d3ed-9f62-45ad-a7ee-ec78ab16f35c
 md"""
-To get the (absolute) sensitivities of $W$ on $\mu$, and of $W$ on $W_f$, you need to use indexing with `sens_W_log`:
-- `sens_W_log[:,1]` gives the (absolute) sensitivity of $W$ on $\mu$.
-- `sens_W_log[:,2]` gives the (absolute) sensitivity of $W$ on $W_f$.
+To get the (absolute) sensitivities of $W$ wrt. $\mu$, and of $W$ on $W_f$, you need to use indexing with `sens_W_log`:
+- `sens_W_log[:,1]` gives the (absolute) sensitivity of $W$ wrt. $\mu$.
+- `sens_W_log[:,2]` gives the (absolute) sensitivity of $W$ wrt. $W_f$.
 """
 
 # ╔═╡ 6600d28e-2522-4069-a5e0-643be43f6117
@@ -287,8 +293,19 @@ Notice that in the `label` option there is no comma separating the labels.
 # ╔═╡ 04a1d1ad-53a9-4146-be09-65aa422e3730
 md"""
 Conclusions:
-- From the sensitivity plot of $W$ on $\mu$ it can be seen that $W$ is most sensitive to $\mu$ in the time region $[5, 30]$. The latter corresponds to the region where the yield rate is largest (i.e., when the growth is largest). This makes sense because when looking at the differential equation, $\mu$ is approximately the growth rate for relatively small $W$ values.
-- From the sensitivity plot of $W$ on $W_f$ it can be seen that $W$ is most sensitive to $W_f$ in the region where time values are large (cf. operating point). The latter corresponds to the region where the yield rate stagnates (i.e., when the yield reaches a steady value). This makes sense because when looking at the differential equation, $W_f$ is the steady state value.
+- From the sensitivity plot of $W$ wrt. $\mu$ it can be seen that $W$ is most sensitive to $\mu$ in the time region $[5, 30]$. The latter corresponds to the region where the yield rate is largest (i.e., when the growth is largest). This makes sense because when looking at the differential equation, $\mu$ is approximately the growth rate for relatively small $W$ values.
+- From the sensitivity plot of $W$ wrt. $W_f$ it can be seen that $W$ is most sensitive to $W_f$ in the region where time values are large (cf. operating point). The latter corresponds to the region where the yield rate stagnates (i.e., when the yield reaches a steady value). This makes sense because when looking at the differential equation, $W_f$ is the steady state value.
+"""
+
+# ╔═╡ e176e6ce-33da-4f3b-860e-4db99a931079
+md"""
+!!! question
+	What name do we often give to the steady state value of $W$ or parameter $W_f$? Do these (local) sensitivity results match your expectations in terms of the different impacts of the parameters?
+"""
+
+# ╔═╡ 3a1bf6da-b2e9-4c86-a83d-abe4de5a0483
+md"""
+- Answer: missing
 """
 
 # ╔═╡ 79f0f1dd-850f-4dfd-b895-ff41a2d8adb8
@@ -402,7 +419,7 @@ plot(osol_exp)
 
 # ╔═╡ 6321774c-5bbe-42a7-bdad-0168c891b5ce
 md"""
-Write a solution function with as argument a vector of the parameters (that you want the sensitivity on), and that returns the outputs.
+Write a solution function with as argument a vector of the parameters (the values for which we want the sensitivity), and that returns the outputs.
 """
 
 # ╔═╡ eb1e5f97-3e09-43f0-b6ce-cc6cbc42ec2f
@@ -453,7 +470,7 @@ W_exp = growth_sim_W_exp([μ_exp, Wf_exp])
 
 # ╔═╡ 9e7bb7ec-8fe3-422e-920f-13c2ef055feb
 md"""
-Using `ForwardDiff.jacobian` to compute the sensitivities for the single ouput(s).
+Using `ForwardDiff.jacobian` to compute the sensitivities for the single ouputt.
 """
 
 # ╔═╡ b13b5e77-ca60-465b-9f63-be9e5da0482f
@@ -609,7 +626,7 @@ plot(osol_gom)
 
 # ╔═╡ 958854fc-8e23-4364-88c5-1ec060b86a16
 md"""
-Write a solution function with as argument a vector of the parameters (that you want the sensitivity on), and that returns the outputs.
+Write a solution function with as argument a vector of the parameters (the values for which we want the sensitivity), and that returns the outputs.
 """
 
 # ╔═╡ be21e269-16c4-42b0-8930-2d009bd91161
@@ -755,6 +772,7 @@ Draw your conclusions:
 # ╠═d0f3197f-3094-4f6e-b33c-e5b74e0947f6
 # ╟─ba4eaa90-b97a-4b71-b3e1-968340c6def5
 # ╠═71f897a6-1e91-412b-ad58-c5f1e7cd1adb
+# ╠═f9f30a2b-04bd-4563-bd3d-8ec7129ca2e7
 # ╟─b3b97b57-a4f7-4cb6-80c8-6ad893ade75d
 # ╠═99864b21-3db0-4d60-a84e-8e96db4de4ae
 # ╟─344eb3a7-8614-4349-a536-62d9acef6bda
@@ -769,6 +787,8 @@ Draw your conclusions:
 # ╠═f58ce914-f366-4087-a7d1-8cfe69ac623b
 # ╟─05972c7f-f64f-4865-b0a7-f33029d0a6fa
 # ╟─04a1d1ad-53a9-4146-be09-65aa422e3730
+# ╟─e176e6ce-33da-4f3b-860e-4db99a931079
+# ╠═3a1bf6da-b2e9-4c86-a83d-abe4de5a0483
 # ╟─79f0f1dd-850f-4dfd-b895-ff41a2d8adb8
 # ╟─fa2270d0-2548-409c-a23f-4369d8bce8ec
 # ╟─794b93c9-0a0a-4e77-b13c-0e2c06a9a0ec
