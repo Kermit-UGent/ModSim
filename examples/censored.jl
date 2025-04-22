@@ -12,13 +12,12 @@ md"""
 
 # Censored
 
-Researchers are studying a new drug designed to cure a specific type of skin condition. They monitor 15 patients undergoing treatment for five months, recording the time it takes for patients to show no signs of the condition. Of the 15, seven were cured in the five-month study period, at `[2.1, 4.7, 1.6, 2.8, 4.3, 1.9, 4.2]` months. Eight patients were not achieve cured within the five-month study period (this is censored data). You may assume that these persons were cured at some later, unspecified time after the five-month trial. Given a Gamma prior on the rate parameter $\lambda$, what is its posterior distribution? 
+Researchers are studying a new drug designed to cure a specific type of skin condition. They monitor 15 patients undergoing treatment for five months, recording the time it takes for patients to show no signs of the condition. Of the 15, seven were cured in the five-month study period, at `[2.1, 4.7, 1.6, 2.8, 4.3, 1.9, 4.2]` months. These data are Exponentially distributed with a rate parameter $\lambda$ ($E[X] = 1/\lambda$). Eight patients were not cured within the five-month study period (this is censored data). You may assume that these persons were cured at some later, unspecified time after the five-month trial. What is its posterior distribution given a Gamma prior on the rate parameter $\lambda$? 
 
 Give a 95% credibility interval.
 
-Given the posterior of $\lambda$, what is the chance someone cures within 10 months?
+Given the distribution posterior of $\lambda$, what is the chance someone is cured within 10 months?
 
-Hint: For the censored data, can you compute the probability that a patient survives beyond five months? What type of distribution models 8 of 15 patients exceeding this time?
 """
 
 # ╔═╡ 3e8810ff-b456-473a-88e1-3344278ee78f
@@ -30,13 +29,13 @@ n = 8  # not cured in 5 months
 # ╔═╡ 4fc7936b-aafc-46a0-8b58-4a601d514586
 @model function censored(x, n, tend)
 	λ ~ Gamma()  # rate paramters
-    N = length(x) + n  # total number of 
-    psurvive = 1 - cdf(Exponential(1/λ), tend)
-    n ~ Binomial(N, psurvive)
+    N = length(x) + n  # total number of participants
+    p = 1 - cdf(Exponential(1/λ), tend)  # chance of being cured after tend
+    n ~ Binomial(N, p)  # number of patient not cured within tend
     for i in 1:length(x)
-        x[i] ~ Exponential(1/λ)
+        x[i] ~ Exponential(1/λ)  # recovery time before tend
     end
-	return cdf(Exponential(1/λ), 10)
+	return cdf(Exponential(1/λ), 10)  
 end
 
 # ╔═╡ 96419a33-6a13-46d2-a610-55b29737eb7b
@@ -56,16 +55,32 @@ posterior_chain = sample(model, NUTS(), 10_000);
 summarize(posterior_chain)
 
 # ╔═╡ eea303cc-b1fa-42a4-9eed-ed5e608ff931
-quantile(posterior_chain, q=[0.025, 0.975])  # 95% credibility interval
+quantile(posterior_chain, q=[0.025, 0.975])  # 95% credibility interval rate par
+
+# ╔═╡ b27e5bf2-b0c2-4c8a-a46c-c4a5fad4411a
+Erecovery = inv.(posterior_chain[:λ])
+
+# ╔═╡ e3622cdb-6e56-4cbd-b9c4-590a90ccbac4
+# 95% credibility interval expected recovery time
+quantile(Erecovery, [0.025, 0.975])
 
 # ╔═╡ e4a44333-2216-4941-bee1-3befe8325c51
 p10months = generated_quantities(model, posterior_chain)
+
+# ╔═╡ 3e0459d7-c623-4a35-851b-164759e85548
+histogram(p10months)
 
 # ╔═╡ d34a22c4-146d-414e-9c57-219defad60cd
 mean(p10months)  # expected posterior probability that one is cured in 10 months
 
 # ╔═╡ 55a93fd2-7cb8-4ceb-b90d-0f533207045e
 quantile(p10months, [0.025, 0.975])  # 95% credibility interval
+
+# ╔═╡ 0cc74646-c899-437a-9e21-824d4c702d63
+hint(text) = Markdown.MD(Markdown.Admonition("hint", "Hint", [text]));
+
+# ╔═╡ 061160a8-62af-4af4-9d1a-7e22e236969c
+hint(md"For the censored data, can you compute the probability that a patient survives beyond five months? What type of distribution models 8 of 15 patients exceeding this time?")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2552,7 +2567,8 @@ version = "1.4.1+1"
 
 # ╔═╡ Cell order:
 # ╠═17b60ab6-b21e-11ef-07cf-d7fb167d8d72
-# ╟─6413a973-95a9-4525-999a-8570b957d4f8
+# ╠═6413a973-95a9-4525-999a-8570b957d4f8
+# ╟─061160a8-62af-4af4-9d1a-7e22e236969c
 # ╠═3e8810ff-b456-473a-88e1-3344278ee78f
 # ╠═efe76607-7c83-4c1a-bfec-84fb90c44154
 # ╠═4fc7936b-aafc-46a0-8b58-4a601d514586
@@ -2562,8 +2578,12 @@ version = "1.4.1+1"
 # ╠═30bf124d-7d9b-48bb-b8e5-80beecc8f839
 # ╠═e7672833-0044-40e9-a215-b3c51c4ca8d4
 # ╠═eea303cc-b1fa-42a4-9eed-ed5e608ff931
+# ╠═b27e5bf2-b0c2-4c8a-a46c-c4a5fad4411a
+# ╠═e3622cdb-6e56-4cbd-b9c4-590a90ccbac4
 # ╠═e4a44333-2216-4941-bee1-3befe8325c51
+# ╠═3e0459d7-c623-4a35-851b-164759e85548
 # ╠═d34a22c4-146d-414e-9c57-219defad60cd
 # ╠═55a93fd2-7cb8-4ceb-b90d-0f533207045e
+# ╟─0cc74646-c899-437a-9e21-824d4c702d63
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
