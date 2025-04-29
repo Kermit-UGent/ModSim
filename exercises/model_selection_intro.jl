@@ -655,14 +655,14 @@ Plot now $W$ simulated with the optimized initial value and parameter values of 
 """
 
 # ╔═╡ fe3c059f-cb4f-4ddf-ad54-c08aa70bc740
-begin
-	plot()
-	plot!(osol_opt_log, label="logistic model", xlabel="t", ylabel="W",
-		xlims=(0, 100), ylims=(0, 14), lw=2)
-	plot!(osol_opt_exp, label="exponential model", lw=2, ls=:dash)
-	scatter!(t_meas, W_meas, label="data")
-	title!("Comparison logistic vs. exponential growth")
-end
+# Uncomment and complete the instruction
+# begin
+# plot()
+# missing
+# missing
+# missing
+# title!("Comparison logistic vs. exponential growth")
+# end
 
 # ╔═╡ fcfd18a2-154f-46fd-b4a5-01e406b500f1
 md"""
@@ -838,33 +838,32 @@ Finally, we plot $W$ simulated with the optimized initial value and parameter va
 """
 
 # ╔═╡ ef5270de-da37-4a01-8734-dac1fd190a05
-begin
-	plot()
-	plot!(osol_opt_log, label="logistic model", xlabel="t", ylabel="W",
-		xlims=(0, 100), ylims=(0, 14), lw=2)
-	plot!(osol_opt_exp, label="exponential model", lw=2, ls=:dash)
-	plot!(osol_opt_gom, label="Gompertz model", lw=2, ls=:dashdot)
-	scatter!(t_meas, W_meas, label="measured data")
-	title!("Comparison logistic vs. exponential vs. Gompertz")
-end
+# Uncomment and complete the instruction
+# begin
+# plot()
+# missing
+# missing
+# missing
+# title!("Comparison logistic vs. exponential growth")
+# end
 
 # ╔═╡ b9030c3f-2cbb-44bf-90b7-23d116de4001
-L_gom = results_gom_mle.lp
+# L_gom = missing
 
 # ╔═╡ 2e684fd0-8410-4037-a6a6-2c472d6592ab
-k_gom = length(coef(results_gom_mle))
+# k_gom = missing
 
 # ╔═╡ 79797d6d-9ca8-4f4f-9694-8045a8cf8cbb
-AIC_gom = AIC(results_gom_mle, W_meas)
+# AIC_gom = missing
 
 # ╔═╡ 2cd566bb-3088-43f8-8926-9952342b5e5c
-BIC_gom = BIC(results_gom_mle, W_meas)
+# BIC_gom = missing
 
 # ╔═╡ 750edde4-16b5-4025-82e0-078c0eacaca9
-AIC_log, AIC_exp, AIC_gom
+# AIC_log, AIC_exp, AIC_gom
 
 # ╔═╡ 1bbbd1ae-3540-44da-bc53-c8182a85b611
-BIC_log, BIC_exp, BIC_gom
+# BIC_log, BIC_exp, BIC_gom
 
 # ╔═╡ 3afb2a69-32d6-42c2-8c1e-51e64b83a6b4
 md"""
@@ -883,14 +882,14 @@ You can use the following graph with all the information calculated so far for y
 """
 
 # ╔═╡ d3b23128-2e7a-4246-a1f2-7325e0c2c432
-plot(
-	bar(1:3, [AIC_log, AIC_exp, AIC_gom], title="AIC", ylims=(0, 50)), 
-	bar(1:3, [BIC_log, BIC_exp, BIC_gom], title="BIC", ylims=(0, 50)), 
-	bar(1:3, [L_log, L_exp, L_gom], title="Log-probability", ylims=(-20, 0)), 
-	bar(1:3, [k_log, k_exp, k_gom], title="no. parameters", ylims=(0, 8)), 
-	xticks=(1:3, ["Logistic", "Exponential", "Gompertz"]),
-	legend=:none
-)
+# plot(
+# 	bar(1:3, [AIC_log, AIC_exp, AIC_gom], title="AIC", ylims=(0, 50)), 
+# 	bar(1:3, [BIC_log, BIC_exp, BIC_gom], title="BIC", ylims=(0, 50)), 
+# 	bar(1:3, [L_log, L_exp, L_gom], title="Log-probability", ylims=(-20, 0)), 
+# 	bar(1:3, [k_log, k_exp, k_gom], title="no. parameters", ylims=(0, 8)), 
+# 	xticks=(1:3, ["Logistic", "Exponential", "Gompertz"]),
+# 	legend=:none
+# )
 
 # ╔═╡ a9e5b236-67d5-400b-ba9a-8b565f6feeb1
 md"""
@@ -903,22 +902,22 @@ Use the above implemented function `posterior` to calculate the posterior model 
 """
 
 # ╔═╡ 947e26fe-2010-48ad-b927-d4e5186f21e0
-posteriors = posterior([AIC_log, AIC_exp, AIC_gom])
+# posteriors = missing
 
 # ╔═╡ 3506765b-a6cf-41ca-9201-fcc650c6f56d
-posteriors
+# posteriors
 
 # ╔═╡ 72dc27a0-0e61-4073-843a-67e1bfd1427a
-md"""
-We can summarize all calculated criteria so far in the following table:
+# md"""
+# We can summarize all calculated criteria so far in the following table:
 
-| Model | k | Log(L) | AIC | BIC | $P(M_i\|D)$ |
-|:---|:---|:---|:---|:---|:---|
-| Logistic | $k_log | $(round(L_log;digits=3)) | $(round(AIC_log;digits=3)) | $(round(BIC_log;digits=3)) | $(posteriors[1]) |
-| Exponential | $k_exp | $(round(L_exp;digits=3)) | $(round(AIC_exp;digits=3)) | $(round(BIC_exp;digits=3)) | $(posteriors[2]) |
-| Gompertz | $k_gom | $(round(L_gom;digits=3)) | $(round(AIC_gom;digits=3)) | $(round(BIC_gom;digits=3)) | $(posteriors[3]) |
+# | Model | k | Log(L) | AIC | BIC | $P(M_i\|D)$ |
+# |:---|:---|:---|:---|:---|:---|
+# | Logistic | $k_log | $(round(L_log;digits=3)) | $(round(AIC_log;digits=3)) | $(round(BIC_log;digits=3)) | $(posteriors[1]) |
+# | Exponential | $k_exp | $(round(L_exp;digits=3)) | $(round(AIC_exp;digits=3)) | $(round(BIC_exp;digits=3)) | $(posteriors[2]) |
+# | Gompertz | $k_gom | $(round(L_gom;digits=3)) | $(round(AIC_gom;digits=3)) | $(round(BIC_gom;digits=3)) | $(posteriors[3]) |
 
-"""
+# """
 
 # ╔═╡ 6240553c-0c7c-45f4-b190-ebacf09ab632
 md"""
@@ -943,39 +942,41 @@ Repeat below the comparison to least squares for the exponential and Gompertz mo
 
 # ╔═╡ 8bbed35b-fec5-4682-8b45-99fd3bd55bf2
 begin
-	W_exp = solve(oprob_opt_exp, Tsit5(), saveat=t_meas)[:W]
-	SSR_exp = SSR(W_exp, W_meas)
-	AIC_LS_exp = AIC_LS(SSR_exp, n, k_exp)
-	BIC_LS_exp = BIC_LS(SSR_exp, n, k_exp)
+	# Uncomment and complete the instruction
+	# W_exp = missing
+	# SSR_exp = missing
+	# AIC_LS_exp = missing
+	# BIC_LS_exp = missing
 end;
 
 # ╔═╡ 414ebb03-4fb7-4591-90e9-9ce3cf11e93d
 begin
-	W_gom = solve(oprob_opt_gom, Tsit5(), saveat=t_meas)[:W]
-	SSR_gom = SSR(W_gom, W_meas)
-	AIC_LS_gom = AIC_LS(SSR_gom, n, k_gom)
-	BIC_LS_gom = BIC_LS(SSR_gom, n, k_gom)
+	# Uncomment and complete the instruction
+	# W_gom = missing
+	# SSR_gom = missing
+	# AIC_LS_gom = missing
+	# BIC_LS_gom = missing
 end;
 
 # ╔═╡ 7a633bd6-10f1-4755-94ac-40d1dc9580a7
-AIC_LS_log, AIC_LS_exp, AIC_LS_gom
+# AIC_LS_log, AIC_LS_exp, AIC_LS_gom
 
 # ╔═╡ aef172f1-8563-4e51-8a88-ec6b764a735e
-BIC_LS_log, BIC_LS_exp, BIC_LS_gom
+# BIC_LS_log, BIC_LS_exp, BIC_LS_gom
 
 # ╔═╡ 091e978a-fd89-455a-9b97-f3088d580683
-posterior([AIC_LS_log, AIC_LS_exp, AIC_LS_gom])
+# posterior([AIC_LS_log, AIC_LS_exp, AIC_LS_gom])
 
 # ╔═╡ d3d6e099-66b0-444e-8142-ccd1718ac9ab
-plot(
-	bar(1:3, [AIC_LS_log, AIC_LS_exp, AIC_LS_gom], title="AIC", ylims=(-40, 0)), 
-	bar(1:3, [BIC_LS_log, BIC_LS_exp, BIC_LS_gom], title="BIC", ylims=(-40, 0)), 
-	bar(1:3, [SSR_log, SSR_exp, SSR_gom], title="SSR", ylims=(0, 8)), 
-	bar(1:3, [k_log, k_exp, k_gom], title="no. parameters", ylims=(0, 8)), 
-	xticks=(1:3, ["Logistic", "Exponential", "Gompertz"]),
-	legend=:none,
-	suptitle="(Least squares)"
-)
+# plot(
+# 	bar(1:3, [AIC_LS_log, AIC_LS_exp, AIC_LS_gom], title="AIC", ylims=(-40, 0)), 
+# 	bar(1:3, [BIC_LS_log, BIC_LS_exp, BIC_LS_gom], title="BIC", ylims=(-40, 0)), 
+# 	bar(1:3, [SSR_log, SSR_exp, SSR_gom], title="SSR", ylims=(0, 8)), 
+# 	bar(1:3, [k_log, k_exp, k_gom], title="no. parameters", ylims=(0, 8)), 
+# 	xticks=(1:3, ["Logistic", "Exponential", "Gompertz"]),
+# 	legend=:none,
+# 	suptitle="(Least squares)"
+# )
 
 # ╔═╡ 2de0f619-63e0-444b-916b-316e4ebfa13e
 md"""
@@ -1301,7 +1302,7 @@ md"""
 # ╟─3bf0c957-f08b-4a45-90e0-40d56330c8e0
 # ╠═947e26fe-2010-48ad-b927-d4e5186f21e0
 # ╠═3506765b-a6cf-41ca-9201-fcc650c6f56d
-# ╟─72dc27a0-0e61-4073-843a-67e1bfd1427a
+# ╠═72dc27a0-0e61-4073-843a-67e1bfd1427a
 # ╟─6240553c-0c7c-45f4-b190-ebacf09ab632
 # ╠═12f64333-36d0-4e2a-9061-e3dcc7a4ae96
 # ╟─95ba48fe-f430-4f47-ab04-f5896d75343b
@@ -1311,7 +1312,7 @@ md"""
 # ╠═7a633bd6-10f1-4755-94ac-40d1dc9580a7
 # ╠═aef172f1-8563-4e51-8a88-ec6b764a735e
 # ╠═091e978a-fd89-455a-9b97-f3088d580683
-# ╟─d3d6e099-66b0-444e-8142-ccd1718ac9ab
+# ╠═d3d6e099-66b0-444e-8142-ccd1718ac9ab
 # ╟─2de0f619-63e0-444b-916b-316e4ebfa13e
 # ╠═ef5329d2-ac63-4b49-a4cb-e8d6281a3184
 # ╟─0b8e6775-7562-4c93-b64d-cb694531f250

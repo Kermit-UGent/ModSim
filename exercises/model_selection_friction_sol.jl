@@ -740,6 +740,9 @@ SSR_quad2 = SSR(sol_quad2_t[:x], d)
 # ╔═╡ 6ec4751a-dd24-4da9-a864-1bde6aa5632d
 AIC_LS_quad2 = AIC_LS(SSR_quad2, n, k_quad2)
 
+# ╔═╡ c63dcc08-911f-49c5-9316-af07bc8c36b4
+BIC_LS_quad2 = BIC_LS(SSR_quad2, n, k_quad2)
+
 # ╔═╡ b88b0d16-a178-4395-a54f-836d4090ccec
 md"""
 ## 3.5 General power law resistance
@@ -824,6 +827,9 @@ SSR_power = SSR(sol_power_t[:x], d)
 
 # ╔═╡ bbd11d02-29ca-4b4d-b08f-2c4b460fd5c5
 AIC_LS_power = AIC_LS(SSR_power, n, k_power)
+
+# ╔═╡ e4c1292a-be82-466f-a586-430f7d34f9bb
+BIC_LS_power = BIC_LS(SSR_power, n, k_power)
 
 # ╔═╡ 3a1ce3ee-864b-4144-a9da-3d66bd1870e9
 md"""
@@ -1093,6 +1099,7 @@ md"""
 # ╠═50213066-8eb4-4d89-a660-da71911104cc
 # ╠═a75c3dc3-03bf-4ed4-8fe8-59a63a022030
 # ╠═6ec4751a-dd24-4da9-a864-1bde6aa5632d
+# ╠═c63dcc08-911f-49c5-9316-af07bc8c36b4
 # ╟─b88b0d16-a178-4395-a54f-836d4090ccec
 # ╠═763b603a-f81b-4d9e-a6eb-7dc345e3e2df
 # ╠═024b9f4e-600d-4d68-962d-a66c9b5a2f23
@@ -1114,13 +1121,14 @@ md"""
 # ╠═8fe403f4-2f3b-482b-91b6-e49672f98d23
 # ╠═88fb0c51-9005-44de-bb15-660ddb9d3165
 # ╠═bbd11d02-29ca-4b4d-b08f-2c4b460fd5c5
+# ╠═e4c1292a-be82-466f-a586-430f7d34f9bb
 # ╟─3a1ce3ee-864b-4144-a9da-3d66bd1870e9
 # ╟─da1dc114-8529-4ef8-b3af-2acb066fa02f
 # ╟─e84a0ef5-a6e9-4c66-a44c-81e7ef70351d
 # ╟─9b8392a5-fc9f-433f-9b23-dab2dd472021
 # ╟─8d1c2906-f7bf-4557-81af-43b8d9b2a260
 # ╠═520e22a5-e08f-4718-bf2f-f1e7e627a417
-# ╟─8fd5f30a-ef31-442f-9124-8ca86a3b9b56
+# ╠═8fd5f30a-ef31-442f-9124-8ca86a3b9b56
 # ╟─5e8a4a93-7316-4b61-b1e0-bce46597f614
 # ╠═dde10d51-3d75-4152-a7da-c05b1affaa6a
 # ╟─8becb816-b96c-4df5-8af0-2464c7188d34
