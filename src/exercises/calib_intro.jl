@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.6
 
 #> [frontmatter]
 #> order = "24"
@@ -25,10 +25,10 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 015050b3-3339-4b1a-ad7d-c358cce73675
-using Catalyst, DifferentialEquations, Plots
+using Catalyst, OrdinaryDiffEq, StatsPlots
 
 # ╔═╡ dbfe4800-0974-4ca1-bb0a-d8803409a98b
-using Turing, StatsPlots, StatsBase
+using Turing, StatsBase
 
 # ╔═╡ 6e227e07-166a-41ce-839a-4c4c72addb23
 using LinearAlgebra, Optim

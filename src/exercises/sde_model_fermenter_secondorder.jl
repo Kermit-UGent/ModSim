@@ -32,7 +32,7 @@ using InteractiveUtils
 using Catalyst
 
 # ╔═╡ e04f782d-67da-4e21-a3bf-d2ddff4bba0b
-using DifferentialEquations, Plots
+using OrdinaryDiffEq, StochasticDiffEq, StatsPlots
 
 # ╔═╡ a28e7ddf-76e9-4628-888c-e1d838da75ce
 md"""

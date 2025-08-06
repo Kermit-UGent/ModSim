@@ -32,7 +32,7 @@ using InteractiveUtils
 using Catalyst
 
 # ╔═╡ aaf6da21-60cc-478c-b447-3f33aa375240
-using DifferentialEquations, Plots
+using OrdinaryDiffEq, StatsPlots
 
 # ╔═╡ e119ed70-fd81-4978-92d9-696cad71125f
 using PlutoUI; TableOfContents()

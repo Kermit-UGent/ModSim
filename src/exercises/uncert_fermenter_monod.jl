@@ -28,7 +28,7 @@ using InteractiveUtils
 using Catalyst
 
 # ╔═╡ 0720732e-105a-40c2-bf45-f8fbbc10e5bc
-using DifferentialEquations, Plots
+using OrdinaryDiffEq, StatsPlots
 
 # ╔═╡ 28bb60c9-ab56-497f-b039-0d6577501be5
 using Measurements

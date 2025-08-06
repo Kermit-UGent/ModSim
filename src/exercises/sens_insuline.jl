@@ -31,7 +31,7 @@ end
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 52b28a4c-b0bb-11ef-2841-17ecfb596676
-using Plots, PlutoUI, DifferentialEquations, ForwardDiff, Catalyst
+using StatsPlots, PlutoUI, OrdinaryDiffEq, ForwardDiff, Catalyst
 
 # ╔═╡ bfcc4b4e-073e-401e-851c-d01ef828028a
 md"""
