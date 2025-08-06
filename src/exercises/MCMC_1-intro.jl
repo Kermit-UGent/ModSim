@@ -3,7 +3,7 @@
 
 #> [frontmatter]
 #> order = "20"
-#> title = "4. MCMCM intro"
+#> title = "4. MCMC intro"
 #> date = "2025-08-06"
 #> tags = ["exercises"]
 #> description = "MCMC intro"
