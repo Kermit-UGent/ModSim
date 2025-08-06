@@ -11,7 +11,7 @@ This is the source code for the computational thinking website! It uses a site g
 
 The `/src/` folder is scanned for files, and all files are turned into HTML pages. 
 
-Paths correspond to URLs. For example, `src/data_science/pca.jl` will become available at `https://computationalthinking.mit.edu/data_science/pca/`. For files called *"index"*, the URL will point to its parent, e.g. `src/docs/index.jlmd` becomes `https://computationalthinking.mit.edu/docs/`. Remember that changing URLs is very bad! You can't share this site with your friends if the links break.
+Paths correspond to URLs. For example, `src/data_science/pca.jl` will become available at `https://kermit-ugent.github.io/ModSim/data_science/pca/`. For files called *"index"*, the URL will point to its parent, e.g. `src/docs/index.jlmd` becomes `https://kermit-ugent.github.io/ModSim/docs/`. Remember that changing URLs is very bad! You can't share this site with your friends if the links break.
 
 > **To add something to our website, just create a new file!** Fons will be happy to figure out the technical bits.
 
