@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.6
 
 #> [frontmatter]
 #> order = "4"
@@ -21,9 +21,6 @@ using InteractiveUtils
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 13ff3e4f-dae2-4e08-946a-857f672e1049
-using Distributions
-
-# ╔═╡ c5eb9fd3-e518-4f96-9581-c0032864c7ec
 using Turing
 
 # ╔═╡ f20a633b-9e9f-40f8-8a1a-eec1890a5652
@@ -216,8 +213,8 @@ mean(chain_x .> chain_y) # Approximate P(X > Y | Z=3)
 # ╠═1cd55133-8bb2-4883-953d-77824c3df54f
 # ╟─c11a0059-c0a5-4789-90b1-41b7d7c46d1c
 # ╟─387c26b2-ff21-4d85-b6eb-0cc0c8ee7347
-# ╟─157d654f-1a17-4eeb-ac0d-cdb6ceac7729
 # ╠═13ff3e4f-dae2-4e08-946a-857f672e1049
+# ╟─157d654f-1a17-4eeb-ac0d-cdb6ceac7729
 # ╠═7833de91-b850-41bd-96b4-4bd706473343
 # ╟─e6394f7a-cefc-4734-854f-72440380973e
 # ╠═e6e377a8-edee-4ae6-8f1b-d30243ef139c
@@ -242,7 +239,6 @@ mean(chain_x .> chain_y) # Approximate P(X > Y | Z=3)
 # ╠═228dc51e-bd89-49d0-86bb-1b02c464aa49
 # ╠═884435f8-d679-4337-998d-37ae1ef41ee0
 # ╟─d6fe2fbe-93e3-460c-9528-6fe01cbcc69a
-# ╠═c5eb9fd3-e518-4f96-9581-c0032864c7ec
 # ╠═ba244c3f-f960-4af8-b755-11c8a636d053
 # ╟─697b913c-8521-42df-81e5-1394c5fa8512
 # ╠═50e0fb1c-7c1e-441a-89c6-7d6311064487

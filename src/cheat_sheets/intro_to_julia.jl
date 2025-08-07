@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.6
 
 #> [frontmatter]
 #> order = "2"
@@ -20,7 +20,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -42,7 +42,7 @@ using LinearAlgebra
 using Statistics
 
 # ╔═╡ bf1385da-4ac2-11eb-3992-41abac921370
-using Plots
+using StatsPlots
 
 # ╔═╡ 2ec33313-e161-420d-ae8b-ac91f945e030
 md"""
@@ -655,7 +655,7 @@ md"Macro's will be vital in the domain specific languages we use in this course.
 # ╔═╡ ad156892-4ac2-11eb-3634-a3783231e5a1
 md"""## 8. Plotting
 
-Quite essential for scientific programming is the visualisation of the results. `Plots` is the Julia package that handles a lot of the visualisation. `rand(10)` returns an array of 10 random floats between 0 and 1.
+Quite essential for scientific programming is the visualisation of the results. `Plots` is the Julia package that handles a lot of the visualisation. `StatsPlots` does the same, but with added functionality for plotting probability distributions. `rand(10)` returns an array of 10 random floats between 0 and 1.
 """
 
 # ╔═╡ e5eeb54f-49f4-4a24-a3f4-6d0b0da99c76
