@@ -29,7 +29,7 @@ using InteractiveUtils
 using Catalyst
 
 # ╔═╡ 00fd6d49-f561-42e9-9413-d33af92f83dc
-using DifferentialEquations, Plots
+using OrdinaryDiffEq, StatsPlots
 
 # ╔═╡ 7ae714c4-d25d-4f9f-ab3d-cc067db9c156
 using ForwardDiff

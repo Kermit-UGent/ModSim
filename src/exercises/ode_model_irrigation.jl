@@ -35,7 +35,7 @@ using PlutoUI; TableOfContents()
 using Catalyst
 
 # ╔═╡ 63c243ff-649d-4494-98ef-e4dee5e88030
-using DifferentialEquations, Plots
+using OrdinaryDiffEq, StatsPlots
 
 # ╔═╡ 2e8b2af9-2fed-49aa-a1cd-76c822664a5d
 md"""

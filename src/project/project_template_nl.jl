@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.6
 
 #> [frontmatter]
 #> order = "2"
@@ -17,6 +17,9 @@ using InteractiveUtils
 
 # ╔═╡ 21357c48-f35d-11ee-23f8-2534bb1d82f4
 begin
+	using Pkg
+    Pkg.activate("../../pluto-deployment-environment")
+	
 	# maak deze cel onzichtbaar als je klaar bent
 	title = "Ons supercoole project"
 	names = ["Alice", "Bob", "Carol"]
@@ -26,20 +29,9 @@ begin
 	email_main_person = "mail@domain.be"
 
 	using PlutoUI  # Interactiviteit
-	using Plots    # Plotten
+	using StatsPlots    # Plotten
 	TableOfContents()
 end;
-
-# ╔═╡ 851a48d5-9820-4bef-9b12-984ad8c8a7d6
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	# Gebruik best geen externe omgeving zodat je notebook op zichzelf staat
-	# maak onzichtbaar
-	using Pkg
-	Pkg.activate("..")
-end
-  ╠═╡ =#
 
 # ╔═╡ 14c7e803-c0ff-4211-8b60-2c9c246934dd
 md"""
@@ -120,7 +112,6 @@ md"""
 md"## Bijlage"
 
 # ╔═╡ Cell order:
-# ╠═851a48d5-9820-4bef-9b12-984ad8c8a7d6
 # ╟─14c7e803-c0ff-4211-8b60-2c9c246934dd
 # ╠═6948149f-854e-4b3c-b51c-099dd221ab83
 # ╠═89551690-500d-4e37-ae20-5beb71cc87ac

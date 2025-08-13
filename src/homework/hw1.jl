@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.25
+# v0.20.6
 
 #> [frontmatter]
 #> homework_number = "1"

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.6
 
 #> [frontmatter]
 #> order = "3"
@@ -21,7 +21,13 @@ using InteractiveUtils
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ fe5e5f00-638f-4ca3-a331-c746af53b6b4
-using Catalyst, Plots, DifferentialEquations
+using Catalyst, StatsPlots, OrdinaryDiffEq
+
+# ╔═╡ c1369e0e-9357-40da-bba1-f680692ab6d1
+using SteadyStateDiffEq
+
+# ╔═╡ 05657e94-1f30-4071-b202-5fda2a9567e3
+using StochasticDiffEq
 
 # ╔═╡ 22cc8f5e-da25-48bb-8cbc-952e205d5640
 md"""## Notes before the cheat sheet
@@ -307,7 +313,7 @@ end;
 ssprob = SteadyStateProblem(mm_continuous, u0map, pmap);
 
 # ╔═╡ bb9f02a8-c4db-45d2-9dd7-163037d8c91d
-print(solve(ssprob))
+print(solve(ssprob, DynamicSS()))
 
 # ╔═╡ 88c50285-6073-4532-a28d-d3373a2b632e
 md"## Discrete jump equations"
@@ -454,6 +460,7 @@ end
 # ╠═2a1b3ea1-bc2b-437a-822a-7199d532007c
 # ╠═6641a5eb-5bac-4442-8610-710c1ea826bc
 # ╟─44fa725e-f4e5-43db-8647-4fa9f4e5e24b
+# ╠═c1369e0e-9357-40da-bba1-f680692ab6d1
 # ╟─70d30f17-e919-4651-926c-09a3f9f38567
 # ╠═529b385b-738c-4601-9fc7-ff3c678656ad
 # ╠═c85dd29e-2eac-4b1a-b23d-a84ff36b7853
@@ -467,6 +474,7 @@ end
 # ╠═b762e40b-b208-43dd-8395-f241ad3a875b
 # ╟─952ee553-567c-4a70-bb24-5db4c7043395
 # ╟─7c98aa51-0853-40f4-8cb1-fe763cda8698
+# ╠═05657e94-1f30-4071-b202-5fda2a9567e3
 # ╠═aae67739-e1ac-4949-8924-087a63881118
 # ╠═73632fbb-88f7-4ff4-a7e6-b5e32780764c
 # ╠═5e0acdd7-318b-4f7e-b4d3-051acc423f69

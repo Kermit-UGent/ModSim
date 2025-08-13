@@ -44,7 +44,7 @@ md"""
 
 # ╔═╡ 71bbd593-f2e4-40dd-b682-40e65305ebb3
 md"""
-We start at time 0 with a common ancestor of fish and terrestrial animals. 30 million years (Ma) later it diverges into ray-finned fish, which will give rise to most modern fish species, and lob-finned fish, which will give rise to i.e. mammals and reptiles. 
+We start at time 0 with a common ancestor of fish and terrestrial animals. 30 million years (Ma) later it diverges into ray-finned fish, which will give rise to most modern fish species, and lob-finned fish, which will give rise to e.g. mammals and reptiles. 
 
 The ray-finned fish fossil is also one of the individuals for which we have DNA for its *cytochrome C* gene. The number represents that it has 25 mutations in this gene compared to the gene's sequence from our starting organism, the ancient bony fish fossil.
 """

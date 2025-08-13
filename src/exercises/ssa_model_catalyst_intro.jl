@@ -1,6 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
-
+# v0.20.6
 
 #> [frontmatter]
 #> order = "14"
@@ -36,7 +35,7 @@ using PlutoUI; TableOfContents()
 using Catalyst
 
 # ╔═╡ 0b3921c9-6d6e-4c52-8c21-d883ed493028
-using DifferentialEquations, Plots
+using OrdinaryDiffEq, JumpProcesses, StatsPlots
 
 # ╔═╡ 62b185be-e327-4ef3-af39-819732d107bf
 md"""
@@ -60,7 +59,7 @@ md"""
 
 # ╔═╡ e1583a47-9171-4db2-a6e9-d4889ee294c7
 md"""
-For the sake of clarity we restate the describtion of the previous infection model.
+For the sake of clarity we restate the description of the previous infection model.
 
 It is important to model the outbreak of infectious diseases in order to devise appropriate measures to avoid global epidemics. In this exercise we consider an isolated group of people in which a viral disease is spreading. An infection model (similar to the SIR-model but slightly extended) will be used for this purpose. We are interested in the evolution of the number of susceptible ($S$), infected ($I$), deceased ($D$) and resistant ($R$) persons.\
 We make the following assumptions:
@@ -194,7 +193,7 @@ md"""
 
 # ╔═╡ d8b11407-e8c0-4ad0-a49d-8e422ccc3a9c
 md"""
-We first need to load the Differential and Plot package, which is required for simulating the system and plotting the results.
+We first need to load the OrdinaryDiffEq and StatsPlots packages, which are required for simulating the system and plotting the results. Additionally, the **JumpProcesses** package is needed to define and solve Jump problems.
 """
 
 # ╔═╡ 78e55389-3431-41de-9f4a-b6b45cb8988b

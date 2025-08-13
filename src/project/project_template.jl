@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.6
 
 #> [frontmatter]
 #> order = "2"
@@ -30,7 +30,7 @@ begin
 	email_main_person = "mail@domain.be"
 
 	using PlutoUI  # interactivity
-	using Plots  # plotting
+	using StatsPlots  # plotting
 	TableOfContents()
 end;
 

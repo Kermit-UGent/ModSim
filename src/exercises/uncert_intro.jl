@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.6
 
 #> [frontmatter]
 #> order = "32"
@@ -28,7 +28,7 @@ using InteractiveUtils
 using Catalyst
 
 # ╔═╡ 73d5f921-82e4-4160-a3c4-fc1935f4c58d
-using DifferentialEquations, Plots
+using OrdinaryDiffEq, StatsPlots
 
 # ╔═╡ 4260699d-4db2-4ac7-b8c8-7bc43fbc1c59
 using PlutoUI; TableOfContents()

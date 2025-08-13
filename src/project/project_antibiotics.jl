@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.6
 
 #> [frontmatter]
 #> order = "3"
@@ -18,7 +18,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -42,12 +42,12 @@ begin
 	email_main_person = "mail@domain.be"
 
 	using PlutoUI  # interactivity
-	using Plots  # plotting
+	using StatsPlots  # plotting
 	TableOfContents()
 end
 
 # ╔═╡ 1e078c8b-2df9-4646-b629-bac7f151e937
-using Catalyst, DifferentialEquations
+using Catalyst, OrdinaryDiffEq
 
 # ╔═╡ 158c4ad8-a38b-4828-812f-1abce60695dc
 using SciMLSensitivity
@@ -145,26 +145,24 @@ What if we give a second dose of antibiotic at a different time?
 # ╔═╡ 49e97512-4150-49e2-bd9b-c3bfd7c375dc
 md"### Second dose of antibiotics"
 
-# ╔═╡ 50794b21-e90f-438d-ad9c-eaddfab14ce7
-function dose!(integrator, D)
-	integrator[:C] += D
-end
-
-# ╔═╡ 7f9c8c7d-90ef-496c-b907-300feba5edfc
-obprob2 = ODEProblem(antibiotics, [], tspan, pars);  # no AB in the system
-
 # ╔═╡ bf81ccd3-4cdf-4a9c-b334-f7339fed8dfe
 @bind D Slider(1.0:100.0, show_value=true)
 
 # ╔═╡ 438de4bb-6d15-4d76-b9a5-95b51924cbc2
 @bind tdose Slider(1.0:35.0, show_value=true)
 
-# ╔═╡ 37ecd681-bd01-4162-94cf-97f6d8d82a8e
-ps_cb = PresetTimeCallback(tdose, I->dose!(I, D));
+# ╔═╡ a59a56d5-c17e-4153-a42f-614d42fd957e
+ps_cb = [tdose] => [antibiotics.C ~ antibiotics.C + D]
+
+# ╔═╡ e4bd38e1-517d-4c50-98d7-26a6dbdf467c
+@named antibiotics2 = ReactionSystem(equations(antibiotics), discrete_events=ps_cb);
+
+# ╔═╡ 7f9c8c7d-90ef-496c-b907-300feba5edfc
+obprob2 = ODEProblem(complete(antibiotics2), [:C=>C0], tspan, pars);  # no AB in the system
 
 # ╔═╡ 0d464337-8a70-47eb-8c08-cc2a7d388cff
 begin
-	plot(solve(oprob, callback=ps_cb))
+	plot(solve(obprob2))
 	vline!([tdose], label="dosing time", ls=:dash, title="Second dosing with concentration of $D at day $tdose")
 end
 
@@ -248,11 +246,11 @@ md"## Appendix"
 # ╠═aa32c5e2-0f67-4910-a612-d958fa13169c
 # ╟─4679507b-e6e4-4d39-8610-77141f7b82e0
 # ╟─49e97512-4150-49e2-bd9b-c3bfd7c375dc
-# ╠═50794b21-e90f-438d-ad9c-eaddfab14ce7
-# ╠═7f9c8c7d-90ef-496c-b907-300feba5edfc
 # ╠═bf81ccd3-4cdf-4a9c-b334-f7339fed8dfe
-# ╠═37ecd681-bd01-4162-94cf-97f6d8d82a8e
 # ╠═438de4bb-6d15-4d76-b9a5-95b51924cbc2
+# ╠═a59a56d5-c17e-4153-a42f-614d42fd957e
+# ╠═e4bd38e1-517d-4c50-98d7-26a6dbdf467c
+# ╠═7f9c8c7d-90ef-496c-b907-300feba5edfc
 # ╟─0d464337-8a70-47eb-8c08-cc2a7d388cff
 # ╟─0bfc00dd-cb88-4166-8cb0-2583882975f4
 # ╟─89798b17-a1f0-43ff-9b3f-42cae0d6020a
