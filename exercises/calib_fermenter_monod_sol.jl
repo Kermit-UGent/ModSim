@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 245ca9d0-10f9-11ef-0ef6-a73594e96db9
@@ -36,10 +36,14 @@ md"""
 In one of the previous practica we were introduced to a fermenter in which biomass $X$ [$g/L$] grows by breaking down substrate $S$ [$g/L$]. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. This process was modelled using Monod kinetics, resulting in the model below:
 
 $$\begin{eqnarray*}
-%S \xrightarrow[\quad\quad]{\beta} Y \, X
-S \xrightarrow[\quad\quad]{r} Y \, X \quad\quad\quad\quad r = \mu \, X \quad \textrm{with} \quad \mu = \mu_{max} \, \cfrac{S}{S + K_s}
+S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s}
 \end{eqnarray*}$$
 """
+# $$\begin{eqnarray*}
+# %S \xrightarrow[\quad\quad]{\beta} Y \, X
+# S \xrightarrow[\quad\quad]{r} Y \, X \quad\quad\quad\quad r = \mu \, X \quad \textrm{with} \quad \mu = \mu_{max} \, \cfrac{S}{S + K_s}
+# \end{eqnarray*}$$
+
 
 # ╔═╡ 824db995-7a66-4719-a534-7e0f6dec90b5
 md"""
@@ -48,12 +52,16 @@ The *reaction network object* for this model could be set-up as:
 
 # ╔═╡ 245c2636-95da-4c76-8b03-c4d20bbabb48
 fermenter_monod = @reaction_network begin
-	X * mm(S, μmax, Ks), S => Y*X
-	# Alternative:
-	# X * mm(S, μmax, Ks), S --> Y*X
+    μmax/(S+Ks), S + X --> (1 + Y)*X
+    # Alternatives:
+    # X * mm(S, μmax, Ks), S => Y*X
+	# mm(S, μmax, Ks)*X, S + X => (1 + Y)*X
     Q/V, (S, X) --> 0
     Q/V*Sin, 0 --> S
 end
+
+# ╔═╡ 956790e2-6cac-46c9-886e-24d5aceae1c5
+convert(ODESystem, fermenter_monod, combinatoric_ratelaws=false)
 
 # ╔═╡ 68f9ecb3-15b0-4a53-8864-5dac13a89e95
 parameters(fermenter_monod)
@@ -123,7 +131,7 @@ u0 = [:S => 0.0, :X => 0.0005]
 
 # ╔═╡ 38fe8304-af61-40a7-ac86-480dfb892185
 # tspan = missing   # Uncomment and complete the instruction
-tspan = (0.0, 100)
+tspan = (0.0, 100.0)
 
 # ╔═╡ 87482f88-8413-4820-9613-7941f3d61bd7
 # params = missing  # Uncomment and complete the instruction
@@ -135,12 +143,12 @@ oprob = ODEProblem(fermenter_monod, u0, tspan, params, combinatoric_ratelaws=fal
 
 # ╔═╡ f6a8f134-6db0-4d74-8af5-82826347d8f0
 md"""
-Declare the Turing model. Use `InverseGamma()` for the standard deviations of the measurements and `LogNormal()` for `μmax` and `K`.
+Declare the Turing model. Use `InverseGamma` for the standard deviations of the measurements and `LogNormal` for `μmax` and `K`.
 """
 
 # ╔═╡ 4c28a66a-ee2c-42a2-95c7-ea4ddb6a232d
 # Uncomment and complete the instruction
-# @model function fermenter_inference(t_meas, S, X)
+# @model function fermenter_fun(t_meas, S, X)
     # σ_S ~ missing
     # σ_X ~ missing
     # μmax ~ missing
@@ -148,32 +156,29 @@ Declare the Turing model. Use `InverseGamma()` for the standard deviations of th
 	# params = missing
 	# oprob = missing
     # osol = missing
-    # S ~ missing
-    # X ~ missing
+    # S_s ~ missing
+    # X_s ~ missing
 # end
-@model function fermenter_inference(t_meas, S, X)
+@model function fermenter_fun(t_meas)
 	σ_S ~ InverseGamma()
 	σ_X ~ InverseGamma()
     μmax ~ LogNormal()
 	Ks ~ LogNormal()
-    # μmax ~ Normal(0.40, 0.1)
-	# Ks ~ Normal(0.015, 0.01)
     params = [:μmax => μmax, :Ks => Ks, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.022]
-	oprob = ODEProblem(fermenter_monod, u0, tspan, params)
-	# , combinatoric_ratelaws=false
+	oprob = ODEProblem(fermenter_monod, u0, tspan, params, combinatoric_ratelaws=false)
     osol = solve(oprob, Tsit5(), saveat=t_meas)
-	S ~ MvNormal(osol[:S], σ_S^2 * I)
-	X ~ MvNormal(osol[:X], σ_X^2 * I)
+	S_s ~ MvNormal(osol[:S], σ_S^2 * I)
+	X_s ~ MvNormal(osol[:X], σ_X^2 * I)
 end
 
 # ╔═╡ 3136b15d-5078-4bcd-954b-e89bcb8aed1b
 md"""
-Provide the measurements to the Turing model.
+Provide the time measurements to the defined function and instantly condition the model with the measurements of $S$ and $X$:
 """
 
 # ╔═╡ 6a508a62-61b9-4273-8e45-b26f594e8da9
-# fermenter_inf = missing       # Uncomment and complete the instruction
-fermenter_inf = fermenter_inference(t_meas, S_meas, X_meas)
+# fermenter_cond_mod = missing       # Uncomment and complete the instruction
+fermenter_cond_mod = fermenter_fun(t_meas) | (S_s = S_meas, X_s = X_meas,)
 
 # ╔═╡ 63420055-55f8-4def-8b0e-11ea61483010
 md"""
@@ -182,7 +187,7 @@ Optimize the priors ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$). Do this wit
 
 # ╔═╡ d52c9da8-d8a4-4db0-ac6d-6d16ccf4775c
 # results_map = missing           # Uncomment and complete the instruction
-results_mle = optimize(fermenter_inf, MLE(), NelderMead())
+results_mle = optimize(fermenter_cond_mod, MLE(), NelderMead())
 
 # ╔═╡ e1b0ee01-f16c-40e9-a0f9-80072d690936
 md"""
@@ -191,7 +196,7 @@ Visualize a summary of the optimized parameters.
 
 # ╔═╡ f2d7daf8-8218-446d-b1d2-e9e05aeadfd9
 # missing        # Uncomment and complete the instruction
-results_mle |> coeftable
+coeftable(results_mle)
 
 # ╔═╡ 23d58bb1-d077-402e-8bee-3866c68e069a
 md"""
@@ -227,8 +232,7 @@ Create an ODEProblem and solve it. Use `Tsit5()` and `saveat=0.5`.
 
 # ╔═╡ 853c1a92-d50f-4b05-9ed3-d3ee1656665a
 # oprob_opt = missing         # Uncomment and complete the instruction
-oprob_opt = ODEProblem(fermenter_monod, u0, tspan, params_opt)
-# , combinatoric_ratelaws=false
+oprob_opt = ODEProblem(fermenter_monod, u0, tspan, params_opt, combinatoric_ratelaws=false)
 
 # ╔═╡ f45e8124-e942-438e-99c5-3032ccc01454
 # osol_opt = missing          # Uncomment and complete the instruction
@@ -252,6 +256,14 @@ begin
 	scatter!(t_meas, X_meas, label="X meas", color=:red)
 end
 
+# ╔═╡ d7e1f24a-f0f0-44d9-a3b8-6c074d273bdc
+md"""
+Do your simulations fit well the measurements?
+"""
+
+# ╔═╡ 49cf442e-0c6a-433f-96c0-e10b29bf86a9
+md"- Answer: missing"
+
 # ╔═╡ Cell order:
 # ╠═245ca9d0-10f9-11ef-0ef6-a73594e96db9
 # ╠═78a25bef-31e5-45ef-b0ba-b9a8c8a9edeb
@@ -263,6 +275,7 @@ end
 # ╟─595ea8ee-bc67-4696-9232-982612fb554d
 # ╟─824db995-7a66-4719-a534-7e0f6dec90b5
 # ╠═245c2636-95da-4c76-8b03-c4d20bbabb48
+# ╠═956790e2-6cac-46c9-886e-24d5aceae1c5
 # ╠═68f9ecb3-15b0-4a53-8864-5dac13a89e95
 # ╟─de8ddc14-8f82-403d-8f42-29673ef2a722
 # ╟─b7b7d58f-d406-4596-b834-ced6d8fada83
@@ -296,3 +309,5 @@ end
 # ╠═f45e8124-e942-438e-99c5-3032ccc01454
 # ╟─5a39b0e0-1ea1-4854-8e68-66d0d4bbf25c
 # ╠═d0156099-ad03-4711-ac0f-94882fb78266
+# ╟─d7e1f24a-f0f0-44d9-a3b8-6c074d273bdc
+# ╠═49cf442e-0c6a-433f-96c0-e10b29bf86a9

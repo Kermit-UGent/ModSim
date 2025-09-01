@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 2b010e5c-1121-11ef-16fe-a5e3317122e4
@@ -39,14 +39,14 @@ md"
 
 # ╔═╡ 8f1afdec-b78d-4aba-a74f-cd3e4b35fab1
 md"""
-In one of the previous practica we were introduced to an irrigation experiment carried out on a soil column consisting of two layers of soil, each with specific soil characteristics. However, here the volume of water per unit of time, $R$, irrigated evenly over the soil column, will be kept constant at $5\;mm\,h^{-1}$ in these new experiments.
+In one of the previous practica we were introduced to an irrigation experiment carried out on a soil column consisting of two layers of soil, each with specific soil characteristics. However, here the volume of water per unit of time, $r$, irrigated evenly over the soil column, will be kept constant at $5\;mm\,h^{-1}$ in these new experiments.
 
 The water falls on the upper layer and percolates to the lower layer. The relative moisture content in both layers (i.e., relative to their residual moisture contents) is denoted by $S_1$ and $S_2$. 
 
 A model description of the relative moisture content in both soil layers is given by:
 
 $$\begin{align}
-\frac{dS_1}{dt} &= R\left(1-\cfrac{S_{1,res}}{S_{max}}\right) - \cfrac{R}{S_{max}}S_1 - \cfrac{k}{S_{max}}S_1 \\
+\frac{dS_1}{dt} &= r\left(1-\cfrac{S_{1,res}}{S_{max}}\right) - \cfrac{r}{S_{max}}S_1 - \cfrac{k}{S_{max}}S_1 \\
 \frac{dS_2}{dt} &= \cfrac{k}{S_{max}}S_1 - v \,S_2^2
 \end{align}$$
 
@@ -62,8 +62,8 @@ The *reaction network object* for this model could be set up as:
 irrigation_mod = @reaction_network begin
     k/Smax, S1 --> S2
     v, 2S2 --> 0
-    R * (1 - S1res / Smax), 0 --> S1
-    R/Smax, S1 --> 0
+    r * (1 - S1res / Smax), 0 --> S1
+    r/Smax, S1 --> 0
 end
 
 # ╔═╡ e5d7520d-fd8c-48c0-bd36-826766212217
@@ -143,57 +143,56 @@ tspan = (0.0, 150.0)
 
 # ╔═╡ 777ce59f-c849-4a2e-a6dc-ae309d2a2e7c
 # params = missing         # Uncomment and complete the instruction
-params = [:k => 3.0, :Smax => 150.0, :v => 1e-3, :R => 5.0, :S1res => 10.0]
+params = [:k => 3.0, :Smax => 150.0, :v => 1e-3, :r => 5.0, :S1res => 10.0]
 
 # ╔═╡ 43b83336-aea6-4914-bc26-b2e84994ce57
 oprob = ODEProblem(irrigation_mod, u0, tspan, params)
 
 # ╔═╡ 923d04ce-b4d2-44b0-afff-7062c4628ad0
 md"""
-Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$.
+Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$. Use `InverseGamma` for the standard deviations of the measurements and `LogNormal` for `k` and a `Uniform` (between 100 and 200) for `Smax`.
 """
 
 # ╔═╡ 481eb8b9-5de2-4f68-b06a-ec18e054c9f5
 # Uncomment and complete the instruction
-# @model function irrigation_inference(t_meas, S1_meas1, S2_meas1, S1_meas2, S2_meas2)
+# @model function irrigation_fun(t_meas)
 # 	σ_S1 ~ missing
 # 	σ_S2 ~ missing
 # 	k ~ missing
 # 	Smax ~ missing
 # 	osol1 = missing
-# 	S1_meas1 ~ missing
-# 	S2_meas1 ~ missing
+# 	S1_s1 ~ missing
+# 	S2_s1 ~ missing
 # 	osol2 = missing
-# 	S1_meas2 ~ missing
-# 	S2_meas2 ~ missing
+# 	S1_s2 ~ missing
+# 	S2_s2 ~ missing
 # end
-@model function irrigation_inference(t_meas, S1_meas1, S2_meas1, S1_meas2, S2_meas2)
+@model function irrigation_fun(t_meas)
 	σ_S1 ~ InverseGamma()
 	σ_S2 ~ InverseGamma()
-	# k ~ Uniform(0, 10)
 	k ~ LogNormal()
 	Smax ~ Uniform(100, 200)
-	params = [:k => k, :Smax => Smax, :v => 1e-3, :R => 5.0, :S1res => 10.0]
+	params = [:k => k, :Smax => Smax, :v => 1e-3, :r => 5.0, :S1res => 10.0]
 	u0 = [:S1 => 0.0, :S2 => 0.0]
 	oprob = ODEProblem(irrigation_mod, u0, tspan, params)
 	osol1 = solve(oprob, Tsit5(), saveat=t_meas)
-	S1_meas1 ~ MvNormal(osol1[:S1], σ_S1^2 * I)
-	S2_meas1 ~ MvNormal(osol1[:S2], σ_S2^2 * I)
+	S1_s1 ~ MvNormal(osol1[:S1], σ_S1^2 * I)
+	S2_s1 ~ MvNormal(osol1[:S2], σ_S2^2 * I)
 	u0 = [:S1 => 140.0, :S2 => 135.0]
 	oprob = ODEProblem(irrigation_mod, u0, tspan, params)
 	osol2 = solve(oprob, Tsit5(), saveat=t_meas)
-	S1_meas2 ~ MvNormal(osol2[:S1], σ_S1^2 * I)
-	S2_meas2 ~ MvNormal(osol2[:S2], σ_S2^2 * I)
+	S1_s2 ~ MvNormal(osol2[:S1], σ_S1^2 * I)
+	S2_s2 ~ MvNormal(osol2[:S2], σ_S2^2 * I)
 end
 
 # ╔═╡ df933ae8-1f51-4467-93a7-33f153e5e4f8
 md"""
-Provide the measurements to the Turing model.
+Provide the time measurements to the defined function and instantly condition the model with the measurements of $S_1$ and $S_2$ from both experiments:
 """
 
 # ╔═╡ 0e2aa675-9e09-4e06-b5f8-118707ee652a
-# irrigation_inf = missing    # Uncomment and complete the instruction
-irrigation_inf = irrigation_inference(t_meas, S1_meas1, S2_meas1, S1_meas2, S2_meas2)
+# irrigation_cond_mod = missing    # Uncomment and complete the instruction
+irrigation_cond_mod = irrigation_fun(t_meas) | (S1_s1 = S1_meas1, S2_s1 = S2_meas1, S1_s2 = S1_meas2, S2_s2 = S2_meas2,)
 
 # ╔═╡ f7f47956-7c3b-44cc-bff7-fb7d32af874a
 md"""
@@ -202,7 +201,7 @@ Optimize the priors ($\sigma_{S1}$, $\sigma_{S2}$, $k$ and $S_{max}$). Do this w
 
 # ╔═╡ 8c254d5a-225b-4772-9fdd-e9f700495fbd
 # results_mle = missing      # Uncomment and complete the instruction
-results_mle = optimize(irrigation_inf, MLE(), NelderMead())
+results_mle = optimize(irrigation_cond_mod, MLE(), NelderMead())
 
 # ╔═╡ f15a1df5-047a-4f46-9419-8492ac1248e0
 md"""
@@ -211,7 +210,7 @@ Visualize a summary of the optimized parameters.
 
 # ╔═╡ 00d944e4-2c88-4a5d-b809-69f435df4684
 # missing           # Uncomment and complete the instruction
-results_mle |> coeftable
+coeftable(results_mle)
 
 # ╔═╡ 89eb31ef-b24f-44c8-bbe5-19101d859937
 md"""
@@ -238,7 +237,7 @@ Set up parameter values with optimized parameter values:
 
 # ╔═╡ 97d53e48-590a-485b-bcf3-edc6a6124faf
 # params_opt = missing         # Uncomment and complete the instruction
-params_opt = [:k => k_opt, :Smax => Smax_opt, :v => 1e-3, :R => 5.0, :S1res => 10.0]
+params_opt = [:k => k_opt, :Smax => Smax_opt, :v => 1e-3, :r => 5.0, :S1res => 10.0]
 
 # ╔═╡ dfd2ac98-5cdc-4627-b6cf-71b33c0ff0d4
 md"""
@@ -300,6 +299,14 @@ begin
   scatter!(t_meas, S2_meas2, label="S2 meas2", color=:red)
 end
 
+# ╔═╡ 3c243670-2ba7-4396-8c6d-084726636741
+md"""
+Do your simulations fit well the measurements?
+"""
+
+# ╔═╡ 1aeb0d86-b276-4bd6-9811-faf4a297ae6f
+md"- Answer: missing"
+
 # ╔═╡ Cell order:
 # ╠═2b010e5c-1121-11ef-16fe-a5e3317122e4
 # ╠═6750d246-8e7a-4cfb-810e-d1100aa4fdef
@@ -355,3 +362,5 @@ end
 # ╠═fe8f4961-68bd-42dc-a3f5-6692e918e241
 # ╠═7f280230-7846-4529-a2ff-a81a2b9480bf
 # ╠═ad9818a9-ccbe-4645-8b91-0c3fa773632a
+# ╟─3c243670-2ba7-4396-8c6d-084726636741
+# ╠═1aeb0d86-b276-4bd6-9811-faf4a297ae6f

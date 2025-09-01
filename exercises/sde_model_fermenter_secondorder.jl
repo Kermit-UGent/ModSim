@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ eb142900-1d94-11ef-12ed-6951b45f1817
@@ -33,9 +33,9 @@ md"""
 In a fermenter reactor biomass grows on substrate. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. Inside the reactor, biomass, with a concentration of $X$ [$g/L$], is produced through second-order kinetics:
 
 $$\begin{eqnarray*}
-%S \xrightarrow[\quad\quad]{\beta} Y \, X
-S \xrightarrow[\quad\quad]{r} Y \, X \quad\quad\quad\quad r = k \, S\,X
+S + X \xrightarrow[\quad\quad]{k} X + YX 
 \end{eqnarray*}$$
+
 
 with $k$ [$L\,gS^{-1}h^{-1}$] the reaction rate constant, and $Y$ [$gX/gS$] the yield coefficient which is defined here by the amount of produced biomass by consumption of one unit of substrate. Futhermore, the reactor is drained with an outlet flow $Q$ [$L/h$], which consist of the current concentrations of substrate $S$ [$g/L$] and biomass $X$ [$g/L$] inside the reactor. The volume $V$ [$L$] of the reactor content is kept constant by setting $Q_{in} = Q$.
 """
@@ -53,6 +53,11 @@ Assign the following noise scaling values:
 - noise scaling of `0.0` for the remaining *reactions*
 """
 
+# ╔═╡ 8e1a3734-d03c-4d0c-a808-a79bcaa7f899
+md"""
+The parameter values are $k =$ 0.2, $Y =$ 0.76, $Q =$ 2.0, $V =$ 40.0 and $S_{in} =$ 2.2$\;g/L$. Suppose that at $t=$0$\;h$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of 0.1$\;g/L$. Simulate the evolution of $S$ and $X$ during $120$ hours.
+"""
+
 # ╔═╡ 6b627d84-b6a5-444d-8163-40a4cab181bd
 # Uncomment and complete the instruction
 # fermenter_sde_secondorder = @reaction_network begin
@@ -65,6 +70,11 @@ Assign the following noise scaling values:
 # ╔═╡ 47ca3573-691c-4127-85b9-d5b5a1a23fbb
 md"""
 Convert the system to a symbolic differential equation model and verify, by analyzing the differential equation, that your model is correctly implemented.
+
+Hint:
+- Use the option: `combinatoric_ratelaws=false`
+
+For information about this option, click [here](https://docs.sciml.ai/Catalyst/stable/introduction_to_catalyst/introduction_to_catalyst/#introduction_to_catalyst_ratelaws).
 """
 
 # ╔═╡ e1f11068-e489-4c54-a30d-981f5cb19b47
@@ -87,7 +97,7 @@ Set the timespan for the simulation:
 # tspan = missing    # Uncomment and complete the instruction
 
 # ╔═╡ a4d28c40-e315-4bb9-87a5-2b45dd633e5f
-# params = missing    # Uncomment and complete the instruction
+# parms = missing    # Uncomment and complete the instruction
 
 # ╔═╡ aeddc31e-9de2-4792-a2d8-59a14dfc8173
 # sprob = missing      # Uncomment and complete the instruction
@@ -126,7 +136,7 @@ Solve the `EnsembleProblem` using the same solver (and time step) as before, for
 
 # ╔═╡ 26746cab-d3e7-4a01-bbbd-9fcb49ef652f
 md"""
-Plot the results. Use as option again `ylim=(0.0,2.0)` and also `linealpha=0.5` to modify the line boldness.
+Plot the results. Use as option again `ylim=(0.0,2.0)` and also `linealpha=0.5` (or `la=0.5`) to modify the line boldness.
 """
 
 # ╔═╡ 4fcc1d0a-9d30-4056-b8a3-3d802edc42e5
@@ -142,6 +152,7 @@ Plot the results. Use as option again `ylim=(0.0,2.0)` and also `linealpha=0.5` 
 # ╟─959d6307-a30d-4ae7-970d-b2c7584c2c8f
 # ╟─98858b9c-d4f9-451f-a7b9-fcaa012ee28e
 # ╟─d2e2680c-01c6-449a-bb5f-7472bc1de243
+# ╟─8e1a3734-d03c-4d0c-a808-a79bcaa7f899
 # ╠═6b627d84-b6a5-444d-8163-40a4cab181bd
 # ╟─47ca3573-691c-4127-85b9-d5b5a1a23fbb
 # ╠═e1f11068-e489-4c54-a30d-981f5cb19b47

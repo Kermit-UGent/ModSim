@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ e5f8c320-eda0-11ee-37d0-458bdbd94f15
@@ -28,7 +28,7 @@ using DifferentialEquations, Plots
 
 # ╔═╡ 62b185be-e327-4ef3-af39-819732d107bf
 md"""
-# Introduction to Catalyst (SSA)
+# Solving discrete jump problems with Catalyst
 """
 
 # ╔═╡ f5f32d5d-0c13-4865-8024-ca47208c9b8e
@@ -247,7 +247,7 @@ We create a DiscreteProblem by calling the `DiscreteProblem` function. Applying 
 """
 
 # ╔═╡ e2f215e7-8d20-4e72-9e0b-cc0ce150e55b
-dprob = DiscreteProblem(infection_model, u0, tspan, params)
+dprob = DiscreteProblem(infection_model, u0, tspan, params);
 
 # ╔═╡ d061c4e2-8fbb-4ac5-95cf-c37d2916e669
 md"""

@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 71118b72-1db2-11ef-1f5b-a163b0b7c390
@@ -25,6 +25,9 @@ using Catalyst
 
 # ╔═╡ 99229de2-1e9b-470f-b532-ed1afb91c971
 using DifferentialEquations, Plots
+
+# ╔═╡ c7c90b19-764e-41b6-a887-78e80d09ef59
+using Distributions
 
 # ╔═╡ 5308b9d5-8068-48d7-b7a2-9e6ae043321b
 md"""
@@ -198,7 +201,7 @@ In the parameter list, you could also mention another default value for the defa
 """
 
 # ╔═╡ 38e28866-8c09-4675-a9c1-d9ba4012070b
-params = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4, :η => 50]
+parms = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4, :η => 50]
 
 # ╔═╡ 5ef6414d-943c-4a1e-a528-af0fb61d4f9a
 md"""
@@ -208,7 +211,7 @@ Create the SDE problem.
 """
 
 # ╔═╡ 1d5c6ff5-6a63-4491-981e-9c1ab5d37d60
-sprob = SDEProblem(infection_sde_model, u0, tspan, params)
+sprob = SDEProblem(infection_sde_model, u0, tspan, parms);
 
 # ╔═╡ 0da84898-6170-4d71-acaf-23d97bfd7be9
 md"""
@@ -268,7 +271,7 @@ You can try this by uncommenting the instruction below and run the cell.
 
 # ╔═╡ 5b91a7c2-64a3-4987-a9c6-6b1432d9b226
 md"""
-You will have noticed the detection of instabilities and the abortions. This is because of the stochastic effects that can cause calculations to become unstable. In order to cope with that, we will make sure that at every step the states $S$, $I$, $R$ and $D$ always remain within their boundaries. Here this is in the interval $[0, 10000000]$. To realize this we can create a so-called `DisceteCallback` function using the functions below, namely, `condition` and `affect!`. Both put in a `DisceteCallback` function they basically will make sure that at each (integration) step, the states (cf. `integrator.u[i]`) will not go below $0$ or above $10000000$.
+You will have noticed the detection of instabilities and the abortions. This is because of the stochastic effects that can cause calculations to become unstable for this particular case. In order to cope with that, we will make sure that at every step the states $S$, $I$, $R$ and $D$ always remain within their boundaries. Here this is in the interval $[0, 10\,000\,000]$. To realize this we can create a so-called `DisceteCallback` function using the functions below, namely, `condition` and `affect!`. Both put in a `DisceteCallback` function they basically will make sure that at each (integration) step, the states (cf. `integrator.u[i]`) will not go below $0$ or above $10\,000\,000$.
 """
 
 # ╔═╡ 3aebcf0b-717b-49bd-ae6b-ca7fffd9b75b
@@ -307,10 +310,118 @@ Now we can solve the ensemble problem while including the callback function.
 """
 
 # ╔═╡ 3f57d613-0042-4df9-9892-edaa90c0f52e
-essol = solve(esprob, EM(), dt=0.1, callback=cb, save_everystep=true, trajectories=100)
+essol = solve(esprob, EM(), dt=0.1, callback=cb, save_everystep=false, trajectories=100)
 
 # ╔═╡ 72770915-e1f5-41c5-84d2-9e6cbc0c24ff
 plot(essol)
+
+# ╔═╡ 573f9c4d-9616-48e6-8d5a-a0660710bcdc
+essol.u
+
+# ╔═╡ 9b5275ed-cdae-44aa-a86a-c6131a2bcc46
+md"""
+We are now interested in the times of the infection peak when there is an epidemic. Notice that some simulations do not show an infection peak. We will later discard these cases.
+"""
+
+# ╔═╡ cf098875-edef-4d98-a1db-660ae99679c3
+md"""
+Suppose you take the index of a simulation where there is a clear infection peak.
+"""
+
+# ╔═╡ bc6364c4-997d-4e31-be0b-2b8e92e96aa5
+i = 3
+
+# ╔═╡ f01a76a4-95e8-4b20-b1b7-104284064420
+md"""
+The time vector corresponding to this simulation is:
+"""
+
+# ╔═╡ 44acee7b-1928-4c88-b4a9-f15bb2be8299
+essol.u[i].t
+
+# ╔═╡ d4c039c5-35fa-4f06-947f-b8fb709fe285
+md"""
+The corresponding $I$-vector is:
+"""
+
+# ╔═╡ d4e37e1e-8a8c-471e-9148-f3fd996fc164
+essol.u[i][:I]
+
+# ╔═╡ b99761c3-6275-431f-a23e-54faae0262e0
+md"""
+You can determine the maximum with the function `maximum`:
+"""
+
+# ╔═╡ 7e33cf89-dc3c-4db3-9a4a-a6042de302db
+I_max = maximum(essol.u[i][:I])
+
+# ╔═╡ a4d7650a-a952-4317-8f40-f74f6499706d
+md"""
+For element wise comparing `I_max` with `essol.u[i][:I]` you need to use the operator `.==` (notice the *dot* before `==`).
+"""
+
+# ╔═╡ 9cb3fe2a-77f9-443b-8b7e-842839bfcdf9
+I_max .== essol.u[i][:I]
+
+# ╔═╡ a1b8b355-2f41-4810-b29e-5d911e7905b5
+md"""
+Now you can find the (first) index in `essol.u[i][:I]` where this maximum is located with the function `findfirst`.
+"""
+
+# ╔═╡ dac7b56f-8b3d-47c6-a68a-f56fc9037402
+i_max = findfirst(I_max .== essol.u[i][:I])
+
+# ╔═╡ 260da0ca-38f5-40e4-9f33-814c03439c5c
+md"""
+Using this index in the time vector gives you the time at which the maximum occurred.
+"""
+
+# ╔═╡ 2fe1a126-b8fd-4adb-95be-37fe87561d13
+essol.u[i].t[i_max]
+
+# ╔═╡ 0dc9d34b-4127-498f-935c-600867dcae65
+md"""
+The next small piece of code will fill the vector `times` with the times at which a maximum occurred in the $I$-vector in the case of an epidemic. To do that, we only consider times that are geater than $10\;days$.
+"""
+
+# ╔═╡ af6c2b51-2d9a-4785-a194-6e9cdd54473a
+begin
+	times = []           # to store the relevant times
+	for i = 1:100        # iterate from 1 to 100
+		I_max = maximum(essol.u[i][:I])             # get the maximum of I
+		i_max = findfirst(I_max .== essol.u[i][:I]) # get the corresponding index
+		t_max = essol.u[i].t[i_max]                 # get the time 
+		if t_max > 10    # make sure it is greater than 10 days
+			append!(times, t_max)                   # append to times
+		end
+	end
+end
+
+# ╔═╡ 01d9195f-7e76-4c64-9196-86be4b34fad5
+# histogram(times, bins=range(0, 90, length=91))
+histogram(times, bins=0:90)
+
+# ╔═╡ 67328358-a4f3-477d-a350-1c3b3c63b941
+md"""
+If you want to get some statistical numbers, you will need to use the package `Distributions`.
+"""
+
+# ╔═╡ 27ce94ea-389c-427c-b55a-a92a0b555992
+md"""
+Now you can for example calculate the mean and standard deviation.
+"""
+
+# ╔═╡ c164b2f8-0265-4378-b0e8-c2569fdc1ea4
+mean(times)
+
+# ╔═╡ 04995e30-0d5f-4ebf-b4ee-4311c54ab3de
+std(times)
+
+# ╔═╡ 2ab0e26e-cf2b-4490-929a-cd29a0842b26
+maximum(times)
+
+# ╔═╡ b08d316d-772d-4a78-a65c-6b9d52e6274f
+minimum(times)
 
 # ╔═╡ Cell order:
 # ╠═71118b72-1db2-11ef-1f5b-a163b0b7c390
@@ -369,3 +480,29 @@ plot(essol)
 # ╟─094d7363-7918-4bd5-ae2b-52f283468317
 # ╠═3f57d613-0042-4df9-9892-edaa90c0f52e
 # ╠═72770915-e1f5-41c5-84d2-9e6cbc0c24ff
+# ╠═573f9c4d-9616-48e6-8d5a-a0660710bcdc
+# ╟─9b5275ed-cdae-44aa-a86a-c6131a2bcc46
+# ╟─cf098875-edef-4d98-a1db-660ae99679c3
+# ╠═bc6364c4-997d-4e31-be0b-2b8e92e96aa5
+# ╟─f01a76a4-95e8-4b20-b1b7-104284064420
+# ╠═44acee7b-1928-4c88-b4a9-f15bb2be8299
+# ╟─d4c039c5-35fa-4f06-947f-b8fb709fe285
+# ╠═d4e37e1e-8a8c-471e-9148-f3fd996fc164
+# ╟─b99761c3-6275-431f-a23e-54faae0262e0
+# ╠═7e33cf89-dc3c-4db3-9a4a-a6042de302db
+# ╟─a4d7650a-a952-4317-8f40-f74f6499706d
+# ╠═9cb3fe2a-77f9-443b-8b7e-842839bfcdf9
+# ╟─a1b8b355-2f41-4810-b29e-5d911e7905b5
+# ╠═dac7b56f-8b3d-47c6-a68a-f56fc9037402
+# ╟─260da0ca-38f5-40e4-9f33-814c03439c5c
+# ╠═2fe1a126-b8fd-4adb-95be-37fe87561d13
+# ╟─0dc9d34b-4127-498f-935c-600867dcae65
+# ╠═af6c2b51-2d9a-4785-a194-6e9cdd54473a
+# ╠═01d9195f-7e76-4c64-9196-86be4b34fad5
+# ╟─67328358-a4f3-477d-a350-1c3b3c63b941
+# ╠═c7c90b19-764e-41b6-a887-78e80d09ef59
+# ╟─27ce94ea-389c-427c-b55a-a92a0b555992
+# ╠═c164b2f8-0265-4378-b0e8-c2569fdc1ea4
+# ╠═04995e30-0d5f-4ebf-b4ee-4311c54ab3de
+# ╠═2ab0e26e-cf2b-4490-929a-cd29a0842b26
+# ╠═b08d316d-772d-4a78-a65c-6b9d52e6274f

@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ f3ae43dc-f7e1-11ee-3615-695b9e85b621
@@ -138,7 +138,7 @@ Create the ODE problem and store it in `oprob`:
 """
 
 # ╔═╡ f222f889-d602-4654-9c90-a813738377c3
-# oprob = missing        # Uncomment and complete the instruction
+# oprob = missing;        # Uncomment and complete the instruction
 
 # ╔═╡ 18717738-ae99-4b41-8414-4c1823307dde
 md"""

@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 0c457482-95fe-11ef-0873-65164704c7a6
@@ -44,7 +44,7 @@ A possible model is the following differential equation:
 
 $$\cfrac{dX}{dt} = \mu t - \beta \cfrac{X}{X + \kappa}$$
 
-Lets denote $X$ in trillions [$tn$]. The term $\mu t$ stands for the procution of senescent cells, and the term $- \beta \cfrac{X}{X + \kappa}$ for the removal of senescent cells. The time $t$ is in years [$y$]. The coefficient $\eta$ [$tn/y^2$] is a proportionality factor for the production, $\beta$ [$tn/y$] is the removal rate coefficient and $\cfrac{X}{X + \kappa}$ [$-$] is the corresponding saturation factor, with $\kappa$ [$tn$] the amount of $X$ at which they inhibit half of their own removal rate.
+Lets denote the amount of senescent cells as $X$ in trillions [$tn$]. The term $\mu t$ stands for the procution of senescent cells, and the term $- \beta \cfrac{X}{X + \kappa}$ for the removal of senescent cells. The time $t$ is in years [$y$]. The coefficient $\eta$ [$tn/y^2$] is a proportionality factor for the production, $\beta$ [$tn/y$] is the removal rate coefficient and $\cfrac{X}{X + \kappa}$ [$-$] is the corresponding saturation factor, with $\kappa$ [$tn$] the amount of $X$ at which they inhibit half of their own removal rate.
 
 If this model was all there was, then all individuals would age at the same rate and die at the same age. The model does not explain why genetically identical organisms could differ in the number of senenscent cells. Therefore, we will introduce  noise in the model by treating it as a **Stochastic Differential Equation** (SDE) model, where noise will be added to both, production and removal processes.
 """
@@ -58,7 +58,7 @@ md"""
 md"""
 Implement the above ODE into a *reaction network object*, and name it `senescent_cells_rn`.
 
-Take a default initial value $X(t=0)=0.0$ for the *species* $X$, and default values of $\mu=0.00558$, $\beta=0.4464$, $\kappa=1.116$ for the *parameters* in the model. In addition to the parameters, take $\eta=0.1$ as the *default noise scaling* factor, and, furthermore, set the noise scaling to $0.5$ for the process exhibiting the saturating removal of damage.
+Take a default initial value $X(t=0)=$0.0 for the *species* $X$, and default values of $\mu=$0.00558, $\beta=$0.4464, $\kappa=$1.116 for the *parameters* in the model. In addition to the parameters, take $\eta=$0.1 as the *default noise scaling* factor, and, furthermore, set the noise scaling to 0.5 for the process exhibiting the saturating removal of damage.
 """
 
 # ╔═╡ 38edfb50-7d6f-4fcc-b328-95ecb26d6de1
@@ -70,6 +70,11 @@ Take a default initial value $X(t=0)=0.0$ for the *species* $X$, and default val
 #     missing
 #     missing
 # end
+
+# ╔═╡ 8358d849-87ac-4d22-b2f9-86c957a1691b
+md"""
+You could use the `mm` function. For information about it, click [here](https://docs.sciml.ai/Catalyst/stable/api/#Catalyst.mm).
+"""
 
 # ╔═╡ 51edb519-2086-45a5-a666-b5a58c51b5e8
 md"""
@@ -86,7 +91,7 @@ md"""
 
 # ╔═╡ 98c1f94e-aea5-40c5-bee7-8df8794fedb3
 md"""
-Initialize a vector `u0` with the default initial condition, set the timespan for the simulation (we will simulate from $0\;y$ to $120\;y$), and initialize a vector `param` with the default parameter values. In that way, later, you can change the initial condition and the parameter values if you want to try other values.
+Initialize a vector `u0` with the default initial condition, set the timespan for the simulation (we will simulate from $0\;y$ to $120\;y$), and initialize a vector `parms` with the default parameter values. In that way, later, you can change the initial condition and the parameter values if you want to try other values.
 """
 
 # ╔═╡ 80db134e-bc57-41b0-8e1b-2ac6bff0c806
@@ -109,7 +114,7 @@ Create the SDE problem.
 """
 
 # ╔═╡ 7d164cdf-fd63-4c85-b168-3279d6d658eb
-# sprob = missing                # Uncomment and complete the instruction
+# sprob = missing;                # Uncomment and complete the instruction
 
 # ╔═╡ 9f9a616a-4353-4f9a-8da5-effe4d214ed0
 md"""
@@ -152,7 +157,7 @@ Create an `EnsembleProblem` based on `sprob`.
 
 # ╔═╡ 7d531f11-1a64-4b43-aa4f-04d282a615bd
 md"""
-Solve the ensemble problem. Use `EM()` as solver, take a time step `dt=0.1`, use the options `save_everystep=true`, and `trajectories=100`.
+Solve the ensemble problem. Use `EM()` as solver, take a time step `dt=0.1`, use the option `trajectories=100`.
 """
 
 # ╔═╡ 5aaf1395-9b7c-451f-b1a3-44e5ba3c4d6a
@@ -181,7 +186,7 @@ md"""
 !!! hints
 - The number of senescent cells of the `i`-th trajoctory can be accessed with: `essol.u[i][:X]`.
 - The index of the first element in the `i`-th trajectory that is greater than 5 can be found with: `findfirst(>(5), essol.u[i][:X])`.
-- An index is a valid index when it if not `nothing`.
+- An index is a valid index when it is not `nothing`.
 - The time at index position `j` can be accessed with `essol.u[i].t[j]`
 - Appending an element, e.g., `x` to an array `times` can be done as follow: `append!(times, x)`
 """
@@ -201,7 +206,7 @@ md"""
 
 # ╔═╡ 65edc40f-430f-4d1a-9062-17bf8e1d7d59
 md"""
-Make a histogram with the array `times`. Use `bins=range(0, 120, length=121)`.
+Make a histogram with the array `times`. Use `bins=range(0, 120, length=121)` or `bins=0:120`.
 """
 
 # ╔═╡ 17a51f9e-0adf-4802-8d13-c43eb7801bc7
@@ -285,6 +290,7 @@ md"- Answer: missing"
 # ╟─d917e75d-eefb-415f-ba45-2f1d7c62d63c
 # ╟─7bda135b-2e0a-425f-b30c-e5a09dbb8a4a
 # ╠═38edfb50-7d6f-4fcc-b328-95ecb26d6de1
+# ╟─8358d849-87ac-4d22-b2f9-86c957a1691b
 # ╟─51edb519-2086-45a5-a666-b5a58c51b5e8
 # ╠═b3dd11e4-1209-46f3-a47a-07b54c5e9d77
 # ╟─0524da26-35cb-4846-b7ef-f5842ae5db74

@@ -1,0 +1,1758 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% chemplants.sty
+%% Copyright 2018-2019 Elia Arnese Feffin
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3c
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+% 	http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status "maintained".
+% 
+% The Current Maintainer of this work is Elia Arnese Feffin.
+% The Current Maintainer can be reached at the e-mail: elia24913@me.com.
+%
+% This work consists of the files chemplants.sty, chemplants-doc.tex
+% and chemplants-changes.tex, together with the derived files
+% chemplants-doc.pdf and chemplants-changes.pdf.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%:File chemplants.sty
+\NeedsTeXFormat{LaTeX2e}
+\def\chpversion{0.9.8}
+\def\chpdate{2019/11/19}
+\ProvidesPackage{chemplants}[%
+	2019/11/19 v0.9.8 Symbology to draw chemical plants with TikZ%
+]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%: Packages Loading
+
+\RequirePackage{ifthen}								% If-Then Logic
+\RequirePackage{tikz}								% The Mother of Them All
+	\usetikzlibrary{decorations.markings}			% Patch Patterns
+	\usetikzlibrary{hobby}							% Hobby's Algorithm
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%: Definitions, Parameters and Commands
+
+%:	Default Parameters
+\def\chp@StreamTip{stealth}							% Stream Tip
+\def\chp@MainStreamThickness{semithick}				% Main Stream Thickness
+\def\chp@SecondaryStreamThickness{thin}				% Secondary Stream Thickness
+\def\chp@UtilityStreamThickness{very thin}			% Utility Stream Thickness
+\def\chp@UnitThickness{thick}						% Unit Thickness
+\def\chp@UnitScale{1}								% Unit Scale
+\def\chp@SignalThickness{very thin}					% Signal Thickness
+\def\chp@HiddenStreamStyle{dashed}					% Hidden Stream
+\def\chp@HiddenComponentStyle{densely dotted}		% Hidden Component
+\def\chp@MeasureColor{gray}							% Measure Color
+\def\chp@MeasureTip{|}								% Measure Tip
+\def\chp@MeasureThickness{thin}						% Measure Thickness
+\def\chp@MeasureFontSize{\footnotesize}				% Measure Font Size
+\def\chp@InstrumentThickness{thin}					% Instrument Thickness
+\def\chp@InstrumentScale{1}							% Instrument Scale
+\def\chp@InstrumentFontSize{\footnotesize}			% Instrument Font Size
+\def\chp@BlockThickness{thick}						% Block Thickness
+\def\chp@BlockScale{1}								% Block Scale
+\def\chp@BlockFontSize{\footnotesize}				% Block Font Size
+
+%:	Commands to Set Parameters
+\newcommand*{\setchpstreamtip}[1]{%					% Stream Tip
+	\gdef\chp@StreamTip{#1}%
+}
+\newcommand*{\setchpmainstreamthickness}[1]{%		% Main Stream Thickness
+	\gdef\chp@MainStreamThickness{#1}%
+}
+\newcommand*{\setchpsecondarystreamthickness}[1]{%	% Secondary Stream Thickness
+	\gdef\chp@MainStreamThickness{#1}%
+}
+\newcommand*{\setchputilitystreamthickness}[1]{%		% Utility Stream Thickness
+	\gdef\chp@UtilityStreamThickness{#1}%
+}
+\newcommand*{\setchpunitthickness}[1]{%				% Unit Thickness
+	\gdef\chp@UnitThickness{#1}%
+}
+\newcommand*{\setchpunitscale}[1]{%					% Unit Scale
+	\gdef\chp@UnitScale{#1}%
+}
+\newcommand*{\setchpsignalthickness}[1]{%			% Signal Thickness
+	\gdef\chp@SignalThickness{#1}%
+}
+\newcommand*{\setchphiddenstreamstyle}[1]{%			% Hidden Stream Style
+	\gdef\chp@HiddenStreamStyle{#1}%
+}
+\newcommand*{\setchphiddencomponentstyle}[1]{%		% Hidden Component Style
+	\gdef\chp@HiddenComponentStyle{#1}%
+}
+\newcommand*{\setchpmeasurecolor}[1]{%				% Measure Color
+	\gdef\chp@MeasureColor{#1}%
+}
+\newcommand*{\setchpmeasuretip}[1]{%					% Measure Tip
+	\gdef\chp@MeasureTip{#1}%
+}
+\newcommand*{\setchpmeasurethickness}[1]{%			% Measure Thickness
+	\gdef\chp@MeasureThickness{#1}%
+}
+\newcommand*{\setchpmeasurefontsize}[1]{%			% Measure
+	\gdef\chp@MeasureFontSize{#1}%
+}
+\newcommand*{\setchpinstrumentthickness}[1]{%		% Instrument Thickness
+	\gdef\chp@InstrumentThickness{#1}%
+}
+\newcommand*{\setchpinstrumentscale}[1]{%			% Instrument Scale
+	\gdef\chp@InstrumentScale{#1}%
+}
+\newcommand*{\setchpinstrumentfontsize}[1]{%			% Instrument Font Size
+	\gdef\chp@InstrumentFontSize{#1}%
+}
+\newcommand*{\setchpblockthickness}[1]{%				% Block Thickness
+	\gdef\chp@BlockThickness{#1}%
+}
+\newcommand*{\setchpblockscale}[1]{%					% Block Scale
+	\gdef\chp@BlockScale{#1}%
+}
+\newcommand*{\setchpblockfontsize}[1]{%				% Block Font Size
+	\gdef\chp@BlockFontSize{#1}%
+}
+
+%:	Measure Command
+\newcommand*{\measure}[4][below]{%
+	\draw [chpmeasure] #2 -- #3
+	node [pos=0.5,sloped,#1,font=\chp@MeasureFontSize] {#4};%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%: Styles for Streams, Units and Signals
+
+%:	Main Stream
+\tikzset{main stream/.style=%
+	{%
+	-\chp@StreamTip,%
+	\chp@MainStreamThickness,%
+	}%
+}
+
+%:	Secondary Stream
+\tikzset{secondary stream/.style=%
+	{%
+	-\chp@StreamTip,%
+	\chp@SecondaryStreamThickness,%
+	}%
+}
+
+%:	Utility Stream
+\tikzset{utility stream/.style=%
+	{%
+	-\chp@StreamTip,%
+	\chp@UtilityStreamThickness,
+	}%
+}
+
+%:	Process Unit
+\tikzset{chpunitstyle/.style=%
+	{%
+	\chp@UnitThickness,%
+	scale=\chp@UnitScale%
+	}%
+}
+
+%:	Signal
+\tikzset{signal/.style=%	
+	{%
+		\chp@SignalThickness,%
+		decoration={%
+			markings, mark=between positions 5mm and (1-5mm) step 5mm with{%
+				\draw [\chp@SignalThickness] (-2pt,2pt) -- (2pt,-2pt);
+				\draw [\chp@SignalThickness] (-1pt,2pt) -- (3pt,-2pt);
+			}%
+		}, postaction={decorate}%
+	}%
+}
+
+%:	Short Signal
+\tikzset{short signal/.style=%
+	{%
+		\chp@SignalThickness,%
+		decoration={%
+			markings, mark=at position 0.5 with{%
+				\draw [\chp@SignalThickness] (-2pt,2pt) -- (2pt,-2pt);
+				\draw [\chp@SignalThickness] (-1pt,2pt) -- (3pt,-2pt);%
+			}%
+		}, postaction={decorate}%
+	}%
+}
+
+%:	Hidden Stream
+\tikzset{hidden stream/.style=%
+	{%
+	\chp@HiddenStreamStyle%
+	}%
+}
+
+%:	Hidden Component
+\tikzset{hidden component/.style=%
+	{%
+	\chp@HiddenComponentStyle%
+	}%
+}
+
+%:	Measure
+\tikzset{chpmeasure/.style=%	
+	{%
+		draw=\chp@MeasureColor,%
+		\chp@MeasureTip-\chp@MeasureTip,%
+		\chp@MeasureThickness%
+	}%
+}
+
+%:	Instrument
+\tikzset{chpinstrumentstyle/.style=%
+	{%
+	\chp@InstrumentThickness,%
+	scale=\chp@InstrumentScale%
+	}%
+}
+
+%:	Block
+\tikzset{chpblockstyle/.style=%
+	{%
+	\chp@BlockThickness,%
+	scale=\chp@BlockScale%
+	}%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%: Process Units
+
+%:	Fluids and Solids Storage
+%:		Tank
+\tikzset{tank/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-1,-0.915) to [out=270,in=270]
+		(1,-0.915) --
+		(1,0.915) to [out=90,in=90]
+		(-1,0.915) -- cycle;
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-1,0);
+		\coordinate (-bottom left) at (-1,-0.915);
+		\coordinate (-bottom) at (0,-1.5);
+		\coordinate (-bottom right) at (1,-0.915);
+		\coordinate (-right) at (1,0);
+		\coordinate (-top right) at (1,0.915);
+		\coordinate (-top) at (0,1.5);
+		\coordinate (-top left) at (-1,0.915);
+	\end{scope}
+	}%
+}
+%:		Cone Tank
+\tikzset{cone tank/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-1.5,-1.5) --
+		(1.5,-1.5) --
+		(1.5,1.1) --
+		(0,1.5) --
+		(-1.5,1.1) -- cycle;
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-1.5,0);
+		\coordinate (-bottom left) at (-1.5,-1.4);
+		\coordinate (-bottom) at (0,-1.5);
+		\coordinate (-bottom right) at (1.5,-1.4);
+		\coordinate (-right) at (1.5,0);
+		\coordinate (-top right) at (1.5,1.1);
+		\coordinate (-top) at (0,1.5);
+		\coordinate (-top left) at (-1.5,1.1);
+	\end{scope}
+	}%
+}
+%:		Dome Tank
+\tikzset{dome tank/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-1.5,-1.5) --
+		(1.5,-1.5) --
+		(1.5,0.7) to [out=90,in=0]
+		(0,1.5) to [out=180,in=90]
+		(-1.5,0.7) -- cycle;
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-1.5,0);
+		\coordinate (-bottom left) at (-1.5,-1.4);
+		\coordinate (-bottom) at (0,-1.5);
+		\coordinate (-bottom right) at (1.5,-1.4);
+		\coordinate (-right) at (1.5,0);
+		\coordinate (-top right) at (1.5,0.7);
+		\coordinate (-top) at (0,1.5);
+		\coordinate (-top left) at (-1.5,0.7);
+	\end{scope}
+	}%
+}
+%:		Floating Roof Tank
+\tikzset{floating roof tank/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-1.5,1.5) --
+		(-1.5,-1.5) --
+		(1.5,-1.5) --
+		(1.5,1.5);
+	\draw [chpunitstyle]
+		(-1.45,1.4) circle (0.05)
+		(1.45,1.4) circle (0.05)
+		(-1.4,1.3) rectangle (1.4,1.5);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-1.5,0);
+		\coordinate (-bottom left) at (-1.5,-1.4);
+		\coordinate (-bottom) at (0,-1.5);
+		\coordinate (-bottom right) at (1.5,-1.4);
+		\coordinate (-right) at (1.5,0);
+		\coordinate (-top right) at (1.5,1.2);
+		\coordinate (-top) at (0,1.5);
+		\coordinate (-top left) at (-1.5,1.2);
+	\end{scope}
+	}%
+}
+%:		Bell Gasholder
+\tikzset{bell gasholder/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-1.5,0.5) --
+		(-1.5,-1.5) --
+		(1.5,-1.5) --
+		(1.5,0.5);
+	\draw [chpunitstyle]
+		(1.45,-0.5) --
+		(1.45,0.7) to [out=90,in=0]
+		(0,1.45) to [out=180,in=90]
+		(-1.45,0.7) -- (-1.45,-0.50);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-1.5,0);
+		\coordinate (-bottom left) at (-1.5,-1.4);
+		\coordinate (-bottom) at (0,-1.5);
+		\coordinate (-bottom right) at (1.5,-1.4);
+		\coordinate (-right) at (1.5,0);
+		\coordinate (-top right) at (1.45,0.7);
+		\coordinate (-top) at (0,1.5);
+		\coordinate (-top left) at (-1.45,0.7);
+	\end{scope}
+	}%
+}
+%:		Dry Gasholder
+\tikzset{dry gasholder/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(1.5,-1.0) arc
+		(0:180:1.5) -- cycle;
+	\draw [chpunitstyle]
+		(1.5,-1.0) --
+		(1.5,1.0) --
+		(-1.5,1.0) --
+		(-1.5,-1.0);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-1.5,0);
+		\coordinate (-bottom left) at (-1.5,-0.9);
+		\coordinate (-bottom) at (0,-1.0);
+		\coordinate (-bottom right) at (1.5,-0.9);
+		\coordinate (-right) at (1.5,0);
+		\coordinate (-top right) at (1.5,1);
+		\coordinate (-top) at (0,1);
+		\coordinate (-top left) at (-1.5,1);
+		\coordinate (-dome top) at (0,0.5);
+	\end{scope}
+	}%
+}
+
+%:	Fluids Handling
+%:		Centrifugal Pump
+\tikzset{centrifugal pump/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) circle (0.4) circle (0.05);
+	\draw [chpunitstyle]
+		(230.19:0.4) --
+		++(230.19:0.377) --
+		++(1,0) -- ++(129.81:0.377);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.4,0);
+		\coordinate (-bottom) at (0,-0.6);
+		\coordinate (-right) at (0.4,0);
+		\coordinate (-top) at (0,0.4);
+	\end{scope}
+	}%
+}
+%:		Rotary Pump
+\tikzset{rotary pump/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.4,0) arc
+		(180:360:0.4) --
+		(0.4,0.5) arc
+		(0:180:0.4) -- cycle
+		(0,0) circle (0.225)
+		(0,0.5) circle (0.225);
+	\draw [chpunitstyle]
+		(230.19:0.4) --
+		++(230.19:0.377) --
+		++(1,0) -- ++(129.81:0.377);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.4,0.25);
+		\coordinate (-bottom) at (0,-0.6);
+		\coordinate (-right) at (0.4,0.25);
+		\coordinate (-top) at (0,0.9);
+	\end{scope}
+	}%
+}
+%:		Liquid Ring Pump
+\tikzset{liquid ring pump/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) circle (0.4) circle (0.325);
+	\draw [chpunitstyle]
+		(230.19:0.4) --
+		++(230.19:0.377) --
+		++(1,0) -- ++(129.81:0.377);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.4,0);
+		\coordinate (-bottom) at (0,-0.6);
+		\coordinate (-right) at (0.4,0);
+		\coordinate (-top) at (0,0.4);
+	\end{scope}
+	}%
+}
+%:		Reciprocating Pump
+\tikzset{reciprocating pump/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.4,-0.4) rectangle (0.4,0.4);
+	\draw [chpunitstyle]
+		(-0.3,-0.4) -- (-0.3,-0.6)
+		(0.3,-0.4) -- (0.3,-0.6)
+		(-0.5,-0.6) -- (0.5,-0.6);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.4,0);
+		\coordinate (-bottom) at (0,-0.6);
+		\coordinate (-right) at (0.4,0);
+		\coordinate (-top) at (0,0.4);
+	\end{scope}
+	}%
+}
+%:		Fan
+\tikzset{fan/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0.4,0.4) --
+		(0,0.4) arc
+		(90:360:0.4) -- cycle
+		(0,0) circle (0.15);
+	\draw [chpunitstyle]
+		(230.19:0.4) --
+		++(230.19:0.377) --
+		++(1,0) -- ++(129.81:0.377);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.4,0);
+		\coordinate (-bottom) at (0,-0.6);
+		\coordinate (-right) at (0.4,0);
+		\coordinate (-top) at (0,0.4);
+		\coordinate (-outlet) at (0.4,0.4);
+	\end{scope}
+	}%
+}
+%:		Centrifugal Compressor
+\tikzset{centrifugal compressor/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.9,-0.4) --
+		(0.9,-0.2) --
+		(0.9,0.2) --
+		(-0.9,0.4) -- cycle;
+	\draw [chpunitstyle]
+		(-0.8,-0.39) -- (-0.8,-0.6)
+		(0.8,-0.21) -- (0.8,-0.6)
+		(-1.0,-0.6) -- (1.0,-0.6);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.9,0);
+		\coordinate (-bottom) at (0,-0.6);
+		\coordinate (-right) at (0.9,0);
+		\coordinate (-inlet bottom) at (-0.9,-0.4);
+		\coordinate (-outlet bottom) at (0.9,-0.2);
+		\coordinate (-outlet top) at (0.9,0.2);
+		\coordinate (-inlet top) at (-0.9,0.4);
+	\end{scope}
+	}%
+}
+%:		Rotary Compressor
+\tikzset{rotary compressor/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.4,0) arc
+		(180:360:0.4) --
+		(0.4,0.5) arc
+		(0:180:0.4) -- cycle
+		(0.325,0.5) arc
+		(0:180:0.325) to [out=270,in=90]
+		(0.325,0) arc (360:180:0.325);
+	\draw [chpunitstyle]
+		(230.19:0.4) --
+		++(230.19:0.377) --
+		++(1,0) -- ++(129.81:0.377);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.4,0.25);
+		\coordinate (-bottom) at (0,-0.6);
+		\coordinate (-right) at (0.4,0.25);
+		\coordinate (-top) at (0,0.9);
+	\end{scope}
+	}%
+}
+%:		Reciprocating Compressor
+\tikzset{reciprocating compressor/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) circle (0.4)
+		(0.2,-0.346) --
+		(1.4,-0.346) --
+		(1.4,0.346) --
+		(0.2,0.346);
+	\draw [chpunitstyle]
+		(0.2,-0.346) -- (0.2,-0.6)
+		(-0.2,-0.346) -- (-0.2,-0.6)
+		(1.3,-0.346) -- (1.3,-0.6)
+		(-0.5,-0.6) -- (1.5,-0.6);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.4,0);
+		\coordinate (-bottom) at (0.5,-0.6);
+		\coordinate (-top) at (0,0.4);
+		\coordinate (-inlet bottom) at (0.8,-0.346);
+		\coordinate (-outlet) at (1.4,0);
+		\coordinate (-inlet top) at (0.8,0.346);
+	\end{scope}
+	}%
+}
+%:		MultiStage Compressor
+\tikzset{multistage compressor/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) circle (0.4)
+		(0.2,-0.346) --
+		(0.7,-0.346) --
+		(0.7,0.346) -- (0.2,0.346)
+		(0.7,-0.231) --
+		(1.1,-0.231) --
+		(1.1,0.231) -- (0.7,0.231)
+		(1.1,-0.116) --
+		(1.4,-0.116) --
+		(1.4,0.116) -- (1.1,0.116);
+	\draw [chpunitstyle]
+		(0.2,-0.346) -- (0.2,-0.6)
+		(-0.2,-0.346) -- (-0.2,-0.6)
+		(1.3,-0.116) -- (1.3,-0.6)
+		(-0.5,-0.6) -- (1.5,-0.6);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.4,0);
+		\coordinate (-bottom) at (0.5,-0.6);
+		\coordinate (-top) at (0,0.4);
+		\coordinate (-first bottom) at (0.45,-0.346);
+		\coordinate (-second bottom) at (0.9,-0.231);
+		\coordinate (-third bottom) at (1.25,-0.116);
+		\coordinate (-outlet) at (1.4,0);
+		\coordinate (-third top) at (1.25,0.116);
+		\coordinate (-second top) at (0.9,0.231);
+		\coordinate (-first top) at (0.45,0.346);
+	\end{scope}
+	}%
+}
+%:		Ejector
+\tikzset{ejector/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0.25,-0.1) --
+		(0.25,-0.25) --
+		(-0.25,-0.25) --
+		(-0.25,0.25) --
+		(0.25,0.25) --
+		(0.25,0.1) --
+		(1.25,0.25) --
+		(1.25,-0.25) -- cycle;
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-main inlet) at (-0.25,0);
+		\coordinate (-suck inlet bottom) at (0,-0.25);
+		\coordinate (-outlet) at (1.25,0);
+		\coordinate (-suck inlet top) at (0,0.25);
+	\end{scope}
+	}%
+}
+
+%:	Heat Exchangers
+%:		Heat Exchanger
+\tikzset{heat exchanger/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) circle (0.5)
+		(-0.5,0) --
+		(-0.25,0) --
+		(-0.25,0.3) --
+		(0.25,-0.3) --
+		(0.25,0) -- (0.5,0);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-shell bottom) at (0,-0.5);
+		\coordinate (-shell top) at (0,0.5);
+		\coordinate (-pipes left) at (-0.5,0);
+		\coordinate (-pipes right) at (0.5,0);
+	\end{scope}
+	}%
+}
+%:		Two-Phases Heat Exchanger
+\tikzset{heat exchanger biphase/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) circle (0.5)
+		(30:0.5) --
+		++(-0.6,0) --
+		++(0.3,-0.25) --
+		++(-0.3,-0.25) -- ++(0.6,0);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-shell left) at (-0.5,0);
+		\coordinate (-shell bottom) at (0,-0.5);
+		\coordinate (-shell right) at (0.5,0);
+		\coordinate (-shell top) at (0,0.5);
+		\coordinate (-pipes bottom) at (-30:0.5);
+		\coordinate (-pipes top) at (30:0.5);
+	\end{scope}
+	}%
+}
+%:		Boiler
+\tikzset{boiler/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) circle (0.5);
+	\draw [chpunitstyle, -\chp@StreamTip]
+		(-0.7,0.5) --
+		(-0.5,0.5) --
+		(0.5,-0.5) -- (0.7,-0.5);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.5,0);
+		\coordinate (-bottom) at (0,-0.5);
+		\coordinate (-right) at (0.5,0);
+		\coordinate (-top) at (0,0.5);
+		\coordinate (-pipes inlet) at (-0.7,0.5);
+		\coordinate (-pipes outlet) at (0.7,-0.5);
+	\end{scope}
+	}%
+}
+%:		Condenser
+\tikzset{condenser/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) circle (0.5);
+	\draw [chpunitstyle, -\chp@StreamTip]
+		(-0.7,-0.5) --
+		(-0.5,-0.5) --
+		(0.5,0.5) --
+		(0.7,0.5);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.5,0);
+		\coordinate (-bottom) at (0,-0.5);
+		\coordinate (-right) at (0.5,0);
+		\coordinate (-top) at (0,0.5);
+		\coordinate (-pipes inlet) at (-0.7,-0.5);
+		\coordinate (-pipes outlet) at (0.7,0.5);
+	\end{scope}
+	}%
+}
+%:		Air Heat Exchanger
+\tikzset{air heat exchanger/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.5,-0.5) rectangle (0.5,0.5)
+		(0,0) circle (0.4)
+		(-0.3,0) --
+		(-0.3,-0.15) --
+		(0.3,0.15) --
+		(0.3,0) -- cycle;
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.5,0);
+		\coordinate (-bottom) at (0,-0.5);
+		\coordinate (-right) at (0.5,0);
+		\coordinate (-top) at (0,0.5);
+	\end{scope}
+	}%
+}
+%:		Tube Bundle Heat Exchanger
+\tikzset{tube bundle heat exchanger/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-1.0,-0.3) --
+		(0.7,-0.3) arc
+		(270:450:0.3) --
+		(-1.0,0.3) -- cycle;
+	\foreach \i in {1, 2, ...,10} {%
+		\draw [chpunitstyle]
+			(-0.6,-0.3 + 0.06*\i) -- ++(1.2,0);
+	}
+	\draw [chpunitstyle]
+		(-1.0,-0.35) -- (-1.0,-0.3)
+		(-1.0,0.35) -- (-1.0,0.3)
+		(-0.6,-0.35) -- (-0.6,0.35)
+		(0.6,-0.35) -- (0.6,0.35);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-1.0,0);
+		\coordinate (-right) at (1.0,0);
+		\coordinate (-head bottom) at (-0.8,-0.3);
+		\coordinate (-head top) at (-0.8,0.3);
+		\coordinate (-shell bottom left) at (-0.5,-0.3);
+		\coordinate (-shell bottom) at (0,-0.3);
+		\coordinate (-shell bottom right) at (0.5,-0.3);
+		\coordinate (-shell top right) at (0.5,0.3);
+		\coordinate (-shell top) at (0,0.3);
+		\coordinate (-shell top left) at (-0.5,0.3);
+	\end{scope}
+	}%
+}
+%:		Plate Heat Exchanger
+\tikzset{plate heat exchanger/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.5,-0.7) rectangle
+		(0.5,0.7);
+	\foreach \i in {1, 2, ..., 4} {%
+		\draw [chpunitstyle]
+			(-0.5 + 0.2*\i,-0.7) -- ++(0,1.4);
+	}
+	\draw [chpunitstyle]
+		(-0.5,-0.6) -- (0.5,0.6);
+	\draw [chpunitstyle]
+		(-0.5,-0.75) -- (-0.5,-0.7)
+		(-0.5,0.7) -- (-0.5,0.75)
+		(0.5,-0.75) -- (0.5,-0.7)
+		(0.5,0.7) -- (0.5,0.75);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.5,0);
+		\coordinate (-bottom) at (0,-0.7);
+		\coordinate (-right) at (0.5,0);
+		\coordinate (-top) at (0,0.7);
+		\coordinate (-inner left) at (-0.5,-0.6);
+		\coordinate (-inner right) at (0.5,0.6);
+		\coordinate (-outer left) at (-0.5,0.6);
+		\coordinate (-outer right) at (0.5,-0.6);
+	\end{scope}
+	}%
+}
+%:		Spiral Heat Exchanger
+\tikzset{spiral heat exchanger/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) circle (0.7);
+	\draw [chpunitstyle]
+		(-0.7,0) -- (0.001,0);
+	\draw [chpunitstyle]
+		plot [variable=\t, domain=0:720, hobby]
+			(\t:\t*0.7/720);
+	\draw [chpunitstyle, dashed]
+		(0,0) -- (0,0.7);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-inner center) at (-0.7,0);
+		\coordinate (-inner edge) at (0.7,0);
+		\coordinate (-outer center) at (0,0.7);
+		\coordinate (-outer edge) at (0,-0.7);
+	\end{scope}
+	}%
+}
+%:		Pipe Furnace
+\tikzset{pipe furnace/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-1.0,-0.5) --
+		(1.0,-0.5) --
+		(1.0,0.5) --
+		(0.2,0.75) --
+		(0.2,1.5) --
+		(-0.2,1.5) --
+		(-0.2,0.75) --
+		(-1.0,0.5) -- cycle;
+	\draw [chpunitstyle]
+		(-1.0,0) --
+		(-0.75,0) --
+		(-0.6,-0.4) --
+		(-0.3,0.4) --
+		(0,-0.4) --
+		(0.3,0.4) --
+		(0.6,-0.4) --
+		(0.75,0) -- (1.0,0);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-bottom) at (0,-0.5);
+		\coordinate (-top) at (0,1.5);
+		\coordinate (-pipes left) at (-1.0,0);
+		\coordinate (-pipes right) at (1.0,0);
+	\end{scope}
+	}%
+}
+
+%:	Separators
+%:		Steam Trap
+\tikzset{steam trap/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(45:0.15) arc (45:225:0.15);
+	\draw [chpunitstyle, fill]
+		(225:0.15) arc (225:405:0.15) -- cycle;
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.15,0);
+		\coordinate (-bottom) at (0,-0.15);
+		\coordinate (-right) at (0.15,0);
+		\coordinate (-top) at (0,0.15);
+	\end{scope}
+	}%
+}
+%:		Gas-Liquid Separator
+\tikzset{gas-liquid separator/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.8,-1.032) to [out=270,in=270]
+		(0.8,-1.032) --
+		(0.8,1.032) to [out=90,in=90]
+		(-0.8,1.032) -- cycle;
+	\draw [chpunitstyle, densely dotted]
+			(-0.755,1.2) -- (0.755,1.2);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-bottom left) at (-0.8,-1.032);
+		\coordinate (-bottom right) at (0.8,-1.032);
+		\coordinate (-top right) at (0.8,1.032);
+		\coordinate (-top left) at (-0.8,1.032);
+		\coordinate (-stirrer) at (0.5,1.5);
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-inlet left) at (-0.8,0);
+		\coordinate (-inlet right) at (0.8,0);
+		\coordinate (-gas outlet) at (0,1.5);
+		\coordinate (-liquid outlet) at (0,-1.5);
+	\end{scope}
+	}%
+}
+%:		Cyclone
+\tikzset{cyclone/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.3,0.25) rectangle
+		(0.3,0) --
+		(0,-1.0) -- (-0.3,0);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-inlet left) at (-0.3,0.125);
+		\coordinate (-inlet right) at (0.3,0.125);
+		\coordinate (-gas outlet) at (0,0.25);
+		\coordinate (-solid outlet) at (0,-1.0);
+	\end{scope}
+	}%
+}
+%:		Stratifier
+\tikzset{stratifier/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(1.032,-0.8) to [out=0,in=0]
+		(1.032,0.8) --
+		(-1.032,0.8) to [out=180,in=180]
+		(-1.032,-0.8) -- cycle;
+	\draw [chpunitstyle]
+		(-0.9,-0.85) -- (-0.9,0.3)
+		(0.9,-0.85) -- (0.9,0)
+		(0.6,0.85) -- (0.6,0.7)
+		(0.6,0.6) -- (0.6,-0.6);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-1.5,0);
+		\coordinate (-bottom) at (0,-0.8);
+		\coordinate (-right) at (1.5,0);
+		\coordinate (-top right) at (1.032,0.8);
+		\coordinate (-top left) at (-1.032,0.8);
+		\coordinate (-inlet) at (0,0.8);
+		\coordinate (-light outlet) at (-1.032,-0.8);
+		\coordinate (-heavy outlet) at (1.032,-0.8);
+	\end{scope}
+	}%
+}
+%:		Settler
+\tikzset{settler/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-1.5,-0.2) --
+		(0,-0.8) --
+		(1.5,-0.2) --
+		(1.5,0.8) --
+		(-1.5,0.8) -- cycle;
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-inlet left) at (-1.5,-0.2);
+		\coordinate (-inlet right) at (1.5,-0.2);
+		\coordinate (-inlet top) at (0,0.8);
+		\coordinate (-liquid outlet left) at (-1.5,0.8);
+		\coordinate (-liquid outlet right) at (1.5,0.8);
+		\coordinate (-solid outlet) at (0,-0.8);
+	\end{scope}
+	}%
+}
+%:		Scrubber
+\tikzset{scrubber/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.3,-0.25) --
+		(0,-0.75) --
+		(0.3,-0.25) --
+		(0.3,0.55) to [out=90,in=0]
+		(0,0.75) to [out=180,in=90]
+		(-0.3,0.55) -- cycle;
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-gas inlet left) at (-0.3,-0.25);
+		\coordinate (-gas inlet right) at (0.3,-0.25);
+		\coordinate (-liquid inlet left) at (-0.3,0.55);
+		\coordinate (-liquid inlet right) at (0.3,0.55);
+		\coordinate (-gas outlet) at (0,0.75);
+		\coordinate (-liquid outlet) at (0,-0.75);
+	\end{scope}
+	}%
+}
+%:		Kettle Bolier
+\tikzset{kettle boiler/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-1.0,-0.3) --
+		(0.7,-0.3) to [out=0,in=270]
+		(1.0,0.2) to [out=90,in=0]
+		(0.7,0.7) --
+		(-0.3,0.7) --
+		(-0.6,0.3) --
+		(-1.0,0.3) -- cycle;
+	\draw [chpunitstyle]
+		(-1.0,-0.35) -- (-1.0,-0.3)
+		(-1.0,0.35) -- (-1.0,0.3)
+		(-0.6,-0.35) -- (-0.6,0.35)
+		(0.6,-0.35) -- (0.6,0.35);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-1.0,0);
+		\coordinate (-right) at (1.0,0.2);
+		\coordinate (-inlet) at (0,-0.3);
+		\coordinate (-gas outlet) at (0.2,0.7);
+		\coordinate (-liquid outlet) at (0.7,-0.3);
+		\coordinate (-head bottom) at (-0.8,-0.3);
+		\coordinate (-head top) at (-0.8,0.3);
+	\end{scope}
+	}%
+}
+%:		Tube Bundle Evaporator
+\tikzset{tube bundle evaporator/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.8,-1.032) to [out=270,in=270]
+		(0.8,-1.032) --
+		(0.8,1.032) to [out=90,in=90]
+		(-0.8,1.032) -- cycle;
+	\foreach \i in {0, 1, ..., 10} {%
+		\draw [chpunitstyle]
+			(-0.85,-0.9 + 0.08*\i) -- ++(1.7,0);
+	}
+	\draw [chpunitstyle]
+		(-0.85,-0.95) -- (-0.85,-0.05)
+		(0.85,-0.95) -- (0.85,-0.05);
+	\draw [chpunitstyle, densely dotted]
+		(-0.755,1.2) -- (0.755,1.2);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-bottom left) at (-0.8,-1.032);
+		\coordinate (-bottom right) at (0.8,-1.032);
+		\coordinate (-top right) at (0.8,1.032);
+		\coordinate (-top left) at (-0.8,1.032);
+		\coordinate (-inlet left) at (-0.8,0);
+		\coordinate (-inlet right) at (0.8,0);
+		\coordinate (-gas outlet) at (0,1.5);
+		\coordinate (-liquid outlet) at (0,-1.5);
+		\coordinate (-pipes left) at (-0.85,-0.5);
+		\coordinate (-pipes right) at (0.85,-0.5);
+	\end{scope}
+	}%
+}
+%:		Basket Evaporator
+\tikzset{basket evaporator/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.8,-1.032) to [out=270,in=270]
+		(0.8,-1.032) --
+		(0.8,1.032) to [out=90,in=90]
+		(-0.8,1.032) -- cycle;
+	\foreach \i in {1, 2, ...,19} {%
+		\draw [chpunitstyle]
+			(-0.8 + 0.08*\i,-0.9) -- ++(0,0.8);
+	}
+	\draw [chpunitstyle]
+		(-0.85,-0.9) -- (0.85,-0.9)
+		(-0.85,-0.1) -- (0.85,-0.1);
+	\draw [chpunitstyle, densely dotted]
+		(-0.755,1.2) -- (0.755,1.2);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-bottom left) at (-0.8,-1.032);
+		\coordinate (-bottom right) at (0.8,-1.032);
+		\coordinate (-top right) at (0.8,1.032);
+		\coordinate (-top left) at (-0.8,1.032);
+		\coordinate (-inlet left) at (-0.8,0);
+		\coordinate (-inlet right) at (0.8,0);
+		\coordinate (-gas outlet) at (0,1.5);
+		\coordinate (-liquid outlet) at (0,-1.5);
+		\coordinate (-shell top left) at (-0.8,-0.2);
+		\coordinate (-shell left) at (-0.8,-0.5);
+		\coordinate (-shell bottom left) at (-0.8,-0.8);
+		\coordinate (-shell bottom right) at (0.8,-0.8);
+		\coordinate (-shell right) at (0.8,-0.5);
+		\coordinate (-shell top right) at (0.8,-0.2);
+	\end{scope}
+	}%
+}
+%:		Climbing Film Evaporator
+\tikzset{climbing film evaporator/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.4,0.4) --
+		(-0.4,-1.2) to [out=270,in=180]
+		(0,-1.5) to [out=0,in=270]
+		(0.4,-1.2) -- (0.4,0.4)
+		(0.4,0.3) --
+		(0.8,0.6) --
+		(0.8,1.032) to [out=90,in=90]
+		(-0.8,1.032) --
+		(-0.8,0.6) -- (-0.4,0.3);
+	\foreach \i in {1, 2, ...,10} {%
+		\draw [chpunitstyle]
+			(-0.4 + 0.08*\i,-1.2) -- ++(0,1.5);
+	}
+	\draw [chpunitstyle]
+		(-0.45,0.3) -- (0.45,0.3)
+		(-0.45,-1.2) -- (0.45,-1.2);
+	\draw [chpunitstyle, -\chp@StreamTip]
+		(-0.5,0.37) --
+		(-0.6,0.23) --
+		(-0.6,-1.35) -- (-0.35,-1.35);
+	\draw [chpunitstyle, densely dotted]
+		(-0.755,1.2) -- (0.755,1.2);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-top right) at (0.8,1.032);
+		\coordinate (-top left) at (-0.8,1.032);
+		\coordinate (-inlet left) at (-0.8,0.6);
+		\coordinate (-inlet right) at (0.8,0.6);
+		\coordinate (-gas outlet) at (0,1.5);
+		\coordinate (-liquid outlet) at (0,-1.5);
+		\coordinate (-shell top left) at (-0.4,0.2);
+		\coordinate (-shell left) at (-0.4,-0.45);
+		\coordinate (-shell bottom left) at (-0.4,-1.1);
+		\coordinate (-shell bottom right) at (0.4,-1.1);
+		\coordinate (-shell right) at (0.4,-0.45);
+		\coordinate (-shell top right) at (0.4,0.2);
+	\end{scope}
+	}%
+}
+%:		Tube Bundle Crystallizer
+\tikzset{tube bundle crystallizer/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.8,-1.032) --
+		(0,-1.5) --
+		(0.8,-1.032) --
+		(0.8,1.032) to [out=90,in=90]
+		(-0.8,1.032) -- cycle;
+	\foreach \i in {0, 1, ..., 10} {%
+		\draw [chpunitstyle]
+			(-0.85,-0.9 + 0.08*\i) -- ++(1.7,0);
+	}
+	\draw [chpunitstyle]
+		(-0.85,-0.95) -- (-0.85,-0.05)
+		(0.85,-0.95) -- (0.85,-0.05);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-bottom left) at (-0.8,-1.032);
+		\coordinate (-bottom right) at (0.8,-1.032);
+		\coordinate (-top right) at (0.8,1.032);
+		\coordinate (-top left) at (-0.8,1.032);
+		\coordinate (-inlet left) at (-0.8,0);
+		\coordinate (-inlet right) at (0.8,0);
+		\coordinate (-liquid outlet) at (0,1.5);
+		\coordinate (-solid outlet) at (0,-1.5);
+		\coordinate (-pipes left) at (-0.85,-0.5);
+		\coordinate (-pipes right) at (0.85,-0.5);
+	\end{scope}
+	}%
+}
+%:		Stirred Crystallizer
+\tikzset{stirred crystallizer/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.8,-1.032) --
+		(0,-1.5) --
+		(0.8,-1.032) --
+		(0.8,1.032) to [out=90,in=90]
+		(-0.8,1.032) -- cycle;
+	\draw [chpunitstyle, yshift=-0.25cm, xslant=0.285]
+		(0,1.75) --
+		(0,0) to [out=150,in=90]
+		(-0.5,0) to [out=270,in=210]
+		(0,0) to [out=30,in=90]
+		(0.5,0) to [out=270,in=330] (0,0);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-bottom left) at (-0.8,-1.032);
+		\coordinate (-bottom right) at (0.8,-1.032);
+		\coordinate (-top right) at (0.8,1.032);
+		\coordinate (-top left) at (-0.8,1.032);
+		\coordinate (-inlet left) at (-0.8,0);
+		\coordinate (-inlet right) at (0.8,0);
+		\coordinate (-liquid outlet) at (0,1.5);
+		\coordinate (-solid outlet) at (0,-1.5);
+		\coordinate (-shaft) at (0.5,1.5);
+	\end{scope}
+	}%
+}
+
+%:	Columns
+%:		Column
+\tikzset{pics/column/.style=%
+	{%
+	code=%
+		{%
+		\draw [chpunitstyle]
+			(-0.5,-2.7) to [out=270,in=270]
+			(0.5,-2.7) --
+			(0.5,2.7) to [out=90,in=90]
+			(-0.5,2.7) -- cycle;
+		\ifthenelse{\equal{#1}{empty}}{%
+			\relax%
+		}%
+		{%
+			\relax%
+		}
+		\ifthenelse{\equal{#1}{trayed}}{%
+			\foreach \i in {0, 1, ..., 24} {%
+				\draw [chpunitstyle]
+					(-0.5,-2.4 + 0.2*\i) -- (0.5,-2.4 + 0.2*\i);
+			}%
+		}%
+		{%
+			\relax%
+		}
+		\ifthenelse{\equal{#1}{packed}}{%
+			\draw [chpunitstyle, join=bevel]
+				(-0.5,-2.4) --
+				(0.5,2.4) --
+				(-0.5,2.4) --
+				(0.5,-2.4) -- cycle;
+		}%
+		{%
+			\relax%
+		}
+		\ifthenelse{\equal{#1}{packed double}}{%
+			\draw [chpunitstyle, join=bevel]
+				(-0.5,-2.4) --
+				(0.5,-0.2) --
+				(-0.5,-0.2) --
+				(0.5,-2.4) -- cycle;
+			\draw [chpunitstyle, join=bevel]
+				(-0.5,2.4) --
+				(0.5,0.2) --
+				(-0.5,0.2) --
+				(0.5,2.4) -- cycle;
+		}%
+		{%
+			\relax%
+		}
+		\begin{scope} [scale=\chp@UnitScale]
+			\coordinate (-anchor) at (0,0);
+			\coordinate (-left) at (-0.5,0);
+			\coordinate (-bottom left) at (-0.5,-2.6);
+			\coordinate (-bottom) at (0,-3);
+			\coordinate (-bottom right) at (0.5,-2.6);
+			\coordinate (-right) at (0.5,0);
+			\coordinate (-top right) at (0.5,2.6);
+			\coordinate (-top) at (0,3);
+			\coordinate (-top left) at (-0.5,2.6);
+		\end{scope}
+		}%
+	}%
+}
+
+%:	Reactors
+%:		Stirred Reactor
+\tikzset{stirred reactor/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.8,-0.732) to [out=270,in=270]
+		(0.8,-0.732) --
+		(0.8,0.732) to [out=90,in=90]
+		(-0.8,0.732) -- cycle;
+	\draw [chpunitstyle, yshift=-0.25cm, xslant=0.285]
+		(0,1.75) --
+		(0,0) to [out=150,in=90]
+		(-0.5,0) to [out=270,in=210]
+		(0,0) to [out=30,in=90]
+		(0.5,0) to [out=270,in=330] (0,0);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.8,0);
+		\coordinate (-bottom left) at (-0.8,-0.732);
+		\coordinate (-bottom) at (0,-1.2);
+		\coordinate (-bottom right) at (0.8,-0.732);
+		\coordinate (-right) at (0.8,0);
+		\coordinate (-top right) at (0.8,0.732);
+		\coordinate (-top) at (0,1.2);
+		\coordinate (-top left) at (-0.8,0.732);
+		\coordinate (-shaft) at (0.5,1.5);
+	\end{scope}
+	}%
+}
+%:		Packed Bed Reactor
+\tikzset{packed bed reactor/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-1.0,-0.4) rectangle (1.0,0.4)
+		(-1.0,-0.45) -- (-1.0,0.45)
+		(1.0,-0.45) -- (1.0,0.45);
+	\draw [chpunitstyle, join=bevel]
+		(-0.8,0.4) --
+		(0.8,-0.4) --
+		(0.8,0.4) --
+		(-0.8,-0.4) -- cycle;
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-1,0);
+		\coordinate (-bottom) at (0,-0.4);
+		\coordinate (-right) at (1,0);
+		\coordinate (-top) at (0,0.4);
+		\coordinate (-utility bottom left) at (-0.9,-0.4);
+		\coordinate (-utility bottom right) at (0.9,-0.4);
+		\coordinate (-utility top right) at (0.9,0.4);
+		\coordinate (-utility top left) at (-0.9,0.4);
+	\end{scope}
+	}%
+}
+%:		Fluidized Bed Reactor
+\tikzset{fluidized bed reactor/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.8,-0.4) --
+		(-0.2,-0.8) --
+		(-0.2,-1.2) --
+		(0.2,-1.2) --
+		(0.2,-0.8) --
+		(0.8,-0.4) --
+		(0.8,0.732) to [out=90,in=90]
+		(-0.8,0.732) -- cycle;
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.8,0);
+		\coordinate (-bottom left) at (-0.8,-0.4);
+		\coordinate (-bottom) at (0,-1.2);
+		\coordinate (-bottom right) at (0.8,-0.4);
+		\coordinate (-right) at (0.8,0);
+		\coordinate (-top right) at (0.8,0.732);
+		\coordinate (-top) at (0,1.2);
+		\coordinate (-top left) at (-0.8,0.732);
+	\end{scope}
+	}%
+}
+%:		Tube Bundle Reactor
+\tikzset{tube bundle reactor/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.8,-0.732) to [out=270,in=270]
+		(0.8,-0.732) --
+		(0.8,0.732) to [out=90,in=90]
+		(-0.8,0.732) -- cycle;
+	\foreach \i in {1, 2, ...,19} {%
+		\draw [chpunitstyle]
+			(-0.8 + 0.08*\i,-0.65) -- ++(0,1.3);
+	}
+	\draw [chpunitstyle]
+		(-0.85,-0.65) -- (0.85,-0.65)
+		(-0.85,0.65) -- (0.85,0.65);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.8,0);
+		\coordinate (-bottom left) at (-0.8,-0.732);
+		\coordinate (-bottom) at (0,-1.2);
+		\coordinate (-bottom right) at (0.8,-0.732);
+		\coordinate (-right) at (0.8,0);
+		\coordinate (-top right) at (0.8,0.732);
+		\coordinate (-top) at (0,1.2);
+		\coordinate (-top left) at (-0.8,0.732);
+	\end{scope}
+	}%
+}
+%:	Associative Pics for Reactors
+%:		Tank Reactor
+\tikzset{tank reactor/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.8,-0.732) to [out=270,in=270]
+		(0.8,-0.732) --
+		(0.8,0.732) to [out=90,in=90]
+		(-0.8,0.732) -- cycle;
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.8,0);
+		\coordinate (-bottom left) at (-0.8,-0.732);
+		\coordinate (-bottom) at (0,-1.2);
+		\coordinate (-bottom right) at (0.8,-0.732);
+		\coordinate (-right) at (0.8,0);
+		\coordinate (-top right) at (0.8,0.732);
+		\coordinate (-top) at (0,1.2);
+		\coordinate (-top left) at (-0.8,0.732);
+	\end{scope}
+	}%
+}
+%:		Jacket
+\tikzset{jacket/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.8,0.7) --
+		(-1.0,0.5) --
+		(-1.0,-0.732) to [out=270,in=180]
+		(-0.15,-1.3) -- (-0.1,-1.2)
+		(0.8,0.7) --
+		(1.0,0.5) --
+		(1.0,-0.732) to [out=270,in=0]
+		(0.15,-1.3) -- (0.1,-1.2);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-1.0,0);
+		\coordinate (-bottom left) at (-0.15,-1.3);
+		\coordinate (-bottom right) at (0.15,-1.3);
+		\coordinate (-right) at (1.0,0);
+		\coordinate (-top right) at (1.0,0.5);
+		\coordinate (-top left) at (-1.0,0.5);
+	\end{scope}
+	}%
+}
+%:		Stirrer
+\tikzset{stirrer/.pic=%
+	{%
+	\draw [chpunitstyle, yshift=-0.25cm, xslant=0.285]
+		(0,1.75) --
+		(0,0) to [out=150,in=90]
+		(-0.5,0) to [out=270,in=210]
+		(0,0) to [out=30,in=90]
+		(0.5,0) to [out=270,in=330] (0,0);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-shaft) at (0.5,1.5);
+	\end{scope}
+	}%
+}
+%:		Coil
+\tikzset{coil/.pic=%
+	{%
+	\draw [chpunitstyle, join=bevel]
+		(1.0,0.7) --
+		(-0.7,0.7) --
+		(0.7,0.467) --
+		(-0.7,0.233) --
+		(0.7,0) --
+		(-0.7,-0.233) --
+		(0.7,-0.467) --
+		(-0.7,-0.7) -- (1.0,-0.7);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-bottom) at (1.0,-0.7);
+		\coordinate (-top) at (1.0,0.7);
+	\end{scope}
+	}%
+}
+%:		Sprayer 
+\tikzset{sprayer/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) --
+		(1.4,0) -- ++(0.1,-0.1)
+		(0.2,0) -- ++(-0.1,-0.1)
+		(0.2,0) -- ++(0.1,-0.1)
+		(0.6,0) -- ++(-0.1,-0.1)
+		(0.6,0) -- ++(0.1,-0.1)
+		(1.0,0) -- ++(-0.1,-0.1)
+		(1.0,0) -- ++(0.1,-0.1)
+		(1.4,0) -- ++(-0.1,-0.1);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+	\end{scope}
+	}%
+}
+%:		Bubbler 
+\tikzset{bubbler/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) --
+		(1.4,0) -- ++(0.1,0.1)
+		(0.2,0) -- ++(-0.1,0.1)
+		(0.2,0) -- ++(0.1,0.1)
+		(0.6,0) -- ++(-0.1,0.1)
+		(0.6,0) -- ++(0.1,0.1)
+		(1.0,0) -- ++(-0.1,0.1)
+		(1.0,0) -- ++(0.1,0.1)
+		(1.4,0) -- ++(-0.1,0.1);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+	\end{scope}
+	}%
+}
+%:		Packing
+\tikzset{packing/.pic=%
+	{%
+	\draw [chpunitstyle, join=bevel]
+		(-0.8,-0.7) --
+		(0.8,0.7) --
+		(-0.8,0.7) --
+		(0.8,-0.7) -- cycle;
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+	\end{scope}
+	}%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%: Process Utilities
+
+%:	Valves
+%:		Lamination Valve
+\tikzset{lamination valve/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(-0.2,-0.1) rectangle (0.2,0.1)
+		(-0.2,0.1) -- (0.2,0)
+		(-0.2,-0.1) -- (0.2,0);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-inlet) at (-0.2,0);
+		\coordinate (-outlet) at (0.2,0);
+	\end{scope}
+	}%
+}
+%:		Valve
+\tikzset{pics/valve/.style=%
+	{%
+	code=%
+		{%
+		\ifthenelse{\equal{#1}{main}}{%
+			\let\chp@ValveThickness\chp@MainStreamThickness%
+		}%
+		{%
+			\relax%
+		}
+		\ifthenelse{\equal{#1}{secondary}}{%
+			\let\chp@ValveThickness\chp@SecondaryStreamThickness%
+		}%
+		{%
+			\relax%
+		}
+		\ifthenelse{\equal{#1}{utility}}{%
+			\let\chp@ValveThickness\chp@UtilityStreamThickness%
+		}%
+		{%
+			\relax%
+		}
+		\draw [\chp@ValveThickness, scale=\chp@UnitScale]
+			(-0.2,-0.1) --
+			(-0.2,0.1) --
+			(0.2,-0.1) --
+			(0.2,0.1) -- cycle;
+		\begin{scope} [scale=\chp@UnitScale]
+			\coordinate (-anchor) at (0,0);
+			\coordinate (-left) at (-0.2,0);
+			\coordinate (-right) at (0.2,0);
+		\end{scope}
+		}%
+	}%
+}
+%:		Three-Way Valve
+\tikzset{pics/valve triple/.style=%
+	{%
+	code=%
+		{%
+		\ifthenelse{\equal{#1}{main}}{%
+			\let\chp@ValveThickness\chp@MainStreamThickness%
+		}%
+		{%
+			\relax%
+		}
+		\ifthenelse{\equal{#1}{secondary}}{%
+			\let\chp@ValveThickness\chp@SecondaryStreamThickness%
+		}%
+		{%
+			\relax%
+		}
+		\ifthenelse{\equal{#1}{utility}}{%
+			\let\chp@ValveThickness\chp@UtilityStreamThickness%
+		}%
+		{%
+			\relax%
+		}
+		\draw [\chp@ValveThickness, scale=\chp@UnitScale]
+			(0,0) --
+			(-0.2,-0.1) --
+			(-0.2,0.1) --
+			(0,0) --
+			(-0.1,0.2) --
+			(0.1,0.2) --
+			(0,0) --
+			(0.2,-0.1) --
+			(0.2,0.1) -- cycle;
+		\begin{scope} [scale=\chp@UnitScale]
+			\coordinate (-anchor) at (0,0);
+			\coordinate (-left) at (-0.2,0);
+			\coordinate (-right) at (0.2,0);
+			\coordinate (-top) at (0,0.2);
+		\end{scope}
+		}%
+	}%
+}
+%:		Four-Way Valve
+\tikzset{pics/valve quadruple/.style=%
+	{%
+	code=%
+		{%
+		\ifthenelse{\equal{#1}{main}}{%
+			\let\chp@ValveThickness\chp@MainStreamThickness%
+		}%
+		{%
+			\relax%
+		}
+		\ifthenelse{\equal{#1}{secondary}}{%
+			\let\chp@ValveThickness\chp@SecondaryStreamThickness%
+		}%
+		{%
+			\relax%
+		}
+		\ifthenelse{\equal{#1}{utility}}{%
+			\let\chp@ValveThickness\chp@UtilityStreamThickness%
+		}%
+		{%
+			\relax%
+		}
+		\draw [\chp@ValveThickness, scale=\chp@UnitScale]
+			(-0.2,-0.1) --
+			(-0.2,0.1) --
+			(0.2,-0.1) --
+			(0.2,0.1) -- cycle
+			(-0.1,0.2) --
+			(0.1,0.2) --
+			(-0.1,-0.2) --
+			(0.1,-0.2) -- cycle;
+		\begin{scope} [scale=\chp@UnitScale]
+			\coordinate (-anchor) at (0,0);
+			\coordinate (-left) at (-0.2,0);
+			\coordinate (-bottom) at (0,-0.2);
+			\coordinate (-right) at (0.2,0);
+			\coordinate (-top) at (0,0.2);
+		\end{scope}
+		}%
+	}%
+}
+%:		Safety Valve
+\tikzset{pics/safety valve/.style=%
+	{%
+	code=%
+		{%
+		\ifthenelse{\equal{#1}{main}}{%
+			\let\chp@ValveThickness\chp@MainStreamThickness%
+		}%
+		{%
+			\relax%
+		}
+		\ifthenelse{\equal{#1}{utility}}{%
+			\let\chp@ValveThickness\chp@UtilityStreamThickness%
+		}%
+		{%
+			\relax%
+		}
+		\draw [\chp@ValveThickness, scale=\chp@UnitScale]
+			(0,0) --
+			(-0.1,-0.2) --
+			(0.1,-0.2) -- cycle
+			(0,0) --
+			(0.2,-0.1) --
+			(0.2,0.1) -- cycle;
+		\draw [\chp@ValveThickness, scale=\chp@UnitScale, fill]
+			(0,0) circle (0.025);
+		\draw [\chp@ValveThickness, scale=\chp@UnitScale]
+			(0,0) -- (0,0.3)
+			(-0.05,0.26) -- (0.05,0.24)
+			(-0.05,0.21) -- (0.05,0.19)
+			(-0.05,0.16) -- (0.05,0.14);
+		\draw [\chp@ValveThickness, scale=\chp@UnitScale]
+			(0.2,0) -- (0.4,0)
+			(0.35,0.1) -- (0.45,-0.1);
+		\begin{scope} [scale=\chp@UnitScale]
+			\coordinate (-anchor) at (0,0);
+			\coordinate (-inlet) at (0,-0.2);
+			\coordinate (-outlet) at (0.4,0);
+		\end{scope}
+		}%
+	}%
+}
+
+%:	Process Streams
+%:		Inlet
+\tikzset{inlet/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) circle (0.25);
+	\draw [chpunitstyle, fill]
+		(0.25,0) -- (150:0.25)
+		(0.25,0) -- (-150:0.25) arc (210:150:0.25);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-left) at (-0.25,0);
+		\coordinate (-bottom) at (0,-0.25);
+		\coordinate (-stream) at (0.25,0);
+		\coordinate (-top) at (0,0.25);
+	\end{scope}
+	}%
+}
+%:		Outlet
+\tikzset{outlet/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) circle (0.25)
+		(0.25,0) -- (150:0.25)
+		(0.25,0) -- (-150:0.25);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-stream) at (-0.25,0);
+		\coordinate (-bottom) at (0,-0.25);
+		\coordinate (-right) at (0.25,0);
+		\coordinate (-top) at (0,0.25);
+	\end{scope}
+	}%
+}
+
+%:	Instrumentation
+%:		Instrument
+\tikzset{pics/instrument/.style=%
+	{%
+	code=%
+		{%
+		\draw [chpinstrumentstyle]
+			(0,0) circle (0.5);
+		\node [font=\chp@InstrumentFontSize] at (0,0) {#1};
+		\begin{scope} [scale=\chp@InstrumentScale]
+			\coordinate (-anchor) at (0,0);
+			\coordinate (-left) at (-0.5,0);
+			\coordinate (-bottom) at (0,-0.5);
+			\coordinate (-right) at (0.5,0);
+			\coordinate (-top) at (0,0.5);
+		\end{scope}
+		}%
+	}%
+}
+%:		Controller
+\tikzset{pics/controller/.style=%
+	{%
+	code=%
+		{%
+		\draw [chpinstrumentstyle]
+			(-0.5,-0.5) rectangle (0.5,0.5);
+		\node [font=\chp@InstrumentFontSize] at (0,0) {#1};
+		\begin{scope} [scale=\chp@InstrumentScale]
+			\coordinate (-anchor) at (0,0);
+			\coordinate (-left) at (-0.5,0);
+			\coordinate (-bottom) at (0,-0.5);
+			\coordinate (-right) at (0.5,0);
+			\coordinate (-top) at (0,0.5);
+		\end{scope}
+		}%
+	}%
+}
+%:		Actuator
+\tikzset{actuator/.pic=%
+	{%
+	\draw [\chp@InstrumentThickness, scale=\chp@UnitScale]
+		(0,0) -- (0,0.2)
+		(0.1,0.2) arc (0:180:0.1) -- cycle;
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+		\coordinate (-top) at (0,0.3);
+	\end{scope}
+	}%
+}
+
+%:	Nozzles
+%:		Input
+\tikzset{input/.pic=%
+	{%
+	\draw [chpunitstyle]
+		(0,0) circle (0.05);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+	\end{scope}
+	}%
+}
+%:		Output
+\tikzset{output/.pic=%
+	{%
+	\draw [chpunitstyle, fill]
+		(0,0) circle (0.05);
+	\begin{scope} [scale=\chp@UnitScale]
+		\coordinate (-anchor) at (0,0);
+	\end{scope}
+	}%
+}
+
+%:	Blocks
+%:		Block
+\tikzset{pics/block/.style=%
+	{%
+	code=%
+		{%
+		\draw [chpblockstyle]
+			(-1.5,-0.75) rectangle (1.5,0.75);
+		\node [align=center, font=\chp@BlockFontSize] at (0,0) {#1};
+		\begin{scope} [scale=\chp@BlockScale]
+			\coordinate (-anchor) at (0,0);
+			\coordinate (-left) at (-1.5,0);
+			\coordinate (-bottom) at (0,-0.75);
+			\coordinate (-right) at (1.5,0);
+			\coordinate (-top) at (0,0.75);
+		\end{scope}
+		}%
+	}%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\endinput										% End of the Package

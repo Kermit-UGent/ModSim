@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ f08fa69c-a744-11ef-0e79-3daf5bf297ea
@@ -74,14 +74,22 @@ Tips:
 """
 
 # ╔═╡ 8708de16-3532-4352-b211-c092f95c82d3
+# Uncomment and complete the instruction
+# wastewater_treatment = @reaction_network begin
+#     @parameters missing
+#     @species missing
+#     missing
+#     missing
+#     missing
+#     missing
+# end
 wastewater_treatment = @reaction_network begin
     @parameters q=5.0 V=50 r=0.4 Cin=3.0 Ks=5.2 kd=0.10 Y=1.2
     @species C(t)=4 X(t)=1.0e-2
     mmr(C, r, Ks), C + X --> (1+Y)*X
     # r*Ks/(C+Ks), C + X --> (1+Y)*X
 	# mmr(C, r, Ks)*X, C --> Y*X
-    q/V*Cin, 0 --> C
-    q/V, C --> 0
+    (q/V, q/V*Cin), 0 <--> C
     q/V, X --> 0
     kd, X --> 0
 end
@@ -152,7 +160,7 @@ osol = solve(oprob, Tsit5(), saveat=0.1)
 
 # ╔═╡ 70871ee8-b0a4-4a9a-af39-5a63459b55f7
 md"""
-Plot the results. Use `ylim=(0, 4)` and `linewidth=2` as options.
+Plot the results. Use `ylim=(0, 3)` and `lw=2` (or `linewidth=2`) as options.
 """
 
 # ╔═╡ 34309734-3751-47e0-a602-d113ffaae510
@@ -160,12 +168,12 @@ Plot the results. Use `ylim=(0, 4)` and `linewidth=2` as options.
 # begin
 #     missing
 #     plot!([tspan[1], tspan[2]], [0.28, 0.28],
-# 		linestyle=:dash, linewidth=2, linecolor=:green, label="")
+# 		ls=:dash, lw=2, lc=:green, lab="C=0.28")
 # end
 begin
-    plot(osol, ylim=(0, 4), linewidth=2)
+    plot(osol, ylim=(0, 3), lw=2)
     plot!([tspan[1], tspan[2]], [0.28, 0.28],
-		linestyle=:dash, linewidth=2, linecolor=:green, label="C=0.28")
+		ls=:dash, lw=2, lc=:green, lab="C=0.28")
 end
 
 # ╔═╡ a0e735ad-09c2-4aa8-bc41-b294a9d56ea8
@@ -198,16 +206,16 @@ Declare the Turing model function. Sample the flow rate $q$ prior from an unifor
 #     params = missing
 #     oprob = missing
 #     osol = missing
-#     C_val ~ missing
+#     C_d ~ missing
 # end
-@model function wastewater_treatment_inference(C_val)
+@model function wastewater_treatment_fun()
 	q ~ Uniform(0, 5.0)
     u0 = [:C=>3.0, :X=>0.5]
     tspan = (0.0, 72.0)  # the time interval to solve on
     params = [:q=>q, :V=>50, :r=>0.4, :Cin=>3.0, :Ks=>5.2, :kd=>0.10, :Y=>1.2]
     oprob = ODEProblem(wastewater_treatment, u0, tspan, params)
     osol = solve(oprob, Tsit5(), saveat=0.1)
-    C_val ~ Normal(osol[:C][end], 1e-3)
+    C_dis ~ Normal(osol[:C][end], 1e-3)
 end
 
 # ╔═╡ b3a40556-0c00-4f6d-8cd9-c5fca79d8bbf
@@ -219,14 +227,25 @@ Define the desired value for the organic waste with the variable name `C_val`.
 # missing                  # Uncomment and complete the instruction
 C_val = 0.28
 
+# ╔═╡ 70cafd87-63f7-4674-ae49-43d422fdeae7
+md"""
+Provide the time measurements to the defined function and instantly condition the model with the desired value:
+"""
+
+# ╔═╡ ee108190-2dbc-42e0-b58b-aaa9fd985e66
+wastewater_treatment_cond_mod = wastewater_treatment_fun() | (C_dis = C_val,)
+
 # ╔═╡ ee1ffc12-55a1-47ef-ac5b-33148706a09b
 md"""
-Provide the measurement to the Turing model and optimize the prior. Do this with `MLE` method and Nelder-Mead. Store the optimization results in `results_mle`.
+Optimize the prior for $q$. Do this with `MLE` method and Nelder-Mead. Store the optimization results in `results_mle`.
 """
 
 # ╔═╡ afc035be-075b-464b-8ba2-20235082f005
 # results_mle = missing    # Uncomment and complete the instruction
-results_mle = optimize(wastewater_treatment_inference(C_val), MLE(), NelderMead())
+results_mle = optimize(wastewater_treatment_cond_mod, MLE(), NelderMead())
+
+# ╔═╡ 64844b47-1578-4e47-9cc7-7f242a583067
+coeftable(results_mle)
 
 # ╔═╡ 3ee8121e-3e78-4901-a32d-f04d0c6a0996
 md"""
@@ -261,7 +280,7 @@ osol_opt = solve(oprob_opt, Tsit5(), saveat=0.1)
 
 # ╔═╡ 82809c26-4cab-405e-8107-a8a43e81f699
 md"""
-Plot $C$ and $X$ simulated with the optimized parameter value. Use `ylim=(0, 4)` and `linewidth=2` as options. The dashed line indicates $C = 0.28\; kg\,m^{-3}$.
+Plot $C$ and $X$ simulated with the optimized parameter value. Use `ylim=(0, 3)` and `lw=2` (or `linewidth=2`) as options. The dashed line indicates $C = 0.28\; kg\,m^{-3}$.
 """
 
 # ╔═╡ 81429279-4190-41d1-a72a-20da0ce90528
@@ -269,12 +288,12 @@ Plot $C$ and $X$ simulated with the optimized parameter value. Use `ylim=(0, 4)`
 # begin
 #     missing
 #     plot!([tspan[1], tspan[2]], [C_val, C_val],
-# 		linestyle=:dash, linewidth=2, linecolor=:green, label="C=0.28")
+# 		ls=:dash, lw=2, lc=:green, lab="C=0.28")
 # end
 begin
-    plot(osol_opt, ylim=(0, 4), linewidth=2)
+    plot(osol_opt, ylim=(0, 3), lw=2)
     plot!([tspan[1], tspan[2]], [C_val, C_val],
-		linestyle=:dash, linewidth=2, linecolor=:green, label="C=0.28")
+		ls=:dash, lw=2, lc=:green, lab="C=0.28")
 end
 
 # ╔═╡ 6589acfd-1d81-4c10-adea-34ca7fa1ab5d
@@ -320,8 +339,11 @@ Draw your conclusion.
 # ╠═b6bac48a-4a3d-47e4-90ea-788ca20dadff
 # ╟─b3a40556-0c00-4f6d-8cd9-c5fca79d8bbf
 # ╠═2df409ef-bd95-4ac3-a2b8-c5e17c490eba
+# ╟─70cafd87-63f7-4674-ae49-43d422fdeae7
+# ╠═ee108190-2dbc-42e0-b58b-aaa9fd985e66
 # ╟─ee1ffc12-55a1-47ef-ac5b-33148706a09b
 # ╠═afc035be-075b-464b-8ba2-20235082f005
+# ╠═64844b47-1578-4e47-9cc7-7f242a583067
 # ╟─3ee8121e-3e78-4901-a32d-f04d0c6a0996
 # ╠═98a157a1-8c20-474d-acb8-00373ee6d224
 # ╟─ceb146c9-a09a-458b-b7d8-3bb7d3de38e0
