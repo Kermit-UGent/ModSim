@@ -1,17 +1,8 @@
 ### A Pluto.jl notebook ###
-# v0.19.43
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
-
-# ╔═╡ e7629b47-8514-4f82-b3d0-1c51b79dbadf
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	using Pkg
-	Pkg.activate("..")
-end
-  ╠═╡ =#
 
 # ╔═╡ 21357c48-f35d-11ee-23f8-2534bb1d82f4
 begin
@@ -43,6 +34,15 @@ md"""
 Note: This project is an adaption of [the following blog post](https://www.oxinabox.net/2022/11/11/Estimating-Estrogen.html) by Dr. Frames Catherine White. Students are (sadly) not permitted to copy existing blog posts for their own projects. 
 """
 
+# ╔═╡ e7629b47-8514-4f82-b3d0-1c51b79dbadf
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	using Pkg
+	Pkg.activate("..")
+end
+  ╠═╡ =#
+
 # ╔═╡ 6948149f-854e-4b3c-b51c-099dd221ab83
 md"""
 ## Abstract
@@ -65,6 +65,22 @@ In [this blog post](https://web.archive.org/web/20230128040153/http://transascit
 
 $$c(t) = \begin{cases}\frac{c_\max t}{t_\max} & \text{if } t \le t_\max\\ c_\max 2^{-(t-t_\max)/t_{1/2}} & \text{if }t_\max < t\,. \end{cases}$$
 """
+
+# ╔═╡ 5b58dc75-6d62-4ba8-b3c3-ddde107d8790
+estrogen_conc(t, c_max = 100, t_max = 3, halflife = 3) = ifelse(t < t_max, c_max/t_max * t, c_max * 2^(-(t-t_max)/halflife))
+
+# ╔═╡ bf645a16-e64e-4051-9b31-bc92148adda9
+# ╠═╡ disabled = true
+#=╠═╡
+function estrogen_conc(t, c_max = 100, t_max = 3, halflife = 3)
+    if t < t_max
+        c = c_max/t_max * t
+    else
+        c = c_max * 2^(-(t-t_max)/halflife)
+    end
+    return c
+end
+  ╠═╡ =#
 
 # ╔═╡ 39ba24b9-0ba1-49a9-b31f-d7cb98d45303
 plot(estrogen_conc, xlims = (0, 24), title = "Estrogen concentration model", xlabel = "t (h)", ylabel = "Estrogen concentration c (pg/ml)", legend = nothing)
@@ -271,22 +287,6 @@ md"""
 md"""
 Järvinen, A., Granander, M., Nykänen, S., Laine, T., Geurts, P., & Viitanen, A. (1997). Steady‐state pharmacokinetics of oestradiol gel in post‐menopausal women: effects of application area and washing. BJOG: An International Journal of Obstetrics & Gynaecology, 104, 14-18.
 """
-
-# ╔═╡ 5b58dc75-6d62-4ba8-b3c3-ddde107d8790
-estrogen_conc(t, c_max = 100, t_max = 3, halflife = 3) = ifelse(t < t_max, c_max/t_max * t, c_max * 2^(-(t-t_max)/halflife))
-
-# ╔═╡ bf645a16-e64e-4051-9b31-bc92148adda9
-# ╠═╡ disabled = true
-#=╠═╡
-function estrogen_conc(t, c_max = 100, t_max = 3, halflife = 3)
-    if t < t_max
-        c = c_max/t_max * t
-    else
-        c = c_max * 2^(-(t-t_max)/halflife)
-    end
-    return c
-end
-  ╠═╡ =#
 
 # ╔═╡ Cell order:
 # ╟─14c7e803-c0ff-4211-8b60-2c9c246934dd

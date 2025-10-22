@@ -1,5 +1,5 @@
 ---
-title: "Introduction"
+title: "Project assignment"
 tags: ["project"]
 order: 1
 layout: "md.jlmd"

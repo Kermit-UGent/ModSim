@@ -1,8 +1,20 @@
 ### A Pluto.jl notebook ###
-# v0.20.0
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
+
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    #! format: off
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+    #! format: on
+end
 
 # ╔═╡ 80bc6542-2f0a-11ef-3308-8b1269e840a1
 begin
@@ -11,13 +23,16 @@ begin
 end
 
 # ╔═╡ 04b15fa3-536f-4676-a41e-f1c8147a2c97
-using PlutoUI, Plots
+using PlutoUI, Plots, StatsPlots
 
 # ╔═╡ 39866945-8759-4034-acdb-0a34a6a26b6d
 using Turing, Optim, StatsBase, LaTeXStrings
 
 # ╔═╡ b1653a62-2456-4ec5-bc4d-f0c6be776f1e
 using Distributions
+
+# ╔═╡ 37608790-16a3-471d-bf37-c10a9653ad50
+using LinearAlgebra
 
 # ╔═╡ 0376ff93-2c87-410a-8cf8-65d3c654b503
 md"# Model Selection"
@@ -194,6 +209,9 @@ md" ## Coin example"
 # ╔═╡ f61522ad-00a7-447a-a249-0d387050248c
 n = 100
 
+# ╔═╡ ddbf180d-f045-4ad3-88e1-c4ff9fd80ee0
+pdf(Binomial(100, 0.5), 61)
+
 # ╔═╡ 4a37e039-db45-4688-8d29-b1662218db60
 x = 61
 
@@ -216,13 +234,88 @@ KA = pM2 / pM1
 prior_p = Beta(14, 10)
 
 # ╔═╡ 8d39ea49-f38d-4be4-90e3-53078652ca45
-dp = 0.01
+dp = 0.01 # step size
 
 # ╔═╡ cc250c89-5c4b-49be-8637-7763e4869605
-pM3 = sum(p->pdf(prior_p, p) * pdf(Binomial(n, p), x) * dp, 0:dp:1)
+# Riemann sum
+pM3 = sum(p->pdf(Binomial(n, p), x) * pdf(Beta(14, 10), p) * dp, 0:dp:1)
 
 # ╔═╡ 657dc886-07be-496c-80aa-848565fef4c3
 KB = pM3 / pM1
+
+# ╔═╡ bb3d17ad-139a-4906-8279-d12cac60a1da
+md"## Fitting"
+
+# ╔═╡ d29ee2bd-85c9-4e33-b434-fbe4346ec1bf
+degree = 7
+
+# ╔═╡ 2d0d98a3-cecc-46d0-ac39-db299cf58cfd
+σ = 3
+
+# ╔═╡ d4c49a72-e818-4836-8bca-d3cbc354baa5
+N = 50
+
+# ╔═╡ a8490458-7c12-489b-8d19-4ef3fd129e9f
+xvals = 0:1:20
+
+# ╔═╡ 3c9861b5-b73d-45ba-87ab-83d2d8b60a8d
+xdense = 0:0.1:20
+
+# ╔═╡ baec7e94-71eb-4e3e-ad39-6404316f6522
+Y = xvals .* sin.(0.5xvals) .+ σ.* randn(length(xvals), N)
+
+# ╔═╡ 6e4fb390-ca56-488e-8066-e22d058f89a7
+B = [xi^d / factorial(d) for xi in xvals, d in 0:degree]
+
+# ╔═╡ 3bfe5ba7-9044-4bbe-a2b8-2fbf7b9e8bd0
+Blarge = [xi^d / factorial(d) for xi in xdense, d in 0:degree]
+
+# ╔═╡ b2f98194-2255-4d90-9869-0aed381e5cac
+Ŷ = Blarge * ((B'*B) \ B') * Y
+
+# ╔═╡ 4d3d9d03-23bc-4b67-8fc6-b84ea1618360
+Eŷ = mean(Ŷ, dims=2)[:,1]
+
+# ╔═╡ 3be0872f-5e8d-4bbd-9161-1c3ec6014c93
+@bind i Clock(max_value=N, repeat=true)
+
+# ╔═╡ 8d9b8e11-91eb-47a4-beb9-d837e0f26161
+let
+	y = Y[:,i]
+	ŷ = Ŷ[:,i]
+	p = plot(xlab=L"x", ylab=L"y", title="Polynomial fit\n (degree=$degree)")
+	scatter!(p, xvals, y, label="data", ylims=extrema(Y), color="yellow")
+	for j in 1:N
+		plot!(p, xdense, Ŷ[:,j], alpha=0.2, color="grey", label="", lw=0.5)
+	end
+	plot!(p, xdense, ŷ, alpha=0.7, color="blue", label="ŷ(x)", lw=2)
+	plot!(p, xdense, Eŷ, alpha=0.7, color="red", label="E[ŷ(x)]", lw=2)
+	
+	p
+end
+
+# ╔═╡ 370ebfc9-d70d-4f5f-b55c-a9a1cebc7ae3
+begin
+	plot()
+end
+
+# ╔═╡ 45720d9f-3c25-45fb-b574-a4d4e0fe968a
+poly_data = polymodel(xvals, yvals, degree)
+
+# ╔═╡ 7dbb3666-fdfd-4f2e-96be-bce9922cf7b2
+poly_map = optimize(poly_data, MAP())
+
+# ╔═╡ 3ffd2e3c-e6ef-4674-b4f2-63b4336c59dd
+chain_poly = sample(poly_data, NUTS(), 500);
+
+# ╔═╡ 9c4fcf78-bec5-482d-9dfa-3891e22dfc2d
+summarize(chain_poly)
+
+# ╔═╡ 6c3699cc-2c8b-4bf9-a637-0843a3058800
+poly_fits = generated_quantities(poly_data, chain_poly)
+
+# ╔═╡ 3b69dd32-e549-4fa0-bae9-c8fe4ffd5716
+plot(chain_poly)
 
 # ╔═╡ 35b75da1-97c8-4df7-bdcd-0ee0e1a428ca
 md"## Appendix"
@@ -363,6 +456,7 @@ end
 # ╠═ca8a9bad-26dd-4d08-a9f5-ca9ca683bc71
 # ╠═b1653a62-2456-4ec5-bc4d-f0c6be776f1e
 # ╠═f61522ad-00a7-447a-a249-0d387050248c
+# ╠═ddbf180d-f045-4ad3-88e1-c4ff9fd80ee0
 # ╠═4a37e039-db45-4688-8d29-b1662218db60
 # ╠═0f9dde78-9921-4bae-a4a7-e784275b82d6
 # ╠═74ebbfe5-2e5f-4505-b5f5-8df50058da82
@@ -374,6 +468,27 @@ end
 # ╠═8d39ea49-f38d-4be4-90e3-53078652ca45
 # ╠═cc250c89-5c4b-49be-8637-7763e4869605
 # ╠═657dc886-07be-496c-80aa-848565fef4c3
+# ╠═bb3d17ad-139a-4906-8279-d12cac60a1da
+# ╠═37608790-16a3-471d-bf37-c10a9653ad50
+# ╠═d29ee2bd-85c9-4e33-b434-fbe4346ec1bf
+# ╠═2d0d98a3-cecc-46d0-ac39-db299cf58cfd
+# ╠═d4c49a72-e818-4836-8bca-d3cbc354baa5
+# ╠═a8490458-7c12-489b-8d19-4ef3fd129e9f
+# ╠═3c9861b5-b73d-45ba-87ab-83d2d8b60a8d
+# ╠═baec7e94-71eb-4e3e-ad39-6404316f6522
+# ╠═6e4fb390-ca56-488e-8066-e22d058f89a7
+# ╠═3bfe5ba7-9044-4bbe-a2b8-2fbf7b9e8bd0
+# ╠═b2f98194-2255-4d90-9869-0aed381e5cac
+# ╠═4d3d9d03-23bc-4b67-8fc6-b84ea1618360
+# ╠═3be0872f-5e8d-4bbd-9161-1c3ec6014c93
+# ╠═8d9b8e11-91eb-47a4-beb9-d837e0f26161
+# ╠═370ebfc9-d70d-4f5f-b55c-a9a1cebc7ae3
+# ╠═45720d9f-3c25-45fb-b574-a4d4e0fe968a
+# ╠═7dbb3666-fdfd-4f2e-96be-bce9922cf7b2
+# ╠═3ffd2e3c-e6ef-4674-b4f2-63b4336c59dd
+# ╠═9c4fcf78-bec5-482d-9dfa-3891e22dfc2d
+# ╠═6c3699cc-2c8b-4bf9-a637-0843a3058800
+# ╠═3b69dd32-e549-4fa0-bae9-c8fe4ffd5716
 # ╠═35b75da1-97c8-4df7-bdcd-0ee0e1a428ca
 # ╠═56f2b018-de9f-4ad2-abfd-920dc2169983
 # ╠═31127a8d-365b-48c4-bfd8-2f968a72be09

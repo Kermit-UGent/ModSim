@@ -101,17 +101,20 @@ n_mm = length(Cs)
 
 # ╔═╡ 234bebb6-0d05-41a0-871d-50cf752d17a2
 @model function michaelis_menten(Xs, μs)
-	sigmasq ~ InverseGamma()
-	mu_max ~ Truncated(Normal(20, 10), 0, 50)
-	Ks ~ Uniform(5, 500)
+	σ² ~ InverseGamma()
+	μ_max ~ Truncated(Normal(20, 10), 0, 50)
+	Ks ~ LogUniform((5), (1000))
 	for i in 1:length(Xs)
-		μs[i] ~ Normal(mm(Xs[i], mu_max, Ks), sqrt(sigmasq))
+		# generate μ
+		μ = mm(Xs[i], μ_max, Ks)
+		# add noise
+		μs[i] ~ Normal(μ, √(σ²))
 	end
-	return x -> mm(x, mu_max, Ks)
+	return x -> mm(x, μ_max, Ks)
 end
 
-# ╔═╡ 4a336948-d46e-415f-bcaf-07c667da4089
-Truncated(Normal(20, 10), 0, 50)
+# ╔═╡ 14889d2d-2666-4346-ae69-0bb7fe3cbfb2
+plot()
 
 # ╔═╡ 07d91dc7-2db0-464e-bc61-9633f2bfe92b
 @model function michaelis_menten_robust(Xs, μs)
@@ -293,9 +296,11 @@ summarize(lv_chain)
     γ ~ truncated(Normal(3.0, 0.5); lower=1, upper=4)
     δ ~ truncated(Normal(1.0, 0.5); lower=0, upper=2)
 
-    # Simulate Lotka-Volterra model but save only the second state of the system (predators).
+    # Simulate Lotka-Volterra model but save 
+	#only the second state of the system (predators).
     p = [α, β, γ, δ]
-    predicted = solve(prob, Tsit5(); p=p, saveat=0.1, save_idxs=2)
+    predicted = solve(prob, Tsit5(); p=p,
+					saveat=0.1, save_idxs=2)
 
     # Observations of the predators.
     data ~ MvNormal(predicted.u, σ^2 * I)
@@ -312,7 +317,6 @@ count_data = rand.(Poisson.(Array(sol)))
 # ╔═╡ 08da7b32-1e53-46da-bfeb-ea16b23dddf8
 @model function fitlv3(data, prob)
     # Prior distributions.
-    σ ~ InverseGamma(2, 3)
     α ~ truncated(Normal(1.5, 0.5); lower=0.5, upper=2.5)
     β ~ truncated(Normal(1.2, 0.5); lower=0, upper=2)
     γ ~ truncated(Normal(3.0, 0.5); lower=1, upper=4)
@@ -618,20 +622,20 @@ rng = MersenneTwister(6)
 # ╔═╡ f3fd99c7-94db-4cfa-a7f2-fe8d2bf33f8e
 mm_model_normal = michaelis_menten(Xs, μ_noise)
 
-# ╔═╡ a8de733e-8f92-443d-9a79-6dc4d17ca52b
-plot(generated_quantities(mm_model_normal, rand(mm_model_normal)))
+# ╔═╡ d9a32372-9fe8-4cf6-98aa-def0d0161877
+mm_mle = optimize(mm_model_normal, MLE(), NelderMead())
 
 # ╔═╡ e2f28fc3-5cfd-4e5f-8e28-36a0e8bf43a2
 # ╠═╡ skip_as_script = true
 #=╠═╡
-coeftable(optimize(mm_model_normal, MLE(), NelderMead()))
+coeftable(mm_mle)
   ╠═╡ =#
 
-# ╔═╡ b1e883f7-10bb-47b6-af26-0c278b15c0b6
-chain_MM = sample(mm_model_normal, NUTS(), 10000)
+# ╔═╡ 2e29ddb0-8238-4549-a243-b68e0d9c4167
+FIM = informationmatrix(mm_mle, expected=false)
 
-# ╔═╡ 9a51f9f4-b403-4466-981f-1aaa74a48e5a
-summarize(chain_MM)
+# ╔═╡ ab9d0e48-6b7c-425b-a740-63bf65623a9a
+Σ = inv(FIM)
 
 # ╔═╡ 5ba1377a-b16e-4e70-8b72-c1477a75f4e8
 mm_map = optimize(mm_model_normal, MAP(), NelderMead())
@@ -642,11 +646,20 @@ mm_map = optimize(mm_model_normal, MAP(), NelderMead())
 coeftable(mm_map)
   ╠═╡ =#
 
-# ╔═╡ ab9d0e48-6b7c-425b-a740-63bf65623a9a
-Σ = informationmatrix(mm_map, expected=false) |> inv
-
 # ╔═╡ ebb6d109-d4d2-4997-bf2b-6b7c12d47e3b
-mu_max_map, Ks_map = mm_map.values[:mu_max], mm_map.values[:Ks]
+mu_max_map, Ks_map = mm_map.values[:μ_max], mm_map.values[:Ks]
+
+# ╔═╡ b1e883f7-10bb-47b6-af26-0c278b15c0b6
+chain_MM = sample(mm_model_normal, NUTS(), 10_000)
+
+# ╔═╡ adf94126-241f-41f6-9fb9-91022cb806e5
+plot(chain_MM)
+
+# ╔═╡ 9a51f9f4-b403-4466-981f-1aaa74a48e5a
+summarize(chain_MM)
+
+# ╔═╡ 35d7aed9-609c-4d7e-97fa-e670d7d0b71c
+quantile(chain_MM)
 
 # ╔═╡ da7b2976-fa09-405a-8c86-081984c0ac8c
 function sq_loss_mm(μmax, Ks)
@@ -721,6 +734,16 @@ end
 # ╔═╡ 83bbcd7b-68e8-4f75-a007-400dd427913f
 plots["MM_norm_data"] = scatter(Cs, μ_noise, xlab="X [mmol/L]", ylab="μ [mmol/s]", title="Michaelis-Menten data", label="data")
 
+# ╔═╡ a8de733e-8f92-443d-9a79-6dc4d17ca52b
+let
+	p_MM_prior = plot(title="Michaelis-Menten prior samples", xlab="X [mmol/L]", ylab="μ [mmol/s]")
+	for i in 1:50
+		f = generated_quantities(mm_model_normal, rand(mm_model_normal))
+		plot!(p_MM_prior, f, extrema(Cs)..., lw=0.5, alpha=0.5, label="")
+	end
+	plots["MM_priors"] = p_MM_prior
+end
+
 # ╔═╡ 2a154a97-2320-476b-8374-14cef9743c27
 let
 	p = contourf(0:0.1:50, 5:1:500, log ∘ sq_loss_mm, color=:speed, xlab=L"\mu_\max", ylab=L"K_s", title="Squared loss Michaelis-Menten")
@@ -739,21 +762,39 @@ end
 
 # ╔═╡ d5504f95-3fd4-4c02-9975-e201a9a09801
 let
-	ll(μmax, Ks) = -loglikelihood(mm_model_normal, (mu_max=μmax, Ks=Ks, sigmasq=1))
+	ll(μmax, Ks) = -loglikelihood(mm_model_normal, (μ_max=μmax, Ks=Ks, σ²=1))
 	p = contourf(0:0.1:50, 5:1:500, log ∘ ll, color=:speed, xlab=L"\mu_\max", ylab=L"K_s", title="Neg log-likelihood MM")
 	xlims!(0, 50)
 	ylims!(5, 500)
-	plots["MM_ll"] = scatter!([mu_max_ls], [Ks_ls], label="minimizer")
+	plots["MM_ll"] = scatter!([mu_max_ls], [Ks_ls], label="minimizer (MLE)")
+end
+
+# ╔═╡ a3cfcd30-ef88-4069-8019-e08a75105c3d
+let
+	ll(μmax, Ks) = -loglikelihood(mm_model_normal, (μ_max=μmax, Ks=Ks, σ²=1)) -  	              logprior(mm_model_normal, (μ_max=μmax, Ks=Ks, σ²=1))
+	p = contourf(0:0.1:50, 5:1:500, log ∘ ll, color=:speed, xlab=L"\mu_\max", ylab=L"K_s", title="Neg log-posterior MM")
+	xlims!(0, 50)
+	ylims!(5, 500)
+	plots["MM_post"] = scatter!([mu_max_map], [Ks_map], label="minimizer (MAP)")
+end
+
+# ╔═╡ cbcae866-596c-4c7a-b86b-c72b8c0777a6
+let
+	ll(μmax, Ks) = -logprior(mm_model_normal, (μ_max=μmax, Ks=Ks, σ²=1))
+	p = contourf(0:0.1:50, 5:1:500, log ∘ ll, color=:speed, xlab=L"\mu_\max", ylab=L"K_s", title="Neg log-prior MM")
+	xlims!(0, 50)
+	ylims!(5, 500)
+	plots["MM_prior"] = p
 end
 
 # ╔═╡ 9cf24cc2-ac54-4239-a313-ee7ecd680f35
-plots["MM_joint_post"] = marginalkde(chain_MM[:mu_max], chain_MM[:Ks], xlab=L"\mu_\max", ylab=L"K_s")
+plots["MM_joint_post"] = marginalkde(chain_MM[:μ_max], chain_MM[:Ks], xlab=L"\mu_\max", ylab=L"K_s")
 
 # ╔═╡ b69eb7d3-8660-44b2-992e-a2b9696d8e50
 let
 	p = scatter(Cs, μ_noise, xlab="X [mmol/L]", ylab="μ [mmol/s]", label="data")
 	title!(p, "MM MAP + posterior")
-	for mm_post in rand(generated_quantities(mm_model_normal, chain_MM), 200)
+	for mm_post in rand(generated_quantities(mm_model_normal, chain_MM), 100)
 		plot!(mm_post, 0, 180, lw=0.1, color="#BBBBBB", alpha=0.5, label="")
 	end
 	plot!(x->mm(x, mu_max_map, Ks_map), 0, 180, lw=2, label="MAP fit", color=2)
@@ -817,7 +858,7 @@ plots["LV_diagnostic"] = plot(lv_chain)
 # ╔═╡ 60022e21-b74a-41b7-a43d-6b14ed482112
 let
 	p = plot(; legend=false, ylab="population size")
-	posterior_samples = sample(lv_chain[[:α, :β, :γ, :δ]], 300; replace=false)
+	posterior_samples = sample(lv_chain[[:α, :β, :γ, :δ]], 20; replace=false)
 	for p in eachrow(Array(posterior_samples))
 	    sol_p = solve(lv_prob, Tsit5(); p=p, saveat=0.1)
 	    plot!(sol_p; alpha=0.1, color="#BBBBBB")
@@ -833,10 +874,10 @@ end
 # ╔═╡ 94cbbbd8-00f7-47fa-b814-0cbca085b886
 let
 	p = plot(; legend=false, ylab="population size")
-	posterior_samples = sample(chain2[[:α, :β, :γ, :δ]], 300; replace=false)
+	posterior_samples = sample(chain2[[:α, :β, :γ, :δ]], 25; replace=false)
 	for p in eachrow(Array(posterior_samples))
 	    sol_p = solve(lv_prob, Tsit5(); p=p, saveat=0.1)
-	    plot!(sol_p; alpha=0.1, color="#BBBBBB")
+	    plot!(sol_p; alpha=0.4, color="#BBBBBB")
 	end
 	
 	title!("Posteriors using only the predators")
@@ -853,10 +894,10 @@ plots["LV_counts_diag"] = plot(lv_chain3)
 # ╔═╡ f845114c-b612-43c1-8a49-c3da8f52e278
 let
 	p = plot(; legend=false, ylab="population size")
-	posterior_samples = sample(lv_chain3[[:α, :β, :γ, :δ]], 300; replace=false)
+	posterior_samples = sample(lv_chain3[[:α, :β, :γ, :δ]], 25; replace=false)
 	for p in eachrow(Array(posterior_samples))
 	    sol_p = solve(lv_prob, Tsit5(); p=p, saveat=0.1)
-	    plot!(sol_p; alpha=0.1, color="#BBBBBB")
+	    plot!(sol_p; alpha=0.3, color="#BBBBBB")
 	end
 	
 	# Plot simulation and noisy observations.
@@ -897,7 +938,6 @@ plots
 # ╠═bf757553-7650-4b42-a07e-41007a3c29db
 # ╠═2d82ae12-da64-426c-9ed1-f65480b88214
 # ╠═234bebb6-0d05-41a0-871d-50cf752d17a2
-# ╠═4a336948-d46e-415f-bcaf-07c667da4089
 # ╠═83bbcd7b-68e8-4f75-a007-400dd427913f
 # ╠═f3fd99c7-94db-4cfa-a7f2-fe8d2bf33f8e
 # ╠═a8de733e-8f92-443d-9a79-6dc4d17ca52b
@@ -907,15 +947,22 @@ plots
 # ╠═2a154a97-2320-476b-8374-14cef9743c27
 # ╠═721c147c-1ecb-4898-a962-08abe2a764d4
 # ╠═d5504f95-3fd4-4c02-9975-e201a9a09801
+# ╠═a3cfcd30-ef88-4069-8019-e08a75105c3d
+# ╠═cbcae866-596c-4c7a-b86b-c72b8c0777a6
+# ╠═d9a32372-9fe8-4cf6-98aa-def0d0161877
 # ╠═e2f28fc3-5cfd-4e5f-8e28-36a0e8bf43a2
+# ╠═5ba1377a-b16e-4e70-8b72-c1477a75f4e8
 # ╠═0d262055-5220-42ae-b232-d96d4965667b
+# ╠═2e29ddb0-8238-4549-a243-b68e0d9c4167
 # ╠═ab9d0e48-6b7c-425b-a740-63bf65623a9a
 # ╠═b1e883f7-10bb-47b6-af26-0c278b15c0b6
+# ╠═adf94126-241f-41f6-9fb9-91022cb806e5
 # ╠═9cf24cc2-ac54-4239-a313-ee7ecd680f35
-# ╠═5ba1377a-b16e-4e70-8b72-c1477a75f4e8
 # ╠═ebb6d109-d4d2-4997-bf2b-6b7c12d47e3b
 # ╠═b69eb7d3-8660-44b2-992e-a2b9696d8e50
 # ╠═9a51f9f4-b403-4466-981f-1aaa74a48e5a
+# ╠═14889d2d-2666-4346-ae69-0bb7fe3cbfb2
+# ╠═35d7aed9-609c-4d7e-97fa-e670d7d0b71c
 # ╠═794fec60-c448-4505-8190-b60e0119200f
 # ╠═12990770-b44f-44b7-b981-9a008d9028d1
 # ╠═07d91dc7-2db0-464e-bc61-9633f2bfe92b

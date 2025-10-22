@@ -31,17 +31,26 @@ using Plots, PlutoUI, LaTeXStrings, Latexify
 # ╔═╡ 8cff27a7-fde1-4b49-8ad6-513302997a4e
 using Catalyst, DifferentialEquations
 
+# ╔═╡ 217818c5-9830-46cc-8827-9085d1fbcacb
+using ModelingToolkit: t_nounits as t, D_nounits as D
+
 # ╔═╡ 0686fc66-5428-451f-aa72-c0250ad4bf67
 using Symbolics
 
 # ╔═╡ f61f9ed2-8592-466c-93d0-e2ae59ed1e2e
+# ╠═╡ disabled = true
+#=╠═╡
 using ModelingToolkit
+  ╠═╡ =#
 
 # ╔═╡ 7f3a81ae-a285-4fa7-b034-cac9201115bc
 using LinearAlgebra
 
 # ╔═╡ dfca2f9f-0134-461c-a18b-f66f2bf02943
 md"# Modelling with ordinary differential equations"
+
+# ╔═╡ 355e3d5e-1249-480b-9a33-604e1fa29157
+using ModelingToolkit
 
 # ╔═╡ 34bec0a1-40e8-48a2-9109-94872aaff1b9
 md"## Balance equations"
@@ -133,10 +142,10 @@ end
 qin = t -> 2 ≤ t < 3 ? 5e-2 : 0.0
 
 # ╔═╡ 0d03953b-6c00-4ffd-abdf-e0540480eb57
-@bind k Slider(0:0.1:2, default=.1)
+@bind kval Slider(0:0.1:2, default=.1)
 
 # ╔═╡ 206dbd4b-2ec0-4591-b7f9-d8e78d568c2f
-coffee_prob = ODEProblem(coffee!, [1.5e-1, 80], (0.0, 8.0), (qin, 5, 20, k
+coffee_prob = ODEProblem(coffee!, [1.5e-1, 80], (0.0, 8.0), (qin, 5, 20, kval
 ))
 
 # ╔═╡ bf062835-538d-437a-bae6-6309c66ebd19
@@ -147,6 +156,38 @@ begin
 	plot(qin, 0:0.01:8, ls=:dash, label="q [L/min]", color=:red, lw=2, xlab="t", title="Inflow of milk added")
 	vspan!([2, 3], alpha=0.4, color=:pink, label="")
 end
+
+# ╔═╡ d531ce6b-6b42-4487-bfa6-a141e85230e8
+@variables V(t) T(t)
+
+# ╔═╡ a97e1976-24fd-49aa-a487-be39f4d87d3f
+@parameters Cₚ ρ Tₑ Tₘ k qᵢₙ
+
+# ╔═╡ 6bc18767-54f0-44dc-a7d3-91c98681bcea
+coffee_eqs = [D(V) ~ qᵢₙ,
+		expand_derivatives(D(V*T)) ~ qᵢₙ * Tₘ + k * V * (Tₑ - T)]
+
+# ╔═╡ 3e8b5648-e4f7-41ef-9e4f-026e05f3e868
+dV, dT = symbolic_linear_solve(coffee_eqs, [D(V), D(T)])
+
+# ╔═╡ c7ead652-fa4f-4db9-9cb2-480993806679
+milk_pouring = [[2] => [qᵢₙ ~ 5e-2],   # start pouring milk
+				[3] => [qᵢₙ ~ 0.0]]    # stop pouring milk
+
+# ╔═╡ 40542050-64c9-45e6-ac42-4fef56d5bde0
+@mtkbuild coffee_model = ODESystem([D(V)~dV, D(T)~dT], t, discrete_events=milk_pouring)
+
+# ╔═╡ 375ced7e-6beb-4670-8682-e9bf0b92f58b
+coffee_prob2 = ODEProblem(coffee_model, [V=>1.5e-1, T=>80], (0.0, 8.0), [Tₑ=>20, Tₘ=>5, k=>kval, qᵢₙ=>0.0])
+
+# ╔═╡ d2c55d9d-df8a-498b-9de6-dd33a18233a5
+coffee_sol2 = solve(coffee_prob2, saveat=0.1)
+
+# ╔═╡ 17b56643-e54c-40f8-a7ef-355f08968ea9
+plot(coffee_sol2, idxs=T)
+
+# ╔═╡ 0572f523-c173-47c7-9dca-5e99acace9e9
+plot(coffee_sol2, idxs=V)
 
 # ╔═╡ d036c1da-2fb7-42b4-81ba-97d40ee2bf8a
 md"""
@@ -226,9 +267,6 @@ parameters(rn)
 
 # ╔═╡ 730255e3-ba36-482c-bff3-8435d348fe40
 reactions(rn)
-
-# ╔═╡ 959b8b64-959a-4869-b499-159eccfa0768
-latexify(rn) |> clipboard
 
 # ╔═╡ 0f19626f-5c0a-4fde-b7b0-824ec624cd96
 convert(ODESystem, rn)
@@ -572,14 +610,14 @@ plots["tank"] = plot(t->q*A/r - q*A/r*exp(-t*r/A), 0, 50, lw=2, label=L"V(t)", t
 
 # ╔═╡ 34906c24-e13c-422f-b330-bb905c356276
 let
-	p = plot(coffee_sol, idxs=1, label="V", title="Coffee volume", lw=2)
+	p = plot(coffee_sol2, idxs=V, label="V [L]", title="Coffee volume", lw=2)
 	vspan!([2, 3], alpha=0.4, color=:pink, label="")
 	plots["coffeevol"] = p
 end
 
 # ╔═╡ 0cb4e475-676b-4d9c-9a75-ea0a0659c5b0
 let
-	p = plot(coffee_sol, idxs=2, label="T [°C]", title="Coffee temperature", color=:orange, lw=2)
+	p = plot(coffee_sol2, idxs=T, label="T [°C]", title="Coffee temperature", color=:orange, lw=2)
 	vspan!([2, 3], alpha=0.4, color=:pink, label="")
 	plots["coffeetemp"] = p
 end
@@ -779,17 +817,19 @@ plots
 length(plots)
 
 # ╔═╡ Cell order:
-# ╠═dfca2f9f-0134-461c-a18b-f66f2bf02943
+# ╟─dfca2f9f-0134-461c-a18b-f66f2bf02943
 # ╠═093b722d-28af-4219-8546-39a3262146b2
 # ╠═a52da2c2-f7df-11ee-033f-8500edb3c03f
 # ╠═8cff27a7-fde1-4b49-8ad6-513302997a4e
-# ╠═34bec0a1-40e8-48a2-9109-94872aaff1b9
+# ╠═355e3d5e-1249-480b-9a33-604e1fa29157
+# ╠═217818c5-9830-46cc-8827-9085d1fbcacb
+# ╟─34bec0a1-40e8-48a2-9109-94872aaff1b9
 # ╟─abebedae-b977-43ae-aaa0-6b00990a5de4
 # ╠═0d09ba2e-3cac-4051-b98f-26b79736b225
 # ╠═fdc534e1-e334-48c1-aac4-5a89c47484e0
 # ╠═104ad25e-743b-4f47-8b10-0d3d6715f95c
 # ╠═e2b7dd60-327c-45fd-a8d7-683b5d4f1274
-# ╠═73eb7d0a-5433-4e3d-a008-748db66b8ef9
+# ╟─73eb7d0a-5433-4e3d-a008-748db66b8ef9
 # ╠═d3b84441-ed9f-436d-a690-660c5f4b8fbd
 # ╠═ddd43577-eb2e-4c72-b829-d7195c165ddf
 # ╠═10a26b97-8b0a-454e-afbf-141aef4aa04f
@@ -799,7 +839,17 @@ length(plots)
 # ╠═34906c24-e13c-422f-b330-bb905c356276
 # ╠═f3737612-5458-4c6e-a634-246b2cb8cb05
 # ╠═0cb4e475-676b-4d9c-9a75-ea0a0659c5b0
-# ╠═d036c1da-2fb7-42b4-81ba-97d40ee2bf8a
+# ╠═d531ce6b-6b42-4487-bfa6-a141e85230e8
+# ╠═a97e1976-24fd-49aa-a487-be39f4d87d3f
+# ╠═6bc18767-54f0-44dc-a7d3-91c98681bcea
+# ╠═3e8b5648-e4f7-41ef-9e4f-026e05f3e868
+# ╠═40542050-64c9-45e6-ac42-4fef56d5bde0
+# ╠═375ced7e-6beb-4670-8682-e9bf0b92f58b
+# ╠═c7ead652-fa4f-4db9-9cb2-480993806679
+# ╠═d2c55d9d-df8a-498b-9de6-dd33a18233a5
+# ╠═17b56643-e54c-40f8-a7ef-355f08968ea9
+# ╠═0572f523-c173-47c7-9dca-5e99acace9e9
+# ╟─d036c1da-2fb7-42b4-81ba-97d40ee2bf8a
 # ╠═6578e920-8bd8-4adb-aa45-7f601fce20e4
 # ╠═06ba3e44-f2af-45c7-917e-3c8d0ca8ba91
 # ╠═14be39e9-4f92-43e9-8a9a-6a38a545060b
@@ -814,7 +864,6 @@ length(plots)
 # ╠═689f9c80-5680-4cc5-a60d-bacd846f0925
 # ╠═ad511e07-230f-4405-9613-40f2e55676e6
 # ╠═730255e3-ba36-482c-bff3-8435d348fe40
-# ╠═959b8b64-959a-4869-b499-159eccfa0768
 # ╠═0f19626f-5c0a-4fde-b7b0-824ec624cd96
 # ╠═8a752cbe-8220-41f8-997f-f2eb321b2a2b
 # ╠═063f7b0d-c8e6-4128-87f9-d3b5b5139670

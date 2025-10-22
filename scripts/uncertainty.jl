@@ -57,8 +57,10 @@ md"## SIR example"
 sir = @reaction_network begin
 	@species S(t)=99 I(t)=1 R(t)=0
 	@parameters β=$β γ=$γ
-    β, S + I --> 2I  # susceptible persons get infected
-    γ, I --> R       # infected persons become recovered
+	# susceptible persons get infected
+    β, S + I --> 2I
+	# infected persons become recovered
+    γ, I --> R       
 end
 
 # ╔═╡ 34f47469-63b7-4e9a-98e8-e67827e4dbf4
@@ -126,6 +128,12 @@ r = 12.5 ± 0.2
 
 # ╔═╡ 660c25d8-bcc5-4de3-9d04-013356acd22a
 area = pi * r^2
+
+# ╔═╡ bc8dd135-2cff-4325-8f68-294ebc70070b
+a = 4.71 ± 0.01
+
+# ╔═╡ 0a2449bd-1908-4137-94e0-306a66e1e5b3
+a*exp(7/a) - a * exp(1/a)
 
 # ╔═╡ 06929445-f0ac-430f-a09f-1743f2de6f91
 md"## Local sensitivity"
@@ -289,6 +297,12 @@ plots["sir_sim"] = plot(sirsol, lw=2, title="SIR model with β=$β and γ=$γ", 
 # ╔═╡ ef6cb5d2-aa48-459d-931f-a5a79fcf2507
 plots["sir_uncertainty"] =plot(solve(sirprobu, saveat=2), lw=2, title="SIR model with β=$βu and γ=$γu", legend=:right)
 
+# ╔═╡ 0d1b081d-415b-4913-b2c1-e00a3fd4bb3b
+plots["beta_dist"] = plot(Normal(0.03, 0.006), xlab=L"\beta", lw=2, title="Distribution on β", color="purple", label="PDF")
+
+# ╔═╡ 1568f766-01a3-4ce7-9030-ccd1cb67b9af
+plots["gamma_dist"] = plot(TriangularDist(0.23, 0.37, 0.3), xlab=L"\gamma", lw=2, title="Distribution on γ", color="orange", label="PDF")
+
 # ╔═╡ 5075c78a-56e3-4372-b605-de3dfec5cebc
 let
 	p = plot(sirsol, lw=2, title="Monte Carlo of SIR model", legend=:right)
@@ -400,6 +414,8 @@ plots
 # ╠═2645bb50-bec6-4b5e-b423-9cbc2f4dbd24
 # ╠═ef6cb5d2-aa48-459d-931f-a5a79fcf2507
 # ╠═02209c47-4ff3-4823-a998-fe1f173f749a
+# ╠═0d1b081d-415b-4913-b2c1-e00a3fd4bb3b
+# ╠═1568f766-01a3-4ce7-9030-ccd1cb67b9af
 # ╠═5075c78a-56e3-4372-b605-de3dfec5cebc
 # ╠═9b048268-30d7-4eaf-8a26-ab2e1c0404cd
 # ╠═4f1cc2c6-254d-4f9c-b97a-09d22cb3838a
@@ -413,6 +429,8 @@ plots
 # ╠═a3f82cf6-b25d-4de1-b264-93d6e047ec6d
 # ╠═090f89e0-d1e2-4363-830e-4d0635749890
 # ╠═660c25d8-bcc5-4de3-9d04-013356acd22a
+# ╠═bc8dd135-2cff-4325-8f68-294ebc70070b
+# ╠═0a2449bd-1908-4137-94e0-306a66e1e5b3
 # ╠═06929445-f0ac-430f-a09f-1743f2de6f91
 # ╠═11c32674-9817-4b0c-bcb2-235c431a5519
 # ╠═1ed87d81-4b19-4de3-9735-fc36894b64c7

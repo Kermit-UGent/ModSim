@@ -30,9 +30,8 @@ using Zygote
 
 # ╔═╡ 08cf2a80-f2b2-11ea-132d-2f26c934bbb2
 md"""
-# Numeric and automatic differentiation
+# Numerical and automatic differentiation
 
-STMO
 
 ![](https://github.com/MichielStock/STMO/blob/master/chapters/03.AutoDiff/Figures/logo.png?raw=true)
 
@@ -332,24 +331,6 @@ md"Let's implement some basic rules showing linearity."
 # ╔═╡ 3f5a58da-f2b8-11ea-3ab0-5db5e9199bb1
 md"And some more advanced ones, based on differentiation."
 
-# ╔═╡ eaacb5a5-c748-4223-98e4-be73d3f2086f
-
-
-# ╔═╡ 263e18dc-fe70-11ea-03a0-8fd5e031b06f
-md"**Assignment**: complete this code."
-
-# ╔═╡ 2f18c362-f2b8-11ea-1beb-719ff5cd5f8d
-Base.:sin(a::Dual) = missing
-
-# ╔═╡ 393f92a6-fe70-11ea-024e-ff30dcfc7103
-Base.:cos(a::Dual) = missing
-
-# ╔═╡ 329cb67e-f2b8-11ea-07b1-e13fd8ddbe42
-Base.:exp(a::Dual) = missing
-
-# ╔═╡ 36a2ca10-f2b8-11ea-0fae-53b552c76115
-Base.:log(a::Dual) = missing
-
 # ╔═╡ 555c8d88-f2b8-11ea-34d8-a17ce87ccdc1
 md"This directly works for vectors!"
 
@@ -536,12 +517,32 @@ sign(num) * significand(num) * 2^exponent(num)
 # ╔═╡ 6fd08e42-f2b5-11ea-36e6-d7ff10412e2b
 xvect = 2rand(10)
 
-# ╔═╡ 4a6270a3-a271-40da-84d0-28247f287c22
-2.0 + 3.0ϵ  # now this works!
-
 # ╔═╡ 48e5da96-f2b8-11ea-0108-2104f2c8ac24
 # you can derive this directly from the definition!
 Base.:/(a::Dual, b::Dual) = Dual(a.v / b.v, (a.vdot * b.v - a.v * b.vdot) / b.v^2)
+
+# ╔═╡ c8a5c6f8-4ca1-4c7e-9cc1-d2e5c9e9da59
+symexpr = (x + 2)^n / (x+2)
+
+# ╔═╡ 997ec642-a865-4c97-9aa1-d4d9df9e1dd0
+expand_derivatives(Dx(symexpr)) |> simplify
+
+# ╔═╡ 688a1f40-f2b5-11ea-3fa8-ebb735323ddd
+grad_vect(f, x, d; h=1e-10) = (f(x .+ h * d) - f(x .- h * d)) / (2h)
+
+# ╔═╡ 6d6da8ba-f2b5-11ea-1064-df27ecea7d13
+dvect = randn(10) / 10
+
+# ╔═╡ 9a87095e-f2b5-11ea-334e-57a637e20c43
+A = randn(10, 10) |> A -> (A * A' + I) / 100  # make sym and PD
+
+# ╔═╡ 0b04b5f3-6c89-49b1-9033-d2e2e5da4cb6
+begin
+	Base.:sin(a::Dual) = Dual(sin(a.v), cos(a.v) * a.vdot)
+	Base.:cos(a::Dual) = Dual(cos(a.v), -sin(a.v) * a.vdot)
+	Base.:exp(a::Dual) = Dual(exp(a.v), exp(a.v) * a.vdot)
+	Base.:log(a::Dual) = Dual(log(a.v), 1.0 / a.v * a.vdot)
+end
 
 # ╔═╡ 2be8656c-f2b3-11ea-2244-5740c807deff
 f(x) = log(x) + sin(x) / x
@@ -594,23 +595,26 @@ f'(a)  # that's it
 # ╔═╡ c6728784-f2b8-11ea-12b5-d7eb039d77ce
 Zygote.gradient(f, a)  # returns a tuple, since you can differentiate w.r.t. multiple arguments
 
-# ╔═╡ c8a5c6f8-4ca1-4c7e-9cc1-d2e5c9e9da59
-symexpr = (x + 2)^n / (x+2)
-
-# ╔═╡ 997ec642-a865-4c97-9aa1-d4d9df9e1dd0
-expand_derivatives(Dx(symexpr)) |> simplify
-
-# ╔═╡ 688a1f40-f2b5-11ea-3fa8-ebb735323ddd
-grad_vect(f, x, d; h=1e-10) = (f(x .+ h * d) - f(x .- h * d)) / (2h)
-
-# ╔═╡ 6d6da8ba-f2b5-11ea-1064-df27ecea7d13
-dvect = randn(10) / 10
-
-# ╔═╡ 9a87095e-f2b5-11ea-334e-57a637e20c43
-A = randn(10, 10) |> A -> (A * A' + I) / 100  # make sym and PD
-
 # ╔═╡ 75ae48fe-f2b5-11ea-0614-912091cbfb6a
 g(x) = exp(- sum(x .* (A * x)))
+
+# ╔═╡ 7b95d73c-f2b5-11ea-1b29-858f7b6c99bf
+∇g(x) = -2g(x) * A * x
+
+# ╔═╡ b372c25c-f2b5-11ea-1c55-e5045e0dc5b7
+∇g(xvect)
+
+# ╔═╡ b6e48b12-f2b5-11ea-3bf2-81e5b2a3dc98
+∇g(xvect)' * dvect
+
+# ╔═╡ bebbd674-f2b5-11ea-19c6-4fe1257b0277
+(∇g(xvect + h * dvect) - ∇g(xvect - h * dvect)) / 2h
+
+# ╔═╡ 836ca94a-f2b5-11ea-07e0-bd830f810fba
+∇²g(x) = -2g(x) * A - 2A * x * ∇g(x)'
+
+# ╔═╡ cd2821c4-fe7f-11ea-0c41-8feab49be07a
+∇²g(xvect) * dvect
 
 # ╔═╡ 8fe85430-f2b5-11ea-3fe7-5d9a0db03932
 g(xvect)
@@ -627,23 +631,8 @@ g'(xvect)
 # ╔═╡ df557ed2-f2b8-11ea-22ee-e1c90a2655bf
 Zygote.hessian(g, xvect)
 
-# ╔═╡ 7b95d73c-f2b5-11ea-1b29-858f7b6c99bf
-∇g(x) = -2g(x) * A * x
-
-# ╔═╡ b372c25c-f2b5-11ea-1c55-e5045e0dc5b7
-∇g(xvect)
-
-# ╔═╡ b6e48b12-f2b5-11ea-3bf2-81e5b2a3dc98
-∇g(xvect)' * dvect
-
-# ╔═╡ 836ca94a-f2b5-11ea-07e0-bd830f810fba
-∇²g(x) = -2g(x) * A - 2A * x * ∇g(x)'
-
-# ╔═╡ cd2821c4-fe7f-11ea-0c41-8feab49be07a
-∇²g(xvect) * dvect
-
-# ╔═╡ bebbd674-f2b5-11ea-19c6-4fe1257b0277
-(∇g(xvect + h * dvect) - ∇g(xvect - h * dvect)) / 2h
+# ╔═╡ 4a6270a3-a271-40da-84d0-28247f287c22
+2.0 + 3.0ϵ  # now this works!
 
 # ╔═╡ 272bdcca-aeb1-405f-8251-33f13cddbdc5
 (2.0+3.0ϵ) / (5.0+8.0ϵ)
@@ -2872,17 +2861,12 @@ version = "1.4.1+1"
 # ╠═ab39b554-0880-11eb-05de-71949f71b440
 # ╟─0aba93a6-f2b8-11ea-1461-d96878b7a5c1
 # ╠═014ec92c-f2b8-11ea-3986-8d74a8c2458d
+# ╠═0b04b5f3-6c89-49b1-9033-d2e2e5da4cb6
+# ╠═48e5da96-f2b8-11ea-0108-2104f2c8ac24
 # ╠═4a6270a3-a271-40da-84d0-28247f287c22
 # ╠═272bdcca-aeb1-405f-8251-33f13cddbdc5
-# ╟─3f5a58da-f2b8-11ea-3ab0-5db5e9199bb1
-# ╠═48e5da96-f2b8-11ea-0108-2104f2c8ac24
-# ╠═eaacb5a5-c748-4223-98e4-be73d3f2086f
-# ╟─263e18dc-fe70-11ea-03a0-8fd5e031b06f
-# ╠═2f18c362-f2b8-11ea-1beb-719ff5cd5f8d
-# ╠═393f92a6-fe70-11ea-024e-ff30dcfc7103
-# ╠═329cb67e-f2b8-11ea-07b1-e13fd8ddbe42
-# ╠═36a2ca10-f2b8-11ea-0fae-53b552c76115
 # ╠═4ee45daa-f2b8-11ea-10ea-f929853879b1
+# ╟─3f5a58da-f2b8-11ea-3ab0-5db5e9199bb1
 # ╟─555c8d88-f2b8-11ea-34d8-a17ce87ccdc1
 # ╠═59eee760-f2b8-11ea-29f6-732292e2f95d
 # ╠═5ccd625e-f2b8-11ea-38c1-098e2f31ce53

@@ -28,6 +28,15 @@ using Symbolics
 # ╔═╡ 0b52aede-1a71-4034-9921-2ffc9120c0ae
 using Latexify
 
+# ╔═╡ a002c012-8cf1-46a3-bdc2-0b545328762b
+md"## Finite diff example"
+
+# ╔═╡ 919ce5fd-3505-4774-b295-430ffce28112
+f(u, θ, t) = √(u + θ^2)
+
+# ╔═╡ aaf15090-ab39-4262-a777-23fb0648df82
+θ = 2
+
 # ╔═╡ ff86545c-64a2-4c6f-8c36-9066b270aa6b
 md"""
 ## Events and callbacks
@@ -251,10 +260,10 @@ u0_sir = [:S=>S₀, :I=>I₀, :R=>R₀]
 sir_oprob = ODEProblem(sir_model, u0_sir, (0.0, 100.0), pars_sir)
 
 # ╔═╡ d0aa9ea8-38cb-4f00-92d2-58740ab2d32a
-sir_dprob = DiscreteProblem(sir_model, u0_sir, (0.0, 100.0), pars_sir)
+sir_dprob = DiscreteProblem(sir_model, u0_sir, (0.0, 100.0), pars_sir);
 
 # ╔═╡ 88a00ea8-9c7b-49fc-8771-2324576a0124
-sir_jprob = JumpProblem(sir_model, sir_dprob, Direct())
+sir_jprob = JumpProblem(sir_model, sir_dprob, Direct());
 
 # ╔═╡ 5c3c6af6-add6-4f1a-91ca-0251b43d5e1a
 plot(solve(sir_oprob), lw=2)
@@ -294,6 +303,31 @@ md"## Getting derivatives"
 # ╠═╡ skip_as_script = true
 #=╠═╡
 f(x) = log(x) + sin(x)^2 / x
+  ╠═╡ =#
+
+# ╔═╡ 0883bb4f-bd3c-47c3-bd88-6eff9960af07
+#=╠═╡
+odeprob = ODEProblem(f, 1.0, (0.0, 10.0), θ)
+  ╠═╡ =#
+
+# ╔═╡ 72c235fa-7114-49df-b49c-d4bc51b66cd3
+#=╠═╡
+sol1 = solve(odeprob, RK4(), saveat=0.1);
+  ╠═╡ =#
+
+# ╔═╡ 76b5f64c-abab-41db-ba43-fb3404341ad1
+#=╠═╡
+odeprob2 = remake(odeprob; p=θ+1e-1)
+  ╠═╡ =#
+
+# ╔═╡ 9e17ddd9-d519-4743-a923-6ac2d6fc7992
+#=╠═╡
+sol2 = solve(odeprob2, RK4(), saveat=0.1);
+  ╠═╡ =#
+
+# ╔═╡ 2440b708-7b44-41ab-a8ef-21ca3b4413de
+#=╠═╡
+plot(sol2.t, Vector((sol2-sol1)/1e-1), xlab="t", title="Forward diff derivative solution to θ", label=L"dy(t;θ)/dθ|_{θ=2}")
   ╠═╡ =#
 
 # ╔═╡ 459fe27d-bc53-469d-919d-724a5df98fe9
@@ -377,6 +411,15 @@ TableOfContents()
 
 # ╔═╡ 13036978-3008-4d7e-9661-a967381f4db6
 plots = Dict()
+
+# ╔═╡ 485d0572-bf5a-40db-8083-596ac4a78e69
+#=╠═╡
+begin
+	plots["ODEdiff"] = plot(sol1, label="Solution with θ=$θ")
+	plot!(sol2, label="Solution with θ=$θ+0.1")
+	title!("Solution of y'=√(y + θ²)")
+end
+  ╠═╡ =#
 
 # ╔═╡ 0de4a715-89d6-403b-ac65-adaed6062371
 let
@@ -641,6 +684,15 @@ plots
 # ╠═eb128248-dfbc-11ee-2efb-cb60fad76024
 # ╠═4f364a47-c45e-4264-9a00-fb705ff3f169
 # ╠═fd2f6fb4-d6da-4b07-8044-d3e2a09a6b4d
+# ╟─a002c012-8cf1-46a3-bdc2-0b545328762b
+# ╠═919ce5fd-3505-4774-b295-430ffce28112
+# ╠═aaf15090-ab39-4262-a777-23fb0648df82
+# ╠═0883bb4f-bd3c-47c3-bd88-6eff9960af07
+# ╠═72c235fa-7114-49df-b49c-d4bc51b66cd3
+# ╠═76b5f64c-abab-41db-ba43-fb3404341ad1
+# ╠═9e17ddd9-d519-4743-a923-6ac2d6fc7992
+# ╠═485d0572-bf5a-40db-8083-596ac4a78e69
+# ╠═2440b708-7b44-41ab-a8ef-21ca3b4413de
 # ╠═ff86545c-64a2-4c6f-8c36-9066b270aa6b
 # ╠═018d215a-41f4-4d21-b57f-fca3ac3a755d
 # ╠═992d2b4f-6521-4368-910d-3e7ef07fb6df

@@ -100,6 +100,9 @@ k
 # ╔═╡ 768ea152-00a5-4409-86eb-9a1c554eb3b2
 mean(Beta(8, 3))  
 
+# ╔═╡ 0e41b480-5d71-4990-9891-013a16323072
+mode(Beta(8, 3))
+
 # ╔═╡ 959cd079-59a4-42f5-a868-4cc0675c694b
 seed_likelihood = p -> pdf(Binomial(10, p), k)
 
@@ -586,12 +589,12 @@ end
 y1, y2 = 7.8, 9.8
 
 # ╔═╡ 15c7c5ed-5bcf-4336-aecb-22fd3ef38d05
-chain_diff = sample(diffuse_prior(y1, y2), NUTS(), 10_000)
+chain_diff = sample(diffuse_prior(y1, y2), NUTS(), 10_000);
 
 # ╔═╡ cde76a39-51a0-4398-ba2c-81170e395a07
 @model function weak_prior(y1, y2)
 	μ ~ Normal(0, 1000)
-	σ ~ Exponential(10) #Uniform(0, 100)
+	σ ~ Exponential(10)
 	y1 ~ Normal(μ, σ)
 	y2 ~ Normal(μ, σ)
 end
@@ -667,7 +670,7 @@ function seed_bayesian_plot(k; a=8, b=3, n=10, title="Inference of p given $k of
 	plot!(p->n * seed_likelihood(p), 0, 1, lw=2, label=labels ? "likelihood (rescaled)" : "", color="blue", ls=:dash)
 	plot!(seed_posterior, 0, 1, lw=2, label=labels ? "posterior" : "", color="orange", ls=:dashdot)
 	vline!([p_ML], lw=2, alpha=0.5, label= labels ? "p* (maximum likelihood)" : "", ls=:dash)
-	vline!([p_MAP], lw=2, alpha=0.5, label=labels ? "p* (maximum posterior likelihood)" : "", ls=:dot)
+	vline!([p_MAP], lw=2, alpha=0.5, label=labels ? "p* (maximum a posteriori likelihood)" : "", ls=:dot)
 	return plot_seed
 end
 
@@ -914,6 +917,7 @@ length(plots)
 # ╠═29928abf-f010-438e-9b60-e6673a51ddf5
 # ╠═730e5cbb-1787-44b3-9bb4-32dba7035ea8
 # ╠═768ea152-00a5-4409-86eb-9a1c554eb3b2
+# ╠═0e41b480-5d71-4990-9891-013a16323072
 # ╠═959cd079-59a4-42f5-a868-4cc0675c694b
 # ╠═39cb8a88-9bfe-4b51-8f2f-b89b45dccc95
 # ╠═667f2069-fd32-4c3e-aebb-b75a38bf84b9
@@ -998,7 +1002,7 @@ length(plots)
 # ╠═37986301-c9d2-42e3-8b73-7c833bf7ae17
 # ╠═35bc2b8f-716d-4a85-8e60-7242709448c3
 # ╟─0c652efb-0edb-4a4e-a14c-7d5ac6eb5ffa
-# ╠═ab09925c-4689-4f87-be44-f8eca12a5c9c
+# ╟─ab09925c-4689-4f87-be44-f8eca12a5c9c
 # ╟─69f2c623-632f-4df4-8566-a48574c0f9fb
 # ╟─1a24999d-1ab7-4220-8e22-b1ac33ad03ac
 # ╟─5e6c6135-f4f9-447c-8f7a-a49ec25e414a
@@ -1010,14 +1014,14 @@ length(plots)
 # ╠═a9bd2d76-16e6-4084-b65d-0645ec94aa9c
 # ╠═444a89d1-a8c1-4df8-945d-6e8dd32ae204
 # ╠═9b4d67dc-9c75-45ee-9328-d229c527fdc6
-# ╠═4d8fd482-11cb-4f2e-8c47-2428ee7e66c6
+# ╟─4d8fd482-11cb-4f2e-8c47-2428ee7e66c6
 # ╟─1ba9efb2-cd95-4097-b8f6-3a770205c935
 # ╟─e5d604e0-44c4-4d10-8faa-7ade5f5fbfff
 # ╠═4019f495-ce19-44e4-ad79-18349fa6ec18
 # ╠═afbf92d5-c72e-4041-a265-50d762df58f7
 # ╠═99d638e6-1fae-4020-af2f-28703cc67377
 # ╠═bec15afc-3f02-4c7d-b9e2-01f496e31689
-# ╠═7f729aa1-78c0-4d2e-9ae5-c27502be22e8
+# ╟─7f729aa1-78c0-4d2e-9ae5-c27502be22e8
 # ╟─786c8319-806c-461d-af08-f082d6f12339
 # ╟─81863647-168f-46b1-87f1-cc1169b7c6ff
 # ╠═aa022156-efb4-4b2b-ac22-9b4228ee2578
@@ -1031,7 +1035,7 @@ length(plots)
 # ╠═8de88cd0-e326-4926-bfe9-776e3516d6e2
 # ╠═cde76a39-51a0-4398-ba2c-81170e395a07
 # ╠═42a81a70-f8a1-4a11-a475-c4adddefde73
-# ╠═0969b685-e9c5-44d5-8698-a141dd01dca7
+# ╟─0969b685-e9c5-44d5-8698-a141dd01dca7
 # ╠═930902f1-5d0d-41a9-8c37-07e0d913aa6e
 # ╠═96f05537-6fb3-45ce-8d75-28efdfa03279
 # ╠═3708eb56-53e4-43b8-8af4-e1f6e302a0cf

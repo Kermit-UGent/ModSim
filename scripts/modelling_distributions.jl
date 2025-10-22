@@ -815,6 +815,20 @@ let
 	p
 end
 
+# ╔═╡ 7d1f7e48-8a4f-4863-b7e9-47062f88e788
+let
+
+	x_unif = 2rand(n_pi) .- 1
+	y_unif = 2rand(n_pi) .- 1
+	in_circle = x_unif.^2 .+ y_unif.^2 .≤ 1
+	
+	p = plot(x->sqrt(1-x^2), -1, 1, aspect_ratio=:equal, xlim=[-1,1], ylim=[-1, 1], lw=0.01, fillrange=x->-sqrt(1-x^2), fillalpha=0.3, xlab=L"x", ylab=L"y", label="circle", title="Rejection sampling unit circle", legend=:outertopright)
+	scatter!(x_unif[in_circle], y_unif[in_circle], ms=0.8, markercolor="orange", markerstrokewidth=0, label="in circle")
+	scatter!(x_unif[.!in_circle], y_unif[.!in_circle], ms=0.8, markercolor="green", markerstrokewidth=0, label="out of circle")
+	plots["pi_sample_RS"] = p
+	p
+end
+
 # ╔═╡ 47924cdc-b5bc-4612-949b-d0d23c8c47d9
 let
 	p = [1, 2, 1, 4, 3, 6]
@@ -1183,6 +1197,7 @@ plots # dictionary of all the figures, for saving
 # ╠═cb36a752-da05-4da8-8dc8-1c2d34a11ad5
 # ╠═7c244dc0-6c7b-451e-b7c0-da25a77da657
 # ╠═fe471a6a-5c29-49f6-afba-83be7ab5d770
+# ╠═7d1f7e48-8a4f-4863-b7e9-47062f88e788
 # ╟─e0f96ed2-bc51-467e-be3e-8617293e33e2
 # ╟─47924cdc-b5bc-4612-949b-d0d23c8c47d9
 # ╟─12df460c-a547-410f-ac1c-90d41c8a37f1
