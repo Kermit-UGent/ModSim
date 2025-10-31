@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.20.10
 
 using Markdown
 using InteractiveUtils
@@ -18,6 +18,12 @@ using Plots, PlutoUI, LaTeXStrings
 
 # ╔═╡ fd2f6fb4-d6da-4b07-8044-d3e2a09a6b4d
 using Catalyst, DifferentialEquations
+
+# ╔═╡ f1e301b7-794e-4738-8cbf-140d74ddeb61
+using ModelingToolkit
+
+# ╔═╡ 160a979c-fe75-4014-9a06-e34b23c6bfaf
+using ModelingToolkit: t_nounits as t, D_nounits as D
 
 # ╔═╡ 6e94632a-cad9-49ea-8cdc-e4ec55871682
 using Distributions
@@ -44,6 +50,22 @@ md"""
 
 # ╔═╡ 018d215a-41f4-4d21-b57f-fca3ac3a755d
 md"### Bouncing ball"
+
+# ╔═╡ a74ea901-5b75-4e16-8d5a-e5e6b8dd2f29
+let
+	@variables y(t) v(t)
+	@parameters g=9.81
+
+	eq = [D(y) ~ v, D(v) ~ - g]
+	
+	bounce = [y ~ 0] => [v ~ -0.9v]
+
+	@mtkbuild ball = ODESystem(eq, t, continuous_events=bounce)
+
+	prob = ODEProblem(ball, [y=>50, v=>0], (0, 15))
+	sol = solve(prob, Tsit5())
+	plot(sol)
+end
 
 # ╔═╡ 992d2b4f-6521-4368-910d-3e7ef07fb6df
 function ball!(du, u, g, t)
@@ -137,6 +159,12 @@ plot(solve(ODEProblem(radicals, [], (0.0, 10)), Rosenbrock23()))
 # ╔═╡ 945febc8-2954-4d5c-a4b1-7f95c70ef4b6
 md"## Stochastic differential equations"
 
+# ╔═╡ 0c68ce8c-289b-4992-bf0e-cff0f89961f4
+md"### Theory"
+
+# ╔═╡ 36e4c633-cd8e-4ed7-bcc1-a4518e83bd7d
+md"### Catalyst example"
+
 # ╔═╡ 6501070e-9093-4928-89b9-b9dd34128810
 brownian_motion = @reaction_network begin
 	@species A(t)=1
@@ -183,6 +211,9 @@ comp_ensemble = solve(eprob; trajectories = 20)
 
 # ╔═╡ 3604baf4-7623-4842-aeb8-74785417b398
 e_sumary = EnsembleAnalysis.EnsembleSummary(comp_ensemble)
+
+# ╔═╡ a6e002b9-4391-4ea7-a6d5-cd8ef9d67c5c
+md"### MTK examples"
 
 # ╔═╡ 4f671499-19b2-426c-a689-2ee4b084f3d0
 md"## Discrete stochastic differential equations"
@@ -336,7 +367,7 @@ diff_complstep(f, x; h=1e-10) = imag(f(x+im*h)) / h
 # ╔═╡ f61a7f2d-faa2-4a54-bd4a-c2fac6da888f
 # ╠═╡ skip_as_script = true
 #=╠═╡
-g(x) = sin(cos(exp(x)) + x^2)
+h(x) = sin(cos(exp(x)) + x^2)
   ╠═╡ =#
 
 # ╔═╡ 615370c3-4986-454e-85c5-11d447b51ff1
@@ -345,7 +376,7 @@ g(x) = sin(cos(exp(x)) + x^2)
 # ╔═╡ 6ae135a1-72b5-434c-89e6-a0df76338d46
 # ╠═╡ skip_as_script = true
 #=╠═╡
-g(x)
+h(x)
   ╠═╡ =#
 
 # ╔═╡ 77e9ad42-87fb-4292-bb89-3b0cb271f1a2
@@ -394,13 +425,13 @@ df(a)
 
 # ╔═╡ 9be6aa61-46fe-4d53-941b-6cb0b21133a0
 #=╠═╡
-d2gdt2 = Dx(Dx(g(x))) |> expand_derivatives |> simplify
+d2gdt2 = Dx(Dx(h(x))) |> expand_derivatives |> simplify
   ╠═╡ =#
 
 # ╔═╡ 4aa42d80-81b5-4144-8b4a-6c3ebf29d84b
 # ╠═╡ skip_as_script = true
 #=╠═╡
-dgdt = Dx(g(x)) |> expand_derivatives |> simplify
+dgdt = Dx(h(x)) |> expand_derivatives |> simplify
   ╠═╡ =#
 
 # ╔═╡ 6f6ba9c5-bc87-4b71-82a0-a4c64750a2ab
@@ -605,6 +636,43 @@ plots["competition_ensemble"] = plot(plot(comp_ensemble, idxs=:A, title="Species
 # ╔═╡ 6286a56e-90c4-41b0-8b62-f7189fd5505d
 plots["competition_ensemble_summary"] = plot(e_sumary, xlab=:t, title="Competition ensemble summary")
 
+# ╔═╡ 37d456a2-dd17-4ad4-813b-8ed322435b4d
+let
+	@variables V(t)
+	@parameters r=0.1 q=2 n=0.5
+	@brownian B
+
+	eq = [D(V) ~ - r * V + (q + n * B)]
+
+	@mtkbuild tank = System(eq, t)
+
+	prob = SDEProblem(tank, [V=>0], (0.0, 100.0))
+	sol = solve(prob, SRIW1())
+	plots["stochastic_tank"] = plot(sol, lw=2)
+	hline!([2/0.1], label="q / r", lw=2, ls=:dash)
+	title!("Tank with stochastic input")
+		
+end
+
+# ╔═╡ 43d0b2eb-0f38-4557-8c1b-178dd65ff179
+let
+	@variables V₁(t)=0 V₂(t)=0 V₃(t)=0
+	@parameters r=0.1 q=2 n=.5
+	@brownian B₁ B₂
+
+	eq = [D(V₁) ~ - r * V₁ + (q + n * B₁),
+		 	D(V₂) ~ - r * V₂ + (q + n * B₂),
+		 	D(V₃) ~ - r * V₃ + r * V₁ + r * V₂]
+
+	@mtkbuild tanks = System(eq, t)
+
+	prob = SDEProblem(tanks, [], (0.0, 100.0))
+	sol = solve(prob, SRIW1())
+	
+	plots["three_stochastic_tank"] = plot(sol, lw=2)	
+	title!("Multiple tanks with stochastic input")
+end
+
 # ╔═╡ bb562e40-daaf-47be-a1d0-1938bc227fc0
 begin
 	n₀ = 20
@@ -695,6 +763,9 @@ plots
 # ╠═2440b708-7b44-41ab-a8ef-21ca3b4413de
 # ╠═ff86545c-64a2-4c6f-8c36-9066b270aa6b
 # ╠═018d215a-41f4-4d21-b57f-fca3ac3a755d
+# ╠═f1e301b7-794e-4738-8cbf-140d74ddeb61
+# ╠═160a979c-fe75-4014-9a06-e34b23c6bfaf
+# ╠═a74ea901-5b75-4e16-8d5a-e5e6b8dd2f29
 # ╠═992d2b4f-6521-4368-910d-3e7ef07fb6df
 # ╠═0de4a715-89d6-403b-ac65-adaed6062371
 # ╟─89d089b2-3220-4696-9ded-364c318b4a1e
@@ -720,10 +791,12 @@ plots
 # ╠═2aad9bca-736f-4aaa-ad50-74cc01661117
 # ╠═80404482-0534-43fd-8783-84ae6522706d
 # ╠═945febc8-2954-4d5c-a4b1-7f95c70ef4b6
+# ╠═0c68ce8c-289b-4992-bf0e-cff0f89961f4
 # ╟─5099fd5b-735e-4de3-918a-685dd4a82c22
 # ╟─18def41b-0827-4356-adfa-d3fc63e23cfa
 # ╟─dc583986-3b76-44a7-ad5a-909aa392c38b
 # ╠═f3ec3c15-aa56-4b20-ad83-2acec0aad6b6
+# ╠═36e4c633-cd8e-4ed7-bcc1-a4518e83bd7d
 # ╠═6501070e-9093-4928-89b9-b9dd34128810
 # ╠═6c5f1ee1-ece0-4a44-8e92-c375f2bd40a7
 # ╠═7d0a5294-6fc2-45d5-b04f-2824649f5d81
@@ -743,6 +816,9 @@ plots
 # ╠═ce7b1335-e43d-40dc-8ee8-d75b6df80dce
 # ╠═3604baf4-7623-4842-aeb8-74785417b398
 # ╠═6286a56e-90c4-41b0-8b62-f7189fd5505d
+# ╠═a6e002b9-4391-4ea7-a6d5-cd8ef9d67c5c
+# ╠═37d456a2-dd17-4ad4-813b-8ed322435b4d
+# ╠═43d0b2eb-0f38-4557-8c1b-178dd65ff179
 # ╟─4f671499-19b2-426c-a689-2ee4b084f3d0
 # ╠═6e94632a-cad9-49ea-8cdc-e4ec55871682
 # ╠═bb562e40-daaf-47be-a1d0-1938bc227fc0

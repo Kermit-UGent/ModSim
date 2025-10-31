@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.20.20
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -485,10 +485,10 @@ summarize(chain_MH2)
 mvn = MultivariateNormal(μ, Σ)
 
 # ╔═╡ 06e83a23-fa3a-49f7-8f43-d46f3285e943
-chain_Gibbs = sample(uncertain_normal(y), Gibbs(MH(:μ), MH(:σ)), 1000)
+chain_Gibbs = sample(uncertain_normal(y), Gibbs(:μ => MH(), :σ => MH()), 1000)
 
 # ╔═╡ a9bd2d76-16e6-4084-b65d-0645ec94aa9c
-sample(uncertain_normal(y), Gibbs(HMC(0.2, 3, :μ), PG(20, :σ)), 1000)
+sample(uncertain_normal(y), Gibbs(:μ => HMC(0.2, 3),:σ => PG(20)), 1000)
 
 # ╔═╡ 9b4d67dc-9c75-45ee-9328-d229c527fdc6
 summarize(chain_Gibbs)
@@ -742,7 +742,7 @@ plots["seeds_large_dataset"] = seed_bayesian_plot(10k, n=100)
 plots["norm_muprior"] = plot(dist2pdf(Normal(0, 20)), -50, 50, xlabel=L"\mu", label="Normal(0, 20)", title="Prior for μ", lw=2)
 
 # ╔═╡ cd8bf990-4f36-4a56-83c2-c58217448b1e
-plots["norm_sigmaprior"] = plot(dist2pdf(InverseGamma(.1)), 0, 20, xlabel=L"\sigma", label="InverseGamma(1)", title="Prior for σ", lw=2)
+plots["norm_sigmaprior"] = plot(dist2pdf(InverseGamma(.1)), 0, 20, xlabel=L"\sigma", label="InverseGamma(.1)", title="Prior for σ", lw=2)
 
 # ╔═╡ 45e175bc-0eaa-4280-aaf6-c8b318a6c12d
 plots["norm_priors"] = plot(plots["norm_muprior"], plots["norm_sigmaprior"],size=(800, 400))

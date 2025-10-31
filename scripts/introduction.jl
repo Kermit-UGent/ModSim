@@ -17,16 +17,22 @@ macro bind(def, element)
 end
 
 # ╔═╡ f99b9e24-a7d8-48e5-b71e-a28e6abe2177
+# ╠═╡ skip_as_script = true
+#=╠═╡
 begin
 	using Pkg
 	Pkg.activate("..")
 end
+  ╠═╡ =#
 
 # ╔═╡ 7b432fab-7e4a-49b7-9ccb-9487001f89a4
-using PlutoUI, Plots
+using PlutoUI, Plots, Latexify
 
 # ╔═╡ 5d71d7a9-4bef-4988-bcab-bce5ad08448f
 using Catalyst, DifferentialEquations
+
+# ╔═╡ 2837e47a-d733-4eb5-be74-8486616862a6
+using ModelingToolkit
 
 # ╔═╡ a46b6d63-64de-4c8d-b447-d6023c77dfb4
 using ModelingToolkit: t_nounits as t, D_nounits as D
@@ -51,14 +57,14 @@ oilfield = @reaction_network begin
 end
 
 # ╔═╡ ea8b91c5-621a-416f-9423-53f3970b370c
-@bind R0 Slider(100:100:1000, default=100, show_value=true)
+@bind R0 Slider(100:100:1000, default=500, show_value=true)
 
 # ╔═╡ 3bcd4ec4-a65d-4561-b57f-805623d8183c
 oilfieldproblem = ODEProblem(oilfield, [:R => R0, :I=>0.0, :C=>10.], (0., 100.),
 			[:v => 0.05, :i=>0.1, :d=>0.05, :r=>0.2])
 
 # ╔═╡ 07e15719-a544-4d88-a42c-152a875c2858
-plots["oilfield"] = oilfieldproblem |> solve |> plot
+plots["oilfield"] = plot(solve(oilfieldproblem), title="Non-renewable", lw=2)
 
 # ╔═╡ 0cc6be58-add9-4a58-b532-a43e33da414c
 fishery = @reaction_network begin
@@ -74,13 +80,13 @@ fisheryproblem = ODEProblem(fishery, [:R => R0, :I=>0.0, :C=>10.], (0., 100.),
 			[:v => 0.01, :i=>0.03, :d=>0.05, :r=>0.2, :R0=>R0, :g=>0.1])
 
 # ╔═╡ ed33e20f-cc2c-47e3-add2-298f4b46b8d2
-plots["fishery"] = fisheryproblem |> solve |> plot
+plots["fishery"] = plot(solve(fisheryproblem), title="Renewable", lw=2)
+
+# ╔═╡ 2b840f01-b92e-4bf9-865c-d52be7c10e37
+plots["renew-unrenew"] = plot(plots["oilfield"], plots["fishery"], size=(800, 400))
 
 # ╔═╡ 8ef0561c-de57-4e47-a830-9f3b507110f0
 md"## Example model building"
-
-# ╔═╡ 2837e47a-d733-4eb5-be74-8486616862a6
-using ModelingToolkit
 
 # ╔═╡ 6a4f086a-0570-43d6-acc3-ba178177aadc
 @variables y(t)  # position y as a function of time
@@ -91,8 +97,20 @@ using ModelingToolkit
 # ╔═╡ cb200949-b7ae-45c5-82e2-d4c81df43afc
 eq = m * D(D(y)) ~ - m * g - k * y - ν * D(y)
 
+# ╔═╡ da489edb-1b02-40cf-877c-2d7c0704a3d1
+
+
 # ╔═╡ 4e4a90c3-1053-4473-b19d-0bf10ef64344
 @mtkbuild model = ODESystem(eq, t)
+
+# ╔═╡ 1d25b873-760a-4de5-b963-88a6894f4f37
+# ╠═╡ disabled = true
+#=╠═╡
+latexify(model) |> clipboard
+  ╠═╡ =#
+
+# ╔═╡ e9c6bbbe-4c42-402d-810a-ae6a9a7abe95
+
 
 # ╔═╡ d012505e-b8a2-4a70-a4f8-09b320073eb0
 symbolic_linear_solve(substitute(eq, D(y)=>0), y)
@@ -104,7 +122,7 @@ oprob = ODEProblem(model, [y => -1, D(y) => 0], (0.0, 25.0), [k=>1.2, ν=>0.2])
 sol = solve(oprob, Tsit5())
 
 # ╔═╡ bf70bd70-34dc-49f1-9f64-a1f87b79aefe
-plots["spring"] = plot(sol)
+plots["spring"] = plot(sol, lw=2)
 
 # ╔═╡ Cell order:
 # ╟─2e3f042e-42bb-11ef-326c-f913245163cf
@@ -120,13 +138,17 @@ plots["spring"] = plot(sol)
 # ╠═0cc6be58-add9-4a58-b532-a43e33da414c
 # ╠═d5f1ed22-e9c7-4164-b266-18cea9d15d14
 # ╠═ed33e20f-cc2c-47e3-add2-298f4b46b8d2
+# ╠═2b840f01-b92e-4bf9-865c-d52be7c10e37
 # ╠═8ef0561c-de57-4e47-a830-9f3b507110f0
 # ╠═2837e47a-d733-4eb5-be74-8486616862a6
 # ╠═a46b6d63-64de-4c8d-b447-d6023c77dfb4
 # ╠═6a4f086a-0570-43d6-acc3-ba178177aadc
 # ╠═333dfcca-74ea-4853-bb2a-c7d311b8d330
 # ╠═cb200949-b7ae-45c5-82e2-d4c81df43afc
+# ╠═1d25b873-760a-4de5-b963-88a6894f4f37
+# ╠═da489edb-1b02-40cf-877c-2d7c0704a3d1
 # ╠═4e4a90c3-1053-4473-b19d-0bf10ef64344
+# ╠═e9c6bbbe-4c42-402d-810a-ae6a9a7abe95
 # ╠═d012505e-b8a2-4a70-a4f8-09b320073eb0
 # ╠═b364c127-344d-4eea-97d1-2c964c956456
 # ╠═dc932c9f-6960-411a-a5b9-6cbb3c1d4cc1
