@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ eb142900-1d94-11ef-12ed-6951b45f1817
@@ -53,14 +53,12 @@ Assign the following noise scaling values:
 - noise scaling of `0.0` for the remaining *reactions*
 """
 
+# ╔═╡ f7941ddf-f1e7-41d1-9764-b644dfed68c0
+md"""
+The parameter values are $k =$ 0.2, $Y =$ 0.76, $Q =$ 2.0, $V =$ 40.0 and $S_{in} =$ 2.2$\;g/L$. Suppose that at $t=$0$\;h$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concetration of 0.1$\;g/L$. Simulate the evolution of $S$ and $X$ during $120$ hours.
+"""
+
 # ╔═╡ 6b627d84-b6a5-444d-8163-40a4cab181bd
-# Uncomment and complete the instruction
-# fermenter_sde_secondorder = @reaction_network begin
-#   @parameters missing
-#   missing
-#   missing
-#   missing
-# end
 fermenter_sde_secondorder = @reaction_network begin
     @parameters η=0.10
     @default_noise_scaling η
@@ -77,7 +75,6 @@ Convert the system to a symbolic differential equation model and verify, by anal
 """
 
 # ╔═╡ e1f11068-e489-4c54-a30d-981f5cb19b47
-# osys = missing      # Uncomment and complete the instruction
 osys = convert(ODESystem, fermenter_sde_secondorder, combinatoric_ratelaws=false)
 
 # ╔═╡ a65c84c8-d2ec-44e4-9a07-cbd59f190c57
@@ -86,7 +83,6 @@ Initialize a vector `u0` with the initial conditions:
 """
 
 # ╔═╡ ef3f7a41-61ab-4449-8ffc-784cf1e5cbe6
-# u0 = missing        # Uncomment and complete the instruction
 u0 = [:S => 0.0, :X => 0.1]
 
 # ╔═╡ 9d113e7f-8499-4b2a-a884-d34ce3da0b82
@@ -95,27 +91,20 @@ Set the timespan for the simulation:
 """
 
 # ╔═╡ 839a624b-ca62-4c57-9511-207b626ce864
-# tspan = missing    # Uncomment and complete the instruction
 tspan = (0.0, 120.0)
 
 # ╔═╡ a4d28c40-e315-4bb9-87a5-2b45dd633e5f
-# params = missing    # Uncomment and complete the instruction
 params = [:k => 0.2, :Y => 0.76, :Q => 2, :V => 40, :Sin => 2.2, :η => 0.10]
 
 # ╔═╡ b2973e86-d89f-476a-8c41-de25a9e5c69d
-# ╠═╡ disabled = true
-#=╠═╡
 md"""
 Create the SDE problem and store it in `sprob`.\
 Hint:
 - Use the option: `combinatoric_ratelaws=false`
 """
-  ╠═╡ =#
 
 # ╔═╡ aeddc31e-9de2-4792-a2d8-59a14dfc8173
-# sprob = missing      # Uncomment and complete the instruction
-# sprob = SDEProblem(fermenter_sde_secondorder, u0, tspan, params, combinatoric_ratelaws=false)
-sprob = SDEProblem(fermenter_sde_secondorder, u0, tspan, params, combinatoric_ratelaws=false)
+sprob = SDEProblem(fermenter_sde_secondorder, u0, tspan, params, combinatoric_ratelaws=false);
 
 # ╔═╡ 3a981326-2031-4c63-ad31-c44ddd7a88d5
 md"""
@@ -123,7 +112,6 @@ Solve the SDE problem. Use `EM()` with `dt=0.1`. Store the solution in `ssol`:
 """
 
 # ╔═╡ 6a69c369-4743-48c1-aed9-4f0ccb095707
-# ssol = missing      # Uncomment and complete the instruction
 ssol = solve(sprob, EM(), dt=0.1)
 
 # ╔═╡ 6b6d2229-913b-41a2-8101-00e9fef0945a
@@ -132,7 +120,6 @@ Plot the results with the option `ylim=(0.0, 2.0)`:
 """
 
 # ╔═╡ 593a0e0a-c4d8-4b12-b38b-15b47705f8a7
-# missing
 plot(ssol, ylim=(0.0, 2.0))
 
 # ╔═╡ 08746e97-d794-4261-9ba6-9002cf17e4c1
@@ -141,7 +128,6 @@ Create an `EnsembleProblem` in order to visualize a multiple solutions. Store it
 """
 
 # ╔═╡ 3d07836a-60b1-4584-a89a-3d8bbc72b8cd
-# esprob = missing     # Uncomment and complete the instruction
 esprob = EnsembleProblem(sprob)
 
 # ╔═╡ 98c4ee2b-20ef-43a1-b420-7644d568810b
@@ -150,7 +136,6 @@ Solve the `EnsembleProblem` using the same solver (and time step) as before, for
 """
 
 # ╔═╡ 683fe575-887b-4bd1-8960-10c04f68354d
-# essol = missing      # Uncomment and complete the instruction
 essol = solve(esprob, EM(), dt=0.1; trajectories=100)
 
 # ╔═╡ 26746cab-d3e7-4a01-bbbd-9fcb49ef652f
@@ -159,7 +144,6 @@ Plot the results. Use as option again `ylim=(0.0,2.0)` and also `linealpha=0.5` 
 """
 
 # ╔═╡ 4fcc1d0a-9d30-4056-b8a3-3d802edc42e5
-# missing
 plot(essol, ylim=(0.0,2.0), linealpha=0.5)
 
 # ╔═╡ Cell order:
@@ -172,6 +156,7 @@ plot(essol, ylim=(0.0,2.0), linealpha=0.5)
 # ╟─959d6307-a30d-4ae7-970d-b2c7584c2c8f
 # ╟─98858b9c-d4f9-451f-a7b9-fcaa012ee28e
 # ╟─d2e2680c-01c6-449a-bb5f-7472bc1de243
+# ╟─f7941ddf-f1e7-41d1-9764-b644dfed68c0
 # ╠═6b627d84-b6a5-444d-8163-40a4cab181bd
 # ╟─47ca3573-691c-4127-85b9-d5b5a1a23fbb
 # ╠═e1f11068-e489-4c54-a30d-981f5cb19b47
@@ -180,7 +165,7 @@ plot(essol, ylim=(0.0,2.0), linealpha=0.5)
 # ╟─9d113e7f-8499-4b2a-a884-d34ce3da0b82
 # ╠═839a624b-ca62-4c57-9511-207b626ce864
 # ╠═a4d28c40-e315-4bb9-87a5-2b45dd633e5f
-# ╠═b2973e86-d89f-476a-8c41-de25a9e5c69d
+# ╟─b2973e86-d89f-476a-8c41-de25a9e5c69d
 # ╠═aeddc31e-9de2-4792-a2d8-59a14dfc8173
 # ╟─3a981326-2031-4c63-ad31-c44ddd7a88d5
 # ╠═6a69c369-4743-48c1-aed9-4f0ccb095707

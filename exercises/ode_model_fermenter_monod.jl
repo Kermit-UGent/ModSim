@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 2e58f4ae-f711-11ee-2598-7f3a6f2e2013
@@ -33,13 +33,12 @@ md"""
 In a fermenter reactor biomass grows on substrate. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. Inside the reactor, biomass, with a concentration of $X$ [$g/L$], is produced through **Monod** kinetics:
 
 $$\begin{eqnarray*}
-%S  \xrightarrow[\quad\quad]{\beta} Y \, X
-S \xrightarrow[\quad\quad]{r} Y \, X \quad\quad\quad\quad r = \mu \, X
+S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s}
 \end{eqnarray*}$$
 
-where
+The quantity
 
-$$\mu = \mu_{max} \, \cfrac{S}{S + K_s}$$
+$$\mu = k\,S = \mu_{max} \, \cfrac{S}{S + K_s}$$
 
 is called the specific growth rate [$h^{-1}$]. Therein, $\mu_{max}$ is the maximum speficic growth rate, and $K_s$ [$g/L$] is the so-called *half-velocity constant* (i.e. the value of $S$ when $\mu/\mu_{max} = 0.5$). Futhermore, $Y$ [$gX/gS$] is the yield coefficient which is defined here by the amount of produced biomass by consumption of one unit of substrate. The reactor is drained with an outlet flow $Q$ [$L/h$], which consist of the current concentrations of substrate $S$ [$g/L$] and biomass $X$ [$g/L$] inside the reactor. The volume $V$ [$L$] of the reactor content is kept constant by setting $Q_{in} = Q$.
 """
@@ -48,14 +47,14 @@ is called the specific growth rate [$h^{-1}$]. Therein, $\mu_{max}$ is the maxim
 md"""
 Create a *reaction network object* model for the aforementioned problem in order to simulate the evolution of substrate $S$ and biomass $X$ with time. Name it `fermenter_monod`.
 
-Tip: The specific growth rate $\mu = \mu_{max} \, \cfrac{S}{S + K_s}$ can be implemented with `mm(S, μmax, Ks)`. The function `mm` stands for the Michaelis-Menten kinetics, whcih is equivalent to Monod kinetics.
+If you want to use the specific growth rate $\mu = \mu_{max} \, \cfrac{S}{S + K_s}$ in your reaction model, it can be implemented with `mm(S, μmax, Ks)`. The function `mm` stands for the Michaelis-Menten kinetics, whcih is equivalent to Monod kinetics.
 """
 
 # ╔═╡ 331a34f4-89d4-4193-896c-c14ab0bf04e7
 # fermenter_monod = @reaction_network begin
-#     ...        # Y*X is created from one S at a rate mm(S, μmax, Ks)*X
-#     ...        # S is created at a rate Q/V*Sin
-#     ...        # S and X are degraded at a rate Q/V*S
+#     missing    # When S and X meet, then Y*X + X are created
+#     missing    # S is created at a rate Q/V*Sin
+#     missing    # S and X are degraded at a rate Q/V*S
 # end
 
 # ╔═╡ 55746566-2d46-4475-851a-02b7fad87a1a
@@ -103,7 +102,7 @@ Create the ODE problem and store it in `oprob`:
 """
 
 # ╔═╡ ab2a9842-6a9c-46bd-812b-db01629d6a1c
-# oprob = missing           # Uncomment and complete the instruction
+# oprob = missing;           # Uncomment and complete the instruction
 
 # ╔═╡ b6a526bd-6ee5-442b-9fb8-3fbe1e280dd4
 md"""
@@ -147,11 +146,17 @@ First, we initialize a vector `u_guess1` with the final values for $S$ and $X$:
 
 # ╔═╡ e8969045-27ac-460e-86a2-7494903534e8
 md"""
-Then we make a so-called SteadyStateProblem based on the ODEProblem but now with `u_guess1` as initial conditions! Finally we use `solve` to solve the steady state problem. The outputs are the steady state values for $S$ and $X$ which we have denoted as `Seq1` and `Xeq1`.
+Then we make a so-called SteadyStateProblem (similar to the ODEProblem) but now with `u_guess1` as initial conditions and without `tspan`! Finally we use `solve` to solve the steady state problem. The outputs are the steady state values for $S$ and $X$ which we have denoted as `Seq1` and `Xeq1`.
 """
 
 # ╔═╡ 1777503e-b793-4be2-b80b-b4edcd7041b5
-# Seq1, Xeq1 = missing
+# eq1 = missing
+
+# ╔═╡ b9b9c5f0-02fa-4544-8865-a07271e8941f
+# Seq1 = missing
+
+# ╔═╡ 0ddf9ea1-3f45-48b1-bb9c-5a08df45bd5b
+# Xeq1 = missing
 
 # ╔═╡ 1d5a2118-96e9-49b2-9931-5d4b201cb8f5
 md"""
@@ -216,7 +221,7 @@ Create the ODE problem and store it in `oprob2`:
 """
 
 # ╔═╡ 7af72709-2f82-4971-8342-f02943f947c8
-# oprob2 = missing                      # Uncomment and complete the instruction
+# oprob2 = missing;                      # Uncomment and complete the instruction
 
 # ╔═╡ e019f797-a6ad-4f8f-8f9e-69db00ed3c39
 md"""
@@ -270,7 +275,13 @@ Make and solve the steady state problem. Call the output values `Seq2` and `Xeq2
 """
 
 # ╔═╡ 0b992750-a446-447b-b2a1-26658c11c0bf
-# Seq2, Xeq2 = missing                    # Uncomment and complete the instruction
+# eq2 = missing                    # Uncomment and complete the instruction
+
+# ╔═╡ 7b985909-bc75-4c03-8949-b689e90c9fea
+# Seq2 = missing
+
+# ╔═╡ c4417b5c-a7cf-497b-8b7a-2a90ebe428f2
+# Xeq2 = missing
 
 # ╔═╡ 4ed59602-ad9d-4aae-8a21-83dabbfd3846
 md"""
@@ -343,7 +354,7 @@ Create the ODE problem and store it in `oprob3`:
 """
 
 # ╔═╡ dd388e88-53af-48d3-800e-09b5c182a83b
-# oprob3 = missing                      # Uncomment and complete the instruction
+# oprob3 = missing;                      # Uncomment and complete the instruction
 
 # ╔═╡ 5133d846-e6a6-4b50-9ce1-cb91cf04cbd1
 md"""
@@ -411,6 +422,8 @@ md"- Answer: missing"
 # ╠═8d96d79f-6ddb-4bba-a6ea-821588e13107
 # ╟─e8969045-27ac-460e-86a2-7494903534e8
 # ╠═1777503e-b793-4be2-b80b-b4edcd7041b5
+# ╠═b9b9c5f0-02fa-4544-8865-a07271e8941f
+# ╠═0ddf9ea1-3f45-48b1-bb9c-5a08df45bd5b
 # ╟─1d5a2118-96e9-49b2-9931-5d4b201cb8f5
 # ╠═cb57997e-c3ec-47e0-b9a0-b10aa9f5608d
 # ╟─bb2d06f8-1940-4585-961a-54068da50e91
@@ -439,6 +452,8 @@ md"- Answer: missing"
 # ╠═f121efc5-4e64-4e82-8672-2765ad85443e
 # ╟─9fe054e0-cf21-49ba-a777-a8200b34b7dd
 # ╠═0b992750-a446-447b-b2a1-26658c11c0bf
+# ╠═7b985909-bc75-4c03-8949-b689e90c9fea
+# ╠═c4417b5c-a7cf-497b-8b7a-2a90ebe428f2
 # ╟─4ed59602-ad9d-4aae-8a21-83dabbfd3846
 # ╠═47a63fd8-f805-4c7d-8695-c9ee6550f24f
 # ╟─4d962d0f-da41-405e-9438-733d5668cde3

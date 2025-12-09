@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 71118b72-1db2-11ef-1f5b-a163b0b7c390
@@ -312,6 +312,37 @@ essol = solve(esprob, EM(), dt=0.1, callback=cb, save_everystep=true, trajectori
 # ╔═╡ 72770915-e1f5-41c5-84d2-9e6cbc0c24ff
 plot(essol)
 
+# ╔═╡ bc6364c4-997d-4e31-be0b-2b8e92e96aa5
+i = 4
+
+# ╔═╡ 44acee7b-1928-4c88-b4a9-f15bb2be8299
+essol.u[i].t
+
+# ╔═╡ 7e33cf89-dc3c-4db3-9a4a-a6042de302db
+I_max = maximum(essol.u[i][:I])
+
+# ╔═╡ dac7b56f-8b3d-47c6-a68a-f56fc9037402
+i_max = findfirst(I_max .== essol.u[i][:I])
+
+# ╔═╡ 2fe1a126-b8fd-4adb-95be-37fe87561d13
+essol.u[i].t[i_max]
+
+# ╔═╡ af6c2b51-2d9a-4785-a194-6e9cdd54473a
+begin
+	times = []
+	for i = 1:100
+		I_max = maximum(essol.u[i][:I])
+		i_max = findfirst(I_max .== essol.u[i][:I])
+		t_max = essol.u[i].t[i_max]
+		if t_max > 10
+			append!(times, t_max)
+		end
+	end
+end
+
+# ╔═╡ 01d9195f-7e76-4c64-9196-86be4b34fad5
+histogram(times, bins=range(0, 90, length=91))
+
 # ╔═╡ Cell order:
 # ╠═71118b72-1db2-11ef-1f5b-a163b0b7c390
 # ╠═dbf68cf4-7a18-4bf2-90a3-e36216a41a70
@@ -369,3 +400,10 @@ plot(essol)
 # ╟─094d7363-7918-4bd5-ae2b-52f283468317
 # ╠═3f57d613-0042-4df9-9892-edaa90c0f52e
 # ╠═72770915-e1f5-41c5-84d2-9e6cbc0c24ff
+# ╠═bc6364c4-997d-4e31-be0b-2b8e92e96aa5
+# ╠═44acee7b-1928-4c88-b4a9-f15bb2be8299
+# ╠═7e33cf89-dc3c-4db3-9a4a-a6042de302db
+# ╠═dac7b56f-8b3d-47c6-a68a-f56fc9037402
+# ╠═2fe1a126-b8fd-4adb-95be-37fe87561d13
+# ╠═af6c2b51-2d9a-4785-a194-6e9cdd54473a
+# ╠═01d9195f-7e76-4c64-9196-86be4b34fad5

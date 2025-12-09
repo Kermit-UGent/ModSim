@@ -20,7 +20,7 @@ end
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 18a4df05-0349-400d-a29e-b3fa71aa4d88
@@ -45,7 +45,7 @@ md"
 
 # ╔═╡ fab49cb7-c41e-498a-98f6-33b4821ceb90
 md"""
-We will work here with the same infection model as in the **Introdution to Catalyst** (revisit the concerned notebook if necessay). We shortly summarize some important aspects of the model and give a condensed version of the solution method and the examples.
+We will work here with the same infection model as in the **Introdution to Catalyst** (revisit the concerned notebook if necessary). We shortly summarize some important aspects of the model and give a condensed version of the solution method and the examples.
 """
 
 # ╔═╡ 8ff0b57e-acc1-4ebd-a562-a82c9efa7ffc
@@ -77,14 +77,14 @@ The **parameters**:
 md"""
 The infection model has three reaction events:
 
-- Infection, where a susceptible persons meets an infected persons and also becomes infected. The infection rate is $\alpha \beta$.
-- Deceasing, where an infected person die. The death rate is $m r$.
-- Recovery, where an infected person recovers. The recovery rate: $(1-m) r$.
+- **Infection**, where a susceptible persons meets an infected person and also becomes infected. The infection rate is $\alpha \beta$.
+- **Decease**, where an infected person dies. The death rate is $m r$.
+- **Recovery**, where an infected person recovers. The recovery rate is $(1-m) r$.
 """
 
 # ╔═╡ afb751b9-39b8-4430-af4b-02f010667518
 md"""
-The *infection reactions* are:
+The involved reactions are:
 
 $$S + I \xrightarrow[]{\alpha \beta} 2I$$
 $$I \xrightarrow[]{mr} D$$
@@ -105,6 +105,11 @@ md"""
 md"
 ### Implementation of the system
 "
+
+# ╔═╡ 13d94ba6-425e-471b-aa99-2f321891d1f0
+md"""
+Implement the *reaction model* in Catalyst:
+"""
 
 # ╔═╡ 3f6080e1-ab43-47f7-a82b-95956bf4cafd
 infection_model = @reaction_network begin
@@ -147,7 +152,7 @@ osys  = convert(ODESystem, infection_model)
 
 # ╔═╡ a432a88a-8db3-4729-b9a3-8ca9322fc81e
 md"""
-Getting a list of the differential equations, the state variables and the parameters:
+We can get a list of the differential equations, the state variables and the parameters:
 """
 
 # ╔═╡ 7e268605-8314-4e7b-8c38-a65212e148a9
@@ -182,7 +187,7 @@ params = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4]
 
 # ╔═╡ 6d2580f7-f882-449d-a9b8-629ab41e2671
 md"""
-### Creating and solving the ODEProblem and plotting results
+### Creating and solving the ODE problem and plotting results
 """
 
 # ╔═╡ d3f39b29-71f5-4674-a52f-3ba63279fca7
@@ -196,25 +201,26 @@ plot(osol)
 
 # ╔═╡ 006bfc98-3c95-4763-b0ed-f4714ad5bd02
 plot(osol, idxs=[:S, :I])     # only S and I
+# plot(osol, idxs=[S, I])     # also possible when S and I are unpacked
 
 # ╔═╡ 4c5d2e5d-3237-4886-b852-3142fb996dd6
-plot(osol, idxs=(:S, :I), xlab="S", ylab="I")    # fase plot I vs S
+plot(osol, idxs=(:S, :I), xlab="S", ylab="I")    # phase plot I vs S
 
 # ╔═╡ f9bd32f5-c473-44d4-af9d-4d99032a2d21
-osol.u[end]
+osol.u[end] 	# final values in the order of defined species
 
 # ╔═╡ 000495a6-e91d-438e-ab6d-7a5e95a99f27
 md"""
 ### Example 1 - Influence of $r$
 
-Influence of the duration of infection $1/r$ for average infection periods of between $10$, days and $1$ day contagious ($r$ between $0.1$ and $1.0$, step $0.1$, default value $0.1$).
+Influence of the duration of infection, $1/r$, for average infection periods  between $1$ and $10$ days of being contagious ($r$ between $0.1$ and $1.0$, with a step of $0.1$, and default value $0.1$).
 """
 
 # ╔═╡ d73f8ed8-ac25-4c1c-b834-989a2a929df3
 @bind r Slider(0.1:0.1:1, default=0.1, show_value=true)
 
 # ╔═╡ 4ca0e1df-7765-4f36-a442-2749ea493426
-params1 = [:α => 0.08, :β => 1.0e-6, :r => r, :m => 0.4]
+params1 = [:α => 0.08, :β => 1.0e-6, :r => r, :m => 0.4] 	# r specified by slider
 
 # ╔═╡ d56b486e-44e5-4db7-9c4e-00db5c1b733f
 oprob1 = ODEProblem(infection_model, u0, tspan, params1);
@@ -253,10 +259,29 @@ oprob2 = ODEProblem(infection_model2_com, u0, tspan, params)
 osol2 = solve(deepcopy(oprob2), Tsit5(), saveat=0.5)
 
 # ╔═╡ 31ceb303-dbb1-4f4d-9082-14ea1d83ab66
-plot(osol2)
+# We can compare the result now to the solution without contact reduction
+begin
+	plot(osol2)
+	plot!(osol; linestyle=:dash, label=:none, color=:grey, lw=0.5)
+end
 
 # ╔═╡ 14143212-53f1-4753-8c25-e22559cdbccd
 osol2.u[end]
+
+# ╔═╡ 9c668254-3c54-4d95-9e1e-e2bd2d3eb1df
+md"""
+!!! question
+	How do we interpret this event? Is the number of deceased and infections reduced? How much?
+"""
+
+# ╔═╡ 130a6ce2-dd8c-4a05-8863-953a77a407aa
+osol2[:D][end]/osol[:D][end] - 1 	# The number of deceased is reduced 13%
+
+# ╔═╡ 9abcc2f9-5c24-4840-8a14-fa7a197ffef0
+osol2[:S][end]/osol[:S][end] - 1 	# 6 times less infections with contact measures
+
+# ╔═╡ 1f970a9e-abde-422b-a793-eb51ad2001bc
+osol2[:R][end]/osol[:R][end] - 1 	# 13% less recoveries (due to fewer infections)
 
 # ╔═╡ bdf9cfa0-9dc4-4ea5-9024-63813ec30d09
 md"""
@@ -267,14 +292,14 @@ Suppose that when the number of infected individuals reaches $1\,000\,000$, then
 
 # ╔═╡ cbf0a768-f6ac-43fb-8d05-e7dac51d4cc0
 infection_model3 = @reaction_network begin
-	@species pwc(t)=true
+	@species thr(t)=1e6
 	α * β, S + I --> 2I
 	r * m, I --> D
 	r * (1 - m), I --> R
 end
 
 # ╔═╡ fee597e0-97cb-40bc-a5b9-166631e8b9f6
-condition3 = [infection_model3.I ~ 1e6*infection_model3.pwc] => [infection_model3.I ~ infection_model3.I - 0.999e6, infection_model3.pwc ~ false]
+condition3 = [infection_model3.I ~ infection_model3.thr] => [infection_model3.I ~ infection_model3.I - 999_000, infection_model3.thr ~ 1e9]
 
 # ╔═╡ 51363f3c-7aa9-48ed-808e-d1f7a4aadc0c
 @named infection_model3_c = ReactionSystem(equations(infection_model3), continuous_events=condition3)
@@ -289,10 +314,42 @@ oprob3 = ODEProblem(infection_model3_c_com, u0, tspan, params)
 osol3 = solve(deepcopy(oprob3), Tsit5(), saveat=0.5)
 
 # ╔═╡ 2b511237-7739-44e5-b6bd-26a2fdc76bb5
-plot(osol3)
+begin
+	plot(osol3; idxs=[:S, :I, :D, :R])
+	plot!(osol; linestyle=:dash, label=:none, color=:grey, lw=0.5)
+end
 
 # ╔═╡ 3a131f92-aa09-4e8c-98a1-0c4c1c74878a
 osol3.u[end]
+
+# ╔═╡ 96792abd-2b86-4245-aaaf-15c43b4eabb0
+md"""
+!!! question
+	How do we interpret this new event? Is this a better measure than contact reduction alone? Would you know how we call such an event?
+"""
+
+# ╔═╡ 1116b608-e6b9-4e6d-a0eb-1ac58ef9e2f7
+0.4*0.999e6 	# Amount of people deceased during isolation (infected)
+
+# ╔═╡ 4111ae36-ddef-42a8-b8a9-61f9f464a5c0
+(osol3[:D][end] + 0.4*0.999e6)/osol[:D][end] - 1 	# Deceased are reduced only 1%!
+
+# ╔═╡ 6c8a9e97-0a60-4e42-ad7f-78c0dece2b30
+osol3[:S][end]/osol[:S][end] - 1 	# Infections have increased 56% (wrt. example 1)
+
+# ╔═╡ 801a038b-7485-40b6-b7a5-92b0b3c11c0e
+(osol3[:R][end] + 0.6*0.999e6)/osol[:R][end] - 1   # 1% less recoveries
+
+# ╔═╡ 62adbc28-cec2-4da8-9842-2153563497d0
+md"""
+- Answer: 
+"""
+
+# ╔═╡ 3bc2d36a-6efc-4631-baae-0d3e62bf7e3f
+md"""
+!!! hint
+	Isolation alone is not effective to protect the part of the population that's already been infected. The peak of infections is not avoided, only delayed. However, the proportion of the population exposed is much lower thanks to isolation. *Would then a combined set of rules be best in that case?*
+"""
 
 # ╔═╡ ad83a851-e424-4e8f-bae9-38b9283db2fa
 md"""
@@ -303,7 +360,7 @@ md"""
 md"""
 ### Exercise 1 - Influence of $\alpha$
 
-Evaluate the effect of a decreasing risk of infection after contact with an infected person, i.e. $r = 0.2$, $\beta = 0.1$ and $\alpha$ between $8\%$ and $20\%$.
+Evaluate the effect of a decreasing risk of infection after contact with an infected person, i.e. $r = 0.2$, $\beta = 10^{-6}$ and $\alpha$ between $8\%$ and $20\%$.
 
 Use the same initial values and timespan as before.
 """
@@ -353,23 +410,35 @@ md"""
 Change the value of $\alpha$ in the `params_ex1` vector to visualize the effect in the plot.
 """
 
+# ╔═╡ f85bd6be-8984-49f0-a36b-7aa7bb937c54
+md"""
+!!! warning "Tip"
+	You can move the cell containing the slider next to the figure to visualize the changes in $\alpha$.
+"""
+
 # ╔═╡ c14d45b8-3af1-4e05-b10a-081ccd62a34d
 md"""
 Try to interpret the results yourself.
 Ask yourself the following questions:
-1. What are the trends in the obtained results?
+!!! question
+	1. What are the trends in the obtained results?
 """
 
 # ╔═╡ 04f89fb3-f856-4206-9871-4d92f2816332
-md"- Answer: missing"
+md"""
+- Answer: 
+""" 
 
 # ╔═╡ a39eeec9-d816-4d35-90ae-e602a24bb056
 md"""
-2. How can this be explained from the model structure?
+!!! question
+	2. How can this be explained from the model structure?
 """
 
 # ╔═╡ fcad8ede-8295-46d6-a637-728b3986a761
-md"- Answer: missing"
+md"""
+- Answer: 
+"""
 
 # ╔═╡ b3f08d61-187d-4f99-b95f-508ff1b3d52d
 md"""
@@ -455,19 +524,25 @@ Change the value of $b$ in the `params_ex2` vector to visualize the effect in th
 md"""
 Try to answer the following questions:
 
-1. Why does the peak in the number of infected individuals shift to the right when the value of $b$ increases?
+!!! question
+	1. Why does the peak in the number of infected individuals shift to the right when the value of $b$ increases?
 """
 
 # ╔═╡ 381d3a54-0e4f-4203-874f-4a4716d481d4
-md"- Answer: missing"
+md"""
+- Answer: 
+"""
 
 # ╔═╡ fd7d89f3-9ab8-4b17-b26f-571bad862718
 md"""
-2. Why does the number of recovered individuals first rise when the value of $b$ increases and then fall when the value of $b$ continues to increase?
+!!! question
+	2. Why does the number of recovered individuals first rise when the value of $b$ increases and then fall when the value of $b$ continues to increase?
 """
 
 # ╔═╡ 96de4f0d-c2d1-4fad-bded-a314cbca848b
-md"- Answer: missing"
+md"""
+- Answer: 
+"""
 
 # ╔═╡ dedb1ac1-cb54-416f-a092-12a50080c69f
 md"""
@@ -494,7 +569,7 @@ The vaccination programme is launched $2$ days after the outbreak of the disease
 
 Assume that individuals are still being treated ($b = 0.2$ and $h = 0.5$). Extend the model obtained in the previous exercise for the launch of a vaccination campaign after the outbreak of the disease.
 
-Find out via trial and error what the minimum vaccination rate need to be so that the number of fatalities is $10$ times smaller after a period of $90$ days compared to those in absence of vaccination (cf. Exercise 2). Consider an initial step size in $v$ of $0.01$ and then fine tune with a step size of $0.001$.
+Find out via trial and error what the minimum vaccination rate need to be so that the number of fatalities is $10$ times smaller after a period of $90$ days compared to those in absence of vaccination (cf. Exercise 2).
 
 Use the same initial values and timespan as before.
 """
@@ -547,7 +622,7 @@ Create the ODE problem and store it in `oprob_ex3`:
 
 # ╔═╡ 69983b90-b6ef-4732-a4af-a772bb1364e5
 md"""
-Solve the ODE problem for (step wise) increasing values of $v$ and store the solution in `osol_ex3_vac`. Consider an initial step size in $v$ of $0.01$ and then fine tune with a step size of $0.001$.
+Solve the ODE problem for (step wise) increasing values of $v$ and store the solution in `osol_ex3_vac`.
 """
 
 # ╔═╡ 16211bc6-cd97-43c0-8faf-25bb490930b6
@@ -555,7 +630,7 @@ Solve the ODE problem for (step wise) increasing values of $v$ and store the sol
 
 # ╔═╡ 461eada9-5f9c-4439-8b65-226382b6d148
 md"""
-Compare the latter with the number of fatalities when no vaccination is/was available (cf. Exercise 2) by setting up a condition (a boolean expression return either `true` or `false`) here below where the final number of fatalities (with vaccination) divided by 10 is compared with (use larger than or smaller than) the number of fatalities (without vaccination):
+First, put the value of $b$ in Exercise 2 to $0.2$. Compare the latter with the number of fatalities when no vaccination is/was available (cf. Exercise 2) by setting up a condition (a boolean expression return either `true` or `false`) here below where the final number of fatalities (with vaccination) divided by 10 is compared with (use larger than or smaller than) the number of fatalities (without vaccination):
 """
 
 # ╔═╡ 0994d790-0fe8-46ab-bba2-a0a4ea466f64
@@ -609,6 +684,31 @@ Plot the solutions:
 # ╔═╡ ed9472a0-09c9-4d1c-8f1d-1b7d87b97640
 # missing          # Uncomment and complete the instruction
 
+# ╔═╡ 6e213afb-fd4b-4ab9-8986-a319bee6be0c
+md"""
+Check the number of fatalities now and compare to the case without vaccination.
+"""
+
+# ╔═╡ 3af06996-bd43-4783-a5e0-3c11c23ca280
+# missing 		   # Uncomment and complete the instruction
+
+# ╔═╡ 93400573-ad1f-408d-b514-854998e7836a
+md"""
+!!! question
+	3. What can you say about the rate of infection in the case of no vaccination? How would you measure this in the plot?
+"""
+
+# ╔═╡ 008cc499-fce9-43e7-b969-2419b847d24c
+md"""
+- Answer: 
+"""
+
+# ╔═╡ 14c3b2f1-14b4-415c-85c6-922361423826
+md"""
+!!! hint
+	The rate of infection has to do with how many people get infected during a certain period...
+"""
+
 # ╔═╡ Cell order:
 # ╠═18a4df05-0349-400d-a29e-b3fa71aa4d88
 # ╠═65b3536b-c9b3-485e-87e1-4f6657381503
@@ -624,6 +724,7 @@ Plot the solutions:
 # ╠═e97637b0-446c-44ac-bd08-c56632f9b57f
 # ╟─a91f1024-4800-4ffe-8bb2-5f6cf3c2bde1
 # ╟─47f4a7cc-1a74-4ff0-ae21-2a5e4c495935
+# ╟─13d94ba6-425e-471b-aa99-2f321891d1f0
 # ╠═3f6080e1-ab43-47f7-a82b-95956bf4cafd
 # ╟─5d5fae40-a4ed-4908-ba65-f3a16c38ab4f
 # ╠═fd347a58-5cad-4073-aadb-176fa54dcdfa
@@ -665,6 +766,10 @@ Plot the solutions:
 # ╠═35d6bce7-9778-4f42-bdcd-271cedd8bad9
 # ╠═31ceb303-dbb1-4f4d-9082-14ea1d83ab66
 # ╠═14143212-53f1-4753-8c25-e22559cdbccd
+# ╟─9c668254-3c54-4d95-9e1e-e2bd2d3eb1df
+# ╠═130a6ce2-dd8c-4a05-8863-953a77a407aa
+# ╠═9abcc2f9-5c24-4840-8a14-fa7a197ffef0
+# ╠═1f970a9e-abde-422b-a793-eb51ad2001bc
 # ╟─bdf9cfa0-9dc4-4ea5-9024-63813ec30d09
 # ╠═cbf0a768-f6ac-43fb-8d05-e7dac51d4cc0
 # ╠═fee597e0-97cb-40bc-a5b9-166631e8b9f6
@@ -674,6 +779,13 @@ Plot the solutions:
 # ╠═fc2dc11e-7022-4c6f-b7ed-5b077fc21ac5
 # ╠═2b511237-7739-44e5-b6bd-26a2fdc76bb5
 # ╠═3a131f92-aa09-4e8c-98a1-0c4c1c74878a
+# ╟─96792abd-2b86-4245-aaaf-15c43b4eabb0
+# ╠═1116b608-e6b9-4e6d-a0eb-1ac58ef9e2f7
+# ╠═4111ae36-ddef-42a8-b8a9-61f9f464a5c0
+# ╠═6c8a9e97-0a60-4e42-ad7f-78c0dece2b30
+# ╠═801a038b-7485-40b6-b7a5-92b0b3c11c0e
+# ╠═62adbc28-cec2-4da8-9842-2153563497d0
+# ╟─3bc2d36a-6efc-4631-baae-0d3e62bf7e3f
 # ╟─ad83a851-e424-4e8f-bae9-38b9283db2fa
 # ╟─b580ef9b-7d53-4bf0-8511-213920d59ee2
 # ╟─090a949f-c18f-4e07-8c94-21a71bb0ceed
@@ -687,10 +799,11 @@ Plot the solutions:
 # ╟─e7947165-b244-4ff6-bdf3-61d03aefe696
 # ╠═adc0aa15-e0a9-4549-9609-967a9dc78b78
 # ╟─7a1effe4-776c-4143-8085-f98a213a2cc3
+# ╟─f85bd6be-8984-49f0-a36b-7aa7bb937c54
 # ╟─c14d45b8-3af1-4e05-b10a-081ccd62a34d
-# ╟─04f89fb3-f856-4206-9871-4d92f2816332
+# ╠═04f89fb3-f856-4206-9871-4d92f2816332
 # ╟─a39eeec9-d816-4d35-90ae-e602a24bb056
-# ╟─fcad8ede-8295-46d6-a637-728b3986a761
+# ╠═fcad8ede-8295-46d6-a637-728b3986a761
 # ╟─b3f08d61-187d-4f99-b95f-508ff1b3d52d
 # ╟─08ba4614-e4fa-4203-9e28-c5c4bd9fcdd5
 # ╠═e4087441-7d0d-4716-b9fa-eef45e9f3b87
@@ -706,9 +819,9 @@ Plot the solutions:
 # ╠═5f9a9838-099d-457f-9402-915f42d0cd33
 # ╟─ef3ca25d-c110-452d-877a-6304ae6cd5a7
 # ╟─f8dbab24-55aa-466f-a978-5f8db93b4b93
-# ╟─381d3a54-0e4f-4203-874f-4a4716d481d4
+# ╠═381d3a54-0e4f-4203-874f-4a4716d481d4
 # ╟─fd7d89f3-9ab8-4b17-b26f-571bad862718
-# ╟─96de4f0d-c2d1-4fad-bded-a314cbca848b
+# ╠═96de4f0d-c2d1-4fad-bded-a314cbca848b
 # ╟─dedb1ac1-cb54-416f-a092-12a50080c69f
 # ╠═a912f449-6c9d-4595-863f-a2ba523bad95
 # ╟─089707c3-1df6-4799-a87b-0d4872a0267d
@@ -738,3 +851,8 @@ Plot the solutions:
 # ╠═8814c42b-16c7-466a-8ad8-58ee1c0921b2
 # ╟─25158ea5-1930-4fee-aab4-490b475d8635
 # ╠═ed9472a0-09c9-4d1c-8f1d-1b7d87b97640
+# ╟─6e213afb-fd4b-4ab9-8986-a319bee6be0c
+# ╠═3af06996-bd43-4783-a5e0-3c11c23ca280
+# ╟─93400573-ad1f-408d-b514-854998e7836a
+# ╠═008cc499-fce9-43e7-b969-2419b847d24c
+# ╟─14c3b2f1-14b4-415c-85c6-922361423826
