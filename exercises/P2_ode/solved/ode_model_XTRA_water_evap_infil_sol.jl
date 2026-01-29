@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 62dc7706-f58a-11ee-2d3d-f78f7ceca914
@@ -43,7 +43,7 @@ There is a natural constant inflow of water into the reservoir at a rate $I$. At
 # ╔═╡ a551f3c5-2fc3-4236-ab4a-3d9c14afc62b
 md"""
 !!! question
-Set-up a system of differential equations modelling the above problem.
+	Set-up a system of differential equations modelling the above problem.
 """
 
 # ╔═╡ 4eb95688-ba9d-4524-a522-3b8343f4e2be
@@ -64,10 +64,6 @@ Model the aforementioned system of differential equations using a *reaction netw
 """
 
 # ╔═╡ 3c275181-503e-4806-b0e6-1731ae881a30
-# Uncomment and complete the instruction
-# water_evap_infil = @reaction_network begin
-#     missing
-# end
 water_evap_infil = @reaction_network begin
     I, 0 --> W     # W is producted at a constant rate (zeroth-order)
     O, W => 0      # W is removed at a constant rate (zeroth-order)
@@ -84,7 +80,6 @@ Convert the system to a symbolic differential equation model and verify that you
 """
 
 # ╔═╡ 5647d122-5e8d-4ff9-a798-4076ee93b771
-# osys = missing         # Uncomment and complete the instruction
 osys = convert(ODESystem, water_evap_infil)
 
 # ╔═╡ acab2bf0-b792-4ccc-bee0-7611bedab23c
@@ -98,7 +93,6 @@ Initialize a vector `u0` with the initial conditions:
 """
 
 # ╔═╡ 733bdb56-fb4f-4bc6-b50c-e3245fd59730
-# u0 = missing          # Uncomment and complete the instruction
 u0 = [:W => 6.75, :G => 6.75]
 
 # ╔═╡ 521fcca5-3c88-463b-9395-e5871b9fc5a3
@@ -107,7 +101,6 @@ Set the timespan for the simulation:
 """
 
 # ╔═╡ f2267cc9-4bfd-44af-984c-cf54aa855f91
-# tspan =  missing      # Uncomment and complete the instruction
 tspan = (0.0, 20)
 
 # ╔═╡ e12840ed-d448-4f7c-893d-cfe974f62f9a
@@ -116,7 +109,6 @@ Initialize a vector `param` with the parameter values:
 """
 
 # ╔═╡ 5a3d520d-fd4f-485c-a8b0-63858eca4bfc
-# params = missing      # Uncomment and complete the instruction
 params = [:I => 2.7, :O => 20.0, :k₁ => 0.4, :k₂ => 1.0]
 
 # ╔═╡ 666c3aa1-26ef-4d77-bb81-f8830e66eea2
@@ -125,7 +117,6 @@ Set-up a the *condition*, name it `condition`.
 """
 
 # ╔═╡ ce612639-0791-4df9-bbd1-11da5ae8b247
-# condition = missing      # Uncomment and complete the instruction
 condition = [water_evap_infil.W ~ 0] => [water_evap_infil.O ~ 0]
 
 # ╔═╡ b4e50fbc-6780-4559-8cab-d7f2fd533eba
@@ -134,7 +125,6 @@ Make a new *reaction system* where the discrete event is included. Name it `wate
 """
 
 # ╔═╡ 82db28cb-d842-442f-a566-32c6fe3acc90
-# @named water_evap_infil_c = missing    # Uncomment and complete the instruction
 @named water_evap_infil_c = ReactionSystem(equations(water_evap_infil), continuous_events=condition)
 
 # ╔═╡ 7b649517-ccab-4f30-b75d-527295cd24a2
@@ -143,7 +133,6 @@ Complete the new *reaction system*. Name it `water_evap_infil_c_com`.
 """
 
 # ╔═╡ 2d72257d-cf23-4a07-b659-4b886abe5abc
-# water_evap_infil_c_com = missing     # Uncomment and complete the instruction
 water_evap_infil_c_com = complete(water_evap_infil_c)
 
 # ╔═╡ aafb49a4-b468-49b2-838d-5ddfcc852d48
@@ -152,8 +141,7 @@ Create the ODE problem and store it in `oprob`:
 """
 
 # ╔═╡ a25d3652-13f5-47ef-9f16-c6698547a734
-# oprob = missing           # Uncomment and complete the instruction
-oprob = ODEProblem(water_evap_infil_c_com, u0, tspan, params)
+oprob = ODEProblem(water_evap_infil_c_com, u0, tspan, params);
 
 # ╔═╡ 451a3c66-5bcc-4161-af81-f89af33b5862
 md"""
@@ -161,7 +149,6 @@ Solve the ODE problem. Make a deepcopy and use `Tsit5()` and `saveat=0.1`. Store
 """
 
 # ╔═╡ b9d2c6cb-88f0-4a88-9e61-eecc905ff3e6
-# osol = missing                # Uncomment and complete the instruction
 osol = solve(deepcopy(oprob), Tsit5(), saveat=0.1)
 
 # ╔═╡ ab77c284-d379-47d1-bd86-88fa77749165
@@ -170,7 +157,6 @@ Plot the results:
 """
 
 # ╔═╡ e29a3294-245b-445d-bb1e-12cafb2ec175
-# missing                  # Uncomment and complete the instruction
 plot(osol)
 
 # ╔═╡ 66588291-d399-4169-9383-ac6c05cdf906
