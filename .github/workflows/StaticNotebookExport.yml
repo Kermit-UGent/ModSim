@@ -22,7 +22,7 @@ jobs:
           version: '1.10'
       - uses: julia-actions/cache@v2
       - name: Instantiate packages
-        run: julia -e 'using Pkg; Pkg.activate(path="./exercises/solved_notebooks"); Pkg.instantiate()'
+        run: julia -e 'using Pkg; Pkg.activate("./exercises/solved_notebooks"); Pkg.instantiate()'
       - name: Build and deploy
         run: julia --color=yes static-notebook-exports/make.jl
         env:
