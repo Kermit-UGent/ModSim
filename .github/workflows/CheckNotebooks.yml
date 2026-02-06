@@ -1,10 +1,7 @@
-name: Export notebooks with PlutoStaticHTML
+name: Check notebooks
 
 on:
   push:
-    # branches: # disabled for testing
-      # - main
-    # tags: '*'
   pull_request:
 
 jobs:
@@ -24,6 +21,6 @@ jobs:
       - name: Instantiate packages
         run: julia -e 'using Pkg; Pkg.activate("./exercises/solved_notebooks"); Pkg.instantiate()'
       - name: Build and deploy
-        run: julia --color=yes static-notebook-exports/make.jl
+        run: julia --color=yes static-notebook-exports/check_notebooks.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

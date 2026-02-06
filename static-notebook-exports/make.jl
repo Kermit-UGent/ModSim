@@ -73,11 +73,11 @@ makedocs(;
 )
 
 
-# Make workflow throw error at end if any notebook failed to compile
+# Throw error at end if any notebook failed to compile
 
 if !isempty(readlines("log.txt"))
     error("Notebook compilation failed for one or more practicals.")
 end
 
-# using LiveServer
-# serve(dir = "./build", launch_browser = true)
+using LiveServer
+serve(dir = "./build", launch_browser = true)

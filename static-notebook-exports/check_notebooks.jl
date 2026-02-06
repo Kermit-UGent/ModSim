@@ -1,0 +1,21 @@
+# use julia 1.10!
+using Pkg; Pkg.activate("./exercises/solved_notebooks")
+using PlutoStaticHTML
+
+cd(@__DIR__)
+
+notebookdir = "../exercises/solved_notebooks"
+any_failed = false # check if any notebook has failed compilation
+
+subdirs = readdir(notebookdir, join = true) |> x -> filter(isdir, x)
+for subdir in subdirs
+    bopts = BuildOptions(subdir, write_files = false)
+    try # prevent error in one practical from stopping the rest
+        build_notebooks(bopts)
+    catch e
+        any_failed = true
+        @warn e.msg
+    end
+end
+
+any_failed && error("One or more notebooks failed to compile.")
