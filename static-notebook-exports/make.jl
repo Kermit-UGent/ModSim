@@ -31,7 +31,7 @@ for subdir in subdirs
 
     # move the markdown files to their designated folder (they are generated in the folder of the pluto notebooks)
     md_files = readdir(subdir) |> x -> filter(name -> name[end-2:end] == ".md", x) # get all .md files
-    subdirname = split(subdir, '\\')[end] # get name of subdir from its path
+    subdirname = split(subdir, ['\\', '/'])[end] # get name of subdir from its path
     for md_file in md_files
         mv(subdir * "/" * md_file, outputdir * "/" * subdirname * "/" * md_file, force = true)
     end
@@ -49,7 +49,7 @@ function get_title(filepath::String)
     return title
 end
 
-subdirnames = split.(subdirs, "\\") .|> last .|> string
+subdirnames = split.(subdirs, ['\\', '/']) .|> last .|> string
 
 exercise_pages = [
     "Practicum $i" => [
