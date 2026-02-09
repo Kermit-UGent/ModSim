@@ -1,0 +1,26 @@
+name: Check notebooks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    permissions:
+      actions: write
+      contents: read
+      pull-requests: read
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.10'
+      - uses: julia-actions/cache@v2
+      - name: Instantiate packages
+        run: julia -e 'using Pkg; Pkg.activate("./exercises/solved_notebooks"); Pkg.instantiate()'
+      - name: Build and deploy
+        run: julia --color=yes notebook-checks/check_notebooks.jl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
