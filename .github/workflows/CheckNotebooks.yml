@@ -8,7 +8,7 @@ jobs:
   build:
     permissions:
       actions: write
-      contents: write
+      contents: read
       pull-requests: read
       statuses: write
     runs-on: ubuntu-latest
@@ -21,6 +21,6 @@ jobs:
       - name: Instantiate packages
         run: julia -e 'using Pkg; Pkg.activate("./exercises/solved_notebooks"); Pkg.instantiate()'
       - name: Build and deploy
-        run: julia --color=yes static-notebook-exports/check_notebooks.jl
+        run: julia --color=yes notebook-checks/check_notebooks.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

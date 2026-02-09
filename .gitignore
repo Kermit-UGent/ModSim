@@ -1,8 +1,8 @@
 ## REPO
 
 figures/*
-static-notebook-exports/src
-static-notebook-exports/build
+notebook-checks/src
+notebook-checks/build
 
 ## Julia
 Manifest.toml
