@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -288,7 +288,7 @@ md"""
 	
 	lifespans = zeros(2)
 	for i in 1:length(lifespans)
-		lifespans[i] ~ Exponential(μ)	
+		lifespans[i] ~ Exponential(μ)
 	end
 	p_stillworking = 1 - cdf(Exponential(μ), time_observed)
 	n_working ~ Binomial(n_working + length(lifespans), p_stillworking) 
@@ -299,7 +299,10 @@ end
 lightmodel_cens = lights_censored(30, 2) | (lifespans = [16, 20],)
 
 # ╔═╡ 8abafb6a-dc83-422c-82d1-a721a0e1eca0
-lightschain_cens = sample(lightmodel_cens, NUTS(), 2000)
+lightschain_cens = sample(lightmodel_cens, MH(), 10_000)
+
+# ╔═╡ 5733590f-913e-4df6-8374-8e2141c839a5
+PG(20)
 
 # ╔═╡ 5ba2886c-b2e1-49f4-90c6-549acc808f77
 plot(lightschain_cens)
@@ -624,6 +627,7 @@ end
 # ╠═8fc58fa4-b005-4f32-9eae-a8143582a1ae
 # ╠═fe2958a7-e9dd-4eca-979d-a80df12f8735
 # ╠═8abafb6a-dc83-422c-82d1-a721a0e1eca0
+# ╠═5733590f-913e-4df6-8374-8e2141c839a5
 # ╠═5ba2886c-b2e1-49f4-90c6-549acc808f77
 # ╠═ed022247-5959-481f-a81e-41e5ee5a1448
 # ╟─9dc0456b-7fd2-4120-8f9e-3de1984ff516
