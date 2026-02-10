@@ -9,11 +9,14 @@ any_notebook_failed = false # check if any notebook has failed compilation
 subdirs = readdir(notebookdir, join = true) |> x -> filter(isdir, x)
 for subdir in subdirs
     bopts = BuildOptions(subdir, write_files = false, use_distributed = false)
-    try # prevent error in one practical from stopping the rest
-        build_notebooks(bopts)
-    catch e
-        global any_notebook_failed = true
-        @warn e.msg
+    for file in readdir(subdir)     
+        try # prevent error in one practical from stopping the rest
+            build_notebooks(bopts, [file])
+        catch e
+            global any_notebook_failed = true
+            @warn e.msg
+            cd(@__DIR__) # errors in notebook building changes working directory sometimes, for some reason
+        end
     end
 end
 
