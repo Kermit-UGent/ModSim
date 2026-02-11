@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -191,7 +191,7 @@ We will thereby take an Inverse Gamma prior distribution for $\sigma_W$ and LogN
 	u0_log = [:W => W0]
 	params_log = [:μ => μ, :Wf => Wf]
 	oprob_log = ODEProblem(growth_log, u0_log, tspan, params_log)
-    osol_log = solve(oprob_log, Tsit5(), saveat=t_meas)
+    osol_log = solve(oprob_log, Rosenbrock23(), saveat=t_meas)
     W_meas ~ MvNormal(osol_log[:W], σ_W^2 * I)
 end
 
@@ -226,7 +226,7 @@ We will use the MLE (Maximum Likelihood Estimation) method here and store the op
 """
 
 # ╔═╡ f34bb7ac-1ed8-4dd9-b0b9-49bd6e0e1d71
-results_log_mle = optimize(growth_log_inf, MLE(), NelderMead())
+results_log_mle = optimize(growth_log_inf, MLE(), LBFGS()) # gradient-based optimizers such as LBFGS work more consistently for some problems
 
 # ╔═╡ e55404ab-6762-4f39-bb42-9c195334a214
 md"""

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -230,7 +230,7 @@ We declare our Turing model function:
 
 # ╔═╡ 169a67ff-55fb-4d1d-b98b-126f4af47e77
 @model function growth_log_fun(t_meas)
-    σ_W ~ InverseGamma()
+    σ_W ~ Exponential(10)
     W0 ~ LogNormal()
     μ ~ LogNormal()
     Wf ~ LogNormal()
@@ -568,7 +568,7 @@ Declare the Turing model function.
 
 # ╔═╡ 89bf91c6-117c-4647-bfb9-6fc9b8dcfb5f
 @model function growth_exp_fun(t_meas)
-    σ_W ~ InverseGamma()
+    σ_W ~ Exponential(10)
     W0 ~ LogNormal()
     μ ~ LogNormal()
     Wf ~ LogNormal()
@@ -751,14 +751,14 @@ Declare the Turing model. Take the same priors as before.
 
 # ╔═╡ 1f8b10ba-f380-492e-800c-2673774cb25c
 @model function growth_gom_fun(t_meas)
-    σ_W ~ InverseGamma()
+    σ_W ~ Exponential(10)
     W0 ~ LogNormal()
     μ ~ LogNormal()
     D ~ LogNormal()
 	u0_gom = [:W => W0]
 	params_gom = [:μ => μ, :D => D]
 	oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, params_gom)
-    osol_gom = solve(oprob_gom, Tsit5(), saveat=t_meas)
+    osol_gom = solve(oprob_gom, Rosenbrock23(), saveat=t_meas, reltol = 1e-6)
     W_s ~ MvNormal(osol_gom[:W], σ_W^2 * I)
 end
 
