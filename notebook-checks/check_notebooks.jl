@@ -4,20 +4,34 @@ using PlutoStaticHTML
 cd(@__DIR__)
 
 notebookdir = "../exercises/solved_notebooks"
-any_notebook_failed = false # check if any notebook has failed compilation
+failed_notebooks_dict = Dict{String, Vector{String}}() # keep track of notebooks that failed compilation
 
 subdirs = readdir(notebookdir, join = true) |> x -> filter(isdir, x)
 for subdir in subdirs
     bopts = BuildOptions(subdir, write_files = false, use_distributed = false)
-    for file in readdir(subdir)     
+    for file in readdir(subdir)
         try # prevent error in one practical from stopping the rest
             build_notebooks(bopts, [file])
         catch e
-            global any_notebook_failed = true
-            @warn e.msg
+            @warn e.msg # give error message as a warning instead
             cd(@__DIR__) # errors in notebook building changes working directory sometimes, for some reason
+
+            # log what notebooks failed (per practical)
+            global failed_notebooks_dict # github actions likes explicit scoping
+            subdirname = split(subdir, ['\\', '/'])[end] # get name of subdir from its path
+            failed_notebooks_in_subdir = get!(failed_notebooks_dict, subdirname, String[])
+            push!(failed_notebooks_in_subdir, file)
         end
     end
 end
 
-any_notebook_failed && error("One or more notebooks failed to compile.")
+if !isempty(failed_notebooks_dict)
+    error_msg = [
+            subdirname * "\n" * *(("\t - " .* failed_notebooks_dict[subdirname] .* "\n")...) 
+            for subdirname in sort(collect(keys(failed_notebooks_dict)))
+        ] |> 
+        x -> reduce(vcat, x) |>
+        x -> *(x...)
+
+    error("The following notebook(s) failed to precompile:" * "\n" * error_msg)
+end
