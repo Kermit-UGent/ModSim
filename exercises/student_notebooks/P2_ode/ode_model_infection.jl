@@ -461,7 +461,8 @@ Set-up the new *reaction network/model* and name it `infection_med`:
 # infection_med = @reaction_network begin  # Uncomment and complete the instruction
 # 	α * β, S + I --> 2I
 # 	..., I --> D
-# 	(..., ...), I --> R
+# 	..., I --> R
+#	..., I --> R
 # end
 
 # ╔═╡ 87b3796d-16c5-4fe9-a32e-d8bf7c754254
@@ -562,7 +563,8 @@ Set-up the new *reaction network/model* and name it `infection_med_vac`:
 # infection_med_vac = @reaction_network begin
 # 	α * β, S + I --> 2I
 # 	..., I --> D
-# 	(..., ...), I --> R
+# 	..., I --> R
+# 	..., I --> R
 # 	..., ... --> ...
 # end
 
