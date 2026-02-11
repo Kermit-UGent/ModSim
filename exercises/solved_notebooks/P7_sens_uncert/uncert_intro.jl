@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ d2c4d230-0943-11ef-3aad-5719e74bb20e

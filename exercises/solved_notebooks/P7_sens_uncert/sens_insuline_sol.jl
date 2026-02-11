@@ -17,7 +17,7 @@ end
 # ╔═╡ 7bc363b0-9415-4954-807f-81a308bde531
 begin
 	import Pkg
-	Pkg.activate(".")
+	Pkg.activate("..")
 end
 
 # ╔═╡ 52b28a4c-b0bb-11ef-2841-17ecfb596676
