@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -220,9 +220,15 @@ We create a Turing model with both parameters $k$ and $g$, where only the first 
 	k ~ LogNormal()
 	params_linear = [:k => k, :g => g]
 	oprob_linear = ODEProblem(model_linear, u0, tspan, params_linear)
-	osol_linear = solve(oprob_linear, Tsit5(), saveat=t)
+	osol_linear = solve(oprob_linear, AutoTsit5(Rosenbrock23()), saveat=t)
 	x ~ MvNormal(osol_linear[:x], σ_x^2 * I)
 end
+
+# ╔═╡ b6aada44-ef32-4c99-9939-47eedb3fc235
+md"""
+!!! note
+	As we will once again be calibrating our model, we use the more reliable Rosenbrock23 solver in our Turing model.
+"""
 
 # ╔═╡ 1f36c90e-ec20-4bdb-8bd0-5f44f03a1748
 mod_linear_cond = linear(t) | (x = d,)
@@ -454,7 +460,7 @@ Let's now estimate the distance assuming a noisy error and no calibrated paramet
 	σ_x ~ InverseGamma()
 	params_nr = [:g => g]
 	oprob_nr = ODEProblem(model_nr, u0, tspan, params_nr)
-	osol_nr = solve(oprob_nr, Tsit5(), saveat=t)
+	osol_nr = solve(oprob_nr, AutoTsit5(Rosenbrock23()), saveat=t)
 	x ~ MvNormal(osol_nr[:x], σ_x^2 * I)
 end
 
@@ -572,7 +578,7 @@ sol_quad = solve(prob_quad);
 	k ~ LogNormal()
 	params_quad = [:k => k, :g => g]
 	oprob_quad = ODEProblem(model_quad, u0, tspan, params_quad)
-	osol_quad = solve(oprob_quad, Tsit5(), saveat=t)
+	osol_quad = solve(oprob_quad, AutoTsit5(Rosenbrock23()), saveat=t)
 	x ~ MvNormal(osol_quad[:x], σ_x^2 * I)
 end
 
@@ -672,7 +678,7 @@ end
 	k₂ ~ LogNormal()
 	params_quad2 = [:k₁ => k₁, :k₂ => k₂, :g => g]
 	oprob_quad2 = ODEProblem(model_quad2, u0, tspan, params_quad2)
-	osol_quad2 = solve(oprob_quad2, Tsit5(), saveat=t)
+	osol_quad2 = solve(oprob_quad2, AutoTsit5(Rosenbrock23()), saveat=t)
 	x ~ MvNormal(osol_quad2[:x], σ_x^2 * I)
 end
 
@@ -771,7 +777,7 @@ sol_power = solve(prob_power);
 	r ~ LogNormal()
 	params_power = [:k => k, :r => r, :g => g]
 	oprob_power = ODEProblem(model_power, u0, tspan, params_power)
-	osol_power = solve(oprob_power, Tsit5(), saveat=t)
+	osol_power = solve(oprob_power, AutoTsit5(Rosenbrock23()), saveat=t)
 	x ~ MvNormal(osol_power[:x], σ_x^2 * I)
 end
 
@@ -988,6 +994,7 @@ md"""
 # ╟─85471dd1-df76-4718-a7ee-d501bb8a2030
 # ╟─4bde3bb3-5dcd-42d4-ae48-b922e99a04bc
 # ╠═fa3383e4-f5fa-4d47-b21b-684c6aacbd46
+# ╟─b6aada44-ef32-4c99-9939-47eedb3fc235
 # ╠═1f36c90e-ec20-4bdb-8bd0-5f44f03a1748
 # ╠═c4de5cb6-4b84-46b0-acc5-01aea794de3e
 # ╠═3153b018-57f8-4d7a-bfb9-c4ca2886363a

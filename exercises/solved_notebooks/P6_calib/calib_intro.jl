@@ -179,27 +179,28 @@ In the Turing model we will define our priors for the following magnitudes:
 - the initial condition $W_0$, and
 - the parameters $\mu$ and $W_f$.
 
-We will thereby take an Inverse Gamma prior distribution for $\sigma_W$ and LogNormal prior distributions for the initial condition and the parameters (assuming they lay in pre-defined range).
+We will thereby take an Exponential prior distribution with mean 10 for $\sigma_W$ and LogNormal prior distributions for the initial condition and the parameters (assuming they lay in pre-defined range).
 """
 
 # ╔═╡ 8a9115eb-4044-4cab-a7db-39b5dd86c70d
 @model function growth_log_inference(t_meas, W_meas)
-    σ_W ~ InverseGamma()
+    σ_W ~ Exponential(10)
     W0 ~ LogNormal()
     μ ~ LogNormal()
     Wf ~ LogNormal()
 	u0_log = [:W => W0]
 	params_log = [:μ => μ, :Wf => Wf]
 	oprob_log = ODEProblem(growth_log, u0_log, tspan, params_log)
-    osol_log = solve(oprob_log, Rosenbrock23(), saveat=t_meas)
+    osol_log = solve(oprob_log, AutoTsit5(Rosenbrock23()), saveat=t_meas)
     W_meas ~ MvNormal(osol_log[:W], σ_W^2 * I)
 end
 
 # ╔═╡ 48c9f616-d298-40da-b917-225abd39b3d9
 md"""
-Some remark:
+Some remarks:
 - The time points are the ones from the measurements, therefore, we set: `saveat=t_meas`.
 - We need to solve the ODE problem inside the Turing model function with values for $W_0$, $\mu$ and $W_f$ sampled from the distributions. Therefore, we need to remake our ODE problem with the appropriate initial and parameter values and solve it.
+- Depending on the priors, the parameter values of our ODE may vary wildly during calibration. As this can influence the stiffness of the system, it can be beneficial to use an ODE solver that automatically detects the stiffness of the system and switches to a stiff solver if necessary, such as `AutoTsit5(Rosenbrock23())`. We don't expect you to know when this is necessary, but if your calibration regularly gives instability errors, this may help! 
 """
 
 # ╔═╡ 35f158c1-858d-4e4d-ac3d-bf4807dad9a0
@@ -226,7 +227,7 @@ We will use the MLE (Maximum Likelihood Estimation) method here and store the op
 """
 
 # ╔═╡ f34bb7ac-1ed8-4dd9-b0b9-49bd6e0e1d71
-results_log_mle = optimize(growth_log_inf, MLE(), LBFGS()) # gradient-based optimizers such as LBFGS work more consistently for some problems
+results_log_mle = optimize(growth_log_inf, MLE(), NelderMead())
 
 # ╔═╡ e55404ab-6762-4f39-bb42-9c195334a214
 md"""
@@ -384,7 +385,7 @@ We will use Markov chain Monte Carlo (MCMC) method in combination with the No U-
 """
 
 # ╔═╡ 0c047043-3284-422a-9c88-2f4f4c170edf
-results_log_nuts = sample(growth_log_inf, NUTS(), 10000)
+results_log_nuts = sample(growth_log_inf, NUTS(), 500)
 
 # ╔═╡ 19c362cb-2764-41c9-a571-2e8e2bfcde93
 summarize(results_log_nuts)
@@ -516,7 +517,7 @@ Declare the Turing model. Take the same priors (and distributions) as before.
 	u0_exp = [:W => W0]
 	params_exp = [:μ => μ, :Wf => Wf]
 	oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, params_exp)
-    osol_exp = solve(oprob_exp, Tsit5(), saveat=t_meas)
+    osol_exp = solve(oprob_exp, AutoTsit5(Rosenbrock23()), saveat=t_meas)
     W_meas ~ MvNormal(osol_exp[:W], σ_W^2 * I)
 end
 
@@ -680,7 +681,7 @@ Declare the Turing model. Take the same priors as before.
 	u0_gom = [:W => W0]
 	params_gom = [:μ => μ, :D => D]
 	oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, params_gom)
-    osol_gom = solve(oprob_gom, Tsit5(), saveat=t_meas)
+    osol_gom = solve(oprob_gom, AutoTsit5(Rosenbrock23()), saveat=t_meas)
     W_meas ~ MvNormal(osol_gom[:W], σ_W^2 * I)
 end
 
