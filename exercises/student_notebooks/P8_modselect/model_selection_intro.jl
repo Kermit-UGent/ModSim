@@ -21,13 +21,13 @@ using InteractiveUtils
 using PlutoUI; TableOfContents()
 
 # ╔═╡ cdcebbb1-40e0-457f-a6ec-b769f6b1f2e9
-using DifferentialEquations, Plots
+using OrdinaryDiffEq
 
 # ╔═╡ 22489bd4-ab64-4bf9-ad03-5372ea273935
 using Catalyst
 
 # ╔═╡ 4ad72a6a-f541-4d0a-8392-56369e29ac96
-using Turing, StatsPlots, StatsBase
+using Turing, StatsPlots, StatsPlots.StatsBase
 
 # ╔═╡ 70590d28-058a-44df-8cf6-092d8c87438c
 using LinearAlgebra, Optim

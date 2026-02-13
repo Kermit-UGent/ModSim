@@ -11,13 +11,13 @@ using Pkg; Pkg.activate("..")
 using Markdown, InteractiveUtils
 
 # ╔═╡ e317c2cc-c41a-4489-b06b-7f07a517e20b
-using ModelingToolkit, DifferentialEquations
+using ModelingToolkit, OrdinaryDiffEq, StochasticDiffEq
 
 # ╔═╡ 2e91e92c-5cd2-4018-8a26-9f0f9e01a175
 using ModelingToolkit: t_nounits as t, D_nounits as D
 
 # ╔═╡ e04f782d-67da-4e21-a3bf-d2ddff4bba0b
-using Plots, Distributions
+using StatsPlots, StatsPlots.Distributions
 
 # ╔═╡ 3552fc05-a4dc-4242-91b3-3eb6fb2ea389
 using PlutoUI; TableOfContents()

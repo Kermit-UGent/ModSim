@@ -24,7 +24,7 @@ using PlutoUI
 using Catalyst
 
 # ╔═╡ 6c4b3d09-09c2-4439-9167-63b59b078104
-using DifferentialEquations, Plots
+using OrdinaryDiffEq, StatsPlots
 
 # ╔═╡ 66e8a12c-74b6-4077-b90e-3d85e5a61d6e
 hint(text) = Markdown.MD(Markdown.Admonition("hint", "Hint", [text]));

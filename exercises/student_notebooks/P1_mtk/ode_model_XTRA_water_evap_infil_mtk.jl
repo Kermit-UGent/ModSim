@@ -11,10 +11,10 @@ using Pkg; 	Pkg.activate("..")
 using Markdown; InteractiveUtils;
 
 # ╔═╡ 65571bb8-e260-4a82-b0d2-198e47c56271
-using Plots, PlutoUI
+using StatsPlots, PlutoUI
 
 # ╔═╡ 5e79d359-393b-405a-847e-dbdec15a1848
-using DifferentialEquations, ModelingToolkit
+using OrdinaryDiffEq, ModelingToolkit
 
 # ╔═╡ cd21ad3c-94b8-4031-8fc0-17a5a39043f4
 using ModelingToolkit: t_nounits as t, D_nounits as D

@@ -18,10 +18,10 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 16438e07-1b2b-467e-822a-081d19cae92b
-using Catalyst, DifferentialEquations, Plots
+using Catalyst, OrdinaryDiffEq
 
 # ╔═╡ 295caa68-db27-4c9b-bc34-86ab088fec24
-using Turing, StatsPlots, StatsBase
+using Turing, StatsPlots, StatsPlots.StatsBase
 
 # ╔═╡ dc6e9bdc-dae0-43aa-b624-f9314d1d9884
 using LinearAlgebra, Optim

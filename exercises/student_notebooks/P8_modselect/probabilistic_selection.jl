@@ -23,7 +23,7 @@ using Pkg; Pkg.activate("..")
 using Turing, StatsPlots
 
 # ╔═╡ c870d28d-7b2e-48f8-8990-b2cc0943cb09
-using Optim, StatsBase
+using Optim, StatsPlots.StatsBase
 
 # ╔═╡ 2a73d23c-73fc-4845-b359-c6fe22077140
 using PlutoUI

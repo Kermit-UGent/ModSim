@@ -18,13 +18,13 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 4947b0fd-13be-4f6a-b605-ed35b509d7ff
-using Catalyst, DifferentialEquations, Plots
+using Catalyst, OrdinaryDiffEq
 
 # ╔═╡ 61d14819-ba44-40fe-95a9-9d7b0bf3dc33
 using Turing
 
 # ╔═╡ f6e77c8d-de11-4b9d-93c6-45bdcfbbbf9b
-using StatsPlots, StatsBase
+using StatsPlots, StatsPlots.StatsBase
 
 # ╔═╡ 9345dd8f-0a60-4aaf-a27f-ef8bf860f495
 using LinearAlgebra
