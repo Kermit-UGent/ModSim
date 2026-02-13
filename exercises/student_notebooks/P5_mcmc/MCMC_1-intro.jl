@@ -229,12 +229,11 @@ md"Note the syntax: we tell Turing that the value of the random variable `N` def
 # ╔═╡ 2d0c969d-03a2-4e4c-ace4-e439f81c771b
 md"""
 !!! danger
-	Note the `,` at the end of `(N = observed_mutations,)`. This is important, as without it Julia thinks you simply put parentheses around a variable assignment and you'll get an error! See the below cell for an example.
+	Note the `,` at the end of `(N = observed_mutations,)`. This is important, as without it Julia thinks you simply put parentheses around a variable assignment and you'll get an error! Uncomment the below cell for an example.
 """
 
 # ╔═╡ a35a43e2-e6b0-47ce-80b2-48148336274c
-forgot_comma = mutation_model | (N = observed_mutations) 
-	# errors because there is no `,` in the parentheses
+# forgot_comma = mutation_model | (N = observed_mutations) 
 
 # ╔═╡ c5f0dbb3-fba1-41f2-b7d2-740012603555
 md"""

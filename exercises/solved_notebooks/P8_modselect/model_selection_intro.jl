@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -237,10 +237,16 @@ We declare our Turing model function:
 	u0_log = [:W => W0]
 	params_log = [:μ => μ, :Wf => Wf]
 	oprob_log = ODEProblem(growth_log, u0_log, tspan, params_log)
-    osol_log = solve(oprob_log, Tsit5(), saveat=t_meas)
+    osol_log = solve(oprob_log, AutoTsit5(Rosenbrock23()), saveat=t_meas)
     W_s ~ MvNormal(osol_log[:W], σ_W^2 * I)
 	return osol_log   # optionally, to be used with MCMC
 end
+
+# ╔═╡ bfb26b9d-6969-457c-8567-03422a7f2a93
+md"""
+!!! note
+	We use the auto-switching `AutoTsit5(Rosenbrock23())` solver here as the calibration of this model is otherwise quite unstable and will fail occassionally (it's not a problem if you didn't do this).
+"""
 
 # ╔═╡ aa3e553d-2731-42d6-b0e6-1821e4d7f4d4
 md"""
@@ -575,7 +581,7 @@ Declare the Turing model function.
 	u0_exp = [:W => W0]
 	params_exp = [:μ => μ, :Wf => Wf]
 	oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, params_exp)
-    osol_exp = solve(oprob_exp, Tsit5(), saveat=t_meas)
+    osol_exp = solve(oprob_exp, AutoTsit5(Rosenbrock23()), saveat=t_meas)
     W_s ~ MvNormal(osol_exp[:W], σ_W^2 * I)
 end
 
@@ -758,7 +764,7 @@ Declare the Turing model. Take the same priors as before.
 	u0_gom = [:W => W0]
 	params_gom = [:μ => μ, :D => D]
 	oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, params_gom)
-    osol_gom = solve(oprob_gom, Tsit5(), saveat=t_meas)
+    osol_gom = solve(oprob_gom, AutoTsit5(Rosenbrock23()), saveat=t_meas)
     W_s ~ MvNormal(osol_gom[:W], σ_W^2 * I)
 end
 
@@ -1164,6 +1170,7 @@ md"""
 # ╟─c73669c4-d7af-4877-b32d-6499f339e27a
 # ╟─28e4a44f-e907-42ce-a748-6d21b60f0e33
 # ╠═169a67ff-55fb-4d1d-b98b-126f4af47e77
+# ╟─bfb26b9d-6969-457c-8567-03422a7f2a93
 # ╟─aa3e553d-2731-42d6-b0e6-1821e4d7f4d4
 # ╠═51426716-03b8-4d54-9064-3943df282fa4
 # ╟─f40873af-3ef9-420b-b0a8-ed9f56b17047
@@ -1325,8 +1332,8 @@ md"""
 # ╟─6e0c869d-6f90-4104-8589-41c2fa1b7342
 # ╟─6ca83977-cb8c-4465-ab2e-c91971f16157
 # ╠═fb76009b-3aaa-4eb5-8d69-45372a23af00
-# ╠═cfeb28b8-2dd7-4c1d-8069-e8fe00d90567
 # ╠═b9c59973-512b-48eb-a2b1-831449e120a4
+# ╠═cfeb28b8-2dd7-4c1d-8069-e8fe00d90567
 # ╟─56784bdf-2a78-4986-9dd2-790a2a2ceea9
 # ╠═bfb99943-1637-4dd6-adee-8a9e79274672
 # ╟─a08fb39b-3911-450e-8377-cc94398825a9
