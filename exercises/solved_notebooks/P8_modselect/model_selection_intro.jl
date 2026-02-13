@@ -230,7 +230,7 @@ We declare our Turing model function:
 
 # ╔═╡ 169a67ff-55fb-4d1d-b98b-126f4af47e77
 @model function growth_log_fun(t_meas)
-    σ_W ~ Exponential(10)
+    σ_W ~ InverseGamma()
     W0 ~ LogNormal()
     μ ~ LogNormal()
     Wf ~ LogNormal()
@@ -245,7 +245,7 @@ end
 # ╔═╡ bfb26b9d-6969-457c-8567-03422a7f2a93
 md"""
 !!! note
-	As we will once again be calibrating our model, we use the more reliable Rosenbrock23 solver in our Turing model.
+	We use the auto-switching `AutoTsit5(Rosenbrock23())` solver here as the calibration of this model is otherwise quite unstable and will fail occassionally (it's not a problem if you didn't do this).
 """
 
 # ╔═╡ aa3e553d-2731-42d6-b0e6-1821e4d7f4d4
@@ -574,7 +574,7 @@ Declare the Turing model function.
 
 # ╔═╡ 89bf91c6-117c-4647-bfb9-6fc9b8dcfb5f
 @model function growth_exp_fun(t_meas)
-    σ_W ~ Exponential(10)
+    σ_W ~ InverseGamma()
     W0 ~ LogNormal()
     μ ~ LogNormal()
     Wf ~ LogNormal()
@@ -757,7 +757,7 @@ Declare the Turing model. Take the same priors as before.
 
 # ╔═╡ 1f8b10ba-f380-492e-800c-2673774cb25c
 @model function growth_gom_fun(t_meas)
-    σ_W ~ Exponential(10)
+    σ_W ~ InverseGamma()
     W0 ~ LogNormal()
     μ ~ LogNormal()
     D ~ LogNormal()

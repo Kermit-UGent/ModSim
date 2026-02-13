@@ -227,7 +227,7 @@ end
 # ╔═╡ b6aada44-ef32-4c99-9939-47eedb3fc235
 md"""
 !!! note
-	As we will once again be calibrating our model, we use the more reliable Rosenbrock23 solver in our Turing model.
+	We use the auto-switching `AutoTsit5(Rosenbrock23())` solver here as the calibration of this model is otherwise quite unstable and will fail occassionally (it's not a problem if you didn't do this).
 """
 
 # ╔═╡ 1f36c90e-ec20-4bdb-8bd0-5f44f03a1748

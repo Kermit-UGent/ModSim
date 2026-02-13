@@ -184,7 +184,7 @@ We will thereby take an Exponential prior distribution with mean 10 for $\sigma_
 
 # ╔═╡ 8a9115eb-4044-4cab-a7db-39b5dd86c70d
 @model function growth_log_inference(t_meas, W_meas)
-    σ_W ~ Exponential(10)
+    σ_W ~ InverseGamma()
     W0 ~ LogNormal()
     μ ~ LogNormal()
     Wf ~ LogNormal()
