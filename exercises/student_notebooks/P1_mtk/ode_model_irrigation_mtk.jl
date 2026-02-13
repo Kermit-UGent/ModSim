@@ -21,6 +21,11 @@ md"""
 # Exercise: Irrigation experiment
 """
 
+# ╔═╡ 1f90bab8-a3c7-4029-9db8-95a4b0a2cb00
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/irrigation_model.png)
+"""
+
 # ╔═╡ 22a32fa7-d9e3-4ed0-bc69-0f82b229a524
 md"""
 An irrigation experiment is carried out on a soil column consisting of two layers of soil, each with specific soil characteristics. An adjustable volume of water per unit of time, $r$, is irrigated evenly over the soil column, starting with $5\;mm\,h^{-1}$ ($mm$ indicates a volume of water: $1\;mm = 10^{-3}\,m^3$). After $60\;h$ the added flow rate is increased to $10\;mm\,h^{-1}$. The water falls on the upper layer and percolates to the lower layer. The **relative moisture content** in both layers (i.e., relative to their residual moisture contents) is denoted by $S_1$ and $S_2$. Initially a moisture content of $30\;mm$ is present in the upper layer (cf. $S_1$) and of $25\;mm$ in the lower layer (cf. $S_2$). The residual moisture content in the upper layer is $S_{1,res}=10 \;mm$.
@@ -218,6 +223,7 @@ missing
 # ╠═34856dc0-e961-4e3e-a996-1966e4191e35
 # ╠═bc7f57f2-bb4d-44d4-b693-f4cf412b470a
 # ╠═45c84728-ff11-4345-9c71-fab084e3159f
+# ╟─1f90bab8-a3c7-4029-9db8-95a4b0a2cb00
 # ╟─22a32fa7-d9e3-4ed0-bc69-0f82b229a524
 # ╟─1bebe2ff-603a-42ba-8526-ab100fa3880d
 # ╟─f5389efd-941f-488b-8d39-407f223277ec

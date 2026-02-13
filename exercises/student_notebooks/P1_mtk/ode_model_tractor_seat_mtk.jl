@@ -36,6 +36,11 @@ md"""
 # ╔═╡ f16b68e8-02ae-49b8-a077-c0100e2d3e89
 solution(text) = Markdown.MD(Markdown.Admonition("hint", "Solution", [text]));
 
+# ╔═╡ d6f7fe5d-155d-434c-a0c3-6e6e9aae55ba
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/tractor_seat_all.png)
+"""
+
 # ╔═╡ 40b40bcf-498b-46f8-8f5d-9eb24375d229
 md"""
 ## Deriving the model equation
@@ -270,6 +275,7 @@ Answer: missing
 # ╠═9bb68aa2-14dd-4c28-b7c1-21f05f5671e2
 # ╠═fa5bb459-e754-401d-84a3-0ae75fb9b914
 # ╠═f16b68e8-02ae-49b8-a077-c0100e2d3e89
+# ╟─d6f7fe5d-155d-434c-a0c3-6e6e9aae55ba
 # ╟─40b40bcf-498b-46f8-8f5d-9eb24375d229
 # ╟─815032ea-12ad-446c-836c-d75e2724bed4
 # ╟─00c93c86-f862-4999-8b54-4edeb85628a0

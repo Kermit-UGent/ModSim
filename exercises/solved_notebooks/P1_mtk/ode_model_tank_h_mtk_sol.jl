@@ -39,6 +39,11 @@ md"""
 # ╔═╡ d99457cc-8223-4970-b52d-45d42bf7f030
 solution(text) = Markdown.MD(Markdown.Admonition("hint", "Solution", [text]));
 
+# ╔═╡ 16d75e68-81b2-4c64-a25f-d2e1381a25d6
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/tank_height.png)
+"""
+
 # ╔═╡ eee09dae-82eb-4e3b-98b3-daad57c42d49
 md"""
 ## Deriving the model equations
@@ -457,6 +462,7 @@ Answer: missing
 # ╠═d6f533fd-e593-4fec-8c87-53a157eeed48
 # ╠═9c093210-cc9f-40a1-8e35-48f58a7fa491
 # ╟─d99457cc-8223-4970-b52d-45d42bf7f030
+# ╟─16d75e68-81b2-4c64-a25f-d2e1381a25d6
 # ╟─eee09dae-82eb-4e3b-98b3-daad57c42d49
 # ╟─e638ef6e-00c3-4666-86d8-5803c21abe64
 # ╟─cab795f1-f477-4d02-8428-3d26778b49ae

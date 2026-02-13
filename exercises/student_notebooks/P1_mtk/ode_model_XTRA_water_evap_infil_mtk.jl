@@ -19,13 +19,21 @@ using OrdinaryDiffEq, ModelingToolkit
 # ╔═╡ cd21ad3c-94b8-4031-8fc0-17a5a39043f4
 using ModelingToolkit: t_nounits as t, D_nounits as D
 
+# ╔═╡ 935787f8-2aa3-477b-8c91-c9c3b0f08d3d
+md"""
+# Exercise: Water evaporation and infiltration
+"""
+
 # ╔═╡ 66e8a12c-74b6-4077-b90e-3d85e5a61d6e
 solution(text) = Markdown.MD(Markdown.Admonition("hint", "Solution", [text]));
 
+# ╔═╡ 7a83f3cd-da5b-46d4-a1c7-9fe14c2122d0
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/water_evap_infil_model.png)
+"""
+
 # ╔═╡ f55e0ca3-07ff-43a1-907f-9ad640227822
 md"""
-# Exercise: Water evaporation and infiltration
-
 Consider a water reservoir, such as a lake, where the water in the reservoir is in contact with the air as well as with the groundwater. We will denote the water level in the reservoir as $W$ and the groundwater level as $G$.
 
 The water in the reservoir evaporates at a rate $k_1$ (i.e. the *evaporation coefficient*) and there can be infiltration into or from the groundwater at a rate $k_2$ (i.e., *infiltration coefficient*) depending on the difference in the water level in the reservoir and groundwater (cf. $(W-G)$)
@@ -254,12 +262,14 @@ Weq = missing
 Geq = missing
 
 # ╔═╡ Cell order:
+# ╟─935787f8-2aa3-477b-8c91-c9c3b0f08d3d
 # ╠═62dc7706-f58a-11ee-2d3d-f78f7ceca914
 # ╠═e079823b-8b40-42a2-a63f-1645a97b33f0
 # ╠═65571bb8-e260-4a82-b0d2-198e47c56271
 # ╠═5e79d359-393b-405a-847e-dbdec15a1848
 # ╠═cd21ad3c-94b8-4031-8fc0-17a5a39043f4
 # ╟─66e8a12c-74b6-4077-b90e-3d85e5a61d6e
+# ╟─7a83f3cd-da5b-46d4-a1c7-9fe14c2122d0
 # ╟─f55e0ca3-07ff-43a1-907f-9ad640227822
 # ╟─a551f3c5-2fc3-4236-ab4a-3d9c14afc62b
 # ╟─4eb95688-ba9d-4524-a522-3b8343f4e2be

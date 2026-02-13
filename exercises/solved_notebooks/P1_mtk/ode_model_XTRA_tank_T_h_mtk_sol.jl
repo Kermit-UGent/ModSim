@@ -24,6 +24,11 @@ md"""
 # ╔═╡ fdf5f147-5e6d-4730-8f16-ddc62ff9fcfe
 solution(text) = Markdown.MD(Markdown.Admonition("hint", "Solution", [text]));
 
+# ╔═╡ 75e8b966-79ce-496a-8121-bec9d4ebfbc4
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/tank_temp.png)
+"""
+
 # ╔═╡ 82207f70-ca9a-409b-952d-520f3b8babc3
 md"""
 ## Deriving the model equations
@@ -300,6 +305,7 @@ Answer: missing
 # ╠═eaa957df-d305-48fb-b2c2-4b4eb29a08be
 # ╠═5f3f3184-7bf8-4f40-80ca-bb48ad85e2f9
 # ╟─fdf5f147-5e6d-4730-8f16-ddc62ff9fcfe
+# ╟─75e8b966-79ce-496a-8121-bec9d4ebfbc4
 # ╟─82207f70-ca9a-409b-952d-520f3b8babc3
 # ╟─defe58ce-d407-4ab4-a4e4-e37fc061149c
 # ╟─1992f00e-c2a6-479b-a81b-d272eeb2dbed
