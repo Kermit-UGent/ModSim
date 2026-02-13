@@ -179,7 +179,7 @@ In the Turing model we will define our priors for the following magnitudes:
 - the initial condition $W_0$, and
 - the parameters $\mu$ and $W_f$.
 
-We will thereby take an Exponential prior distribution with mean 10 for $\sigma_W$ and LogNormal prior distributions for the initial condition and the parameters (assuming they lay in pre-defined range).
+We will thereby take an Inverse Gamma prior distribution for $\sigma_W$ and LogNormal prior distributions for the initial condition and the parameters (assuming they lay in pre-defined range).
 """
 
 # ╔═╡ 8a9115eb-4044-4cab-a7db-39b5dd86c70d
