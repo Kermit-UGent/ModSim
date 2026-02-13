@@ -11,10 +11,10 @@ using Pkg; Pkg.activate("..")
 using Markdown, InteractiveUtils
 
 # ╔═╡ e6bf6f7e-f56d-4ee1-89ec-9224ef4444a6
-using Plots, PlutoUI; TableOfContents()
+using StatsPlots, PlutoUI; TableOfContents()
 
 # ╔═╡ 7906cea8-e163-42cf-adbc-7eec7adc5597
-using Catalyst, DifferentialEquations
+using Catalyst, OrdinaryDiffEq
 
 # ╔═╡ 7856d878-8586-4cfd-9cf6-d61234450e41
 md"

@@ -8,7 +8,7 @@ using InteractiveUtils
 using Pkg; Pkg.activate("..")
 
 # ╔═╡ e84131d2-3ad2-11f0-02b8-2ffac00498cf
-using Catalyst, Plots, DifferentialEquations
+using Catalyst, StatsPlots, OrdinaryDiffEq, JumpProcesses
 
 # ╔═╡ 0ab79c4e-0206-47e1-b057-3f84e4f66a17
 using PlutoUI; TableOfContents()

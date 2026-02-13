@@ -26,7 +26,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 71140c81-af29-4857-8020-4f94c8bd64b3
-using Catalyst, DifferentialEquations, Plots, Distributions
+using Catalyst, OrdinaryDiffEq, JumpProcesses, StatsPlots, StatsPlots.Distributions
 
 # ╔═╡ 284f5847-9c15-41f3-a595-1e12a22df69f
 using PlutoUI; TableOfContents()

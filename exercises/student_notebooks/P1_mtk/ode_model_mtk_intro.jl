@@ -8,11 +8,11 @@ using InteractiveUtils
 using Pkg; Pkg.activate("..")
 
 # ╔═╡ 2d125aad-334c-4210-a921-1acacefc5cfa
-using Plots, PlutoUI; TableOfContents()
+using StatsPlots, PlutoUI; TableOfContents()
 # packages needed for example to make plots
 
 # ╔═╡ d0f32979-01f6-4f07-acb3-627077c7c029
-using DifferentialEquations, ModelingToolkit
+using OrdinaryDiffEq, ModelingToolkit
 # packages needed to solve differential equations with ModelingToolkit
 
 # ╔═╡ 43c4f402-45a9-48d5-b1c6-8a6ea8107ce2

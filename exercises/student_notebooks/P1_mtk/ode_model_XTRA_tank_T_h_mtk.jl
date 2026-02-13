@@ -8,10 +8,10 @@ using InteractiveUtils
 using Pkg; Pkg.activate("..")
 
 # ╔═╡ 21c2d9ad-9411-4e05-be3e-7f37deebc70d
-using Plots, PlutoUI; TableOfContents()
+using StatsPlots, PlutoUI; TableOfContents()
 
 # ╔═╡ eaa957df-d305-48fb-b2c2-4b4eb29a08be
-using DifferentialEquations, ModelingToolkit
+using OrdinaryDiffEq, ModelingToolkit
 
 # ╔═╡ 5f3f3184-7bf8-4f40-80ca-bb48ad85e2f9
 using ModelingToolkit: t_nounits as t, D_nounits as D

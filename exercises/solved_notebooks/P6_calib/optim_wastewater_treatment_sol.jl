@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -18,10 +18,10 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 0407d891-a46d-4deb-a21a-23833acbcb87
-using Catalyst, DifferentialEquations, Plots
+using Catalyst, OrdinaryDiffEq
 
 # ╔═╡ e48dc930-be03-47b2-b9e3-16e854782aec
-using Turing, StatsBase, Optim
+using Turing, StatsPlots, StatsPlots.StatsBase, Optim
 
 # ╔═╡ 6458329f-73dd-4cb0-8da4-90678875a1f0
 using PlutoUI; TableOfContents()

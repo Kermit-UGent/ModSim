@@ -20,10 +20,10 @@ end
 using Pkg; Pkg.activate("..")
 
 # ╔═╡ 47bc4a5d-7e5a-4278-b881-951737277dcf
-using Plots, PlutoUI; TableOfContents()
+using StatsPlots, PlutoUI; TableOfContents()
 
 # ╔═╡ 9bb68aa2-14dd-4c28-b7c1-21f05f5671e2
-using DifferentialEquations, ModelingToolkit
+using OrdinaryDiffEq, ModelingToolkit
 
 # ╔═╡ fa5bb459-e754-401d-84a3-0ae75fb9b914
 using ModelingToolkit: t_nounits as t, D_nounits as D

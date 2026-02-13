@@ -14,7 +14,7 @@ using Markdown, InteractiveUtils
 using Catalyst
 
 # ╔═╡ 28e9e96c-fce6-4507-97c9-37337a0731bc
-using DifferentialEquations, Plots
+using OrdinaryDiffEq, StatsPlots
 
 # ╔═╡ 2f0c3dd4-9429-4f5b-9150-011970b003f4
 md"""

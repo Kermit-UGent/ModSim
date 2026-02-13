@@ -29,7 +29,7 @@ using PlutoUI; TableOfContents()
 using Catalyst
 
 # ╔═╡ 19398992-dca7-441a-a5fd-7f9d0ad30be5
-using DifferentialEquations, Plots
+using OrdinaryDiffEq, StatsPlots
 
 # ╔═╡ 9ea49d7a-e524-11ee-1b68-9d1d71aaba24
 md"""
@@ -243,7 +243,7 @@ parameters(osys)
 md"""
 ### Simulating the system as an ODE-problem
 
-We first need to load the `DifferentialEquations` and `Plots` packages, which are required for simulating the system and plotting the results.
+We first need to load the `DifferentialEquations` and `StatsPlots` packages, which are required for simulating the system and plotting the results.
 """
 
 # ╔═╡ 3197244f-655b-4dca-80f3-794b30722551
