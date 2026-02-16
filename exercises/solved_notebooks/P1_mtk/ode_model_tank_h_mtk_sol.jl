@@ -230,6 +230,7 @@ Plot the height and the pressure. Fix the limits of the y-axis to $[0.0, 2.6]$ b
 """
 
 # ╔═╡ 8b15f793-3628-486a-8fd3-c590db3bda7e
+# missing
 plot(sol1_tank, ylim=(0.0, 2.6), idxs=[h, p])
 
 # ╔═╡ 8da6d0e4-01aa-428a-b1e8-e951087115f6
