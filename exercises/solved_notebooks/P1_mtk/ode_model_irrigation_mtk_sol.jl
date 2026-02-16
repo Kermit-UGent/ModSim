@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -59,7 +59,7 @@ md"""
 
 # ╔═╡ 832e65cb-5029-48f5-9ed2-41c46e759a6c
 md"""
-Define the variables $S_1$ and $S_2$ with their corresponding initial values. Consider the observables $R$, $O$ and $P$ also as variables, as well as the 'parameter' $r$. Mention the dependency on the time $t$.
+Define the variables $S_1$ and $S_2$ with their corresponding initial values. Consider the observables $R$, $O$ and $P$ also as variables, as well as the 'parameter' $r$.
 """
 
 # ╔═╡ 51fbf7e9-00f6-4864-9844-eabe8fdc6f1f
@@ -140,7 +140,7 @@ md"""
 
 # ╔═╡ 872ca902-45b6-496e-ae96-fa1b1c6e16bd
 md"""
-Build a system of equations with `@mtkbuild`. Name it `sys_irrigation`.
+Build a system of equations with `@mtkbuild`.
 """
 
 # ╔═╡ 9c70c339-c2ac-4983-8564-4a02fdb73e8a
@@ -154,7 +154,7 @@ md"""
 
 # ╔═╡ 72f30ddc-d442-49e9-8b18-ac94cb561a7f
 md"""
-Create the ODE problem and store it in `oprob_irrigation`:
+Create the ODE problem for your system.
 """
 
 # ╔═╡ fa1c55a1-3020-44f0-88b4-3e089fd691ec
@@ -177,7 +177,7 @@ md"""
 
 # ╔═╡ cebac4b0-1ca1-4e5c-adb6-73fbe2b3ad1f
 md"""
-Plot $R$, $O$ and $P$. Use the option `idxs=[R, O, P]` for that.
+Plot $R$, $O$ and $P$.
 """
 
 # ╔═╡ c9aa4a15-5fd4-4598-ad46-6680585965f7

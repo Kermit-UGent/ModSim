@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -99,7 +99,7 @@ where $g$ is the gravitational constant.
 
 # ╔═╡ 3ae63528-8a78-4884-85f6-1c6dc3ae178e
 md"""
-Define variables for the height $h$ of the water in the tank and the hydrostatic pressure $p$. Use the following variable names: `h` and `p`. Mention the dependency on the time $t$.
+Define variables for the height $h$ of the water in the tank and the hydrostatic pressure $p$. Mention the dependency on the time $t$.
 """
 
 # ╔═╡ fac7ad9e-a4a2-4f7c-90f1-0111f9b3639c
@@ -108,7 +108,7 @@ Define variables for the height $h$ of the water in the tank and the hydrostatic
 
 # ╔═╡ 1df30e1f-190e-4e26-9133-152afc60119d
 md"""
-Define the parameters for this model and assign their corresponding values.
+Define the parameters for this model and assign their corresponding default values.
 
 | Parameter | Value | Unit | Meaning |
 |:---------- |:---------- |:------------|:------------|
@@ -153,7 +153,7 @@ change_height = A*D(h) ~ Qin - (h>0)*sqrt(h)/R
 
 # ╔═╡ be764668-1a10-4e79-9cc0-585eeb25caf0
 md"""
-Set up the expression that will keep track of the hydrostatic pressure. Don't forget to include `*1e-5` in the term in order to have it in $bar$.
+Set up the equation that will keep track of the hydrostatic pressure. Don't forget to include `*1e-5` in the term in order to have it in $bar$.
 """
 
 # ╔═╡ 4d24b00a-ec24-4fe9-a31d-472904f2d64e
@@ -162,7 +162,7 @@ eq_pressure = p ~ ρ * g * h * 1e-5
 
 # ╔═╡ f3acc97b-e501-4797-9334-fd3fb7197cbe
 md"""
-Bundle the equation and the expression.
+Bundle the equations.
 """
 
 # ╔═╡ 25973753-4374-41ae-a391-87c750289653
@@ -194,7 +194,7 @@ Create the ODE problem. Use the variables `h₀`, `QinLmin` and `R_val` to set t
 
 **Important remarks:**
 - The value of `QinLmin` is in liters per minute ($L/min$). Hence, you need to multiply it with `1e-3/60` to have it in $m^3/s$ before assigning it to `Qin`.
-- You don't need to reassign the parameters `A`, `ρ` and `g` because they were set before when defining the actual parameters.
+- You can use the default values for the parameters `A`, `ρ` and `g`, which were defined earlier.
 """
 
 # ╔═╡ 401cb8fe-4b56-40ef-a763-741867c55685
@@ -226,11 +226,11 @@ sol1_tank = solve(oprob1_tank, Tsit5(), saveat=1)
 
 # ╔═╡ 4358d80a-8240-41b5-acfc-d4c0b1b22876
 md"""
-Plot the height and the pressure. Use the options `ylim=(0.0, 2.6)` and `idxs=[h, p]`. Play with the sliders above to see their effect.
+Plot the height and the pressure. Fix the limits of the y-axis to $[0.0, 2.6]$ by specifying `ylim=(0.0, 2.6)`. Play with the sliders above to see their effect.
 """
 
 # ╔═╡ 8b15f793-3628-486a-8fd3-c590db3bda7e
-plot(sol1_tank, ylim=(0.0, 2.6); idxs=[h, p])
+plot(sol1_tank, ylim=(0.0, 2.6), idxs=[h, p])
 
 # ╔═╡ 8da6d0e4-01aa-428a-b1e8-e951087115f6
 md"""
@@ -255,12 +255,12 @@ md"""
 
 # ╔═╡ 0e2f2d97-3091-41e2-ae02-2e8307fb6795
 md"""
-Calculate the steady state value using `SteadyStateProblem`. Use `1.0` as a first guess for `h`. Make this calculation only when `QinLmin` is greater than $30\;L/min$.
+Calculate the steady state value using `SteadyStateProblem`. Use `1.0` as a first guess for $h$. Make this calculation only when `QinLmin` is greater than $30\;L/min$.
 """
 
 # ╔═╡ 0308b949-5376-4d4e-9c2e-c4c0e5120991
 # equil_val = missing
-equil_val = solve(SteadyStateProblem(sys1_tank, [h=>0.2], [Qin=>QinLmin*1e-3/60, R=>R_val]))
+equil_val = solve(SteadyStateProblem(sys1_tank, [h=>1.0], [Qin=>QinLmin*1e-3/60, R=>R_val]))
 
 # ╔═╡ 9a3c9576-a3cc-46a3-911f-906e7a019e9b
 md"""
@@ -283,7 +283,7 @@ In this part the tank will be filled up to a certain height and then completely 
 
 # ╔═╡ 5559a586-59f2-470a-9bf8-efba2ce42270
 md"""
-The tank is initially empty and filled up with an inlet flow `Qin` of `100` $L/min$. Take `600` for the value of `R`. The continuous event should state that when `h` becomes `0.99`, the value of `Qin` should be set to `0`.
+The tank is initially empty and filled up with an inlet flow $Q_{in}$ of $100$ $L/min$. Take $600$ for the value of $R$. The continuous event should state that when $h$ becomes $0.99$, the value of $Q_{in}$ should be set to $0$.
 """
 
 # ╔═╡ 5bd86c38-0338-4bd1-bdc7-a7c494b1f17a
@@ -293,7 +293,7 @@ md"""
 
 # ╔═╡ 618590fc-7fb9-4020-858b-d9b2d43fbd70
 md"""
-Build the new model that includes the continuous event. Name it `sys2_tank`.
+Build the new model that includes the continuous event.
 """
 
 # ╔═╡ 0a7dc8af-e7d2-40fd-8c60-d266e9d6c0b7
@@ -316,7 +316,7 @@ oprob2_tank = ODEProblem(sys2_tank, [h=>0.0], (0.0, 1800.0), [Qin=>100*1e-3/60, 
 
 # ╔═╡ b9c8d9aa-2f9f-487c-87b4-048d4fbe8aa9
 md"""
-Solve the ODE problem. Use `Tsit5()` and `saveat=1`. Don't forget to take a `deepcopy` of the ODE problem.
+Solve the ODE problem. Use `Tsit5()` and `saveat=1`. Don't forget to make a `deepcopy` of the ODE problem.
 """
 
 # ╔═╡ c53ecb42-cd0a-43a2-b244-22eb6833ea92
@@ -330,7 +330,7 @@ md"""
 
 # ╔═╡ 333cafcc-c6bb-433c-9f34-fdcf27d59508
 md"""
-Plot the height and the pressure. Use the option `idxs=[h, p]`.
+Plot the height and the pressure.
 """
 
 # ╔═╡ 0de3c62d-b02e-4f9d-8213-58c4199e2662
@@ -392,9 +392,9 @@ md"""
 
 # ╔═╡ 39099e15-ed02-47bb-8801-8b59ced0b0db
 md"""
-In this part the values of $Q_{in}$ and $R$ will be modified at distinct moments in time. In order to achieve this, we will use discrete events. The tank is initially empty and filled up with an inlet flow `Qin` of `100` $L/min$. Take `600` for the value of `R`.
+In this part the values of $Q_{in}$ and $R$ will be modified at distinct moments in time. In order to achieve this, we will use discrete events. The tank is initially empty and filled up with an inlet flow $Q_{in}$ of $100$ $L/min$. Take $600$ for the value of $R$.
 
-At the time instant `600.0` $s$ the value of `Qin` will increase by $10\;\%$ (i.e., multiplied by `1.1`). At the time instant `1200.0` $s$ the value of `R` will be decreased by $25\;\%$ (i.e., multiplied by `0.75`).
+At the time instant $600$ $s$ the value of $Q_{in}$ will increase by $10\;\%$ (i.e., multiplied by `1.1`). At the time instant `1200` $s$ the value of `R` will be decreased by $25\;\%$ (i.e., multiplied by `0.75`).
 """
 
 # ╔═╡ 2b68cd82-3c81-4a4f-a27d-e5cb35a7b0f0
@@ -404,12 +404,12 @@ md"""
 
 # ╔═╡ c1f4c7ab-88b2-4282-8a6f-47f9161951eb
 md"""
-Build the new model that includes both discrete events. Name it `sys3_tank`.
+Build the new model that includes both discrete events.
 """
 
 # ╔═╡ 07cc0c6d-1514-4d49-bab3-12794e199729
 # @mtkbuild missing
-@mtkbuild sys3_tank = ODESystem(eqns_tank, t; discrete_events = [[600.0]=>[Qin ~ 1.1*Qin], [1200.0]=>[R ~ 0.75*R]])
+@mtkbuild sys3_tank = ODESystem(eqns_tank, t; discrete_events = [[600]=>[Qin ~ 1.1*Qin], [1200]=>[R ~ 0.75*R]])
 
 # ╔═╡ e395c4c4-3761-4b74-9b1d-4e3d32366333
 md"""

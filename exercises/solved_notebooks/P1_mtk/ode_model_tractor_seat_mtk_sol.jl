@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -51,7 +51,9 @@ md"""
 
 # ╔═╡ 815032ea-12ad-446c-836c-d75e2724bed4
 md"""
-Find out how the vertical position $y$ of a tractor seat with mass $m$ varies when, after 1 second, a person with mass $M$ suddenly sits in the seat. The tractor seat consists of a spring and a shock absorber. The spring constant is denoted $k$ and the natural length of the spring is denoted $L$. The shock absorber has a damping effect which is proportional (proportionality factor $b$), but opposite, to the velocity of the seat when moving. Pay attention to the sense of forces! Assume that the seat was initially in a rest position $y_0$ and not moving ($v_0 = 0$).
+We want to model the movement of a tractor seat when, at time $t = 1$, a person goes to sit on the seat, suddenly increasing its mass.
+
+First, derive the equation relating the vertical position $y$ of a tractor seat with its mass $m$. The tractor seat consists of a spring and a shock absorber. The spring constant is denoted $k$ and the natural length of the spring is denoted $L$. The shock absorber has a damping effect which is proportional (proportionality factor $b$), but opposite, to the velocity of the seat when moving. Pay attention to the sense of forces! Assume that the seat was initially in a rest position $y_0$ and not moving ($v_0 = 0$).
 """
 
 # ╔═╡ 00c93c86-f862-4999-8b54-4edeb85628a0
@@ -87,7 +89,7 @@ md"""
 
 # ╔═╡ 20073595-1940-406f-b30b-57a1033e9c4f
 md"""
-Define the variable for the position $y$. Use the following variable name: `y`. Mention the dependency on the time $t$.
+Define the variable for the position $y$. Mention the dependency on the time $t$.
 """
 
 # ╔═╡ eb2ac37e-91e7-4253-9274-ef8e3a2c666b
@@ -105,8 +107,6 @@ Define the parameters for this model and assign their corresponding values.
 | $k$    | 22570 | $N/m$  |  spring constant  |
 | $L$    | 0.40 | $m$  |   natural length of the spring |
 | $b$    | 900 | $Ns/m$  |   damping constant |
-
-Use the following names: `m`, `g`, `k`, `L` and `b`.
 """
 
 # ╔═╡ 0472f2b5-394f-4670-81ec-3046c9826ee0
@@ -136,15 +136,6 @@ let
 	round((-k)\(m*g-k*L), digits=2)
 end
 
-# ╔═╡ 42a05adc-a5ac-43d5-9e0b-d8cb1f539c09
-md"""
-The person that will sit in the seat has a mass of `80.0` $kg$. Use a normal variable for the parameter `M`, the mass of the person.
-"""
-
-# ╔═╡ be8bff08-aa49-4ef4-9be6-d13a8aac01c5
-# missing
-M=80.0
-
 # ╔═╡ e918256e-3999-4ab2-8792-7da6ba32ab19
 md"""
 Set up the model equation.
@@ -161,8 +152,11 @@ md"""
 
 # ╔═╡ 5856753b-2753-4a83-b3ec-747a7c0b9c52
 md"""
-Build the model and include the (discrete) event that when the time is `1`, `m` needs to be incremented with `M`. Name your model `sys_tractor_seat`.
+Build the model and include the (discrete) event that when the time is $1$ min, the mass needs to be incremented with the mass of the person. Assume the person weighs $80$ $kg$.
 """
+
+# ╔═╡ 6bf84dfd-0f3c-47af-8b1d-fdad7e54f19b
+M = 80
 
 # ╔═╡ 75e757ef-ed89-40f7-a8d6-12884f4ccb98
 # @mtkbuild missing
@@ -175,7 +169,7 @@ md"""
 
 # ╔═╡ 9270475c-1f63-4d3e-98e0-ba7d2417ee81
 md"""
-Create the ODE problem. Use the steady state value that you calculated before for the initial position $y_0$. As mentioned before $v_0 = 0$. The symbol for $\frac{dy}{dt}$ in the vector of initial conditions is `D(y)`. Use a simulation time span of `5.0` seconds. Use `[b=>b_val]` for the parameters argument so that you can see the effect of the damping coefficient on the results. The variable `b_val` is defined later and bound to a slider.
+Create the ODE problem. Use the steady state value that you calculated before for the initial position $y_0$. As mentioned before $v_0 = 0$. The symbol for $\frac{dy}{dt}$ in the vector of initial conditions is `D(y)`. Use a simulation time span of `5.0` seconds. Assign the value `b_val` to the damping constant parameter. `b_val` is defined later in the notebook and bound to a slider, so you can see how it influences the results.
 """
 
 # ╔═╡ a6ca51e5-4019-4aa1-a667-66af70b77f8a
@@ -210,7 +204,7 @@ plot(sol_tractor_seat; idxs=[y], ylim=(0.32, 0.392))
 
 # ╔═╡ 0d90986f-7c35-4145-aa50-9093725b1440
 md"""
-Check out the final value of $y$.
+Check the final value of $y$.
 """
 
 # ╔═╡ d8db3d47-7a0d-4d59-8820-5dc81475b5e3
@@ -312,12 +306,11 @@ Answer: missing
 # ╠═0472f2b5-394f-4670-81ec-3046c9826ee0
 # ╟─e68827a7-5f6e-45f7-b7fb-d0b41472b2c8
 # ╠═d8ab108b-89af-4f3d-bb4d-dae83bd71aaf
-# ╟─42a05adc-a5ac-43d5-9e0b-d8cb1f539c09
-# ╠═be8bff08-aa49-4ef4-9be6-d13a8aac01c5
 # ╟─e918256e-3999-4ab2-8792-7da6ba32ab19
 # ╠═115c48a4-4dc0-4cf0-ac34-e651e773e675
 # ╟─6049886b-95a3-4d9e-a4e7-d05f1e9c504a
 # ╟─5856753b-2753-4a83-b3ec-747a7c0b9c52
+# ╠═6bf84dfd-0f3c-47af-8b1d-fdad7e54f19b
 # ╠═75e757ef-ed89-40f7-a8d6-12884f4ccb98
 # ╟─d4bc6ff0-7383-4ea2-a7e0-5719a9dfe794
 # ╟─9270475c-1f63-4d3e-98e0-ba7d2417ee81

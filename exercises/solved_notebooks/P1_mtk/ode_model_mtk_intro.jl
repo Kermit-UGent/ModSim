@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -99,12 +99,11 @@ We define the equation that relates $r$ to $h$. The equation is named `eq_radius
 """
 
 # ╔═╡ f98ecb14-9df2-4ba3-a1c7-3ab75e3e8055
-eq_radius = r ~ h * R / H 
-
+eq_radius = r ~ h * R / H
 
 # ╔═╡ 3c4ac6b0-08d2-4f93-bd98-b52a03e9af7d
 md"""
-Next, we define the equation that relates $V$ to $r$ and $h$. The equation is named `eq_volume`.
+Next, we define the equation that relates $V$ to $r$ and $h$.
 """
 
 # ╔═╡ c18b1610-eadf-474e-8da9-9c1f21845bc1
@@ -112,7 +111,7 @@ eq_volume = V ~ π * r^2 * h / 3
 
 # ╔═╡ f6cb6648-95bd-4a8e-85ad-626b97bb6cb4
 md"""
-Finally, we will define the differential equation that relates the rate of change in $V$ to the inlet flow rate and the outlet flow rate. The equation is named `change_vol`. The symbolic operator `D` takes the symbolic differentiation of `V` in `D(V)`.
+Finally, we will define the differential equation that relates the rate of change in $V$ to the inlet flow rate and the outlet flow rate. The symbolic operator `D` takes the symbolic differentiation of `V` in `D(V)`.
 """
 
 # ╔═╡ e87ea53c-8629-4f49-af3b-1c753940e27d
@@ -120,7 +119,7 @@ change_vol = D(V) ~ q - h * k   # change in volume = inflow - outflow
 
 # ╔═╡ 74fc9ede-c032-4d5a-b508-c6de4021f460
 md"""
-After all equations have been defined, we will bundle them in a list using square brackets as below. The name of the bundled equations is here `eqns_tank`.
+After all equations have been defined, we will bundle them in a vector using square brackets as below.
 """
 
 # ╔═╡ 8e6efab4-ac91-40bd-9805-88e0dabb2cd1
@@ -133,7 +132,7 @@ md"""
 
 # ╔═╡ 9d302a6c-3b1b-47b8-85df-a658baaca050
 md"""
-We will build an ODE system for MTK (ModelingToolkit). You need to provide the list of equations (cf. here: `eqns_tank`) and the symbol `t` for the time to the function `ODESystem`. Optionally you can also provide so-called *continuous* and *discrete* events but this will be illustrated later. The name of the MTK model (or system) given is here `tank`.
+We will build an ODE system for MTK (ModelingToolkit). You need to provide the list of equations (cf. here: `eqns_tank`) and the symbol `t` for the time to the function `ODESystem`. Optionally you can also provide so-called *continuous* and *discrete* events, but this will be illustrated later. The name of the MTK model (or system) given is here `tank`.
 """
 
 # ╔═╡ c6bfc46c-7ca5-4d9e-88fb-3e7065ec6bb0
@@ -141,12 +140,12 @@ We will build an ODE system for MTK (ModelingToolkit). You need to provide the l
 
 # ╔═╡ c3fce45c-f4d6-49e7-82cf-79a58412bc57
 md"""
-After having built the MTK model we need to create the ODE problem. You need to provide the name of the MTK model (cf. here: `tanks`), a vector with the initial conditions, a time span and a vector of parameter values to the function `ODEProblem. Because $V$, $r$ and $h$ are related to eachother, we provide the initial condition for $V$ only and also provide guessed values for $r$ and $h$.
+After having built the MTK model we need to create the ODE problem. You need to provide the MTK model (cf. here: `tanks`), a vector with the initial conditions, a time span and a vector of parameter values to the function `ODEProblem`. Because $V$, $r$ and $h$ are related to each other, we provide the initial condition for $V$ only and provide guessed values for $r$ and $h$.
 
 Some remarks:
 - Since the initial value for $V$ was set when defining the variables, we could as well have written `[]` instead of `[V=>0.1]` if you want to use the default value. You can overwrite the initial value here if you wish.
 - Beware that $V$, $r$ and $h$ are related with eachother and that only one of them must be given an initial value. The other two values need to be 'guessed' (cf. the keyword argument `guesses=...`).
-- We have intentionally not mentioned the parameters `R` and `H` in the vector of parameters. In that way we use their default values as set when defining the parameters. You can overwrite the parameter values here if you wish.
+- We have intentionally not specified the parameters `R` and `H` in the vector of parameters, because we want to use their default values. You can overwrite the default parameter values here if you wish.
 """
 
 # ╔═╡ d6a153d4-d41f-47d4-88b0-b10ac2e22b04
@@ -161,7 +160,7 @@ md"""
 
 # ╔═╡ f6e0db08-723d-4b55-ac40-6828105ed6a7
 md"""
-We will now solve the ODE problem using the function `solve`. At least, the ODE problem should be given to the function `solve`. In that case, a default solver will be used and the time instances at which the solution is approximanted will be chosen by the solver. If you provide the option `saveat=1`, then the solution will be approximated every time unit. Here the solution object is named `tank_sol`.
+We will now solve the ODE problem using the function `solve`. The function expects two inputs: an `ODEProblem` and an ODE solver. It is also possible to call `solve` with just the `ODEProblem`, in which case it will try to automatically select a suitable solver for the ODE problem. This function also has many keyword arguments, which you can find in the docs page of the function (type `?solve` in a cell or write in directly in the `🔍 Live docs` in the bottom right corner). One we will use often is `saveat`, which decides at what timesteps the solution will be returned. For example, if you provide the option `saveat=1`, then the solution will be approximated every time unit.
 """
 
 # ╔═╡ 9492a458-2e7c-4828-85a3-20ed266e794c
@@ -170,7 +169,7 @@ tank_sol = solve(tank_prob)
 
 # ╔═╡ 61e22259-4a15-44cc-ab2b-e21030502135
 md"""
-If you want to check out the number of time instances at whcih the solution was approximated, you can use the function `length`:
+If you want to check the number of time instances at which the solution was approximated, you can use the function `length`:
 """
 
 # ╔═╡ 66947904-6b80-4279-ae2b-a3c20886062d
@@ -178,15 +177,21 @@ length(tank_sol)
 
 # ╔═╡ baf2cc98-0a10-4c30-8d32-66b93b4c37aa
 md"""
-If you plan on further analyzing the solution for one of the variables, you can access their values using square brackets on the solution object and provide the name of the variable. For example:
+If you plan on further analyzing the solution for one of the variables, you can access their values by indexing the solution object with the symbolic variable. For example:
 """
 
 # ╔═╡ 258ad571-6e2d-470f-ae5f-5c5ac34afbab
 tank_sol[V]
 
+# ╔═╡ b5ef6331-0239-4c4c-a7e2-8df1d1077b07
+md"You can also use the variable name as a `Symbol` (created by adding a leading `:`):"
+
+# ╔═╡ 3240e248-06ad-4720-b0d0-14665a0ee128
+tank_sol[V] == tank_sol[:V]
+
 # ╔═╡ 9bbaf346-0195-405d-bf3a-8360d49f03ab
 md"""
-You can plot the evolution of $V$, $h$ and $r$ using the function `plot` and providing the name of the solution object and the option `idxs=` and provide a vector of one or more variable names.
+You can plot the evolution of $V$, $h$ and $r$ using the function `plot` and providing the name of the solution object. The keyword argument `idxs` allows you to choose what variables to plot.
 """
 
 # ╔═╡ 99158cd8-753c-4d6b-9288-a78dfc1fa86a
@@ -199,7 +204,7 @@ You can calculate the steady state (equilibrium) values by solving a steady stat
 """
 
 # ╔═╡ 08a72b39-81c8-4b3a-90a7-761bf6398e80
-equil_val_tank = solve(SteadyStateProblem(tank, [V=>1.0, r=>1.0, h=>1.0], [q=>0.1, k=>0.05]))
+equil_val_tank = solve(SteadyStateProblem(tank, [V=>1.0, h=>2.0, r=>0.5], [q=>0.1, k=>0.05]))
 
 # ╔═╡ 24087790-80c0-41fb-af35-1b49078705e7
 md"""
@@ -214,7 +219,7 @@ equil_val_tank[h]
 
 # ╔═╡ 12fc3604-1871-4197-bf95-5674dc9d9afb
 md"""
-You can also provide an expression to `idxs=` consisting of variables and/or parameters. Below, we show the ratio $V/h$.
+You can also provide an expression to `idxs` consisting of variables and/or parameters. Below, we show the ratio $V/h$.
 """
 
 # ╔═╡ 8c9e806b-ee8b-4c84-b9bb-113e1d8ab4e4
@@ -260,12 +265,16 @@ We define variables for the position $y$ and the total energy $E$ as follow. Don
 # ╔═╡ b1277bf9-9958-4c07-aba1-77a9e5252b20
 md"""
 We define the parameters. Optionally, as with the variables, you can also provide default values for the parameters and/or overwrite them later when creating the ODE problem. An other option is to provide an informative *description* string with the meaning of each of the parameters.
+"""
 
-**Important:** Mind that the parameter `k` is not included in the parameters here below. This is because a parameter `k` was already defined in *Case 1: Conical tank*. **Pluto notebooks do not allow to redefine parameters or variables elsewhere.**
+# ╔═╡ 26921be4-4438-4be7-b6c0-d9ea28af0865
+md"""
+!!! note
+	We can't define a parameter `k` here because we already defined one in the previous section, and Pluto doesn't allow variables to be defined multiple times in different places (this guarantees the code returns the same output no matter what order it is run in). Because of this, we call it `k_s` instead.
 """
 
 # ╔═╡ d3954593-63ae-4dfe-b752-01339b44adcd
-@parameters μ [description="friction"] m [description="mass"]
+@parameters μ [description="friction"] m [description="mass"] k_s [description="spring constant"]
 
 # ╔═╡ f67ffde7-622a-45bf-b987-5802a7413610
 md"""
@@ -285,20 +294,20 @@ D(D(y))  # second-order derivative wrt time
 
 # ╔═╡ b9a3e9c0-577b-45ae-82bd-79d33879343f
 md"""
-We will define the second-order differential equation for the position (i.e. the equation based on Newton’s second law). We have named it `eq_spring`.
+We will define the second-order differential equation for the position (i.e. the equation based on Newton’s second law).
 """
 
 # ╔═╡ ed48e70a-a608-46a1-9339-0bb3a93a4ea1
-# spring_eq = m * D(D(y)) ~ - k * y - μ * D(y)
-eq_spring = m * (D^2)(y) ~ - k * y - μ * D(y)
+# spring_eq = m * D(D(y)) ~ - k_s * y - μ * D(y)
+eq_spring = m * (D^2)(y) ~ - k_s * y - μ * D(y)
 
 # ╔═╡ caada693-9aca-41ac-bd37-bc3fee641125
 md"""
-Next, we will define the expression for the total energy of the system. We have named it `exp_energy`.
+Next, we will define the expression for the total energy of the system.
 """
 
 # ╔═╡ dc7e26c6-2c88-475d-a4ab-64dbb4f9a956
-exp_energy = E ~ m*D(y)^2/2 + y^2*k/2  # we can add quantities to keep track off. 
+exp_energy = E ~ m*D(y)^2/2 + y^2*k_s/2  # we can add quantities to keep track off. 
 
 # ╔═╡ ecc6d921-ae18-4a25-b2f8-3636ae8fc85c
 md"""
@@ -307,7 +316,7 @@ md"""
 
 # ╔═╡ 3e7eeaec-ee16-4078-829e-61eb9acba0e8
 md"""
-We will now build an ODE system for MTK (ModelingToolkit). You will need to provide the list of equations and the symbol `t` for the time to the function `ODESystem`. In addition we will introduce a discrete event: at time t=`40`, the mass is reduced by 75%. You could image that part of the mass fell from the spring during the movement. The name of the MTK model (or system) given is here `spring_ode`.
+We will now build an ODE system for MTK (ModelingToolkit). You will need to provide the vector of equations and the symbol `t` for the time to the function `ODESystem`. In addition we will introduce a discrete event: at time t=`40`, the mass is reduced by 75%. You could image that part of the mass fell from the spring during the movement. The name of the MTK model (or system) given is here `spring_ode`.
 If you have multiple discrete events you can include them in the following way:
 `[[...]=>[...~...], [...]=>[...~...], ...]`.
 """
@@ -326,7 +335,7 @@ After having built the MTK model we need to create the ODE problem. You need to 
 """
 
 # ╔═╡ 30b3ed77-0709-4410-8d56-d576d69b5e0b
-spring_prob = ODEProblem(spring_ode, [y=>2.0, D(y)=>-1.0], (0.0, 100.), [m=>3, k=>0.6, μ=>1e-1])
+spring_prob = ODEProblem(spring_ode, [y=>2.0, D(y)=>-1.0], (0.0, 100.), [m=>3, k_s=>0.6, μ=>1e-1])
 
 # ╔═╡ 53913925-13d2-4a70-b310-8c19ae628581
 md"""
@@ -335,11 +344,17 @@ md"""
 
 # ╔═╡ 85d111eb-5452-43de-a674-a6242e7dc5ca
 md"""
-We will now solve the ODE problem using the function `solve`. In this case we have provided a solver (cf. `Tsit5()`) and a relative tolerance to be met by the solver (cf. `reltol=1e-9`). The solver `Tsit5()` is a recommended solver for non-stiff problem. See the [documentations](https://docs.sciml.ai/DiffEqDocs/dev/solvers/ode_solve/) for more details. Here the solution object is named `sol_spring`. In addition, when working with events, it is good practice to take a `deepcopy` of the ODE problem before solving it.
+We will now solve the ODE problem using the function `solve`. In this case we have provided a solver (cf. `Tsit5()`) and a relative tolerance to be met by the solver (cf. `reltol=1e-9`). The solver `Tsit5()` is a recommended solver for non-stiff problems. See the [documentation](https://docs.sciml.ai/DiffEqDocs/dev/solvers/ode_solve/) for more details.
 """
 
 # ╔═╡ 15ba5472-72da-4ae4-9438-fe8a1d88d9c0
 sol_spring = solve(deepcopy(spring_prob), Tsit5(), reltol=1e-9)
+
+# ╔═╡ cf253b87-8a15-4e4e-b372-f427793143bb
+md"""
+!!! note
+	When working with events, it is good practice to take a `deepcopy` of the ODE problem before solving it. This is because events can change parameter values of the problem while solving, which do not reset when solving is done. Therefore solving the same problem a second time would use a changed set of initial parameters, and give different results. Copying the problem before solving prevents this issue.
+"""
 
 # ╔═╡ 4b04ccc3-94c4-4331-a781-d02be313ef73
 md"""
@@ -356,7 +371,7 @@ You can clearly notice some change in the oscillatory at t=40.
 
 # ╔═╡ f954d1ff-d9dd-4ba2-8dc2-a5ccd87e1ce3
 md"""
-If you want to see the evolution of $E$ provide to option `idxs=E` as well to the `plot` function.
+If you want to see the evolution of $E$, you can provide it to the `idxs` keyword argument.
 """
 
 # ╔═╡ ff3645ab-12d1-46ac-b4d8-ce431ba27491
@@ -391,7 +406,7 @@ md"""
 
 # ╔═╡ 4537da11-be37-42d2-b4d8-5e08272e9f65
 md"""
-We will define the variables for this model. For the rabbits we will use the symbol 🐰 and for the foxes the symbol 🦊. In order to get the first symbol, type a back slash `\` and then type `:rabbit:` followed by the TAB-key. The second symbol you can get analogously, type `\` and then type `:fox_face:` followed by the TAB-key. If you hit the TAB-key before finishing the name of the symbol, you can see different options. Don't forget to mention the dependence on the time `t`.
+We will define the variables for this model. For the rabbits we will use the symbol 🐰 and for the foxes the symbol 🦊. In order to get the first symbol, type a back slash `\` and then type `:rabbit:` followed by the TAB-key. The second symbol you can get analogously, type `\` and then type `:fox_face:` followed by the TAB-key. If you hit the TAB-key before finishing the name of the symbol, you can see different options. Don't forget to specify the dependence on the time `t`.
 """
 
 # ╔═╡ 3100925e-d5dc-4d56-af84-ffab2059a4c5
@@ -428,7 +443,7 @@ md"""
 
 # ╔═╡ 6d10c03d-0795-4458-88a6-f7484efe9478
 md"""
-In this example we will introduce a so-called continuous event. The continuous event is formulated here below. It states that when the population of rabbits hits 300, then its population is brought back to 100. You can imagine that if you have enough rabbits, say 300, hunters will hunt the rabbits and bring its population back to 100. This is how one can interprete the event. In our case there is only one continuous event but you can include many others. If you have multiple continuous events you can include them in the following way:
+In this example we will introduce a so-called continuous event. The continuous event is formulated here below. It states that when the population of rabbits hits 300, then its population is brought back to 100. You can imagine that if you have enough rabbits, say 300, hunters will hunt the rabbits and bring its population back to 100. In our case there is only one continuous event, but it is possible to include multiple continuous events in the following way:
 `[[...~...]=>[...~...], [...~...]=>[...~...], ...]`
 """
 
@@ -437,7 +452,7 @@ rabbitmanagment = [[🐰 ~ 300.0] => [🐰 ~ 100.0]]
 
 # ╔═╡ 3f2170d3-be36-415e-8c65-4f492baccac0
 md"""
-We will now build an ODE system for MTK. You will need to provide the list of equations, the symbol `t` for the time and the continuous event to the function `ODESystem`. The name of the MTK model (or system) given is here `lv_sys`.
+We will now build an ODE system for MTK. You will need to provide the list of equations, the symbol `t` for the time and the continuous event to the function `ODESystem`.
 """
 
 # ╔═╡ 1cdf417d-daea-4684-89bd-7deb951c6b3a
@@ -544,6 +559,8 @@ plot(sol_LV, idxs=🐰/🦊, label="rabbits/foxes")
 # ╠═66947904-6b80-4279-ae2b-a3c20886062d
 # ╟─baf2cc98-0a10-4c30-8d32-66b93b4c37aa
 # ╠═258ad571-6e2d-470f-ae5f-5c5ac34afbab
+# ╟─b5ef6331-0239-4c4c-a7e2-8df1d1077b07
+# ╠═3240e248-06ad-4720-b0d0-14665a0ee128
 # ╟─9bbaf346-0195-405d-bf3a-8360d49f03ab
 # ╠═99158cd8-753c-4d6b-9288-a78dfc1fa86a
 # ╟─ce573c77-ff84-446e-9460-1aff19b324f2
@@ -559,6 +576,7 @@ plot(sol_LV, idxs=🐰/🦊, label="rabbits/foxes")
 # ╟─497fe740-385e-4bd1-b5c6-1203b00eb1ab
 # ╠═a0f5eeee-3b5f-4588-bd31-1cff6c993f6b
 # ╟─b1277bf9-9958-4c07-aba1-77a9e5252b20
+# ╟─26921be4-4438-4be7-b6c0-d9ea28af0865
 # ╠═d3954593-63ae-4dfe-b752-01339b44adcd
 # ╟─f67ffde7-622a-45bf-b987-5802a7413610
 # ╟─b195f1cb-c87b-407b-9840-a2e3c3da4fba
@@ -577,6 +595,7 @@ plot(sol_LV, idxs=🐰/🦊, label="rabbits/foxes")
 # ╟─53913925-13d2-4a70-b310-8c19ae628581
 # ╟─85d111eb-5452-43de-a674-a6242e7dc5ca
 # ╠═15ba5472-72da-4ae4-9438-fe8a1d88d9c0
+# ╟─cf253b87-8a15-4e4e-b372-f427793143bb
 # ╟─4b04ccc3-94c4-4331-a781-d02be313ef73
 # ╠═d29f022c-924b-4d26-ab8c-65f11eb85b6a
 # ╟─ab4aca36-5d8a-43b5-9e7a-c9c6f8288fef
