@@ -146,10 +146,10 @@ In order to have an idea of this initial body pressure, it is preferable to calc
 """
 
 # ╔═╡ 3b460c68-cd31-4adf-985a-057508b40105
-let
-	pa=101325*1e-5; ρ=1000.0; g=9.81;
-	missing
-end
+# let
+# 	pa=101325*1e-5; ρ=1000.0; g=9.81;
+# 	missing
+# end
 
 # ╔═╡ fd38ceaf-ca26-43a7-8e8b-52aa63f389a9
 md"""
@@ -366,11 +366,11 @@ In order to have an idea of what external force you need to pull up the diver at
 """
 
 # ╔═╡ 2d5c2f05-c902-4b6d-8b73-38d092a11fd8
-let
-	ρ=1000.0; g=9.81; v_const=0.15;
-	m=100.0; V=0.082; c₁=20.0;
-	missing
-end
+# let
+# 	ρ=1000.0; g=9.81; v_const=0.15;
+# 	m=100.0; V=0.082; c₁=20.0;
+# 	missing
+# end
 
 # ╔═╡ 9db90eab-683d-4c7c-a0b9-5c7904dd0aa2
 md"""
