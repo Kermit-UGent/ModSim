@@ -123,7 +123,7 @@ Hints:
 
 # ╔═╡ d8ab108b-89af-4f3d-bb4d-dae83bd71aaf
 # let
-# 	missing
+# 	m=23.0; g=9.81; k=22570; L=0.40
 # 	missing
 # end
 
