@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -29,23 +29,23 @@ solution(text) = Markdown.MD(Markdown.Admonition("hint", "Solution", [text]));
 
 # ╔═╡ ece4a09b-781a-48d1-994c-856674b6ef71
 md"""
-A diver is pulled up from a depth of $30\;m$ to a ship. The pressure change that takes place in the body is proportional to the difference between the ambient pressure (at a certain depth) and the internal pressure in the diver's body through a coefficient gradient of $c_2\;[s^{−1}]$. We are interested in the rate of pressure change in the body, as it has to stay below a certain critical value (estimated to be $0.02\;bar/s$) if we want to avoid the Caisson disease.
+A diver is pulled up from a depth of $30\;m$ to a ship with a constant velocity $v$. The pressure change that takes place in the body is proportional to the difference between the ambient pressure (at a certain depth) and the internal pressure in the diver's body through a coefficient gradient of $c_2\;[s^{−1}]$. We are interested in the rate of pressure change in the body, as it has to stay below a certain critical value (estimated to be $0.02\;bar/s$) if we want to avoid the Caisson disease.
 """
 
 # ╔═╡ 92e3c710-9cd2-4441-a395-f4303d3c122e
 # PlutoUI.LocalResource("fig/diver_position.png")
+# https://users.ugent.be/~gvhaelew/fig/diver_position.png
 md"""
 ![Diver](https://users.ugent.be/~gvhaelew/fig/diver_position.png)
 """
 
 # ╔═╡ 25ab9b2b-c594-4a48-ab77-910897597782
 md"""
-For reasons of convenience, consider a $Z$-axis pointing upwards with the water surface at position $z=0\;m$. Hence, the position of the diver (beneath the water surface) is negative ($z < 0$). The pressure that the water exerts on the diver's body is given by Pascal's law: $p = p_a - \rho g z$, with $p_a$ the air pressure. Remember that $z<0$, so that the term $- \rho \, g \, z$ really adds up to $p_a$, so that $p = p_a - \rho \, g \, z > p_0$ for $z < 0$.
+Consider a $Z$-axis pointing upwards with the water surface at position $z=0\;m$. Hence, the position of the diver (beneath the water surface) is negative ($z < 0$). The pressure that the water exerts on the diver's body is given by Pascal's law: $p = p_a - \rho g z$, with $p_a$ the air pressure. It is easy to verify that $p = p_a$ at $z = 0$.
 
 **Important remaks:**
 - When the diver is residing for a relatively long period of time at a certain position $z$, its internal body pressure $p_b$ will equal the ambient pressure $p$ ($= p_a - \rho \, g \, z$).
-- When the diver is (suddenly) pulled up, it takes time for the internal body pressure of the diver to adapt to the (new) ambient pressure. A measure for this adaptation time is $1/c_2$. Saying that the change in internal body pressure (cf. $\cfrac{dp_b}{dt}$) is proportional to $(p - p_b)$ through the adaption coefficient $c_2$ means:
-$$\cfrac{dp_b}{dt} = c_2 \left(p - p_b\right)$$
+- When the diver is (suddenly) pulled up, it takes time for the internal body pressure of the diver to adapt to the (new) ambient pressure. Assume a linear relationship between the rate of change in internal body pressure and the difference between the ambient and the internal body pressure: $$\cfrac{dp_b}{dt} = c_2 \left(p - p_b\right) \, ,$$ with $c_2$ the adaption coefficient.
 - Since the adaption of $p_b$ is not instant (cf. adaptation coefficient $c_2$), the factor $p - p_b$ will be negative, and hence, also $\cfrac{dp_b}{dt}$. It is the absolute value of $\cfrac{dp_b}{dt}$ that must stay below a certain critical value in order to avoid the Caisson disease.
 """
 
@@ -99,7 +99,7 @@ Consider for this part the velocity $v$ being constant with a value of $0.15\;m/
 
 # ╔═╡ c58a62a3-6519-4a81-a851-04ce6ec8a9db
 md"""
-Define variables for the position $z$, the body pressure $p_b$ and the rate of change in body pressure $dp_b/dt$. Use the following variable names: `z`, `pb` and `dpbdt`. Mention the dependency on the time $t$.
+Define variables for the position $z$, the body pressure $p_b$ and the rate of change in body pressure $dp_b/dt$.  Use the following variable names: `z`, `pb` and `dpbdt`.
 """
 
 # ╔═╡ 7be849c3-d841-4967-936b-2e42dc332de5
@@ -116,9 +116,10 @@ Define the parameters for this model and assign their corresponding values.
 | $g$    | 9.81 | $m/s^2$  |   gravitational constant |
 | $c_2$    | 0.05 | $1/s$  |   coefficient gradient |
 | $v$    | 0.15 | $m/s$  |   pull-up velocity |
-
-Use the following names: `pa`, `ρ`, `g`, `c₂` and `v_const`.
 """
+
+# ╔═╡ 66ed6b4f-2af3-4ec9-bd6f-4861129ae379
+md"Use the following names: `pa`, `ρ`, `g`, `c₂` and `v_const`."
 
 # ╔═╡ fb444a48-63ec-4bf4-aa55-8e8ae04640cd
 # @parameters missing
@@ -145,10 +146,10 @@ In order to have an idea of this initial body pressure, it is preferable to calc
 """
 
 # ╔═╡ 3b460c68-cd31-4adf-985a-057508b40105
-# let
-# 	pa=101325*1e-5; ρ=1000.0; g=9.81;
-# 	missing
-# end
+let
+	pa=101325*1e-5; ρ=1000.0; g=9.81;
+	missing
+end
 
 # ╔═╡ fd38ceaf-ca26-43a7-8e8b-52aa63f389a9
 md"""
@@ -189,7 +190,7 @@ md"""
 
 # ╔═╡ 4ca01607-0a0a-4ada-96de-44286565f6be
 md"""
-Build the model and include the (continuous) event that when `z` hits zero, `v_const` must become zero as well. Name the model `sys1_diver`.
+Build the model and include the (continuous) event that when $z$ hits zero, the pull-up velocity must become zero as well. Name the model `sys1_diver`.
 """
 
 # ╔═╡ fafc4370-569b-4e05-9683-8e54340713d2
@@ -202,7 +203,7 @@ md"""
 
 # ╔═╡ d42afda6-edd4-4fb6-93b9-8663adc0c96d
 md"""
-Create the ODE problem. Use the aforementioned variables `z₀` and `pb₀` for the initial conditions. Use a simulation time span of `500.0` seconds. Use `[]` for the parameters argument since their values have been set before.
+Create the ODE problem, specifying the initial values for the diver's position and internal body pressure. Use a simulation time span of `500.0` seconds. Use an empty vector `[]` for the parameters argument to use their default values.
 """
 
 # ╔═╡ df8fda53-7226-409f-89a4-7375a26468e6
@@ -336,7 +337,7 @@ md"""
 
 # ╔═╡ 180a67b1-a03e-4dbc-9331-d82e688e49d0
 md"""
-Define an additional variable for the velocity $v$. Use the following variable name: `v`. Mention the dependency on the time $t$.
+Define an additional variable for the velocity $v$. Use the following variable name: `v`. 
 """
 
 # ╔═╡ c78d0438-ba53-4f37-ac5e-9a32172c501b
@@ -351,28 +352,29 @@ Define the additional parameters for this model and assign their corresponding v
 | $m$    | 100 | $kg$  |    mass of the diver   |
 | $V$    | 0.082 | $m^3$  |  volume of the diver  |
 | $c_1$    | 20.0 | $kg/s$  |   friction coefficient |
-
-Use the following names: `m`, `V` and `c₁`.
 """
+
+# ╔═╡ c94700b4-462e-4179-9845-1d3c52617709
+md"Use the following names: `m`, `V` and `c₁`."
 
 # ╔═╡ 1d3a4fba-9593-4503-8656-ffbceb8046ec
 # @parameters missing
 
 # ╔═╡ e88c9c4e-d50b-436a-a810-76fe40ddc24d
 md"""
-In order to have an idea of what external force you need to pull up the diver at a constant velocity of 0.15 $m/s$, you can calculate it by setting $\cfrac{dv}{dt}$ to zero in the equation for the rate of change in the velocity, and solving for $F_{ext}$.
+In order to have an idea of what external force you need to pull up the diver at a constant velocity of 0.15 m/s, you can calculate it by setting $\cfrac{dv}{dt}$ to zero in the equation for the rate of change in the velocity, and solving for $F_{ext}$.
 """
 
 # ╔═╡ 2d5c2f05-c902-4b6d-8b73-38d092a11fd8
-# let
-# 	ρ=1000.0; g=9.81; v_const=0.15;
-# 	m=100.0; V=0.082; c₁=20.0;
-# 	missing
-# end
+let
+	ρ=1000.0; g=9.81; v_const=0.15;
+	m=100.0; V=0.082; c₁=20.0;
+	missing
+end
 
 # ╔═╡ 9db90eab-683d-4c7c-a0b9-5c7904dd0aa2
 md"""
-Set up the additional parameter for the external force. Use the name `Fext` and set it to 180.0.
+Set up the additional parameter for the external force with a default value of 180. Name it `Fext`.
 """
 
 # ╔═╡ c8b34161-ecb6-4be7-a4c4-d0381198846c
@@ -425,7 +427,7 @@ md"""
 
 # ╔═╡ 9827f9e4-d514-454e-893f-42f9c97b5a43
 md"""
-Build the model and include the (continuous) event that when `z` hits zero, `v` must become zero as well. Name the model `sys2_diver`.
+Build the model and include the (continuous) event that when $z$ hits zero, $v$ must become zero as well. Name the model `sys2_diver`.
 """
 
 # ╔═╡ 70a6a572-c25a-40bd-824a-80b21957efbb
@@ -438,7 +440,7 @@ md"""
 
 # ╔═╡ 4bb1e0f4-2544-437b-8523-4e5547caee25
 md"""
-Create the ODE problem. The initial conditions for `z` and `pb` are the same as before. For `v` assume that the diver is initially at rest at the initial depth. Use a simulation time span of `500.0` seconds. Use `[]` for the parameters argument since their values have been set before.
+Create the ODE problem. The initial conditions for the position and body pressure are the same as before. For $v$, assume that the diver is initially at rest. Use a simulation time span of `500.0` seconds. Use the default values of the parameters again.
 """
 
 # ╔═╡ 26eb5e36-4026-41b8-b2fc-4be950727e29
@@ -660,7 +662,7 @@ md"""
 
 # ╔═╡ 6d13fdf7-7214-483b-9de3-9fd7accab4a1
 md"""
-Build the model and include the (continuous) event that when `z` hits `5`, `v` must become zero. Name the model `sys5_diver`.
+Build the model and include the (continuous) event that when $z$ hits $5$, $v$ must become zero. Name the model `sys5_diver`.
 """
 
 # ╔═╡ 6a87b974-4ce6-45b0-b7e8-ce007c45659c
@@ -673,7 +675,7 @@ md"""
 
 # ╔═╡ 68a2f5cf-3e0b-4dbc-ad66-ab728cbe7984
 md"""
-Create the ODE problem. All initial conditions are the same as before. Use a simulation time span of `500.0` seconds. Use `[]` for the parameters argument since their values have been set before.
+Create the ODE problem. All initial conditions are the same as before. Use a simulation time span of `500.0` seconds. Use the default parameter values.
 """
 
 # ╔═╡ 0a447fbc-c31d-4eac-b272-65818efb62d7
@@ -744,6 +746,7 @@ Answers:
 # ╟─c58a62a3-6519-4a81-a851-04ce6ec8a9db
 # ╠═7be849c3-d841-4967-936b-2e42dc332de5
 # ╟─d548f583-5f9b-4921-8e89-85995b892e51
+# ╟─66ed6b4f-2af3-4ec9-bd6f-4861129ae379
 # ╠═fb444a48-63ec-4bf4-aa55-8e8ae04640cd
 # ╟─1916a1ca-565b-4692-82c2-5484a486e435
 # ╠═9a289ab4-87b5-452e-890e-2cad5c16ab4a
@@ -789,6 +792,7 @@ Answers:
 # ╟─180a67b1-a03e-4dbc-9331-d82e688e49d0
 # ╠═c78d0438-ba53-4f37-ac5e-9a32172c501b
 # ╟─588e1ad2-181d-4a1f-b974-a7f5f0f70c28
+# ╟─c94700b4-462e-4179-9845-1d3c52617709
 # ╠═1d3a4fba-9593-4503-8656-ffbceb8046ec
 # ╟─e88c9c4e-d50b-436a-a810-76fe40ddc24d
 # ╠═2d5c2f05-c902-4b6d-8b73-38d092a11fd8
