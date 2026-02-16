@@ -89,7 +89,7 @@ md"""
 
 # ╔═╡ 20073595-1940-406f-b30b-57a1033e9c4f
 md"""
-Define the variable for the position $y$. Mention the dependency on the time $t$.
+Define the variable for the position $y$. Name it `y`, and mention the dependency on the time $t$.
 """
 
 # ╔═╡ eb2ac37e-91e7-4253-9274-ef8e3a2c666b
@@ -108,6 +108,9 @@ Define the parameters for this model and assign their corresponding values.
 | $L$    | 0.40 | $m$  |   natural length of the spring |
 | $b$    | 900 | $Ns/m$  |   damping constant |
 """
+
+# ╔═╡ 2df58ef3-cec0-43a1-afcc-6fc8dd1ab4a6
+md"Use the following names: `m`, `g`, `k`, `L` and `b`."
 
 # ╔═╡ 0472f2b5-394f-4670-81ec-3046c9826ee0
 # @parameters missing
@@ -152,7 +155,7 @@ md"""
 
 # ╔═╡ 5856753b-2753-4a83-b3ec-747a7c0b9c52
 md"""
-Build the model and include the (discrete) event that when the time is $1$ min, the mass needs to be incremented with the mass of the person. Assume the person weighs $80$ $kg$.
+Build the model and include the (discrete) event that when the time is $1$ min, the mass needs to be incremented with the mass of the person. Assume the person weighs $80$ $kg$. Name your model `sys_tractor_seat`.
 """
 
 # ╔═╡ 6bf84dfd-0f3c-47af-8b1d-fdad7e54f19b
@@ -169,7 +172,7 @@ md"""
 
 # ╔═╡ 9270475c-1f63-4d3e-98e0-ba7d2417ee81
 md"""
-Create the ODE problem. Use the steady state value that you calculated before for the initial position $y_0$. As mentioned before $v_0 = 0$. The symbol for $\frac{dy}{dt}$ in the vector of initial conditions is `D(y)`. Use a simulation time span of `5.0` seconds. Assign the value `b_val` to the damping constant parameter. `b_val` is defined later in the notebook and bound to a slider, so you can see how it influences the results.
+Create the ODE problem. Use the steady state value that you calculated before for the initial position $y_0$. As mentioned before $v_0 = 0$. The symbol for $\frac{dy}{dt}$ in the vector of initial conditions is `D(y)`. Use a simulation time span of `5.0` seconds. Assign the value `b_val` to the damping constant parameter $b$. `b_val` is defined later in the notebook and bound to a slider, so you can see how it influences the results.
 """
 
 # ╔═╡ a6ca51e5-4019-4aa1-a667-66af70b77f8a
@@ -303,6 +306,7 @@ Answer: missing
 # ╟─20073595-1940-406f-b30b-57a1033e9c4f
 # ╠═eb2ac37e-91e7-4253-9274-ef8e3a2c666b
 # ╟─16b70e7d-e9a4-4406-a830-6e591fd868e7
+# ╟─2df58ef3-cec0-43a1-afcc-6fc8dd1ab4a6
 # ╠═0472f2b5-394f-4670-81ec-3046c9826ee0
 # ╟─e68827a7-5f6e-45f7-b7fb-d0b41472b2c8
 # ╠═d8ab108b-89af-4f3d-bb4d-dae83bd71aaf

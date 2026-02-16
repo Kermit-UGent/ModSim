@@ -140,7 +140,7 @@ md"""
 
 # ╔═╡ 872ca902-45b6-496e-ae96-fa1b1c6e16bd
 md"""
-Build a system of equations with `@mtkbuild`.
+Build a system of equations with `@mtkbuild`. Name it `sys_irrigation`.
 """
 
 # ╔═╡ 9c70c339-c2ac-4983-8564-4a02fdb73e8a
@@ -154,7 +154,7 @@ md"""
 
 # ╔═╡ 72f30ddc-d442-49e9-8b18-ac94cb561a7f
 md"""
-Create the ODE problem for your system.
+Create the ODE problem for your system and name it `oprob_irrigation`.
 """
 
 # ╔═╡ fa1c55a1-3020-44f0-88b4-3e089fd691ec

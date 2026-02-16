@@ -99,7 +99,7 @@ Consider for this part the velocity $v$ being constant with a value of $0.15\;m/
 
 # ╔═╡ c58a62a3-6519-4a81-a851-04ce6ec8a9db
 md"""
-Define variables for the position $z$, the body pressure $p_b$ and the rate of change in body pressure $dp_b/dt$.
+Define variables for the position $z$, the body pressure $p_b$ and the rate of change in body pressure $dp_b/dt$.  Use the following variable names: `z`, `pb` and `dpbdt`.
 """
 
 # ╔═╡ 7be849c3-d841-4967-936b-2e42dc332de5
@@ -118,6 +118,9 @@ Define the parameters for this model and assign their corresponding values.
 | $c_2$    | 0.05 | $1/s$  |   coefficient gradient |
 | $v$    | 0.15 | $m/s$  |   pull-up velocity |
 """
+
+# ╔═╡ 66ed6b4f-2af3-4ec9-bd6f-4861129ae379
+md"Use the following names: `pa`, `ρ`, `g`, `c₂` and `v_const`."
 
 # ╔═╡ fb444a48-63ec-4bf4-aa55-8e8ae04640cd
 # @parameters missing
@@ -199,7 +202,7 @@ md"""
 
 # ╔═╡ 4ca01607-0a0a-4ada-96de-44286565f6be
 md"""
-Build the model and include the (continuous) event that when $z$ hits zero, the pull-up velocity must become zero as well.
+Build the model and include the (continuous) event that when $z$ hits zero, the pull-up velocity must become zero as well. Name the model `sys1_diver`.
 """
 
 # ╔═╡ fafc4370-569b-4e05-9683-8e54340713d2
@@ -353,7 +356,7 @@ md"""
 
 # ╔═╡ 180a67b1-a03e-4dbc-9331-d82e688e49d0
 md"""
-Define an additional variable for the velocity $v$.
+Define an additional variable for the velocity $v$. Use the following variable name: `v`. 
 """
 
 # ╔═╡ c78d0438-ba53-4f37-ac5e-9a32172c501b
@@ -370,6 +373,9 @@ Define the additional parameters for this model and assign their corresponding v
 | $V$    | 0.082 | $m^3$  |  volume of the diver  |
 | $c_1$    | 20.0 | $kg/s$  |   friction coefficient |
 """
+
+# ╔═╡ c94700b4-462e-4179-9845-1d3c52617709
+md"Use the following names: `m`, `V` and `c₁`."
 
 # ╔═╡ 1d3a4fba-9593-4503-8656-ffbceb8046ec
 # @parameters missing
@@ -394,7 +400,7 @@ end
 
 # ╔═╡ 9db90eab-683d-4c7c-a0b9-5c7904dd0aa2
 md"""
-Set up the additional parameter for the external force with a default value of 180.
+Set up the additional parameter for the external force with a default value of 180. Name it `Fext`.
 """
 
 # ╔═╡ c8b34161-ecb6-4be7-a4c4-d0381198846c
@@ -454,7 +460,7 @@ md"""
 
 # ╔═╡ 9827f9e4-d514-454e-893f-42f9c97b5a43
 md"""
-Build the model and include the (continuous) event that when $z$ hits zero, $v$ must become zero as well.
+Build the model and include the (continuous) event that when $z$ hits zero, $v$ must become zero as well. Name the model `sys2_diver`.
 """
 
 # ╔═╡ 70a6a572-c25a-40bd-824a-80b21957efbb
@@ -734,7 +740,7 @@ md"""
 
 # ╔═╡ 6d13fdf7-7214-483b-9de3-9fd7accab4a1
 md"""
-Build the model and include the (continuous) event that when $z$ hits $5$, $v$ must become zero.
+Build the model and include the (continuous) event that when $z$ hits $5$, $v$ must become zero. Name the model `sys5_diver`.
 """
 
 # ╔═╡ 6a87b974-4ce6-45b0-b7e8-ce007c45659c
@@ -825,6 +831,7 @@ Answers:
 # ╟─c58a62a3-6519-4a81-a851-04ce6ec8a9db
 # ╠═7be849c3-d841-4967-936b-2e42dc332de5
 # ╟─d548f583-5f9b-4921-8e89-85995b892e51
+# ╟─66ed6b4f-2af3-4ec9-bd6f-4861129ae379
 # ╠═fb444a48-63ec-4bf4-aa55-8e8ae04640cd
 # ╟─1916a1ca-565b-4692-82c2-5484a486e435
 # ╠═9a289ab4-87b5-452e-890e-2cad5c16ab4a
@@ -870,6 +877,7 @@ Answers:
 # ╟─180a67b1-a03e-4dbc-9331-d82e688e49d0
 # ╠═c78d0438-ba53-4f37-ac5e-9a32172c501b
 # ╟─588e1ad2-181d-4a1f-b974-a7f5f0f70c28
+# ╟─c94700b4-462e-4179-9845-1d3c52617709
 # ╠═1d3a4fba-9593-4503-8656-ffbceb8046ec
 # ╟─e88c9c4e-d50b-436a-a810-76fe40ddc24d
 # ╠═2d5c2f05-c902-4b6d-8b73-38d092a11fd8

@@ -99,7 +99,7 @@ where $g$ is the gravitational constant.
 
 # ╔═╡ 3ae63528-8a78-4884-85f6-1c6dc3ae178e
 md"""
-Define variables for the height $h$ of the water in the tank and the hydrostatic pressure $p$. Mention the dependency on the time $t$.
+Define variables for the height $h$ of the water in the tank and the hydrostatic pressure $p$. Name them `h` and `p`. Mention the dependency on the time $t$.
 """
 
 # ╔═╡ fac7ad9e-a4a2-4f7c-90f1-0111f9b3639c
@@ -293,7 +293,7 @@ md"""
 
 # ╔═╡ 618590fc-7fb9-4020-858b-d9b2d43fbd70
 md"""
-Build the new model that includes the continuous event.
+Build the new model that includes the continuous event. Name it `sys2_tank`.
 """
 
 # ╔═╡ 0a7dc8af-e7d2-40fd-8c60-d266e9d6c0b7
@@ -404,7 +404,7 @@ md"""
 
 # ╔═╡ c1f4c7ab-88b2-4282-8a6f-47f9161951eb
 md"""
-Build the new model that includes both discrete events.
+Build the new model that includes both discrete events. Name it `sys3_tank`.
 """
 
 # ╔═╡ 07cc0c6d-1514-4d49-bab3-12794e199729
