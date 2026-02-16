@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -19,6 +19,11 @@ using ModelingToolkit: t_nounits as t, D_nounits as D
 # ╔═╡ 4252c39a-ab0f-4392-8e77-1c2e2c3e36e6
 md"""
 # Exercise: Irrigation experiment
+"""
+
+# ╔═╡ 869e0a97-45da-459d-b9e2-cd519241fcd0
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/irrigation_model.png)
 """
 
 # ╔═╡ 22a32fa7-d9e3-4ed0-bc69-0f82b229a524
@@ -54,7 +59,7 @@ md"""
 
 # ╔═╡ 832e65cb-5029-48f5-9ed2-41c46e759a6c
 md"""
-Define the variables $S_1$ and $S_2$ with their corresponding initial values. Consider the observables $R$, $O$ and $P$ also as variables, as well as the 'parameter' $r$. Mention the dependency on the time $t$.
+Define the variables $S_1$ and $S_2$ with their corresponding initial values. Consider the observables $R$, $O$ and $P$ also as variables, as well as the 'parameter' $r$.
 """
 
 # ╔═╡ 51fbf7e9-00f6-4864-9844-eabe8fdc6f1f
@@ -139,7 +144,7 @@ md"""
 
 # ╔═╡ 72f30ddc-d442-49e9-8b18-ac94cb561a7f
 md"""
-Create the ODE problem and store it in `oprob_irrigation`:
+Create the ODE problem for your system and name it `oprob_irrigation`.
 """
 
 # ╔═╡ fa1c55a1-3020-44f0-88b4-3e089fd691ec
@@ -160,7 +165,7 @@ md"""
 
 # ╔═╡ cebac4b0-1ca1-4e5c-adb6-73fbe2b3ad1f
 md"""
-Plot $R$, $O$ and $P$. Use the option `idxs=[R, O, P]` for that.
+Plot $R$, $O$ and $P$.
 """
 
 # ╔═╡ c9aa4a15-5fd4-4598-ad46-6680585965f7
@@ -218,6 +223,7 @@ missing
 # ╠═34856dc0-e961-4e3e-a996-1966e4191e35
 # ╠═bc7f57f2-bb4d-44d4-b693-f4cf412b470a
 # ╠═45c84728-ff11-4345-9c71-fab084e3159f
+# ╟─869e0a97-45da-459d-b9e2-cd519241fcd0
 # ╟─22a32fa7-d9e3-4ed0-bc69-0f82b229a524
 # ╟─1bebe2ff-603a-42ba-8526-ab100fa3880d
 # ╟─f5389efd-941f-488b-8d39-407f223277ec
