@@ -155,7 +155,7 @@ md"""
 
 # ╔═╡ 5856753b-2753-4a83-b3ec-747a7c0b9c52
 md"""
-Build the model and include the (discrete) event that when the time is $1$ min, the mass needs to be incremented with the mass of the person. Assume the person weighs $80$ $kg$. Name your model `sys_tractor_seat`.
+Build the model and include the (discrete) event that when the time is $1$ second, the mass needs to be incremented with the mass of the person. Assume the person weighs $80$ $kg$. Name your model `sys_tractor_seat`.
 """
 
 # ╔═╡ 6bf84dfd-0f3c-47af-8b1d-fdad7e54f19b
