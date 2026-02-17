@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -149,14 +149,18 @@ md"### 1"
 # ╔═╡ f080f708-a457-40a3-936c-b82d5159975d
 dropletdist = MixtureModel([Poisson(10), Poisson(30)], [0.75, 0.25]);
 
+# ╔═╡ aede37d7-6c7c-4645-a3e0-d071db312b21
+plot(dropletdist)
+
 # ╔═╡ 7b4aef69-10ec-4935-b7fd-4c1d49aa9b3d
 @model function petrigrowth(t_obs)
-	P0 ~ dropletdist
+	P0 ~ MixtureModel([Poisson(10), Poisson(30)], [0.75, 0.25]);
     r ~ LogNormal(0.0, 0.3)
 	K ~ Normal(1e5, 1e4)
 
 	logfun = t -> logistic(t, P0, r, K)
-	Pt = logfun(t_obs)
+	Pt = max(logfun(t_obs), 0) 
+		# set to 0 if negative to prevent possible errors (not required)
     P_obs ~ Poisson(Pt)
 	
     return logfun
@@ -259,6 +263,7 @@ md"Changing to all continuous distributions made the inference much higher quali
 # ╠═4b94e5a6-1ed6-4095-ab18-06b76d4fec99
 # ╟─234b2c87-fe91-4be4-bf0c-a6f20dcc38fe
 # ╠═f080f708-a457-40a3-936c-b82d5159975d
+# ╠═aede37d7-6c7c-4645-a3e0-d071db312b21
 # ╠═7b4aef69-10ec-4935-b7fd-4c1d49aa9b3d
 # ╠═a5b5a65e-2bac-49fa-b4ca-2fcaf64e4ada
 # ╠═b579ccc6-993e-451b-a137-6fff6b630b49
