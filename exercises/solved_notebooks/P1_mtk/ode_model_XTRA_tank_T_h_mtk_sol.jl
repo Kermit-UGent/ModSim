@@ -260,7 +260,7 @@ oprob2_tank = ODEProblem(sys2_tank, [T=>15.0, h=>0.8], (0.0, 2400.0), [])
 
 # ╔═╡ d762e7f2-c030-49a4-865a-139d648e42b1
 md"""
-Solve the ODE problem. Use `saveat=1` and `reltol=1e-9`. Don't forget to take a `deepcopy` of the ODFE problem.
+Solve the ODE problem. Use `saveat=1` and `reltol=1e-9`. Don't forget to take a `deepcopy` of the ODE problem.
 """
 
 # ╔═╡ 50719433-3e82-4614-ad19-b1610fe23916
