@@ -17,7 +17,7 @@ using ModelingToolkit, OrdinaryDiffEq, StochasticDiffEq
 using ModelingToolkit: t_nounits as t, D_nounits as D
 
 # ╔═╡ e04f782d-67da-4e21-a3bf-d2ddff4bba0b
-using StatsPlots, StatsPlots.Distributions
+using StatsPlots, StatsBase
 
 # ╔═╡ 3552fc05-a4dc-4242-91b3-3eb6fb2ea389
 using PlutoUI; TableOfContents()

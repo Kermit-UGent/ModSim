@@ -21,7 +21,7 @@ using InteractiveUtils
 using Catalyst, OrdinaryDiffEq
 
 # ╔═╡ 295caa68-db27-4c9b-bc34-86ab088fec24
-using Turing, StatsPlots, StatsPlots.StatsBase
+using Turing, StatsPlots, StatsBase
 
 # ╔═╡ dc6e9bdc-dae0-43aa-b624-f9314d1d9884
 using LinearAlgebra, Optim
