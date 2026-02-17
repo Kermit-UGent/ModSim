@@ -11,7 +11,7 @@ using Pkg; Pkg.activate("..")
 using Markdown, InteractiveUtils
 
 # ╔═╡ c070007f-b4b8-4edc-8d04-700bf7e323de
-using StatsPlots
+using StatsPlots, StatsPlots.Distributions
 
 # ╔═╡ 7e450e64-a8d6-47e9-9c2a-8bf8a4e2e71e
 using ModelingToolkit, OrdinaryDiffEq, StochasticDiffEq
