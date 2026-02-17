@@ -24,7 +24,7 @@ using Catalyst, OrdinaryDiffEq
 using Turing
 
 # ╔═╡ f6e77c8d-de11-4b9d-93c6-45bdcfbbbf9b
-using StatsPlots, StatsPlots.StatsBase
+using StatsPlots, StatsBase
 
 # ╔═╡ 9345dd8f-0a60-4aaf-a27f-ef8bf860f495
 using LinearAlgebra

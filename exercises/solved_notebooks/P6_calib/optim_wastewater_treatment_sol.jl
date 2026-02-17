@@ -21,7 +21,7 @@ using InteractiveUtils
 using Catalyst, OrdinaryDiffEq
 
 # ╔═╡ e48dc930-be03-47b2-b9e3-16e854782aec
-using Turing, StatsPlots, StatsPlots.StatsBase, Optim
+using Turing, StatsPlots, StatsBase, Optim
 
 # ╔═╡ 6458329f-73dd-4cb0-8da4-90678875a1f0
 using PlutoUI; TableOfContents()
