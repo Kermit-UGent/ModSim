@@ -313,7 +313,7 @@ md"Then we get the specific trajectory for every sample of our chain by filling 
 trajectories = [
 	# note: every trajectory in our vector is a function of x!
 	# so we will write an anonymous function x -> function(x,...,...) 
-	# which makes it possible to make a trajectory plot in function of x
+	# to plot the trajectory in function of x
 	x -> y(x, α_samples[i], v0_samples[i])
 	for i in 1:length(v0_samples)
 ];
