@@ -20,7 +20,16 @@ for subdir in subdirs
             global failed_notebooks_dict # github actions likes explicit scoping
             subdirname = split(subdir, ['\\', '/'])[end] # get name of subdir from its path
             failed_notebooks_in_subdir = get!(failed_notebooks_dict, subdirname, String[])
-            push!(failed_notebooks_in_subdir, file)
+
+            # get essence of error
+            error_lines = split(e.msg, "\n")
+            startidx = findfirst(x -> !isnothing(match(r"^Error:", x)), error_lines) + 1
+            stopidx = findfirst(x -> !isnothing(match(r"Stacktrace:", x)), error_lines) - 1
+            if !(isnothing(startidx) || isnothing(stopidx))
+                push!(failed_notebooks_in_subdir, file * *("\n" .* error_lines[startidx:stopidx]...))
+            else
+                push!(failed_notebooks_in_subdir, file)
+            end
         end
     end
 end
