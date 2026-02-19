@@ -14,7 +14,7 @@ using Markdown, InteractiveUtils
 using StatsPlots, StatsBase
 
 # ╔═╡ 7e450e64-a8d6-47e9-9c2a-8bf8a4e2e71e
-using ModelingToolkit, OrdinaryDiffEq, StochasticDiffEq
+using ModelingToolkit, StochasticDiffEq
 
 # ╔═╡ d1185b3f-5fa3-4d84-9a7f-c105b7c456ac
 using ModelingToolkit: t_nounits as t, D_nounits as D

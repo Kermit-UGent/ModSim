@@ -11,7 +11,7 @@ using Pkg; Pkg.activate("..")
 using Markdown, InteractiveUtils
 
 # ╔═╡ 1d0a8fb2-dab9-44ae-a230-f3e92cf3cd6a
-using ModelingToolkit, OrdinaryDiffEq, StochasticDiffEq
+using ModelingToolkit, StochasticDiffEq
 
 # ╔═╡ 7a9fa5bc-7bb3-436e-b796-b946c855fe0a
 using ModelingToolkit: t_nounits as t, D_nounits as D

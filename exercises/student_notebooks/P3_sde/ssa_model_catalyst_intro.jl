@@ -17,7 +17,7 @@ using PlutoUI; TableOfContents()
 using Catalyst
 
 # ╔═╡ 0b3921c9-6d6e-4c52-8c21-d883ed493028
-using OrdinaryDiffEq, JumpProcesses, StatsPlots
+using JumpProcesses, StatsPlots
 
 # ╔═╡ 62b185be-e327-4ef3-af39-819732d107bf
 md"""
