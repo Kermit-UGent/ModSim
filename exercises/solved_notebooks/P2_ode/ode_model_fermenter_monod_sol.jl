@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -14,11 +14,17 @@ using Markdown, InteractiveUtils
 using StatsPlots, PlutoUI; TableOfContents()
 
 # ╔═╡ e66518ee-b6f6-4cca-a224-30e01cffddbe
-using Catalyst, OrdinaryDiffEq
+# ╠═╡ show_logs = false
+using OrdinaryDiffEq, Catalyst
 
 # ╔═╡ 7856d878-8586-4cfd-9cf6-d61234450e41
 md"""
 # Exercise: Fermenter - Monod kinetics
+"""
+
+# ╔═╡ 749f4e7f-4f95-4d9b-8f9e-b1db04d5c37d
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/fermenter_model_2nd.png)
 """
 
 # ╔═╡ 8500c35e-6bc3-4900-81bf-7705ddd61532
@@ -45,6 +51,8 @@ If you want to use the specific growth rate $\mu = \mu_{max} \, \cfrac{S}{S + K_
 
 # ╔═╡ 331a34f4-89d4-4193-896c-c14ab0bf04e7
 fermenter_monod = @reaction_network begin
+	@species S(t)=0.0 X(t)=0.0005   # default values (optional)
+	@parameters μmax=0.4 Ks=0.015 Y=0.67 Q=2.0 V=40.0 Sin=0.02 # default values (optional)
 	# When S and X meet, then Y*X + X are created:
 	μmax/(S + Ks), S + X --> (1 + Y)*X
 	# Alternative:
@@ -52,8 +60,8 @@ fermenter_monod = @reaction_network begin
 	# Note that we have used S => Y*X instead of S --> Y*X because otherwise
 	# with --> an additional multiplication with S will occur.
 	# mm(S, μmax, Ks)*X, S => Y*X
-    Q/V, (S, X) --> 0           # S and X are degraded at rates Q/V*S and Q/V*X
-    Q/V*Sin, 0 --> S            # S is created at a rate Q/V*Sin 
+    Q/V, (S, X) --> 0    # S and X are degraded at rates Q/V*S and Q/V*X
+    Q/V*Sin, 0 --> S     # S is created at a rate Q/V*Sin 
 end
 
 # ╔═╡ 42190228-40d3-48e8-b52f-156a0c7cbddc
@@ -391,11 +399,12 @@ Answers:
 =#
 
 # ╔═╡ Cell order:
+# ╟─7856d878-8586-4cfd-9cf6-d61234450e41
 # ╠═2e58f4ae-f711-11ee-2598-7f3a6f2e2013
 # ╠═e99680dc-73af-40aa-bf57-a06d3a7372be
 # ╠═bb467b0d-af7a-4efc-96cc-2debf38d92c8
 # ╠═e66518ee-b6f6-4cca-a224-30e01cffddbe
-# ╟─7856d878-8586-4cfd-9cf6-d61234450e41
+# ╟─749f4e7f-4f95-4d9b-8f9e-b1db04d5c37d
 # ╟─8500c35e-6bc3-4900-81bf-7705ddd61532
 # ╟─f1350528-07a5-4860-ad2d-627588186abc
 # ╠═331a34f4-89d4-4193-896c-c14ab0bf04e7

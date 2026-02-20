@@ -23,18 +23,21 @@ using Pkg; Pkg.activate("..")
 using Markdown, InteractiveUtils
 
 # ╔═╡ e968f6d5-962c-4de8-a9a3-ec116805d5e1
-using PlutoUI; TableOfContents()
+using StatsPlots, PlutoUI; TableOfContents()
 
 # ╔═╡ e97637b0-446c-44ac-bd08-c56632f9b57f
-using Catalyst
-
-# ╔═╡ c992a16d-80d3-48d6-bf43-2dbfa8e2f081
-using OrdinaryDiffEq, StatsPlots
+# ╠═╡ show_logs = false
+using OrdinaryDiffEq, Catalyst
 
 # ╔═╡ c54c7e3c-f3d1-40a5-88f7-bedcab3269ba
 md"
 # Exercises - infection model
 "
+
+# ╔═╡ 2befe6e1-ce89-4071-bfaf-e1642532dd8f
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/infection_model.png)
+"""
 
 # ╔═╡ fab49cb7-c41e-498a-98f6-33b4821ceb90
 md"""
@@ -320,7 +323,7 @@ md"""
 (osol3[:D][end] + 0.4*0.999e6)/osol[:D][end] - 1 	# Deceased are reduced only 1%!
 
 # ╔═╡ 8507a09a-5b19-4c37-b0cf-411732960315
-osol3[:S][end]/osol[:S][end] - 1   # 56% less infections  (wrt. example 1)
+(osol3[:S][end] + 0.999e6)/osol[:S][end] - 1 # 5.6% less infections  (wrt. example 1)
 
 # ╔═╡ ea00eba1-af9d-48d3-a893-0dc57777b7a5
 (osol3[:R][end] + 0.6*0.999e6)/osol[:R][end] - 1   # 1% less recoveries
@@ -531,7 +534,7 @@ Check the number of fatalities:
 """
 
 # ╔═╡ a912f449-6c9d-4595-863f-a2ba523bad95
-osol_ex2[:D][end]/osol_ex1[:D][end]-1   # 41% less deaths
+osol_ex2[:D][end]/osol_ex1[:D][end]-1   # 41% less deaths for b = 0.2
 
 # ╔═╡ 089707c3-1df6-4799-a87b-0d4872a0267d
 md"""
@@ -544,13 +547,13 @@ Vaccination affects several differential equations:
 - Susceptible individuals are vaccinated at a rate of $v$ (with unit $day^{-1}$). These persons can therefore no longer be infected.
 - The vaccinated persons become resistant.
 
-We are going to use a vaccination rate $v$ so that the number of fatalities is about 10 times smaller after a period of 90 days compared to those in absence of vaccination (cf. Exercise 2).
+We will use a vaccination rate $v$ so that the number of fatalities is about 10 times smaller after 90 days than in the absence of vaccination (cf. Exercise 2).
 
-The vaccination programme is launched $2$ days after the outbreak of the disease.
+The vaccination programme was launched $2$ days after the outbreak.
 
 Assume that individuals are still being treated ($b = 0.2$ and $h = 0.5$). Extend the model obtained in the previous exercise for the launch of a vaccination campaign after the outbreak of the disease.
 
-Find out via trial and error what the minimum vaccination rate need to be so that the number of fatalities is $10$ times smaller after a period of $90$ days compared to those in absence of vaccination (cf. Exercise 2).
+Find out via trial and error what the minimum vaccination rate needs to be so that the number of fatalities is $10$ times smaller after a period of $90$ days compared to those in the absence of vaccination (cf. Exercise 2).
 
 Use the same initial values and timespan as before.
 """
@@ -611,7 +614,7 @@ osol_ex3_vac = solve(oprob_ex3, Tsit5(), saveat=0.5);
 
 # ╔═╡ 461eada9-5f9c-4439-8b65-226382b6d148
 md"""
-First, put the value of $b$ in Exercise 2 to $0.2$. Compare the latter with the number of fatalities when no vaccination is/was available (cf. Exercise 2) by setting up a condition (a boolean expression return either `true` or `false`) here below where the final number of fatalities (with vaccination) divided by 10 is compared with (use larger than or smaller than) the number of fatalities (without vaccination):
+First, put the value of $b$ in Exercise 2 to $0.2$. Compare the latter with the number of fatalities when no vaccination is/was available (cf. Exercise 2) by setting up a condition (a boolean expression returning either `true` or `false`) here below where the final number of fatalities (with vaccination) divided by 10 is compared with (use larger than or smaller than) the number of fatalities (without vaccination):
 """
 
 # ╔═╡ 0994d790-0fe8-46ab-bba2-a0a4ea466f64
@@ -700,12 +703,12 @@ md"""
 """
 
 # ╔═╡ Cell order:
+# ╟─c54c7e3c-f3d1-40a5-88f7-bedcab3269ba
 # ╠═18a4df05-0349-400d-a29e-b3fa71aa4d88
 # ╠═989fd8c8-25d9-47b9-ade6-6c7f21a7dceb
 # ╠═e968f6d5-962c-4de8-a9a3-ec116805d5e1
 # ╠═e97637b0-446c-44ac-bd08-c56632f9b57f
-# ╠═c992a16d-80d3-48d6-bf43-2dbfa8e2f081
-# ╟─c54c7e3c-f3d1-40a5-88f7-bedcab3269ba
+# ╟─2befe6e1-ce89-4071-bfaf-e1642532dd8f
 # ╟─fab49cb7-c41e-498a-98f6-33b4821ceb90
 # ╟─8ff0b57e-acc1-4ebd-a562-a82c9efa7ffc
 # ╟─e36b150a-b4fc-476f-bab7-e1162a4b263d

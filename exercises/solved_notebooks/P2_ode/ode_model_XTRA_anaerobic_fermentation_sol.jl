@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -10,18 +10,20 @@ using Pkg; Pkg.activate("..")
 # ╔═╡ 84e21b44-a1b0-11ef-014d-c58a169e3de3
 using Markdown, InteractiveUtils
 
+# ╔═╡ d8702b60-4308-48d6-a5fe-42adb6aad33d
+using StatsPlots, PlutoUI; TableOfContents()
+
 # ╔═╡ 896b4151-e26b-40ee-bfb9-c56dfc4e7048
-using Catalyst
-
-# ╔═╡ aaf6da21-60cc-478c-b447-3f33aa375240
-using OrdinaryDiffEq, StatsPlots
-
-# ╔═╡ e119ed70-fd81-4978-92d9-696cad71125f
-using PlutoUI; TableOfContents()
+using OrdinaryDiffEq, Catalyst
 
 # ╔═╡ bb10266a-1f6c-4fda-b276-6a9cf3a86e90
 md"""
 # Exercise - Anaerobic fermentation
+"""
+
+# ╔═╡ b27ef20d-3ba3-4bab-a1bc-153f5cd10bd7
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/anaerobic_fermentation.png)
 """
 
 # ╔═╡ c3f85244-e0a8-4808-aa2d-15ab6bbb1b26
@@ -386,12 +388,12 @@ Interprete the results.
 md"- Answer: missing"
 
 # ╔═╡ Cell order:
+# ╟─bb10266a-1f6c-4fda-b276-6a9cf3a86e90
 # ╠═84e21b44-a1b0-11ef-014d-c58a169e3de3
 # ╠═2552c020-1e29-451e-9f59-c4bde047faad
+# ╠═d8702b60-4308-48d6-a5fe-42adb6aad33d
 # ╠═896b4151-e26b-40ee-bfb9-c56dfc4e7048
-# ╠═aaf6da21-60cc-478c-b447-3f33aa375240
-# ╠═e119ed70-fd81-4978-92d9-696cad71125f
-# ╟─bb10266a-1f6c-4fda-b276-6a9cf3a86e90
+# ╟─b27ef20d-3ba3-4bab-a1bc-153f5cd10bd7
 # ╟─c3f85244-e0a8-4808-aa2d-15ab6bbb1b26
 # ╟─2e7c2eab-a3bc-4574-a0fd-0a45b59b803b
 # ╟─35f2015d-9c28-4bc8-83cd-c185757db0dc

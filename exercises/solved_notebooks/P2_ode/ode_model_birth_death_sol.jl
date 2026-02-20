@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -11,18 +11,24 @@ using Pkg; Pkg.activate("..")
 using Markdown, InteractiveUtils
 
 # ╔═╡ 34a2f237-848c-4d07-9cea-fa5505a9e215
-using PlutoUI; TableOfContents()
+using StatsPlots, PlutoUI; TableOfContents()
 
 # ╔═╡ b721cc4d-43ba-4221-bbd1-15293aaf54b5
-using Catalyst
-
-# ╔═╡ 47e9c791-99cc-4a78-94b0-e0f5d4e0ecc5
-using OrdinaryDiffEq, StatsPlots
+# ╠═╡ show_logs = false
+using OrdinaryDiffEq, Catalyst
 
 # ╔═╡ c701d64e-640c-473f-b0fa-688024962f28
 md"""
 # Exercise: Simple birth-death model for mice
+"""
 
+# ╔═╡ 1cadc3db-af98-4f0d-874b-32f5b7852ad2
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/mice_model_part1.png)
+"""
+
+# ╔═╡ c025dfec-df32-466c-b652-5a95e5415155
+md"""
 In a simple birth-death model for mice, the birth rate of mice represents the
 rate at which new individuals are added to the population through reproduction.
 This rate is influenced by factors such as the number of reproductive females,
@@ -212,12 +218,13 @@ Answers:
 """
 
 # ╔═╡ Cell order:
+# ╟─c701d64e-640c-473f-b0fa-688024962f28
 # ╠═4a3d066c-f5b1-11ee-0145-2da7c11147a5
 # ╠═12fee37d-eef9-4e90-b0af-d892469fad08
 # ╠═34a2f237-848c-4d07-9cea-fa5505a9e215
 # ╠═b721cc4d-43ba-4221-bbd1-15293aaf54b5
-# ╠═47e9c791-99cc-4a78-94b0-e0f5d4e0ecc5
-# ╟─c701d64e-640c-473f-b0fa-688024962f28
+# ╟─1cadc3db-af98-4f0d-874b-32f5b7852ad2
+# ╟─c025dfec-df32-466c-b652-5a95e5415155
 # ╟─b583efef-dc7d-4447-bf27-e6373f5872c4
 # ╠═74c3f7ed-d705-4cb9-b52c-e06c9df5ca13
 # ╟─c84f2a32-e66b-4a36-a257-7031ce799225

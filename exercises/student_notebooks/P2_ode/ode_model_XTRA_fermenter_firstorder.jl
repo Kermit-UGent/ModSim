@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -10,11 +10,11 @@ using Pkg; Pkg.activate("..")
 # ╔═╡ 2e58f4ae-f711-11ee-2598-7f3a6f2e2013
 using Markdown, InteractiveUtils
 
-# ╔═╡ e66518ee-b6f6-4cca-a224-30e01cffddbe
-using Catalyst
+# ╔═╡ b33193b3-220e-49fc-acd1-6d1bec3caf88
+using StatsPlots, PlutoUI; TableOfContents()
 
-# ╔═╡ bd648109-f042-42de-9e0e-017b502fab95
-using OrdinaryDiffEq, StatsPlots
+# ╔═╡ e66518ee-b6f6-4cca-a224-30e01cffddbe
+using OrdinaryDiffEq, Catalyst
 
 # ╔═╡ 7856d878-8586-4cfd-9cf6-d61234450e41
 md"""
@@ -156,8 +156,8 @@ Answers:
 # ╔═╡ Cell order:
 # ╠═2e58f4ae-f711-11ee-2598-7f3a6f2e2013
 # ╠═e99680dc-73af-40aa-bf57-a06d3a7372be
+# ╠═b33193b3-220e-49fc-acd1-6d1bec3caf88
 # ╠═e66518ee-b6f6-4cca-a224-30e01cffddbe
-# ╠═bd648109-f042-42de-9e0e-017b502fab95
 # ╟─7856d878-8586-4cfd-9cf6-d61234450e41
 # ╟─8500c35e-6bc3-4900-81bf-7705ddd61532
 # ╟─f1350528-07a5-4860-ad2d-627588186abc
