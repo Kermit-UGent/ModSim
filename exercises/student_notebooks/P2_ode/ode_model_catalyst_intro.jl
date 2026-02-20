@@ -274,7 +274,7 @@ md"""
 
 # ╔═╡ a7a99fde-c1bd-484c-a7b6-a7d8af809ecc
 md"""
-Creating the ODE problem works exactly the same as when working with a `ModelingToolkit` model: we use the function `ODEProblem` and provide the symbolic system, the initial conditions, the time span, and the parameters.
+Creating the ODE problem works the same as when working with a `ModelingToolkit` model: we use the function `ODEProblem` and provide the symbolic system, the initial conditions, the time span, and the parameters. There is **one important difference**: as we defined our variables and parameters inside the catalyst model, they are **not defined in the global environment**. We therefore can't use the variables directly for our initial conditions and parameters (e.g. `[R => 0]`), but instead provide their **names** as `Symbol`s (e.g. `[:R => 0]`, note the colon `:`)
 """
 
 # ╔═╡ 35bd9a1a-bb4a-4285-98f0-853b03c95cb7
