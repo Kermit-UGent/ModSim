@@ -26,7 +26,7 @@ for subdir in subdirs
             startidx = findfirst(x -> !isnothing(match(r"^Error:", x)), error_lines) + 1
             stopidx = findfirst(x -> !isnothing(match(r"Stacktrace:", x)), error_lines) - 1
             if !(isnothing(startidx) || isnothing(stopidx))
-                push!(failed_notebooks_in_subdir, file * *("\n" .* error_lines[startidx:stopidx]...))
+                push!(failed_notebooks_in_subdir, file * *("\n\t\t" .* error_lines[startidx:stopidx]...))
             else
                 push!(failed_notebooks_in_subdir, file)
             end
