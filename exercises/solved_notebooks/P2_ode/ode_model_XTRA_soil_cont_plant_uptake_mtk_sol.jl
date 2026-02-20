@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -11,7 +11,7 @@ using Pkg; Pkg.activate("..")
 using Markdown; InteractiveUtils;
 
 # ╔═╡ 2c6324f9-1b00-48b3-a1af-8ece8b302f7d
-using StatsPlots, PlutoUI
+using StatsPlots, PlutoUI; TableOfContents()
 
 # ╔═╡ c54fee70-5250-43ad-8582-3d4ac2215041
 using OrdinaryDiffEq, ModelingToolkit
@@ -22,6 +22,11 @@ using ModelingToolkit: t_nounits as t, D_nounits as D
 # ╔═╡ 2f0c3dd4-9429-4f5b-9150-011970b003f4
 md"""
 # Exercise: Soil Contamination with Plant Uptake
+"""
+
+# ╔═╡ 78dc9e01-ec30-4720-8fad-13e69a3146c4
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/soil_plant_cont_model.png)
 """
 
 # ╔═╡ c0c35547-9eed-428b-b513-4b5166decb7e
@@ -225,12 +230,13 @@ Yes!
 =#
 
 # ╔═╡ Cell order:
+# ╟─2f0c3dd4-9429-4f5b-9150-011970b003f4
 # ╠═121df656-f57a-11ee-140e-dfb61e112370
 # ╠═6c7911b4-fec2-4139-8b54-36a4fb5916a0
 # ╠═2c6324f9-1b00-48b3-a1af-8ece8b302f7d
 # ╠═c54fee70-5250-43ad-8582-3d4ac2215041
 # ╠═2e963f28-6d41-48be-a13f-6cd4bc1f7143
-# ╟─2f0c3dd4-9429-4f5b-9150-011970b003f4
+# ╟─78dc9e01-ec30-4720-8fad-13e69a3146c4
 # ╟─c0c35547-9eed-428b-b513-4b5166decb7e
 # ╟─7755d7e9-f8fd-476b-9178-4719754e4ba5
 # ╟─eef7afc7-b4b2-4a45-8459-291ec5b75038

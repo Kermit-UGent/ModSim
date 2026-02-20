@@ -1,38 +1,36 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ e079823b-8b40-42a2-a63f-1645a97b33f0
-begin
-	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
-	using Pkg
-	Pkg.activate("..")
-end
+using Pkg; Pkg.activate("..")
 
 # ╔═╡ 62dc7706-f58a-11ee-2d3d-f78f7ceca914
-using Markdown
-
-# ╔═╡ 4071647d-3084-4c8b-9fb7-eca7255253a9
-using InteractiveUtils
+using Markdown, InteractiveUtils
 
 # ╔═╡ 65571bb8-e260-4a82-b0d2-198e47c56271
-using PlutoUI
+using StatsPlots, PlutoUI; TableOfContents()
 
-# ╔═╡ 2574879f-28d1-4d30-a1aa-a637dd1b216a
-using Catalyst
+# ╔═╡ 48eec602-e3cd-4a55-a545-982141bc1adf
+using OrdinaryDiffEq, Catalyst
 
-# ╔═╡ 6c4b3d09-09c2-4439-9167-63b59b078104
-using OrdinaryDiffEq, StatsPlots
+# ╔═╡ 40676b3f-634b-42ba-a3cc-633279182cb6
+md"""
+# Exercise: Water evaporation and infiltration
+"""
 
 # ╔═╡ 66e8a12c-74b6-4077-b90e-3d85e5a61d6e
 hint(text) = Markdown.MD(Markdown.Admonition("hint", "Hint", [text]));
 
+# ╔═╡ 4e6a0829-4bec-437d-b511-95efa60de499
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/water_evap_infil_model.png)
+"""
+
 # ╔═╡ f55e0ca3-07ff-43a1-907f-9ad640227822
 md"""
-# Exercise: Water evaporation and infiltration
-
 Consider a water reservoir, such as a lake, where the water in the reservoir is in contact with the air as well as with the groundwater. We will denote the water level in the reservoir as $W$ and the groundwater level as $G$.
 
 The water in the reservoir evaporates at a rate $k_1$ (i.e. the *evaporation coefficient*) and there can be infiltration into or from the groundwater at a rate $k_2$ (i.e., *infiltration coefficient*) depending on the difference in the water level in the reservoir and groundwater (cf. $(W-G)$)
@@ -195,20 +193,20 @@ md"- Answer: missing"
 =#
 
 # ╔═╡ Cell order:
+# ╟─40676b3f-634b-42ba-a3cc-633279182cb6
 # ╠═62dc7706-f58a-11ee-2d3d-f78f7ceca914
-# ╠═4071647d-3084-4c8b-9fb7-eca7255253a9
 # ╠═e079823b-8b40-42a2-a63f-1645a97b33f0
 # ╠═65571bb8-e260-4a82-b0d2-198e47c56271
+# ╠═48eec602-e3cd-4a55-a545-982141bc1adf
 # ╟─66e8a12c-74b6-4077-b90e-3d85e5a61d6e
+# ╟─4e6a0829-4bec-437d-b511-95efa60de499
 # ╟─f55e0ca3-07ff-43a1-907f-9ad640227822
 # ╟─a551f3c5-2fc3-4236-ab4a-3d9c14afc62b
 # ╟─4eb95688-ba9d-4524-a522-3b8343f4e2be
-# ╠═2574879f-28d1-4d30-a1aa-a637dd1b216a
 # ╟─dc9d4427-0a9e-41ab-9074-3e4f10dbae7f
 # ╠═3c275181-503e-4806-b0e6-1731ae881a30
 # ╟─608c61bc-c029-433e-ad8f-b13cfb40bc3d
 # ╠═5647d122-5e8d-4ff9-a798-4076ee93b771
-# ╠═6c4b3d09-09c2-4439-9167-63b59b078104
 # ╟─acab2bf0-b792-4ccc-bee0-7611bedab23c
 # ╟─44cf2ac6-75e2-4440-94f1-8fe6887ee1e0
 # ╠═733bdb56-fb4f-4bc6-b50c-e3245fd59730
