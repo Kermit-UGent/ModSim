@@ -38,7 +38,11 @@ md"""
 
 # ╔═╡ ba4dfc95-b74f-4d36-b34b-5eb2836a5cd6
 md"""
-Catalyst.jl is a symbolic modelling package for construction, analysis and high performance simulation of chemical reaction networks. In essence, the package simply provides an alternative way for defining ModelingToolkit's symbolic systems, using the notation of chemical reaction networks. These can be created programmatically or easily specified using Catalyst's **D**omain **S**pecific **L**anguage (DSL).
+In practicum 1, we learned to solve ODEs by making use of the modeling toolkit (MTK). In this practicum we will learn to use Catalyst.jl which is an alternative for modeling and simulating ODEs. So bear in mind that all equations you will solve in this practicum can also be solved
+by making use of the modeling tookit (could be a nice test for yourself).
+Catalyst.jl is a symbolic modelling package for construction, analysis and high performance simulation of chemical reaction networks. In essence, the package simply provides an alternative way for defining ModelingToolkit's symbolic systems, 
+using the notation of chemical reaction networks. These can be created programmatically or easily specified using Catalyst's **D**omain **S**pecific **L**anguage (DSL).
+
 """
 
 # ╔═╡ 94440e99-7c0b-4d87-8038-141a2bc5fcb8
