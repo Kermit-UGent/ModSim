@@ -38,8 +38,8 @@ md"""
 
 # ╔═╡ ba4dfc95-b74f-4d36-b34b-5eb2836a5cd6
 md"""
-In practical 1, we learned to solve ODEs by making use of ModelingToolkit.jl (MTK). In this practical we will learn to use Catalyst.jl which is an alternative for modeling and simulating ODEs. So bear in mind that all problems you will solve in this practical can also be solved
-by making use of ModelingToolkit.jl (could be a nice test for yourself).
+In practical 1, we learned to solve ODEs by making use of ModelingToolkit.jl (MTK). In this practical we will learn to use Catalyst.jl which is an alternative for defining ODEs. So bear in mind that all problems you will solve in this practical can also be solved
+by making use of ModelingToolkit.jl (this could be a nice test for yourself).
 Catalyst.jl is a symbolic modelling package for construction, analysis and high performance simulation of chemical reaction networks. In essence, the package simply provides an alternative way for defining ModelingToolkit's symbolic systems, 
 using the notation of chemical reaction networks. These can be created programmatically or easily specified using Catalyst's **D**omain **S**pecific **L**anguage (DSL)."""
 
@@ -276,7 +276,10 @@ md"""
 
 # ╔═╡ a7a99fde-c1bd-484c-a7b6-a7d8af809ecc
 md"""
-Creating the ODE problem works the same as when working with a `ModelingToolkit` model: we use the function `ODEProblem` and provide the symbolic system, the initial conditions, the time span, and the parameters. There is **one important difference**: as we defined our variables and parameters inside the catalyst model, they are **not defined in the global environment**. We therefore can't use the variables directly for our initial conditions and parameters (e.g. `[R => 0]`), but instead provide their **names** as `Symbol`s (e.g. `[:R => 0]`, note the colon `:`)
+Creating the ODE problem works the same as when working with a `ModelingToolkit` model: we use the function `ODEProblem` and provide the symbolic system, the initial conditions, the time span, and the parameters. There is **one important difference**: as we defined our variables and parameters inside the Catalyst model, they are generally **not defined in the global environment**. We have a few options to solve this:
+1. Use the variable names instead as `Symbol`s, for example: `:S`
+1. Specify the variable or parameter as an element of the Catalyst model using the following syntax: `model.X`, for example: `infection_model.S`
+1. Use `@unpack` to bring the variables into the global environment (does not work for the parameters).
 """
 
 # ╔═╡ 35bd9a1a-bb4a-4285-98f0-853b03c95cb7
@@ -457,6 +460,12 @@ We need to state that the parameter $\beta$ needs to be reduced by $50\%$ at tim
 
 # ╔═╡ 7411474c-fac7-4b7c-8ded-4c2df5956fb0
 condition2 = [14.0] => [infection_model.β ~ infection_model.β/2]
+
+# ╔═╡ cf715eac-c2d0-4f4d-a274-61237e994dc5
+md"""
+!!! note
+	Events only recognize symbolic variables, not variable names, so we need to specify `β` as `infection_model.β` (see the problem creation section).
+"""
 
 # ╔═╡ e6949052-6d12-4414-ac67-cb9435b46290
 md"""
@@ -721,6 +730,7 @@ md"""
 # ╟─ade413c2-d7d9-4250-8490-75534900a389
 # ╟─58730ac6-d83b-420d-a000-2f50545f0d39
 # ╠═7411474c-fac7-4b7c-8ded-4c2df5956fb0
+# ╟─cf715eac-c2d0-4f4d-a274-61237e994dc5
 # ╟─e6949052-6d12-4414-ac67-cb9435b46290
 # ╠═8752373f-a602-437b-9b3a-2602c8babf87
 # ╟─ee596a6c-29bf-4d18-b687-be943c128aa7
