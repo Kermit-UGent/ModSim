@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -20,24 +20,23 @@ end
 using Pkg; Pkg.activate("..")
 
 # ╔═╡ 18a4df05-0349-400d-a29e-b3fa71aa4d88
-using Markdown
-
-# ╔═╡ 65b3536b-c9b3-485e-87e1-4f6657381503
-using InteractiveUtils
+using Markdown, InteractiveUtils
 
 # ╔═╡ e968f6d5-962c-4de8-a9a3-ec116805d5e1
-using PlutoUI; TableOfContents()
+using StatsPlots, PlutoUI; TableOfContents()
 
 # ╔═╡ e97637b0-446c-44ac-bd08-c56632f9b57f
-using Catalyst
-
-# ╔═╡ c992a16d-80d3-48d6-bf43-2dbfa8e2f081
-using OrdinaryDiffEq, StatsPlots
+using OrdinaryDiffEq, Catalyst
 
 # ╔═╡ c54c7e3c-f3d1-40a5-88f7-bedcab3269ba
 md"
 # Exercises - infection model
 "
+
+# ╔═╡ 6b7d1263-fa96-47a7-b19c-4a518fd974d0
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/infection_model.png)
+"""
 
 # ╔═╡ fab49cb7-c41e-498a-98f6-33b4821ceb90
 md"""
@@ -324,7 +323,7 @@ md"""
 (osol3[:D][end] + 0.4*0.999e6)/osol[:D][end] - 1 	# Deceased are reduced only 1%!
 
 # ╔═╡ 6c8a9e97-0a60-4e42-ad7f-78c0dece2b30
-osol3[:S][end]/osol[:S][end] - 1 	# Infections have increased 56% (wrt. example 1)
+(osol3[:S][end] + 0.999e6)/osol[:S][end] - 1 # Infections have increased 56% (wrt. example 1)
 
 # ╔═╡ 801a038b-7485-40b6-b7a5-92b0b3c11c0e
 (osol3[:R][end] + 0.6*0.999e6)/osol[:R][end] - 1   # 1% less recoveries
@@ -462,7 +461,7 @@ Set-up the new *reaction network/model* and name it `infection_med`:
 # 	α * β, S + I --> 2I
 # 	..., I --> D
 # 	..., I --> R
-#	..., I --> R
+# 	..., I --> R
 # end
 
 # ╔═╡ 87b3796d-16c5-4fe9-a32e-d8bf7c754254
@@ -529,7 +528,7 @@ Check the number of fatalities:
 """
 
 # ╔═╡ a912f449-6c9d-4595-863f-a2ba523bad95
-missing
+missing   # ...% less deaths for b = 0.2
 
 # ╔═╡ 089707c3-1df6-4799-a87b-0d4872a0267d
 md"""
@@ -610,7 +609,7 @@ osol_ex3_no_vac = missing;
 
 # ╔═╡ 461eada9-5f9c-4439-8b65-226382b6d148
 md"""
-First, put the value of $b$ in Exercise 2 to $0.2$. Compare the latter with the number of fatalities when no vaccination is/was available (cf. Exercise 2) by setting up a condition (a boolean expression return either `true` or `false`) here below where the final number of fatalities (with vaccination) divided by 10 is compared with (use larger than or smaller than) the number of fatalities (without vaccination):
+First, put the value of $b$ in Exercise 2 to $0.2$. Compare the latter with the number of fatalities when no vaccination is/was available (cf. Exercise 2) by setting up a condition (a boolean expression returning either `true` or `false`) here below where the final number of fatalities (with vaccination) divided by 10 is compared with (use larger than or smaller than) the number of fatalities (without vaccination):
 """
 
 # ╔═╡ 0994d790-0fe8-46ab-bba2-a0a4ea466f64
@@ -630,7 +629,7 @@ Make a new *reaction system* where the discrete event is included. Name it `infe
 """
 
 # ╔═╡ ceae9947-ed0f-4975-a944-cc938cf22dde
-@named infection_med_vac_c = missing
+# @named infection_med_vac_c = missing
 
 # ╔═╡ 6e767e36-f54e-4472-881a-ab04ad9c9d09
 md"""
@@ -690,13 +689,12 @@ md"""
 """
 
 # ╔═╡ Cell order:
+# ╟─c54c7e3c-f3d1-40a5-88f7-bedcab3269ba
 # ╠═18a4df05-0349-400d-a29e-b3fa71aa4d88
-# ╠═65b3536b-c9b3-485e-87e1-4f6657381503
 # ╠═989fd8c8-25d9-47b9-ade6-6c7f21a7dceb
 # ╠═e968f6d5-962c-4de8-a9a3-ec116805d5e1
 # ╠═e97637b0-446c-44ac-bd08-c56632f9b57f
-# ╠═c992a16d-80d3-48d6-bf43-2dbfa8e2f081
-# ╟─c54c7e3c-f3d1-40a5-88f7-bedcab3269ba
+# ╟─6b7d1263-fa96-47a7-b19c-4a518fd974d0
 # ╟─fab49cb7-c41e-498a-98f6-33b4821ceb90
 # ╟─8ff0b57e-acc1-4ebd-a562-a82c9efa7ffc
 # ╟─e36b150a-b4fc-476f-bab7-e1162a4b263d
