@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -38,7 +38,7 @@ md"""
 
 # ╔═╡ ba4dfc95-b74f-4d36-b34b-5eb2836a5cd6
 md"""
-Catalyst.jl is a symbolic modelling package for construction, analysis and high performance simulation of chemical reaction networks. Catalyst defines symbolic ReactionSystems, which can be created programmatically or easily specified using Catalyst's **D**omain **S**pecific **L**anguage (DSL).
+Catalyst.jl is a symbolic modelling package for construction, analysis and high performance simulation of chemical reaction networks. In essence, the package simply provides an alternative way for defining ModelingToolkit's symbolic systems, using the notation of chemical reaction networks. These can be created programmatically or easily specified using Catalyst's **D**omain **S**pecific **L**anguage (DSL).
 """
 
 # ╔═╡ 94440e99-7c0b-4d87-8038-141a2bc5fcb8
@@ -199,7 +199,7 @@ md"""
 
 # ╔═╡ 64a48327-03ec-46a0-9a76-79c10acb6e20
 md"""
-The *reaction model* can be converted to a symbolic differential equation model via
+The *reaction model* is essentially a `ModelingToolkit` `ODESystem` with some extra information added on top (such as: what to return when you call the function `species` on it). It can be converted to a classic `ODESystem` via
 """
 
 # ╔═╡ 78a22ba2-1e60-40b3-989c-922dcf9ca054
@@ -243,7 +243,7 @@ parameters(osys)
 md"""
 ### Simulating the system as an ODE-problem
 
-We first need to load the `DifferentialEquations` and `StatsPlots` packages, which are required for simulating the system and plotting the results.
+We first need to load the `OrdinaryDiffEq` and `StatsPlots` packages, which are required for simulating the system and plotting the results.
 """
 
 # ╔═╡ 3197244f-655b-4dca-80f3-794b30722551
@@ -254,7 +254,7 @@ Now we wish to simulate our model. To do this, we need to provide the following 
 - The parameter values for $\alpha$, $\beta$, $r$ and $m$.
 - The timespan, which is the timeframe over which we wish to run the simulation.
 
-Assume in this example that there are $10\,000\,000$ people in the country, and that initially $1\,000$ persons are infected. Hence, $I_0 = 1\,000$, $S_0 = 10\,000\,000-I_0 = 9\,999\,000$, $D_0 = 0$ and $R_0 = 0$.\
+Assume in this example that there are $10\,000\,000$ people in the country, and that initially $1\,000$ persons are infected. Hence, $I_0 = 1\,000$, $S_0 = 10\,000\,000-I_0 = 9\,999\,000$, $D_0 = 0$ and $R_0 = 0.$\
 Furthermore, we take the following values for the parameters: $\alpha = 0.08\;person/contact$, $\beta = 10^{-6}\;contact/(person^2\,day)$, $r = 0.2\;day^{-1}$ (i.e. a person is contagious for an average of $5\;days$) and $m=0.4$. The following table summarizes the above values:
 
 |Initial conditions                   |Parameters          |
@@ -267,63 +267,33 @@ Furthermore, we take the following values for the parameters: $\alpha = 0.08\;pe
 Finally, we want to run our simulation from day $0$ till day $90$.
 """
 
-# ╔═╡ 979afe85-b910-44a0-8ac0-6e719cb9157e
+# ╔═╡ c4e83ef8-9490-4361-a2a9-5abc45e242be
 md"""
-### Setting initial conditions
+### Creating the ODEProblem
 """
 
-# ╔═╡ 1ba859fa-46a5-434f-a99c-e710ba85caf8
+# ╔═╡ a7a99fde-c1bd-484c-a7b6-a7d8af809ecc
 md"""
-The initial conditions are given as a *Vector*. This is a type which collects several different values. To declare a vector, the values are specified within brackets, `[]`, and separated by `,`. Since we have four species, the vector holds four elements. E.g., we set the value of $I$ using the `:I => 1` syntax. Here, we first denote the name of the species (with a colon `:` pre-appended), next follows a `=>` and then the value of `I`.\
-The vector holding the initial conditions for $S$, $I$, $D$ and $R$ can be created in the following way:
+Creating the ODE problem works exactly the same as when working with a `ModelingToolkit` model: we use the function `ODEProblem` and provide the symbolic system, the initial conditions, the time span, and the parameters.
 """
 
 # ╔═╡ 35bd9a1a-bb4a-4285-98f0-853b03c95cb7
 u0 = [:S => 9_999_000.0, :I => 1_000.0, :D => 0.0, :R => 0.0]
 
-# ╔═╡ 95c1c0ea-51d0-47ee-8948-a5b87c42a70d
-md"
-Note that the order of the vector elements doesn't matter here, since the initial values of each of the species is indicated using its variable name.
-"
-
-# ╔═╡ 57036f49-2f1f-4327-89ed-2c96098a1c22
-md"""
-### Setting the timespan
-"""
-
-# ╔═╡ 56ebb72d-2351-4e67-b268-1f48bbb77cb3
-md"""
-The timespan sets the time point at which we start the simulation (typically `0.0` is used) and the final time point of the simulation. These are combined into a two-valued *Tuple*. Tuples are similar to vectors, but are enclosed by `()` and not `[]`. Again, we will let both time points be decimal valued.
-"""
-
 # ╔═╡ a25d5925-a254-488b-b782-d29cff4470a2
 tspan = (0.0, 90.0)
-
-# ╔═╡ 0952b1d1-24b4-4540-91cd-94f7a4dcbd57
-md"""
-### Setting parameter values
-"""
-
-# ╔═╡ a235c7ce-f14a-4c7c-86a1-08aa5f2d9c85
-md"""
-Similarly, the parameter values are also given as a vector. We have four parameters, hence, the parameter vector will also contain four elements. We use a similar notation for setting the parameter values as the initial condition (first the colon, then the parameter name, then an arrow, then the value).
-"""
 
 # ╔═╡ 9a9440fa-d8a3-44bc-8037-4bf1f8af40b0
 parms = [:α => 0.08, :β => 1.0e-6, :r => 0.2, :m => 0.4]
 
-# ╔═╡ c4e83ef8-9490-4361-a2a9-5abc45e242be
-md"""
-### Creating an ODEProblem
-"""
-
-# ╔═╡ aa1b904a-c8a9-41a4-9297-8d7c821d4b77
-md"
-Next, before we can simulate our model, we bundle all the required information together in a so-called **ODEProblem**. *Note that the order in which the input (the model name, the initial condition, the timespan, and the parameter values) is provided to the ODEProblem matters!* Here, we save our ODEProblem in the `oprob` variable.
-"
-
 # ╔═╡ c6d2dd69-8c61-4a40-894f-664b2d2d14be
 oprob = ODEProblem(infection_model, u0, tspan, parms);
+
+# ╔═╡ 050a3786-5ce3-44c2-b2c2-94cb640326aa
+md"""
+!!! note
+	The time span is given in parentheses `()` rather than square brackets `[]` to make it into a `Tuple` rather than a `Vector`. `Tuple`s are very similar to `Vector`s, but are used when the amount of elements inside is important. This is the case here because our time span always needs exactly 2 elements: a starting time and an ending time. The parameters and initial conditions, on the other hand, could contain any amount of elements, and therefore we use `Vector`s for them.
+"""
 
 # ╔═╡ 3c253bf3-886d-4e86-82ac-7751d23f342f
 md"""
@@ -332,9 +302,8 @@ md"""
 
 # ╔═╡ 14756171-9e8e-4cb0-b7af-74c2d649fe9f
 md"""
-We can now simulate our model. We do this by providing the ODEProblem to the `solve` function. There are some [examples](https://docs.sciml.ai/DiffEqDocs/stable/getting_started/) online on how to solve ODE problems with the *DifferentialEquations.jl* package. We save the output to the `sol` variable. Optionally, one can provide a [solver method](https://docs.sciml.ai/DiffEqDocs/stable/solvers/ode_solve/#Full-List-of-Methods) (e.g., `Tsit5`), and the time stepsize (with `saveat`).
+We can now simulate our model. Solving the model is again done using `OrdinaryDiffEq`, and is therefore exactly the same as the first practical. If you'd like some more examples, there are some [examples](https://docs.sciml.ai/DiffEqDocs/stable/getting_started/) online on how to solve ODE problems with Julia's ecosystem for differential equations. Additionally, if you're interested in all the ODE solvers available, there is a [nice overview](https://docs.sciml.ai/DiffEqDocs/stable/solvers/ode_solve/#Full-List-of-Methods) available.
 """
-# https://docs.sciml.ai/DiffEqDocs/stable/solvers/ode_solve/#Full-List-of-Methods
 
 # ╔═╡ 142e3e48-bf75-4498-ad0e-9f47cb921045
 # osol = solve(oprob)
@@ -416,7 +385,7 @@ md"
 md"""
 In Example 1 we will show you one way of how you could analyze the simulation results for a limited range of parameter values.
 
-In Examples 2 and 3 we will apply some new concepts, namely **discrete** and **continuous** events. The latter will basically affect, e.g., one or more parameter values or state variables during the solving process based on one or more *conditions* (also called *events*). These conditions can be either *time* or *state variable* related:
+In Examples 2 and 3 we add **discrete** and **continuous** events. These are used to affect, e.g., one or more parameter values or state variables during the solving process based on one or more *conditions* (also called *events*). These conditions can be either *time* or *state variable* related:
 
 - A time related condition is a vector of one (or more) timepoint(s) for which the value of one (or more) parameter(s) or state variable(s) need to be altered. We refer to them as **discrete events**.
 - A state variable related condition is usually a condition for a certain value of a state variable. We will refer to them as **continuous events**.
@@ -432,20 +401,17 @@ You may have noticed that while using the Pluto notebooks, when you change the v
 md"""
 ### Example 1 - Influence of $r$
 
-Influence of the duration of infection $1/r$ for average infection periods of between $10$ days and $1$ day of being contagious ($r$ between $0.1$ and $1.0$, step $0.1$, default value $0.1$).
+Influence of the duration of infection $1/r$ for average infection periods of between $10$ days and $1$ day of being contagious.
+"""
+
+# ╔═╡ ae38c663-0ee4-409e-bfca-5f13ed88b67d
+md"""
+We will create a new parameter value vector, ODE problem and solution object by putting `1` at the end of the corresponding variable names. In that way, the previous simulation results will be unaffected! The model, the initial conditions and the timespan are identical as before. For the value of parameter `r`, we define a slider a little further on.
 """
 
 # ╔═╡ b6baafc2-6d5e-43c3-8ef9-845961cdd20b
 md"""
 We will create a slider for the $r$-values between $0.1$ and $1.0$, stepsize $0.1$, default value $0.1$.
-"""
-
-# ╔═╡ cd32beba-67cf-4b12-a77b-99f96263f0a4
-# @bind r Slider(0.1:0.1:1, default=0.1, show_value=true)
-
-# ╔═╡ ae38c663-0ee4-409e-bfca-5f13ed88b67d
-md"""
-We will create a new parameter value vector, ODE problem and solution object by putting `1` at the end of the corresponding variable names. In that way, the previous simulation results will be unaffected! The model, the initial conditions and the timespan are identical as before. In there we also use the variable `r` coupled to the slider.
 """
 
 # ╔═╡ b65e948d-b13a-4021-a545-b7912fd86e94
@@ -467,6 +433,12 @@ plot(osol1, ylim=(0, 1e7))
 # ╔═╡ 102b4fbc-23b1-46ed-bb72-124eb88517ce
 md"""
 Now, change the value of $r$ in the `param1` vector and analyze the effect in the plot.
+"""
+
+# ╔═╡ a627e3c0-e29f-4592-9dc6-5cf48f80252d
+md"""
+!!! note
+	You can see here we use the value of `r` in the parameter vector **before** defining it in the slider. This is possible in Pluto because it knows what code cells depend on each other, and it will simply run the definition of `r` before running the code that uses `r`, even though the definition appears later in the notebook.
 """
 
 # ╔═╡ ade413c2-d7d9-4250-8490-75534900a389
@@ -705,19 +677,13 @@ md"""
 # ╟─7fc8c671-b75c-4487-a013-779ee2422c8b
 # ╠═19398992-dca7-441a-a5fd-7f9d0ad30be5
 # ╟─3197244f-655b-4dca-80f3-794b30722551
-# ╟─979afe85-b910-44a0-8ac0-6e719cb9157e
-# ╟─1ba859fa-46a5-434f-a99c-e710ba85caf8
-# ╠═35bd9a1a-bb4a-4285-98f0-853b03c95cb7
-# ╟─95c1c0ea-51d0-47ee-8948-a5b87c42a70d
-# ╟─57036f49-2f1f-4327-89ed-2c96098a1c22
-# ╟─56ebb72d-2351-4e67-b268-1f48bbb77cb3
-# ╠═a25d5925-a254-488b-b782-d29cff4470a2
-# ╟─0952b1d1-24b4-4540-91cd-94f7a4dcbd57
-# ╟─a235c7ce-f14a-4c7c-86a1-08aa5f2d9c85
-# ╠═9a9440fa-d8a3-44bc-8037-4bf1f8af40b0
 # ╟─c4e83ef8-9490-4361-a2a9-5abc45e242be
-# ╟─aa1b904a-c8a9-41a4-9297-8d7c821d4b77
+# ╟─a7a99fde-c1bd-484c-a7b6-a7d8af809ecc
+# ╠═35bd9a1a-bb4a-4285-98f0-853b03c95cb7
+# ╠═a25d5925-a254-488b-b782-d29cff4470a2
+# ╠═9a9440fa-d8a3-44bc-8037-4bf1f8af40b0
 # ╠═c6d2dd69-8c61-4a40-894f-664b2d2d14be
+# ╟─050a3786-5ce3-44c2-b2c2-94cb640326aa
 # ╟─3c253bf3-886d-4e86-82ac-7751d23f342f
 # ╟─14756171-9e8e-4cb0-b7af-74c2d649fe9f
 # ╠═142e3e48-bf75-4498-ad0e-9f47cb921045
@@ -741,15 +707,15 @@ md"""
 # ╟─2ae76ddb-71f5-49d7-a250-429d6c0138f6
 # ╟─590f1b49-7442-4a71-af8c-8acdea071448
 # ╟─45c1c238-a9f7-4f7b-a0ce-07b5bb4768d4
-# ╟─b6baafc2-6d5e-43c3-8ef9-845961cdd20b
-# ╠═cd32beba-67cf-4b12-a77b-99f96263f0a4
 # ╟─ae38c663-0ee4-409e-bfca-5f13ed88b67d
 # ╠═d44da6c6-c93d-4c61-8125-9eee464c897e
 # ╠═00a72697-d36a-41cc-9eec-8e821829ce0e
 # ╠═cf39b4cf-9cd0-4755-80db-ca4aea7c1084
+# ╟─b6baafc2-6d5e-43c3-8ef9-845961cdd20b
 # ╠═b65e948d-b13a-4021-a545-b7912fd86e94
 # ╠═52901bbf-e47b-4da1-95c4-f0869812398c
 # ╟─102b4fbc-23b1-46ed-bb72-124eb88517ce
+# ╟─a627e3c0-e29f-4592-9dc6-5cf48f80252d
 # ╟─ade413c2-d7d9-4250-8490-75534900a389
 # ╟─58730ac6-d83b-420d-a000-2f50545f0d39
 # ╠═7411474c-fac7-4b7c-8ded-4c2df5956fb0
