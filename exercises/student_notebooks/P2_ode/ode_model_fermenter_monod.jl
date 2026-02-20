@@ -14,12 +14,17 @@ using Markdown, InteractiveUtils
 using StatsPlots, PlutoUI; TableOfContents()
 
 # ╔═╡ 7906cea8-e163-42cf-adbc-7eec7adc5597
-using Catalyst, OrdinaryDiffEq
+using OrdinaryDiffEq, Catalyst
 
 # ╔═╡ 7856d878-8586-4cfd-9cf6-d61234450e41
 md"
 # Exercise: Fermenter - Monod kinetics
 "
+
+# ╔═╡ 7bbab2e5-0ea9-4682-ad7c-a98a5218c7ca
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/fermenter_model_2nd.png)
+"""
 
 # ╔═╡ 8500c35e-6bc3-4900-81bf-7705ddd61532
 md"""
@@ -371,11 +376,12 @@ Answers:
 """
 
 # ╔═╡ Cell order:
+# ╟─7856d878-8586-4cfd-9cf6-d61234450e41
 # ╠═2e58f4ae-f711-11ee-2598-7f3a6f2e2013
 # ╠═e99680dc-73af-40aa-bf57-a06d3a7372be
 # ╠═e6bf6f7e-f56d-4ee1-89ec-9224ef4444a6
 # ╠═7906cea8-e163-42cf-adbc-7eec7adc5597
-# ╟─7856d878-8586-4cfd-9cf6-d61234450e41
+# ╟─7bbab2e5-0ea9-4682-ad7c-a98a5218c7ca
 # ╟─8500c35e-6bc3-4900-81bf-7705ddd61532
 # ╟─f1350528-07a5-4860-ad2d-627588186abc
 # ╠═331a34f4-89d4-4193-896c-c14ab0bf04e7
