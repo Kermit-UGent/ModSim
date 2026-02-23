@@ -13,7 +13,8 @@ for subdir in subdirs
         try # prevent error in one practical from stopping the rest
             build_notebooks(bopts, [file])
         catch e
-            @warn e.msg # give error message as a warning instead
+            error_msg = sprint(showerror, e)
+            @warn error_msg # give error message as a warning instead
             cd(@__DIR__) # errors in notebook building changes working directory sometimes, for some reason
 
             # log what notebooks failed (per practical)
@@ -22,11 +23,11 @@ for subdir in subdirs
             failed_notebooks_in_subdir = get!(failed_notebooks_dict, subdirname, String[])
 
             # get essence of error
-            error_lines = split(e.msg, "\n")
-            startidx = findfirst(x -> !isnothing(match(r"^Error:", x)), error_lines) + 1
-            stopidx = findfirst(x -> !isnothing(match(r"Stacktrace:", x)), error_lines) - 1
+            error_lines = split(error_msg, "\n")
+            startidx = findfirst(x -> !isnothing(match(r"^Error:", x)), error_lines)
+            stopidx = findfirst(x -> !isnothing(match(r"Stacktrace:", x)), error_lines)
             if !(isnothing(startidx) || isnothing(stopidx))
-                push!(failed_notebooks_in_subdir, file * *("\n\t\t" .* error_lines[startidx:stopidx]...))
+                push!(failed_notebooks_in_subdir, file * *("\n\t\t" .* error_lines[(startidx+1):(stopidx-1)]...))
             else
                 push!(failed_notebooks_in_subdir, file)
             end
