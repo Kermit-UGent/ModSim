@@ -89,7 +89,7 @@ Set up de model equations.
 
 # ╔═╡ d7e2b0d6-cdbc-49cd-a2fa-d055c6476b5b
 # change_S1 = missing
-change_S1 = D(S₁) ~ r*(1 - S₁res/Smax) - k/Smax*S₁ - k/Smax*S₁
+change_S1 = D(S₁) ~ r*(1 - S₁res/Smax) - r/Smax*S₁ - k/Smax*S₁
 
 # ╔═╡ 64516f9d-3ce2-4fee-a5b7-3f89e5df992f
 # change_S2 = missing
