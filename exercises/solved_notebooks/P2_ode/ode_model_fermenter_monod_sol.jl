@@ -29,28 +29,30 @@ md"""
 
 # ╔═╡ 8500c35e-6bc3-4900-81bf-7705ddd61532
 md"""
-In a fermenter reactor biomass grows on substrate. The reactor is fed with a inlet flow rate $Q_{in}$ [$L/h$], which consist of a (manipulable) input concentration of substrate $S_{in}$ [$g/L$]. Inside the reactor, biomass, with a concentration of $X$ [$g/L$], is produced through **Monod** kinetics:
+In a fermenter reactor biomass grows on substrate. The reactor is fed with a inlet flow rate $Q_{in} \, [L/h],$ which consist of a (manipulable) input concentration of substrate $S_{in} \, [g/L].$ Inside the reactor, biomass, with a concentration of $X \, [g/L]$, is produced through **Monod** kinetics:
 
 $$\begin{eqnarray*}
-S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s}
+S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s} \, .
 \end{eqnarray*}$$
+Note that we also make the assumption that the reaction kinetics follow the [rate equation](https://en.wikipedia.org/wiki/Rate_equation), and therefore the reaction's speed is also first order in $S$ and $X$.
 
 The quantity
 
 $$\mu = k\,S = \mu_{max} \, \cfrac{S}{S + K_s}$$
 
-is called the specific growth rate [$h^{-1}$]. Therein, $\mu_{max}$ is the maximum speficic growth rate, and $K_s$ [$g/L$] is the so-called *half-velocity constant* (i.e. the value of $S$ when $\mu/\mu_{max} = 0.5$). Futhermore, $Y$ [$gX/gS$] is the yield coefficient which is defined here by the amount of produced biomass by consumption of one unit of substrate. The reactor is drained with an outlet flow $Q$ [$L/h$], which consist of the current concentrations of substrate $S$ [$g/L$] and biomass $X$ [$g/L$] inside the reactor. The volume $V$ [$L$] of the reactor content is kept constant by setting $Q_{in} = Q$.
+is called the specific growth rate $[h^{-1}]$. Therein, $\mu_{max}$ is the maximum specific growth rate, and $K_s \, [g/L]$ is the so-called *half-velocity constant* (i.e. the value of $S$ when $\mu/\mu_{max} = 0.5$). Note that in Catalyst you can write this as `mm(S, μmax, Ks)`, where the function `mm` stands for the Michaelis-Menten kinetics, which is equivalent to Monod kinetics.
+
+Futhermore, $Y \, [gX/gS]$ is the yield coefficient which is defined here by the amount of produced biomass by consumption of one unit of substrate. The reactor is drained with an outlet flow $Q \, [L/h]$, which consist of the current concentrations of substrate $S \, [g/L]$ and biomass $X \, [g/L]$ inside the reactor. The volume $V \, [L]$ of the reactor content is kept constant by setting $Q_{in} = Q$.
 """
 
 # ╔═╡ f1350528-07a5-4860-ad2d-627588186abc
 md"""
 Create a *reaction network object* model for the aforementioned problem in order to simulate the evolution of substrate $S$ and biomass $X$ with time. Name it `fermenter_monod`.
-
-If you want to use the specific growth rate $\mu = \mu_{max} \, \cfrac{S}{S + K_s}$ in your reaction model, it can be implemented with `mm(S, μmax, Ks)`. The function `mm` stands for the Michaelis-Menten kinetics, whcih is equivalent to Monod kinetics.
 """
 
 # ╔═╡ 331a34f4-89d4-4193-896c-c14ab0bf04e7
 fermenter_monod = @reaction_network begin
+
 	@species S(t)=0.0 X(t)=0.0005   # default values (optional)
 	@parameters μmax=0.4 Ks=0.015 Y=0.67 Q=2.0 V=40.0 Sin=0.02 # default values (optional)
 	# When S and X meet, then Y*X + X are created:
@@ -143,12 +145,12 @@ Tip: use something like: `(osol1[...][...], osol1[...][...])`
 
 # ╔═╡ d8234337-7516-4817-8ce5-194af694e3e3
 md"""
-We will now show you how to determine the steady state values for $S$ and $X$ under the current conditions (cf. current initial values and current parameter values).
+We will now create a `SteadyStateProblem` to determine the steady state values for $S$ and $X$ under the current conditions (cf. current initial values and current parameter values).
 """
 
 # ╔═╡ b63fa707-6023-44fc-aac9-25c76e075f90
 md"""
-First, we initialize a vector `u_guess1` with the final values for $S$ and $X$:
+Initialize a vector `u_guess1` with the final values for $S$ and $X$:
 """
 
 # ╔═╡ 8d96d79f-6ddb-4bba-a6ea-821588e13107
@@ -156,17 +158,17 @@ u_guess1 = [:S => osol1[:S][end], :X => osol1[:X][end]]
 
 # ╔═╡ e8969045-27ac-460e-86a2-7494903534e8
 md"""
-Then we make a so-called SteadyStateProblem (similar to the ODEProblem) but now with `u_guess1` as initial conditions and without `tspan`! Finally we use `solve` to solve the steady state problem. The outputs are the steady state values for $S$ and $X$ which we have denoted as `Seq1` and `Xeq1`.
+Make and solve the SteadyStateProblem. Use `u_guess1` as initial conditions and the parameter values previously defined. The outputs are the steady state values for $S$ and $X$ which we have denoted as `Seq1` and `Xeq1`.
 """
 
 # ╔═╡ 1777503e-b793-4be2-b80b-b4edcd7041b5
-eq1 = solve(SteadyStateProblem(fermenter_monod, u_guess1, parms))
+equil_val_monod = solve(SteadyStateProblem(fermenter_monod, u_guess1, parms))
 
 # ╔═╡ 36312d33-909b-47a9-8fab-fc70950ff07e
-Seq1 = eq1[:S]
+Seq1 = equil_val_monod[:S]
 
 # ╔═╡ 6cd388c4-f2a6-45d6-9b51-a1659b2dec07
-Xeq1 = eq1[:X]
+Xeq1 = equil_val_monod[:X]
 
 # ╔═╡ 1d5a2118-96e9-49b2-9931-5d4b201cb8f5
 md"""
