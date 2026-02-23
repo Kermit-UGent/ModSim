@@ -149,7 +149,7 @@ Interprete the results. Try to come up with an answer to the following questions
 # ╔═╡ ad1347a2-9fbf-4681-b82b-4643d7337ed9
 md"""
 !!! question
-	1. Why is the concentration of invertase ($I$) constant zero, and the concentration of sucrose ($S$) becoming zero?
+	1. Why is the concentration of invertase ($I$) constant, and the concentration of sucrose ($S$) becoming zero?
 """
 
 # ╔═╡ 39e96a71-7483-4c85-b44d-76cafc3b22dc
