@@ -209,7 +209,7 @@ anaerobic_fermentation2 = @reaction_network begin
     @species S(t)=0.04 I(t)=0.02 G(t)=0.0 E(t)=0.01 CO2(t)=0.0
 	@parameters d=0.003
     k1, S + I --> 2G + I
-    mm(E, k2, K), 2G --> 4E + 4CO2
+    mmr(E, k2, K), 2G --> 4E + 4CO2
     Q/V, (S, G, E, CO2) --> (0, 0, 0, 0)
 	d, I --> 0
     Q/V*Sin, 0 --> S
