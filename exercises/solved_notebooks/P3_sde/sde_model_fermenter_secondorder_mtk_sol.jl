@@ -83,7 +83,7 @@ Instantiate a source `B` of Brownian noise (a Wiener process by default) with `@
 
 # ╔═╡ 1090d70a-a23b-40ce-9ab9-6a316c455286
 md"""
-Set up the model equations with the noise `n*B` added to `Sin` and put them in a vector/array. Name the array `eq_ferm`.
+Set up the model equations with the noise `n*B` added to `Sin` and put them in a vector/array. Name the array `eqns_ferm`.
 """
 
 # ╔═╡ 07e86c4d-9634-4304-bba3-3caed3fcda07
