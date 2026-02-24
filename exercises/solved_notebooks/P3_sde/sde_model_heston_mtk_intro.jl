@@ -216,8 +216,9 @@ plot(ssol_spsv; idxs=[S])
 md"""
 ## Simulating the system as an EnsembleProblem.
 
-In order to see to have an idea of the extend of the stochastic effect on the solutions, we can create a so-called *EnsembleProblem*. This allows us to plot many possible solutions in one plot.
-
+In practice, modeling and simulation are used to draw conclusions or gain insights into a system. Unlike ordinary differential equations (ODEs), simulations based on stochastic differential equations (SDEs) produce different outcomes each time they are run due to their inherent randomness. 
+Besides, we are often interested in the edge cases: what are the chances of losing more than 20% of my budget or what are the chances of doubling it? 
+In order to see to have an idea of the extend of the stochastic effect on the solutions, we can create a so-called *EnsembleProblem*. This allows us to plot many possible solutions in one plot and gain insights in the general behaviour of the system.
 In order to create an *EnsembleProblem*, you need to create an *SDEProblem* first. Since we already have our *SDEProblem* called `sprob_spsv`, we can readily create an *EnsembleProblem* from this. All you need to do is call the function `EnsembleProblem` with the name of the SDE problem object (cf. `sprob_spsv`) as argument.
 """
 
