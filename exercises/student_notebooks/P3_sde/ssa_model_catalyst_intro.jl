@@ -27,7 +27,7 @@ md"""
 # ╔═╡ f5f32d5d-0c13-4865-8024-ca47208c9b8e
 md"""
 In this practical, we will revisit the infection model which we solved last week using Catalyst.jl. Last week we assumed that the number of people is a continuous variable, while in practice this is not the case (ever
-seen 46.3 persons). In this practical we will make use of an SSA (stochastic simulation algorithm), which can be used when working with discrete variables (such as the number of infected people).
+seen 46.3 persons). In this session, we will instead use a Stochastic Simulation Algorithm (SSA), which is better suited for models with discrete variables, such as the number of infected individuals.
 """
 
 
