@@ -47,7 +47,7 @@ md"""
 Imagine a bike sharing system for students traveling between Olin College and Wellesley College, which are about three miles apart in eastern Massachusetts. Suppose the system contains 12 bikes and two bike racks, one at Olin and one at Wellesley, each with the capacity to hold 12 bikes. As students arrive, check out a bike, and ride to the other campus, the number of bikes in each location changes.
 Initially there are `10` bikes at Olin and, hence, `2` bikes at Wellesley. For this simple model, we will also assume that the changes in the number of bikes at both locations is instantaneous. The rate at which a bike is moved from Olin to Wellesley is denoted as $p_1$ ($\#bikes\;min^{-1}$); the rate at which a bike is moved from Wellesley to Olin is denoted as $p_2$ ($\#bikes\;min^{-1}$). Both processes are zeroth-order and we want to see the evolution of bikes during $1\,h = 60\,min$.
 
-This is a discreet and stochastic problem and you need to solve it with SSA.
+This is a discrete and stochastic problem and you need to solve it with SSA.
 """
 
 # ╔═╡ 016842c9-9479-4061-a27e-9dc006121f23
