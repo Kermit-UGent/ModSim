@@ -65,7 +65,8 @@ In order to make sure that $O$ does not become negative, you can use either `ife
 # end
 bike_sharing = @reaction_network begin
 	@species O(t)=10 W(t)=2
-    p₁*ifelse(O>0, 1, 0), O => W #0th order: use => instead of --> (1st order)
+	# use `=>` instead of `-->` to prevent Catalyst from adding the concentrations of the reactants to the reaction rate (see https://en.wikipedia.org/wiki/Rate_equation)
+    p₁*ifelse(O>0, 1, 0), O => W 
 	p₂*ifelse(W>0, 1, 0), W => O
 end
 
