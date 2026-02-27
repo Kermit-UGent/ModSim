@@ -58,8 +58,13 @@ In order to make sure that $O$ does not become negative, you can use either `ife
 """
 
 # ╔═╡ 6c97bf81-ef32-45a4-aa7c-c8c26ba2d2c3
+# bike_sharing = @reaction_network begin
+#     missing
+#     missing
+#     missing
+# end
 bike_sharing = @reaction_network begin
-	@species O(t) W(t)
+	@species O(t)=10 W(t)=2
     p₁*ifelse(O>0, 1, 0), O => W #0th order: use => instead of --> (1st order)
 	p₂*ifelse(W>0, 1, 0), W => O
 end
@@ -76,6 +81,7 @@ Convert the system to a symbolic differential equation model and verify, by anal
 """
 
 # ╔═╡ 1536fe23-0f8d-4b86-98d2-076248b35954
+# missing
 convert(ODESystem, bike_sharing)
 
 # ╔═╡ 613d7769-cc9d-471e-b3e7-4266fc0e4677
@@ -94,6 +100,7 @@ Initialize a vector `u0` with the initial conditions:
 """
 
 # ╔═╡ ab6af765-1cde-4da8-bbc1-a5fab391db54
+# u0 = missing
 u0 = [:O => 10, :W => 2]
 
 # ╔═╡ 378878a0-5c09-4eb0-ac43-1031014ff12a
@@ -102,53 +109,57 @@ Set the timespan for the simulation:
 """
 
 # ╔═╡ 3ae98e83-7beb-4597-89be-80c813d4349b
+# tspan = missing
 tspan = (0.0, 60.0)
 
 # ╔═╡ 988f79c0-9c7b-4752-a7f2-d4473ad73ce6
 md"""
 Create a slider for the variable `p₁` in the range of `0.0` and `1.0` with a step of `0.1`. Take a default value of `0.0`.
 """
+# ╔═╡ 0d8f53f8-0a14-4ac6-bd0c-2190d4db0909
+# @bind missing
+@bind p₁ Slider(0.0:0.1:1.0, default = 0.1, show_value=true)
 
 # ╔═╡ 08d43ac8-a973-4d7b-baf7-4c37e54cfe24
 md"
 Initialize vector `parms` with parameter values, `p₁` is the slider value and assign a constant value of `0.3` to `p₂`.
 "
+# ╔═╡ e20e4dd8-bdbb-4005-af68-6bf7e4ec130e
+# parms = missing
+parms = [:p₁ => p₁, :p₂ => 0.3]
 
 # ╔═╡ 238e1120-34af-4d57-8efa-aa80ab28a874
 md"""
 Create a DiscreteProblem and store it in `dprob`:
 """
+# ╔═╡ d4c45709-70c9-4ba0-8fb8-6b600473723d
+# dprob = missing
+dprob = DiscreteProblem(bike_sharing, u0, tspan, parms)
 
 # ╔═╡ d06fb076-76e4-4248-a940-96804ea68833
 md"""
 Create a JumpProblem and store it in `jdprob`. Use the simulation method `Direct()`."""
+
+# ╔═╡ 7644adf4-d992-48b1-b40a-12fdf30f6cb5
+# jdprob = missing
+jdprob = JumpProblem(bike_sharing, dprob, Direct())
 
 # ╔═╡ 74708270-b1ec-48c7-af32-3b970b92c706
 md"""
 Solve the problem and store it in `jdsol`.
 """
 
+# ╔═╡ 2b00df5d-994e-47a1-8068-c93ce3f1a618
+# jdsol = missing
+jdsol = solve(jdprob)
+
 # ╔═╡ 9d06c31e-3525-4889-a1de-3fe02413c7d8
 md"""
 Plot the solution. Limit the plot to `(0, 12)` for the vertical axis.
 """
 
-# ╔═╡ 0d8f53f8-0a14-4ac6-bd0c-2190d4db0909
-@bind p₁ Slider(0.0:0.1:1.0, default = 0.1, show_value=true)
-
-# ╔═╡ e20e4dd8-bdbb-4005-af68-6bf7e4ec130e
-parms = [:p₁ => p₁, :p₂ => 0.3]
-
-# ╔═╡ d4c45709-70c9-4ba0-8fb8-6b600473723d
-dprob = DiscreteProblem(bike_sharing, u0, tspan, parms)
-
-# ╔═╡ 7644adf4-d992-48b1-b40a-12fdf30f6cb5
-jdprob = JumpProblem(bike_sharing, dprob, Direct())
-
-# ╔═╡ 2b00df5d-994e-47a1-8068-c93ce3f1a618
-jdsol = solve(jdprob)
-
 # ╔═╡ 9a90f800-3669-4831-b50b-c5405bbb9a03
+# missing
 plot(jdsol, ylim=(0,12))
 
 # ╔═╡ a554fd16-aa3d-48ca-8de6-5582725c27d8
@@ -165,7 +176,10 @@ md"""
 """
 
 # ╔═╡ 747e20c4-b06b-4e78-a09a-55053cf42bf4
-md"- Answer: When p₁ exceeds p₂."
+md"- Answer: missing"
+#=
+When p₁ exceeds p₂.
+=#
 
 # ╔═╡ ce18866b-5cb8-4966-81c7-683fa65823ff
 md"""
@@ -183,6 +197,7 @@ You can inspect the actual number of bike values at Olin by using `jdsol[:O]`:
 """
 
 # ╔═╡ f8942b10-773a-4b22-baad-8004fba8bd34
+#missing
 jdsol[:O]
 
 # ╔═╡ 43d41284-053d-4dfe-8d5b-96be70c0495c
@@ -193,6 +208,7 @@ Compare in that way `jdsol[:O]` with `0`:
 """
 
 # ╔═╡ a999ae2a-7567-41e7-9c0c-e94fad6f5d46
+# missing
 sum(jdsol[:O].==0)
 
 # ╔═╡ 9ebb5b44-04d7-4b89-acdb-e40a245703d2
@@ -201,6 +217,7 @@ Furthermore, if you want the count the number of `true` values in the latter (he
 """
 
 # ╔═╡ 049de8d5-b221-452b-b2c4-9bc1e0c17f48
+# missing
 count(jdsol[:O].==0)
 
 # ╔═╡ a73a2853-1f48-4179-9771-083794d3f137
@@ -234,6 +251,23 @@ md"""
 """
 
 # ╔═╡ 682e9120-0e1c-4dfa-9ec6-66bb0a3f4374
+# begin
+# 	p_values = 0.0:0.1:1.0  # different p-values
+# 	mean_zero_counts = []   # vector to store the corresponding mean zero values
+# 	for p_val in p_values    # p_val will be each of the p_values
+# 		zero_counts_p_val = []  # vector to store the zeros for the 1000 simulations
+# 		for i = missing          # do a 1000 simulation
+# 			# take a deepcopy and remake the problem for the specific p-value
+# 			jdprob_re = missing
+# 			# solve the problem
+# 			jdsol_re = missing;
+# 			# append the number of zeros to zero_counts_p_val
+# 			missing
+# 		end
+# 		# append the mean number of zeros to mean_zero_counts
+# 		missing
+# 	end
+# end
 begin
 	p_values = 0.0:0.1:1.0  # different p-values
 	mean_zero_counts = []   # vector to store the corresponding mean zero values
@@ -258,6 +292,7 @@ Have a look at the mean zero counts by typing `mean_zero_counts`:
 """
 
 # ╔═╡ 5968317a-6c07-4655-8137-6702656bb3b4
+# missing
 mean_zero_counts
 
 # ╔═╡ ff9370d8-3395-4382-9f51-afa11748319e
@@ -266,6 +301,7 @@ Plot the mean zero counts as a function of the $p$-values.
 """
 
 # ╔═╡ 48be49d0-0b60-44f3-8152-1ca917a4232e
+#missing
 plot(p_values, mean_zero_counts, xlabel="value of p1", ylabel="Mean number of empty bikes")
 
 # ╔═╡ d6452915-bdf0-48f0-8c7d-3df83c7bce72
