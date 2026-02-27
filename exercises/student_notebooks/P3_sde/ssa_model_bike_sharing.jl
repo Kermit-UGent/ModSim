@@ -20,10 +20,7 @@ end
 using Pkg; Pkg.activate("..")
 
 # ╔═╡ 6b342f14-e7d5-11ef-1ea0-77ceb0d78f32
-using Markdown
-
-# ╔═╡ 7bfcc024-7d7f-4c0b-b918-8f7626b10974
-using InteractiveUtils
+using Markdown, InteractiveUtils
 
 # ╔═╡ 71140c81-af29-4857-8020-4f94c8bd64b3
 using Catalyst, JumpProcesses, StatsPlots, StatsBase
@@ -59,7 +56,7 @@ In order to make sure that $O$ does not become negative, you can use either `ife
 
 # ╔═╡ 6c97bf81-ef32-45a4-aa7c-c8c26ba2d2c3
 # bike_sharing = @reaction_network begin
-#     missing
+#     @species missing
 #     missing
 #     missing
 # end
@@ -282,12 +279,11 @@ Answers:
 """
 
 # ╔═╡ Cell order:
+# ╟─1f975552-b0b8-4830-8dcc-214574d4fc38
 # ╠═6b342f14-e7d5-11ef-1ea0-77ceb0d78f32
-# ╠═7bfcc024-7d7f-4c0b-b918-8f7626b10974
 # ╠═309035dd-5653-48a6-a53d-817e743279fa
 # ╠═71140c81-af29-4857-8020-4f94c8bd64b3
 # ╠═284f5847-9c15-41f3-a595-1e12a22df69f
-# ╟─1f975552-b0b8-4830-8dcc-214574d4fc38
 # ╟─a0da1455-bf8c-45d2-893a-f9b5c279cb59
 # ╟─d2f32eab-0b35-4794-9219-5bcbb4c069c5
 # ╟─016842c9-9479-4061-a27e-9dc006121f23

@@ -20,10 +20,7 @@ end
 using Pkg; Pkg.activate("..")
 
 # ╔═╡ 6b342f14-e7d5-11ef-1ea0-77ceb0d78f32
-using Markdown
-
-# ╔═╡ 7bfcc024-7d7f-4c0b-b918-8f7626b10974
-using InteractiveUtils
+using Markdown, InteractiveUtils
 
 # ╔═╡ 71140c81-af29-4857-8020-4f94c8bd64b3
 using Catalyst, JumpProcesses, StatsPlots, StatsBase
@@ -169,6 +166,12 @@ jdsol = solve(jdprob)
 # ╔═╡ 9a90f800-3669-4831-b50b-c5405bbb9a03
 # missing
 plot(jdsol, ylim=(0, 12))
+
+# ╔═╡ fdab1897-c3c6-4957-bfd4-c3bdb456c7ea
+jdsol.t
+
+# ╔═╡ f76b9671-e004-4666-ba54-bfe73915722b
+jdsol[:O]
 
 # ╔═╡ a554fd16-aa3d-48ca-8de6-5582725c27d8
 md"""
@@ -334,8 +337,8 @@ Answers:
 =#
 
 # ╔═╡ Cell order:
+# ╟─1f975552-b0b8-4830-8dcc-214574d4fc38
 # ╠═6b342f14-e7d5-11ef-1ea0-77ceb0d78f32
-# ╠═7bfcc024-7d7f-4c0b-b918-8f7626b10974
 # ╠═309035dd-5653-48a6-a53d-817e743279fa
 # ╠═71140c81-af29-4857-8020-4f94c8bd64b3
 # ╠═284f5847-9c15-41f3-a595-1e12a22df69f
@@ -365,6 +368,8 @@ Answers:
 # ╟─9d06c31e-3525-4889-a1de-3fe02413c7d8
 # ╠═0d8f53f8-0a14-4ac6-bd0c-2190d4db0909
 # ╠═9a90f800-3669-4831-b50b-c5405bbb9a03
+# ╠═fdab1897-c3c6-4957-bfd4-c3bdb456c7ea
+# ╠═f76b9671-e004-4666-ba54-bfe73915722b
 # ╟─a554fd16-aa3d-48ca-8de6-5582725c27d8
 # ╟─d6872046-b5ef-4c2d-a9bb-2418f57f715d
 # ╟─747e20c4-b06b-4e78-a09a-55053cf42bf4

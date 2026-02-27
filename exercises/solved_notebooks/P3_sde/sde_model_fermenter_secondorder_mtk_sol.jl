@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -119,7 +119,7 @@ tspan = (0.0, 120.0)
 
 # ╔═╡ a4d28c40-e315-4bb9-87a5-2b45dd633e5f
 # parms = missing
-parms = [:k => 0.2, :Y => 0.76, :Q => 2, :V => 40, :Sin => 2.2, :η => 0.10]
+parms = [:k => 0.2, :Y => 0.76, :Q => 2, :V => 40, :Sin => 2.2, :n => 0.50]
 
 # ╔═╡ 0545417b-e3f2-42a7-aa30-15c3bca9ed9c
 md"""
@@ -242,13 +242,13 @@ Calculate the standard deviation.
 std(Xeq_values)
 
 # ╔═╡ Cell order:
+# ╟─a28e7ddf-76e9-4628-888c-e1d838da75ce
 # ╠═eb142900-1d94-11ef-12ed-6951b45f1817
 # ╠═8152f632-af15-4164-a8ff-07c33a9a49b3
 # ╠═e317c2cc-c41a-4489-b06b-7f07a517e20b
 # ╠═2e91e92c-5cd2-4018-8a26-9f0f9e01a175
 # ╠═e04f782d-67da-4e21-a3bf-d2ddff4bba0b
 # ╠═3552fc05-a4dc-4242-91b3-3eb6fb2ea389
-# ╟─a28e7ddf-76e9-4628-888c-e1d838da75ce
 # ╟─959d6307-a30d-4ae7-970d-b2c7584c2c8f
 # ╟─6da59e21-6451-4f82-9387-63b90e88de00
 # ╟─98858b9c-d4f9-451f-a7b9-fcaa012ee28e
