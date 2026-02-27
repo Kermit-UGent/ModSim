@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -289,13 +289,13 @@ You can determine the standard deviation of all end values of S in the following
 std(S_end_vals)
 
 # ╔═╡ Cell order:
+# ╟─fd3b7b7e-b573-4c14-afe1-a9a9083f39fe
 # ╠═058d1250-30a2-11f0-05e1-4b134c2349ec
 # ╠═7e26d33b-2401-4e11-a457-bde8316df2f0
 # ╠═c070007f-b4b8-4edc-8d04-700bf7e323de
 # ╠═7e450e64-a8d6-47e9-9c2a-8bf8a4e2e71e
 # ╠═d1185b3f-5fa3-4d84-9a7f-c105b7c456ac
 # ╠═6846bf57-0737-4ffd-87cf-955ecb4bd4de
-# ╟─fd3b7b7e-b573-4c14-afe1-a9a9083f39fe
 # ╟─ba1450a1-5061-4352-994f-a308c053c3ce
 # ╟─e2ba0bc5-7147-462a-8eb9-76bf7145a51e
 # ╟─00b7ef23-1cfd-4923-918a-4d62de6ef17d

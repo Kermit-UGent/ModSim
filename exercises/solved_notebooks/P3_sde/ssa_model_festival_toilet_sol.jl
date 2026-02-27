@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -245,7 +245,7 @@ toilet_wp = @reaction_network begin
 	kₒ, L + V --> B
 	kₑ, B --> V
 	1*>(L, 15), L --> W
-	# 1*ifelse(L > 20, 1, 0), L --> W
+	# 1*ifelse(L > 15, 1, 0), L --> W   # alternative
 end
 
 # ╔═╡ ee055acd-cd86-4e02-bf38-bf5779bd4f95

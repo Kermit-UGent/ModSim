@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -20,10 +20,7 @@ end
 using Pkg; Pkg.activate("..")
 
 # ╔═╡ 6b342f14-e7d5-11ef-1ea0-77ceb0d78f32
-using Markdown
-
-# ╔═╡ 7bfcc024-7d7f-4c0b-b918-8f7626b10974
-using InteractiveUtils
+using Markdown, InteractiveUtils
 
 # ╔═╡ 71140c81-af29-4857-8020-4f94c8bd64b3
 using Catalyst, JumpProcesses, StatsPlots, StatsBase
@@ -126,7 +123,7 @@ Create a slider for the variable `p₁` in the range of `0.0` and `1.0` with a s
 
 # ╔═╡ 0d8f53f8-0a14-4ac6-bd0c-2190d4db0909
 # @bind missing
-@bind p₁ Slider(0.0:0.1:1, default=0.0, show_value=true)
+@bind p₁ Slider(0.0:0.05:1, default=0.0, show_value=true)
 
 # ╔═╡ 08d43ac8-a973-4d7b-baf7-4c37e54cfe24
 md"
@@ -161,7 +158,7 @@ Solve the problem and store it in `jdsol`.
 
 # ╔═╡ 2b00df5d-994e-47a1-8068-c93ce3f1a618
 # jdsol = missing
-jdsol = solve(jdprob);
+jdsol = solve(jdprob, saveat=1);  # 
 
 # ╔═╡ 9d06c31e-3525-4889-a1de-3fe02413c7d8
 md"""
@@ -171,6 +168,12 @@ Plot the solution. Limit the plot to `(0, 12)` for the vertical axis.
 # ╔═╡ 9a90f800-3669-4831-b50b-c5405bbb9a03
 # missing
 plot(jdsol, ylim=(0, 12))
+
+# ╔═╡ fdab1897-c3c6-4957-bfd4-c3bdb456c7ea
+jdsol.t
+
+# ╔═╡ f76b9671-e004-4666-ba54-bfe73915722b
+jdsol[:O]
 
 # ╔═╡ a554fd16-aa3d-48ca-8de6-5582725c27d8
 md"""
@@ -270,7 +273,7 @@ begin
 			# take a deepcopy and remake the problem for the specific p-value
 			jdprob_re = remake(deepcopy(jdprob); p=[:p₁=>p_val])
 			# solve the problem
-			jdsol_re = solve(jdprob_re);
+			jdsol_re = solve(jdprob_re, saveat=1);
 			# append the number of zeros to zero_counts_p_val
 			append!(zero_counts_p_val, count(jdsol_re[:O] .== 0))
 		end
@@ -316,12 +319,11 @@ Answers:
 =#
 
 # ╔═╡ Cell order:
+# ╟─1f975552-b0b8-4830-8dcc-214574d4fc38
 # ╠═6b342f14-e7d5-11ef-1ea0-77ceb0d78f32
-# ╠═7bfcc024-7d7f-4c0b-b918-8f7626b10974
 # ╠═309035dd-5653-48a6-a53d-817e743279fa
 # ╠═71140c81-af29-4857-8020-4f94c8bd64b3
 # ╠═284f5847-9c15-41f3-a595-1e12a22df69f
-# ╟─1f975552-b0b8-4830-8dcc-214574d4fc38
 # ╟─a0411d81-48f6-451c-884d-754dd313c609
 # ╟─d2f32eab-0b35-4794-9219-5bcbb4c069c5
 # ╟─016842c9-9479-4061-a27e-9dc006121f23
@@ -347,6 +349,8 @@ Answers:
 # ╠═2b00df5d-994e-47a1-8068-c93ce3f1a618
 # ╟─9d06c31e-3525-4889-a1de-3fe02413c7d8
 # ╠═9a90f800-3669-4831-b50b-c5405bbb9a03
+# ╠═fdab1897-c3c6-4957-bfd4-c3bdb456c7ea
+# ╠═f76b9671-e004-4666-ba54-bfe73915722b
 # ╟─a554fd16-aa3d-48ca-8de6-5582725c27d8
 # ╟─d6872046-b5ef-4c2d-a9bb-2418f57f715d
 # ╠═747e20c4-b06b-4e78-a09a-55053cf42bf4
