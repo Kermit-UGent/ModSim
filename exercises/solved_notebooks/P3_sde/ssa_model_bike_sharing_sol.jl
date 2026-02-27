@@ -68,6 +68,9 @@ bike_sharing = @reaction_network begin
 	# use `=>` instead of `-->` to prevent Catalyst from adding the concentrations of the reactants to the reaction rate (see https://en.wikipedia.org/wiki/Rate_equation)
     p₁*ifelse(O>0, 1, 0), O => W 
 	p₂*ifelse(W>0, 1, 0), W => O
+	# Alternatively:
+	# p₁*>(O, 0), O => W
+	# p₂*>(W, 0), W => O
 end
 
 # ╔═╡ 7227a95a-ba0c-44dc-b0b8-18d6bbf362e8
@@ -165,7 +168,7 @@ jdsol = solve(jdprob)
 
 # ╔═╡ 9a90f800-3669-4831-b50b-c5405bbb9a03
 # missing
-plot(jdsol, ylim=(0,12))
+plot(jdsol, ylim=(0, 12))
 
 # ╔═╡ a554fd16-aa3d-48ca-8de6-5582725c27d8
 md"""
