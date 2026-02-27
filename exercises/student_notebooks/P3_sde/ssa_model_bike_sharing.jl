@@ -216,6 +216,25 @@ In the layout below, `mean_zero_counts` while contain the final mean values of t
 Use the layout below to fill in `mean_zero_counts`.
 """
 
+# ╔═╡ f269ad67-b1bb-4a99-a90f-de627425a555
+md"""
+!!! warning "Important note"
+    It is tempting to simply count how many times the value 0 appears in the solution to measure how often there were no bikes at a campus. However, this leads to incorrect conclusions.
+
+    The Stochastic Simulation Algorithm (SSA) only stores time points when a change happens (for example, when a bike arrives or leaves). It does not store values at every minute. This means that long periods without change are represented by very few data points.
+
+    For example, suppose there are 0 bikes at campus Olin from minute 0 to minute 50. The solution may only contain two entries: one at time 0 (with 0 bikes) and one at time 50 (when a bike arrives). Even though the campus was empty for 50 minutes, the value 0 appears only once or twice in the stored solution.
+
+    In contrast, if the number of bikes fluctuates frequently between 0 and 1, the value 0 may appear many times in the stored output, even though the campus was empty for a much shorter total time.
+
+    The reasoning error is that counting how often 0 appears ignores how long the system remained in that state. What we actually care about is the total time interval during which there were no bikes.
+
+    Since this is not a programming course, we can approximate this time by saving the solution at regular intervals, for example by setting `saveat = 0.1`. This forces the solver to record the state frequently, allowing us to approximate the total time with zero bikes by counting how often 0 appears and multiplying by the time step.
+
+"""
+
+# ╔═╡ 682e9120-0e1c-4dfa-9ec6-66bb0a3f4374
+
 # ╔═╡ 682e9120-0e1c-4dfa-9ec6-66bb0a3f4374
 # begin
 # 	p_values = 0.0:0.1:1.0  # different p-values
