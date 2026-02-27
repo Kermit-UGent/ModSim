@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -188,6 +188,9 @@ md"""
 	2. If the death rate increases at a different timepoint, would you reach the same steady state value for $X$? Explain.
 """
 
+# ╔═╡ 87cfc14f-3f15-41a5-984f-4d5f03cddf0b
+
+
 # ╔═╡ 775f2cf3-ffbb-491a-9002-3a39b9c70f3c
 md"""
 Answers:
@@ -237,4 +240,5 @@ Answers:
 # ╟─694e5b50-f4c9-4ecc-8860-1b217696e1ea
 # ╠═c69d0e86-0d15-4915-a890-8abd378da59a
 # ╟─1f869579-7019-4120-8d14-b38f48d05bdd
+# ╠═87cfc14f-3f15-41a5-984f-4d5f03cddf0b
 # ╠═775f2cf3-ffbb-491a-9002-3a39b9c70f3c
