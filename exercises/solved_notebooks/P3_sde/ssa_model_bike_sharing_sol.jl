@@ -241,9 +241,7 @@ md"""
 
 	The SSA solver only saves the state when something changes (for example, when a bike arrives or leaves). It does **not** automatically store values in between events, so it does not explicitly keep track of how long the system stays in the same state.
 
-	If we want to estimate how long there were zero bikes, we need information at regular time intervals. We can do this by setting `saveat = 0.1`. This forces the solver to record the state every 0.1 time units.
-
-	Because the solution is then saved at approximately constant time steps, we can estimate the total time with zero bikes by counting how many saved values are `0` and multiplying by `0.1`.
+	If we want to estimate how long there were zero bikes, we need information at regular time intervals. We can do this by setting `saveat = 0.1`. This forces the solver to record the state every 0.1 time units, thereby approximating the time that there are 0 bikes at the campus. It is important to save at rather small time intervals (think about integrating over time with saveat= dt) to have a good approximation.
 
 
 """
