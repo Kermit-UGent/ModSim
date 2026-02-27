@@ -76,7 +76,7 @@ Convert the system to a symbolic differential equation model and verify, by anal
 """
 
 # ╔═╡ 1536fe23-0f8d-4b86-98d2-076248b35954
-# missing
+missing
 
 # ╔═╡ 613d7769-cc9d-471e-b3e7-4266fc0e4677
 md"""
@@ -94,7 +94,7 @@ Initialize a vector `u0` with the initial conditions:
 """
 
 # ╔═╡ ab6af765-1cde-4da8-bbc1-a5fab391db54
-# u0 = missing
+u0 = missing
 
 # ╔═╡ 378878a0-5c09-4eb0-ac43-1031014ff12a
 md"""
@@ -102,7 +102,7 @@ Set the timespan for the simulation:
 """
 
 # ╔═╡ 3ae98e83-7beb-4597-89be-80c813d4349b
-# tspan = missing
+tspan = missing
 
 # ╔═╡ 988f79c0-9c7b-4752-a7f2-d4473ad73ce6
 md"""
@@ -116,7 +116,7 @@ Initialize vector `parms` with parameter values, `p₁` is the slider value and 
 
 
 # ╔═╡ e20e4dd8-bdbb-4005-af68-6bf7e4ec130e
-# parms = missing
+parms = missing
 
 # ╔═╡ 238e1120-34af-4d57-8efa-aa80ab28a874
 md"""
@@ -124,14 +124,14 @@ Create a DiscreteProblem and store it in `dprob`:
 """
 
 # ╔═╡ d4c45709-70c9-4ba0-8fb8-6b600473723d
-# dprob = missing
+dprob = missing
 
 # ╔═╡ d06fb076-76e4-4248-a940-96804ea68833
 md"""
 Create a JumpProblem and store it in `jdprob`. Use the simulation method `Direct()`."""
 
 # ╔═╡ 7644adf4-d992-48b1-b40a-12fdf30f6cb5
-# jdprob = missing
+jdprob = missing
 
 # ╔═╡ 74708270-b1ec-48c7-af32-3b970b92c706
 md"""
@@ -139,7 +139,7 @@ Solve the problem and store it in `jdsol`.
 """
 
 # ╔═╡ 2b00df5d-994e-47a1-8068-c93ce3f1a618
-# jdsol = missing
+jdsol = missing
 
 # ╔═╡ 9d06c31e-3525-4889-a1de-3fe02413c7d8
 md"""
@@ -150,7 +150,7 @@ Plot the solution. Limit the plot to `(0, 12)` for the vertical axis.
 # @bind missing
 
 # ╔═╡ 9a90f800-3669-4831-b50b-c5405bbb9a03
-# missing
+missing
 
 # ╔═╡ a554fd16-aa3d-48ca-8de6-5582725c27d8
 md"""
@@ -166,8 +166,9 @@ md"""
 """
 
 # ╔═╡ 747e20c4-b06b-4e78-a09a-55053cf42bf4
-md"
-Answer: When p₁ exceeds p₂."
+md"""
+Answer: missing
+"""
 
 # ╔═╡ ce18866b-5cb8-4966-81c7-683fa65823ff
 md"""
@@ -185,7 +186,7 @@ You can inspect the actual number of bike values at Olin by using `jdsol[:O]`:
 """
 
 # ╔═╡ f8942b10-773a-4b22-baad-8004fba8bd34
-#missing
+missing
 
 # ╔═╡ 43d41284-053d-4dfe-8d5b-96be70c0495c
 md"""
@@ -195,7 +196,7 @@ Compare in that way `jdsol[:O]` with `0`:
 """
 
 # ╔═╡ a999ae2a-7567-41e7-9c0c-e94fad6f5d46
-# missing
+missing
 
 # ╔═╡ 9ebb5b44-04d7-4b89-acdb-e40a245703d2
 md"""
@@ -203,7 +204,7 @@ Furthermore, if you want the count the number of `true` values in the latter (he
 """
 
 # ╔═╡ 049de8d5-b221-452b-b2c4-9bc1e0c17f48
-# missing
+missing
 
 # ╔═╡ a73a2853-1f48-4179-9771-083794d3f137
 md"""
@@ -256,7 +257,7 @@ Have a look at the mean zero counts by typing `mean_zero_counts`:
 """
 
 # ╔═╡ 5968317a-6c07-4655-8137-6702656bb3b4
-# missing
+missing
 
 # ╔═╡ ff9370d8-3395-4382-9f51-afa11748319e
 md"""
@@ -264,7 +265,7 @@ Plot the mean zero counts as a function of the $p$-values.
 """
 
 # ╔═╡ 48be49d0-0b60-44f3-8152-1ca917a4232e
-#missing
+missing
 
 # ╔═╡ d6452915-bdf0-48f0-8c7d-3df83c7bce72
 md"""

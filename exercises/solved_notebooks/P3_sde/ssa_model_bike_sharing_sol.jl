@@ -180,8 +180,12 @@ md"""
 """
 
 # ╔═╡ 747e20c4-b06b-4e78-a09a-55053cf42bf4
-md"
-Answer: When p₁ exceeds p₂."
+md"""
+Answer: missing
+"""
+#=
+When p₁ exceeds p₂.
+=#
 
 # ╔═╡ ce18866b-5cb8-4966-81c7-683fa65823ff
 md"""
@@ -199,7 +203,7 @@ You can inspect the actual number of bike values at Olin by using `jdsol[:O]`:
 """
 
 # ╔═╡ f8942b10-773a-4b22-baad-8004fba8bd34
-#missing
+# missing
 jdsol[:O]
 
 # ╔═╡ 43d41284-053d-4dfe-8d5b-96be70c0495c
@@ -211,7 +215,7 @@ Compare in that way `jdsol[:O]` with `0`:
 
 # ╔═╡ a999ae2a-7567-41e7-9c0c-e94fad6f5d46
 # missing
-sum(jdsol[:O].==0)
+jdsol[:O] .== 0
 
 # ╔═╡ 9ebb5b44-04d7-4b89-acdb-e40a245703d2
 md"""
@@ -220,7 +224,7 @@ Furthermore, if you want the count the number of `true` values in the latter (he
 
 # ╔═╡ 049de8d5-b221-452b-b2c4-9bc1e0c17f48
 # missing
-count(jdsol[:O].==0)
+count(jdsol[:O] .== 0)
 
 # ╔═╡ a73a2853-1f48-4179-9771-083794d3f137
 md"""
@@ -273,13 +277,18 @@ begin
 		zero_counts_p_val = []  # vector to store the zeros for the 1000 simulations
 		for i = 1:1000          # do a 1000 simulation
 			# take a deepcopy and remake the problem for the specific p-value
-			jdprob_re = remake(deepcopy(jdprob);p=[:p₁=>p_val])
+			jdprob_re = remake(deepcopy(jdprob); p=[:p₁=>p_val])
 			# solve the problem
 			jdsol_re = solve(jdprob_re, saveat=0.1);
 			# append the number of zeros to zero_counts_p_val
-			frac = count(jdsol_re[:O].==0) #/length(jdsol_re[:O]) #to normalize this
-			append!(zero_counts_p_val, frac)
+			append!(zero_counts_p_val, count(jdsol_re[:O] .== 0))
+			# alternatively, to get the fraction of times there are 0 bikes:
+			# append!(
+			# 	zero_counts_p_val,
+			# 	count(jdsol_re[:O] .== 0)/length(jdsol_re[:O])
+			# )
 		end
+		# append the mean number of zeros to mean_zero_counts
 		append!(mean_zero_counts, mean(zero_counts_p_val))
 	end
 end
@@ -299,7 +308,7 @@ Plot the mean zero counts as a function of the $p$-values.
 """
 
 # ╔═╡ 48be49d0-0b60-44f3-8152-1ca917a4232e
-#missing
+# missing
 plot(p_values, mean_zero_counts, xlabel="value of p1", ylabel="Mean number of empty bikes")
 
 # ╔═╡ d6452915-bdf0-48f0-8c7d-3df83c7bce72
@@ -312,9 +321,13 @@ md"""
 # ╔═╡ 4d73e614-9360-4e13-b7a4-ff7713989bf8
 md"""
 Answers:
+1. missing
+2. missing
+"""
+#=
 1. From a value of p₁ significantly larger than p₂.
 2. Yes, this makes sense, because p₁ larger than p₂ means that the rate at which bikes go from Olim to Wellesley is larger than the rate for the other way round. Hence, chances to get empty racks at Olin become larger when p₁ becomes significantly larger than p₂.
-"""
+=#
 
 # ╔═╡ Cell order:
 # ╠═6b342f14-e7d5-11ef-1ea0-77ceb0d78f32
