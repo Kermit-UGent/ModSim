@@ -17,6 +17,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ 309035dd-5653-48a6-a53d-817e743279fa
+# ╠═╡ show_logs = false
 using Pkg; Pkg.activate("..")
 
 # ╔═╡ 6b342f14-e7d5-11ef-1ea0-77ceb0d78f32
