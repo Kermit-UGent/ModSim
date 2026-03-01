@@ -106,11 +106,13 @@ md"""
 Create a slider for the variable `p₁` in the range of `0.0` and `1.0` with a step of `0.1`. Take a default value of `0.0`.
 """
 
-# ╔═╡ 08d43ac8-a973-4d7b-baf7-4c37e54cfe24
-md"""
-Initialize vector `parms` with parameter values, `p₁` is the slider value and assign a constant value of `0.3` to `p₂`.
-"""
+# ╔═╡ 0d8f53f8-0a14-4ac6-bd0c-2190d4db0909
+# @bind missing
 
+# ╔═╡ 08d43ac8-a973-4d7b-baf7-4c37e54cfe24
+md"
+Initialize vector `parms` with parameter values, `p₁` is the slider value and assign a constant value of `0.3` to `p₂`.
+"
 
 # ╔═╡ e20e4dd8-bdbb-4005-af68-6bf7e4ec130e
 parms = missing
@@ -143,9 +145,6 @@ md"""
 Plot the solution. Limit the plot to `(0, 12)` for the vertical axis.
 """
 
-# ╔═╡ 0d8f53f8-0a14-4ac6-bd0c-2190d4db0909
-# @bind missing
-
 # ╔═╡ 9a90f800-3669-4831-b50b-c5405bbb9a03
 missing
 
@@ -163,9 +162,7 @@ md"""
 """
 
 # ╔═╡ 747e20c4-b06b-4e78-a09a-55053cf42bf4
-md"""
-Answer: missing
-"""
+md"- Answer: missing"
 
 # ╔═╡ ce18866b-5cb8-4966-81c7-683fa65823ff
 md"""
@@ -216,7 +213,7 @@ In the layout below, `mean_zero_counts` while contain the final mean values of t
 Use the layout below to fill in `mean_zero_counts`.
 """
 
-# ╔═╡ f269ad67-b1bb-4a99-a90f-de627425a555
+# ╔═╡ b82da9cc-ccba-45c4-92c4-2c3b2c190688
 md"""
 !!! warning "Important note"
 
@@ -225,8 +222,6 @@ md"""
 	If we want to estimate how long there were zero bikes, we need information at regular time intervals. We can do this by setting `saveat = 0.1`. This forces the solver to record the state every 0.1 time units, thereby approximating the time that there are 0 bikes at the campus. 
 
 	Because the timepoints at which a state changes are random, we will still have a small error due to the number of bikes changing in between our chosen time intervals. Choosing a small time interval will help reduce this error. 
-
-
 """
 
 # ╔═╡ 682e9120-0e1c-4dfa-9ec6-66bb0a3f4374
@@ -298,6 +293,7 @@ Answers:
 # ╟─378878a0-5c09-4eb0-ac43-1031014ff12a
 # ╠═3ae98e83-7beb-4597-89be-80c813d4349b
 # ╟─988f79c0-9c7b-4752-a7f2-d4473ad73ce6
+# ╠═0d8f53f8-0a14-4ac6-bd0c-2190d4db0909
 # ╟─08d43ac8-a973-4d7b-baf7-4c37e54cfe24
 # ╠═e20e4dd8-bdbb-4005-af68-6bf7e4ec130e
 # ╟─238e1120-34af-4d57-8efa-aa80ab28a874
@@ -307,11 +303,10 @@ Answers:
 # ╟─74708270-b1ec-48c7-af32-3b970b92c706
 # ╠═2b00df5d-994e-47a1-8068-c93ce3f1a618
 # ╟─9d06c31e-3525-4889-a1de-3fe02413c7d8
-# ╠═0d8f53f8-0a14-4ac6-bd0c-2190d4db0909
 # ╠═9a90f800-3669-4831-b50b-c5405bbb9a03
 # ╟─a554fd16-aa3d-48ca-8de6-5582725c27d8
 # ╟─d6872046-b5ef-4c2d-a9bb-2418f57f715d
-# ╟─747e20c4-b06b-4e78-a09a-55053cf42bf4
+# ╠═747e20c4-b06b-4e78-a09a-55053cf42bf4
 # ╟─ce18866b-5cb8-4966-81c7-683fa65823ff
 # ╟─dcad848a-c178-4ce5-82d0-8a11aabb3b3c
 # ╟─92181028-60fc-4830-afba-2380ac91455d
@@ -321,11 +316,11 @@ Answers:
 # ╟─9ebb5b44-04d7-4b89-acdb-e40a245703d2
 # ╠═049de8d5-b221-452b-b2c4-9bc1e0c17f48
 # ╟─a73a2853-1f48-4179-9771-083794d3f137
-# ╟─f269ad67-b1bb-4a99-a90f-de627425a555
+# ╟─b82da9cc-ccba-45c4-92c4-2c3b2c190688
 # ╠═682e9120-0e1c-4dfa-9ec6-66bb0a3f4374
 # ╟─705d3fcb-20b6-4481-a304-1d3ccd623674
 # ╠═5968317a-6c07-4655-8137-6702656bb3b4
 # ╟─ff9370d8-3395-4382-9f51-afa11748319e
 # ╠═48be49d0-0b60-44f3-8152-1ca917a4232e
 # ╟─d6452915-bdf0-48f0-8c7d-3df83c7bce72
-# ╟─4d73e614-9360-4e13-b7a4-ff7713989bf8
+# ╠═4d73e614-9360-4e13-b7a4-ff7713989bf8

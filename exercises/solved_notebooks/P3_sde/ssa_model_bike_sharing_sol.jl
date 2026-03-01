@@ -33,7 +33,7 @@ md"""
 # Exercise: Modeling a simple Bike Sharing System
 """
 
-# ╔═╡ a0da1455-bf8c-45d2-893a-f9b5c279cb59
+# ╔═╡ a0411d81-48f6-451c-884d-754dd313c609
 # https://www.rete8.it/wp-content/uploads/2016/04/ciclostazione-777x437.jpg
 md"""
 ![Bike sharing station](https://www.rete8.it/wp-content/uploads/2016/04/ciclostazione-777x437.jpg)
@@ -61,9 +61,9 @@ In order to make sure that $O$ does not become negative, you can use either `ife
 #     missing
 # end
 bike_sharing = @reaction_network begin
-	@species O(t)=10 W(t)=2
+    @species O(t)=10 W(t)=2
 	# use `=>` instead of `-->` to prevent Catalyst from adding the concentrations of the reactants to the reaction rate (see https://en.wikipedia.org/wiki/Rate_equation)
-    p₁*ifelse(O>0, 1, 0), O => W 
+	p₁*ifelse(O>0, 1, 0), O => W
 	p₂*ifelse(W>0, 1, 0), W => O
 	# Alternatively:
 	# p₁*>(O, 0), O => W
@@ -118,50 +118,49 @@ md"""
 Create a slider for the variable `p₁` in the range of `0.0` and `1.0` with a step of `0.1`. Take a default value of `0.0`.
 """
 
-# ╔═╡ 08d43ac8-a973-4d7b-baf7-4c37e54cfe24
-md"""
-Initialize vector `parms` with parameter values, `p₁` is the slider value and assign a constant value of `0.3` to `p₂`.
-"""
+# ╔═╡ 0d8f53f8-0a14-4ac6-bd0c-2190d4db0909
+# @bind missing
+@bind p₁ Slider(0.0:0.05:1, default=0.0, show_value=true)
 
+# ╔═╡ 08d43ac8-a973-4d7b-baf7-4c37e54cfe24
+md"
+Initialize vector `parms` with parameter values, `p₁` is the slider value and assign a constant value of `0.3` to `p₂`.
+"
+
+# ╔═╡ e20e4dd8-bdbb-4005-af68-6bf7e4ec130e
+# parms = missing
+parms = [:p₁=>p₁, :p₂=>0.30]
 
 # ╔═╡ 238e1120-34af-4d57-8efa-aa80ab28a874
 md"""
 Create a DiscreteProblem and store it in `dprob`:
 """
 
+# ╔═╡ d4c45709-70c9-4ba0-8fb8-6b600473723d
+# dprob = missing
+dprob = DiscreteProblem(bike_sharing, u0, tspan, parms);
+
 # ╔═╡ d06fb076-76e4-4248-a940-96804ea68833
 md"""
 Create a JumpProblem and store it in `jdprob`. Use the simulation method `Direct()`."""
+
+# ╔═╡ 7644adf4-d992-48b1-b40a-12fdf30f6cb5
+# jdprob = missing
+jdprob = JumpProblem(bike_sharing, dprob, Direct());
 
 # ╔═╡ 74708270-b1ec-48c7-af32-3b970b92c706
 md"""
 Solve the problem and store it in `jdsol`.
 """
 
+# ╔═╡ 2b00df5d-994e-47a1-8068-c93ce3f1a618
+# jdsol = missing
+jdsol = solve(jdprob);
+
 # ╔═╡ 9d06c31e-3525-4889-a1de-3fe02413c7d8
 md"""
 Plot the solution. Limit the plot to `(0, 12)` for the vertical axis.
 """
-
-# ╔═╡ 0d8f53f8-0a14-4ac6-bd0c-2190d4db0909
-# @bind missing
-@bind p₁ Slider(0.0:0.1:1.0, default = 0.1, show_value=true)
-
-# ╔═╡ e20e4dd8-bdbb-4005-af68-6bf7e4ec130e
-# parms = missing
-parms = [:p₁ => p₁, :p₂ => 0.3]
-
-# ╔═╡ d4c45709-70c9-4ba0-8fb8-6b600473723d
-# dprob = missing
-dprob = DiscreteProblem(bike_sharing, u0, tspan, parms)
-
-# ╔═╡ 7644adf4-d992-48b1-b40a-12fdf30f6cb5
-# jdprob = missing
-jdprob = JumpProblem(bike_sharing, dprob, Direct())
-
-# ╔═╡ 2b00df5d-994e-47a1-8068-c93ce3f1a618
-# jdsol = missing
-jdsol = solve(jdprob)
 
 # ╔═╡ 9a90f800-3669-4831-b50b-c5405bbb9a03
 # missing
@@ -187,9 +186,7 @@ md"""
 """
 
 # ╔═╡ 747e20c4-b06b-4e78-a09a-55053cf42bf4
-md"""
-Answer: missing
-"""
+md"- Answer: missing"
 #=
 When p₁ exceeds p₂.
 =#
@@ -246,7 +243,7 @@ In the layout below, `mean_zero_counts` while contain the final mean values of t
 Use the layout below to fill in `mean_zero_counts`.
 """
 
-# ╔═╡ f269ad67-b1bb-4a99-a90f-de627425a555
+# ╔═╡ ddbfc99e-5990-466a-9e53-b0e6708b7ca3
 md"""
 !!! warning "Important note"
 
@@ -255,8 +252,6 @@ md"""
 	If we want to estimate how long there were zero bikes, we need information at regular time intervals. We can do this by setting `saveat = 0.1`. This forces the solver to record the state every 0.1 time units, thereby approximating the time that there are 0 bikes at the campus. 
 
 	Because the timepoints at which a state changes are random, we will still have a small error due to the number of bikes changing in between our chosen time intervals. Choosing a small time interval will help reduce this error. 
-
-
 """
 
 # ╔═╡ 682e9120-0e1c-4dfa-9ec6-66bb0a3f4374
@@ -342,7 +337,7 @@ Answers:
 # ╠═309035dd-5653-48a6-a53d-817e743279fa
 # ╠═71140c81-af29-4857-8020-4f94c8bd64b3
 # ╠═284f5847-9c15-41f3-a595-1e12a22df69f
-# ╟─a0da1455-bf8c-45d2-893a-f9b5c279cb59
+# ╟─a0411d81-48f6-451c-884d-754dd313c609
 # ╟─d2f32eab-0b35-4794-9219-5bcbb4c069c5
 # ╟─016842c9-9479-4061-a27e-9dc006121f23
 # ╠═6c97bf81-ef32-45a4-aa7c-c8c26ba2d2c3
@@ -356,6 +351,7 @@ Answers:
 # ╟─378878a0-5c09-4eb0-ac43-1031014ff12a
 # ╠═3ae98e83-7beb-4597-89be-80c813d4349b
 # ╟─988f79c0-9c7b-4752-a7f2-d4473ad73ce6
+# ╠═0d8f53f8-0a14-4ac6-bd0c-2190d4db0909
 # ╟─08d43ac8-a973-4d7b-baf7-4c37e54cfe24
 # ╠═e20e4dd8-bdbb-4005-af68-6bf7e4ec130e
 # ╟─238e1120-34af-4d57-8efa-aa80ab28a874
@@ -365,13 +361,12 @@ Answers:
 # ╟─74708270-b1ec-48c7-af32-3b970b92c706
 # ╠═2b00df5d-994e-47a1-8068-c93ce3f1a618
 # ╟─9d06c31e-3525-4889-a1de-3fe02413c7d8
-# ╠═0d8f53f8-0a14-4ac6-bd0c-2190d4db0909
 # ╠═9a90f800-3669-4831-b50b-c5405bbb9a03
 # ╠═fdab1897-c3c6-4957-bfd4-c3bdb456c7ea
 # ╠═f76b9671-e004-4666-ba54-bfe73915722b
 # ╟─a554fd16-aa3d-48ca-8de6-5582725c27d8
 # ╟─d6872046-b5ef-4c2d-a9bb-2418f57f715d
-# ╟─747e20c4-b06b-4e78-a09a-55053cf42bf4
+# ╠═747e20c4-b06b-4e78-a09a-55053cf42bf4
 # ╟─ce18866b-5cb8-4966-81c7-683fa65823ff
 # ╟─dcad848a-c178-4ce5-82d0-8a11aabb3b3c
 # ╟─92181028-60fc-4830-afba-2380ac91455d
@@ -381,11 +376,11 @@ Answers:
 # ╟─9ebb5b44-04d7-4b89-acdb-e40a245703d2
 # ╠═049de8d5-b221-452b-b2c4-9bc1e0c17f48
 # ╟─a73a2853-1f48-4179-9771-083794d3f137
-# ╟─f269ad67-b1bb-4a99-a90f-de627425a555
+# ╟─ddbfc99e-5990-466a-9e53-b0e6708b7ca3
 # ╠═682e9120-0e1c-4dfa-9ec6-66bb0a3f4374
 # ╟─705d3fcb-20b6-4481-a304-1d3ccd623674
 # ╠═5968317a-6c07-4655-8137-6702656bb3b4
 # ╟─ff9370d8-3395-4382-9f51-afa11748319e
 # ╠═48be49d0-0b60-44f3-8152-1ca917a4232e
 # ╟─d6452915-bdf0-48f0-8c7d-3df83c7bce72
-# ╟─4d73e614-9360-4e13-b7a4-ff7713989bf8
+# ╠═4d73e614-9360-4e13-b7a4-ff7713989bf8
