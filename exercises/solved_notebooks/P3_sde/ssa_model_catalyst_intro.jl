@@ -26,12 +26,8 @@ md"""
 
 # ╔═╡ f5f32d5d-0c13-4865-8024-ca47208c9b8e
 md"""
-Catalyst.jl is a symbolic modeling package for analysis and high performance simulation of chemical reaction networks. Catalyst defines symbolic ReactionSystems, which can be created programmatically or easily specified using Catalyst's domain specific language (DSL).
-"""
-
-# ╔═╡ 8d9af65e-0499-4a6d-afbf-5afa9903a42e
-md"""
-This notebook describes the syntax for building chemical reaction network models using Catalyst's **D**omain-**S**pecific **L**anguage (DSL). We will illustrate this by implementing and solving an infection model by means of an SSA (**S**tochastic **S**imulation **A**lgorithm).
+In this practical, we will revisit the infection model which we solved last week using Catalyst.jl. Last week we assumed that the number of people is a continuous variable, while in practice this is not the case (ever
+seen 46.3 persons?). In this session, we will instead use a Stochastic Simulation Algorithm (SSA), which is better suited for models with discrete variables, such as the number of infected individuals.
 """
 
 # ╔═╡ 9cfa5b79-2128-4d45-aa22-51da0e74f320

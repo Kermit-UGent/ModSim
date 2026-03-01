@@ -213,6 +213,17 @@ In the layout below, `mean_zero_counts` while contain the final mean values of t
 Use the layout below to fill in `mean_zero_counts`.
 """
 
+# ╔═╡ b82da9cc-ccba-45c4-92c4-2c3b2c190688
+md"""
+!!! warning "Important note"
+
+	The SSA solver only saves the state when something changes (for example, when a bike arrives or leaves). It does **not** automatically store values in between events, so it does not explicitly keep track of how long the system stays in the same state.
+
+	If we want to estimate how long there were zero bikes, we need information at regular time intervals. We can do this by setting `saveat = 0.1`. This forces the solver to record the state every 0.1 time units, thereby approximating the time that there are 0 bikes at the campus. 
+
+	Because the timepoints at which a state changes are random, we will still have a small error due to the number of bikes changing in between our chosen time intervals. Choosing a small time interval will help reduce this error. 
+"""
+
 # ╔═╡ 682e9120-0e1c-4dfa-9ec6-66bb0a3f4374
 # begin
 # 	p_values = 0.0:0.1:1.0  # different p-values
@@ -305,6 +316,7 @@ Answers:
 # ╟─9ebb5b44-04d7-4b89-acdb-e40a245703d2
 # ╠═049de8d5-b221-452b-b2c4-9bc1e0c17f48
 # ╟─a73a2853-1f48-4179-9771-083794d3f137
+# ╟─b82da9cc-ccba-45c4-92c4-2c3b2c190688
 # ╠═682e9120-0e1c-4dfa-9ec6-66bb0a3f4374
 # ╟─705d3fcb-20b6-4481-a304-1d3ccd623674
 # ╠═5968317a-6c07-4655-8137-6702656bb3b4

@@ -62,16 +62,13 @@ In order to make sure that $O$ does not become negative, you can use either `ife
 # end
 bike_sharing = @reaction_network begin
     @species O(t)=10 W(t)=2
+	# use `=>` instead of `-->` to prevent Catalyst from adding the concentrations of the reactants to the reaction rate (see https://en.wikipedia.org/wiki/Rate_equation)
 	p₁*ifelse(O>0, 1, 0), O => W
 	p₂*ifelse(W>0, 1, 0), W => O
 	# Alternatively:
 	# p₁*>(O, 0), O => W
 	# p₂*>(W, 0), W => O
 end
-#=
-If O becomes zero, then no bike will be transfered to W, hence, O will not go below zeros and W will not go above 12.
-If W becomes zero, then no bike will be transfered to O, hence, W will not go below zeros and O will not go above 12.
-=#
 
 # ╔═╡ 7227a95a-ba0c-44dc-b0b8-18d6bbf362e8
 md"""
@@ -158,7 +155,7 @@ Solve the problem and store it in `jdsol`.
 
 # ╔═╡ 2b00df5d-994e-47a1-8068-c93ce3f1a618
 # jdsol = missing
-jdsol = solve(jdprob, saveat=1);  # 
+jdsol = solve(jdprob);
 
 # ╔═╡ 9d06c31e-3525-4889-a1de-3fe02413c7d8
 md"""
@@ -246,6 +243,17 @@ In the layout below, `mean_zero_counts` while contain the final mean values of t
 Use the layout below to fill in `mean_zero_counts`.
 """
 
+# ╔═╡ ddbfc99e-5990-466a-9e53-b0e6708b7ca3
+md"""
+!!! warning "Important note"
+
+	The SSA solver only saves the state when something changes (for example, when a bike arrives or leaves). It does **not** automatically store values in between events, so it does not explicitly keep track of how long the system stays in the same state.
+
+	If we want to estimate how long there were zero bikes, we need information at regular time intervals. We can do this by setting `saveat = 0.1`. This forces the solver to record the state every 0.1 time units, thereby approximating the time that there are 0 bikes at the campus. 
+
+	Because the timepoints at which a state changes are random, we will still have a small error due to the number of bikes changing in between our chosen time intervals. Choosing a small time interval will help reduce this error. 
+"""
+
 # ╔═╡ 682e9120-0e1c-4dfa-9ec6-66bb0a3f4374
 # begin
 # 	p_values = 0.0:0.1:1.0  # different p-values
@@ -273,9 +281,14 @@ begin
 			# take a deepcopy and remake the problem for the specific p-value
 			jdprob_re = remake(deepcopy(jdprob); p=[:p₁=>p_val])
 			# solve the problem
-			jdsol_re = solve(jdprob_re, saveat=1);
+			jdsol_re = solve(jdprob_re, saveat=0.1);
 			# append the number of zeros to zero_counts_p_val
 			append!(zero_counts_p_val, count(jdsol_re[:O] .== 0))
+			# alternatively, to get the fraction of times there are 0 bikes:
+			# append!(
+			# 	zero_counts_p_val,
+			# 	count(jdsol_re[:O] .== 0)/length(jdsol_re[:O])
+			# )
 		end
 		# append the mean number of zeros to mean_zero_counts
 		append!(mean_zero_counts, mean(zero_counts_p_val))
@@ -298,7 +311,7 @@ Plot the mean zero counts as a function of the $p$-values.
 
 # ╔═╡ 48be49d0-0b60-44f3-8152-1ca917a4232e
 # missing
-plot(p_values, mean_zero_counts)
+plot(p_values, mean_zero_counts, xlabel="value of p1", ylabel="Mean number of empty bikes")
 
 # ╔═╡ d6452915-bdf0-48f0-8c7d-3df83c7bce72
 md"""
@@ -363,6 +376,7 @@ Answers:
 # ╟─9ebb5b44-04d7-4b89-acdb-e40a245703d2
 # ╠═049de8d5-b221-452b-b2c4-9bc1e0c17f48
 # ╟─a73a2853-1f48-4179-9771-083794d3f137
+# ╟─ddbfc99e-5990-466a-9e53-b0e6708b7ca3
 # ╠═682e9120-0e1c-4dfa-9ec6-66bb0a3f4374
 # ╟─705d3fcb-20b6-4481-a304-1d3ccd623674
 # ╠═5968317a-6c07-4655-8137-6702656bb3b4

@@ -28,7 +28,7 @@ md"""
 md"""
 A good festival provides sufficient food and drink. This also means that there will be a lot of discharge. As a student worker, you are responsible for determining the toilet capacity by means of a simulation.
 
-The festival has ten mobile unisex toilets and only one queue. Given that people are discreet and unpredictable, a Jump model seems appropriate.
+The festival has ten mobile unisex toilets and only one queue. Given that people are discrete and unpredictable, a Jump model seems appropriate.
 
 These are the stocks in your model:
 -  $L(t)$: the number of people in the queue (wacht_**L**_ijn) (initially zero);
