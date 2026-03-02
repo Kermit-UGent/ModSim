@@ -5,20 +5,16 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ f8a92690-990b-4341-89e1-322adbcb8d1b
-begin
-	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
-	using Pkg
-	Pkg.activate("..")
-end
+using Pkg; Pkg.activate("..")
 
 # ╔═╡ a09f814a-0c6a-11ef-0e79-a50b01287d63
-using Markdown
-
-# ╔═╡ 7f521435-63ac-4178-a4aa-93d9c45fe820
-using InteractiveUtils
+using Markdown, InteractiveUtils
 
 # ╔═╡ 015050b3-3339-4b1a-ad7d-c358cce73675
-using Catalyst, OrdinaryDiffEq
+using Catalyst, ModelingToolkit, OrdinaryDiffEq
+
+# ╔═╡ a83f424f-1bbb-4e71-af81-302c0ce68907
+using ModelingToolkit: t_nounits as t, D_nounits as D
 
 # ╔═╡ dbfe4800-0974-4ca1-bb0a-d8803409a98b
 using Turing, StatsPlots, StatsBase
@@ -71,11 +67,11 @@ In this notebook, three different models will be used, each modelling the yield 
 
 - Logistic growth model: $\cfrac{dW}{dt} = \mu \left( 1 - \cfrac{W}{W_f} \right) W$
 - Exponential growth model: $\cfrac{dW}{dt} = \mu \left( W_f - W \right)$
-- Gompertz growth model: $\cfrac{dW}{dt} = \left( \mu - D \ln(W) \right) W$
+- Gompertz growth model: $\cfrac{dW}{dt} = \left( \mu - d \ln(W) \right) W$
 
-with output $W$ the grass yield, and $W_f$, $\mu$ and $D$ parameters. The table below show the parameter values and the initial condition that will be used as initial values for the optimization algorithm:
+with output $W$ the grass yield, and $W_f$, $\mu$ and $d$ parameters. The table below show the parameter values and the initial condition that will be used as initial values for the optimization algorithm:
 
-|             | $\mu$      | $W_f$       | $D$          | $W_0$          |
+|             | $\mu$      | $W_f$       | $d$          | $W_0$          |
 |:----------- |:----------:|:-----------:|:------------:|:------------:|
 | Logistic    |  0.07      | 10.0        |              | 2.0          |
 | Exponential |  0.02      | 10.0        |              | 2.0          |
@@ -100,25 +96,44 @@ Variables containing the initial condition and parameters values will be defined
 # ╔═╡ 9a5bc72b-346d-4e95-a873-783037ed98bc
 md"""
 ### Logistic growth model
+"""
 
-We will illustrate the calibration with the logistic growth model:
+# ╔═╡ 4b17f7e6-26b0-425a-9f53-ccf1689639fe
+md"""
+We will illustrate the calibration with the logistic growth model. The latter can be done via a Catalyst reaction network model or via a model built with ModelingToolkit. As an example, we will show both possibilities for the logistic growth model.
+"""
+
+# ╔═╡ 6736542c-5378-480e-a56b-65956b416225
+md"""
+#### 1) Catalyst based model
 """
 
 # ╔═╡ ba56adb1-9405-40d5-be48-4273b42ab145
-growth_log = @reaction_network begin
-	μ*(1-W/Wf), W --> 2W
-end
+# growth_log = @reaction_network begin
+# 	@species W(t)=2.0
+# 	@parameters μ=0.07 Wf=10.0
+# 	μ*(1-W/Wf), W --> 2W
+# end
 
-# ╔═╡ 6e3e53ea-4fe7-4a34-8b00-cbf8d63a3203
-osys_log  = convert(ODESystem, growth_log)
-
-# ╔═╡ f4748167-b635-47a1-9015-32e1258c0afa
+# ╔═╡ 1c311b6f-6b18-4170-b500-33a8e4d3cb2d
 md"""
-Check the order of the parameters:
+#### ̇2) ModelingToolkit based model
 """
 
-# ╔═╡ a022b2ab-68a0-40ca-b914-7a2adcf4ae39
-parameters(growth_log)
+# ╔═╡ 50220e1f-8e42-44da-be03-08c11df967f0
+@variables W(t)
+
+# ╔═╡ 449286b0-0210-4c6b-b28f-fca87b52d674
+@parameters μ Wf d
+
+# ╔═╡ f720eac9-cb29-4eef-ac94-471395941c0f
+# IF YOU UNCOMMENT THE FOLLOWING LINE, PLEASE COMMENT THE CATALYST MODEL FIRST!!!
+@mtkbuild growth_log = ODESystem([D(W) ~ μ*(1 - W/Wf)*W], t)
+
+# ╔═╡ 024cce41-0469-415f-bdc5-69e8d38c4b69
+md"""
+#### Creating the ODEProblem
+"""
 
 # ╔═╡ acccb2fa-12b2-4fc7-91e3-58a4b1a02892
 md"""
@@ -126,13 +141,18 @@ Next, we will need to create an `ODEProblem` in advance before we can optimize s
 """
 
 # ╔═╡ e54ea8d1-0854-44fa-aed8-45d106e921e4
-u0_log = [:W => 2.0]
+u0_log = [:W=>2.0]
 
 # ╔═╡ 8d96eb17-ce19-4523-916f-3cd0441a16ca
-params_log = [:μ => 0.07, :Wf => 10.0]
+parms_log = [:μ=>0.07, :Wf=>10.0]
+
+# ╔═╡ 561f97d4-b7c3-491a-9031-5148336867ea
+md"""
+Now you can choose which model (based on Catalyst or MTK) to use when creating the ODEProblem. They should both render the same results. *Leave one of them commented!*
+"""
 
 # ╔═╡ 5c9db9df-0cbd-41ac-afe9-fb5616c967be
-oprob_log = ODEProblem(growth_log, u0_log, tspan, params_log)
+oprob_log = ODEProblem(growth_log, u0_log, tspan, parms_log);
 
 # ╔═╡ 1aa44f2b-6f33-437f-b9dd-89762d9f28ea
 md"""
@@ -189,8 +209,8 @@ We will thereby take an Inverse Gamma prior distribution for $\sigma_W$ and LogN
     μ ~ LogNormal()
     Wf ~ LogNormal()
 	u0_log = [:W => W0]
-	params_log = [:μ => μ, :Wf => Wf]
-	oprob_log = ODEProblem(growth_log, u0_log, tspan, params_log)
+	parms_log = [:μ => μ, :Wf => Wf]
+	oprob_log = ODEProblem(growth_log, u0_log, tspan, parms_log)
     osol_log = solve(oprob_log, AutoTsit5(Rosenbrock23()), saveat=t_meas)
     W_meas ~ MvNormal(osol_log[:W], σ_W^2 * I)
 end
@@ -231,11 +251,11 @@ results_log_mle = optimize(growth_log_inf, MLE(), NelderMead())
 
 # ╔═╡ e55404ab-6762-4f39-bb42-9c195334a214
 md"""
-You can visualize a summary of the optimized parameters by piping them to `coeftable`:
+You can visualize a summary of the optimized parameters by piping them to `coeftable`. Beware that this can take a lot of time...
 """
 
 # ╔═╡ 80e7f6b8-7592-48a3-8587-f1953d1bfcd8
-results_log_mle |> coeftable
+# results_log_mle |> coeftable
 
 # ╔═╡ a1ca7d0e-639c-42d4-be09-5c61a2008f29
 md"""
@@ -262,7 +282,7 @@ Setting up initial condition with optimized initial condition:
 """
 
 # ╔═╡ 590b1006-0e37-4668-9b4a-3588fab45696
-u0_opt1_log = [:W => W0_opt1_log]
+u0_opt1_log = [:W=>W0_opt1_log]
 
 # ╔═╡ 8ff28a2e-185d-4dca-ad3b-a0b1507646d6
 md"""
@@ -270,7 +290,7 @@ Setting up parameter values with optimized parameter values:
 """
 
 # ╔═╡ 14d24cbd-3259-41bb-9013-b4fe25a3be4c
-params_opt1_log = [:μ => μ_opt1_log, :Wf => Wf_opt1_log]
+parms_opt1_log = [:μ=>μ_opt1_log, :Wf=>Wf_opt1_log]
 
 # ╔═╡ 6c134677-3ec1-4e0a-88b5-01341a096675
 md"""
@@ -278,7 +298,7 @@ Next, we create an ODEProblem and solve it:
 """
 
 # ╔═╡ 7a81f4a0-8f7c-4e05-9c3f-2438eab9b691
-oprob_opt1_log = ODEProblem(growth_log, u0_opt1_log, tspan, params_opt1_log)
+oprob_opt1_log = ODEProblem(growth_log, u0_opt1_log, tspan, parms_opt1_log)
 
 # ╔═╡ ac80099b-d8f0-4eba-809d-d482bd354d35
 osol_opt1_log = solve(oprob_opt1_log, Tsit5(), saveat=0.5)
@@ -310,11 +330,11 @@ results_log_map = optimize(growth_log_inf, MAP(), NelderMead())
 
 # ╔═╡ 07efb21a-0dac-46d5-b9e1-8f4757c6cedf
 md"""
-You can visualize a summary of the optimized parameters by piping them to `coeftable`:
+You can visualize a summary of the optimized parameters by piping them to `coeftable`. Beware that this can take a lot of time...
 """
 
 # ╔═╡ a93a7eeb-aad1-49f3-a05f-1512adb08b6b
-results_log_map |> coeftable
+# results_log_map |> coeftable
 
 # ╔═╡ ccc66805-efce-4f25-b76b-7cff23901ba4
 md"""
@@ -341,7 +361,7 @@ Setting up initial condition with optimized initial condition:
 """
 
 # ╔═╡ a570ebab-64de-4934-b887-77a8e2fb42e8
-u0_opt2_log = [:W => W0_opt2_log]
+u0_opt2_log = [:W=>W0_opt2_log]
 
 # ╔═╡ feee9cc1-ebe2-4c77-a11e-53ca00864ccf
 md"""
@@ -349,7 +369,7 @@ Setting up parameter values with optimized parameter values:
 """
 
 # ╔═╡ 73e86176-f314-463c-8821-51c0f3cc1a56
-params_opt2_log = [:μ => μ_opt2_log, :Wf => Wf_opt2_log]
+parms_opt2_log = [:μ=>μ_opt2_log, :Wf=>Wf_opt2_log]
 
 # ╔═╡ c17c4e00-8688-4f9c-b0ae-741d70601aba
 md"""
@@ -357,7 +377,7 @@ Next, we create an ODEProblem and solve it:
 """
 
 # ╔═╡ f751b962-1810-429c-b34b-658b63fa9ba0
-oprob_opt2_log = ODEProblem(growth_log, u0_opt2_log, tspan, params_opt2_log)
+oprob_opt2_log = ODEProblem(growth_log, u0_opt2_log, tspan, parms_opt2_log)
 
 # ╔═╡ 0fd058cc-9bd8-4e12-b5dd-79818519165b
 osol_opt2_log = solve(oprob_opt2_log, Tsit5(), saveat=0.5)
@@ -388,7 +408,7 @@ We will use Markov chain Monte Carlo (MCMC) method in combination with the No U-
 results_log_nuts = sample(growth_log_inf, NUTS(), 500)
 
 # ╔═╡ 19c362cb-2764-41c9-a571-2e8e2bfcde93
-summarize(results_log_nuts)
+# summarize(results_log_nuts)
 
 # ╔═╡ 93db47b2-34e8-43b4-beac-b5620fd444e7
 W0_opt3_log = summarize(results_log_nuts)[:W0, :mean]
@@ -410,7 +430,7 @@ Setting up initial condition with optimized initial condition:
 """
 
 # ╔═╡ ecf4b951-9b5f-441a-89f5-b0ccd040ba02
-u0_opt3_log = [:W => W0_opt3_log]
+u0_opt3_log = [:W=>W0_opt3_log]
 
 # ╔═╡ b92bf532-5610-4ce8-b469-154b20cc5956
 md"""
@@ -418,7 +438,7 @@ Setting up parameter values with optimized parameter values:
 """
 
 # ╔═╡ e629fbd1-a7c7-4dc3-8b7d-bdca380fe5ad
-params_opt3_log = [:μ => μ_opt3_log, :Wf => Wf_opt3_log]
+parms_opt3_log = [:μ=>μ_opt3_log, :Wf=>Wf_opt3_log]
 
 # ╔═╡ a48df980-4847-418e-813d-1875d032ffd9
 md"""
@@ -426,7 +446,7 @@ Next, we create an ODEProblem and solve it:
 """
 
 # ╔═╡ 348e7454-c6dc-4d1e-b18b-6b34bc2fc0fc
-oprob_opt3_log = ODEProblem(growth_log, u0_opt3_log, tspan, params_opt3_log)
+oprob_opt3_log = ODEProblem(growth_log, u0_opt3_log, tspan, parms_opt3_log)
 
 # ╔═╡ f71f0cf4-b63e-452c-b971-f30d7503f1e5
 osol_opt3_log = solve(oprob_opt3_log, Tsit5(), saveat=0.5)
@@ -457,17 +477,27 @@ Calibrate the initial condition and both parameters of the exponential growth mo
 
 # ╔═╡ cdab3079-04b0-4a44-b770-468c20e321e4
 md"""
-We have seen before that a possible *reaction network object* for the exponential growth model can be implemented as follows:
+Implement a *reaction network object* using Catalyst for the exponential growth model:
 """
 
 # ╔═╡ cf1a144e-09e9-42a3-b2a3-b8676a200a39
+# growth_exp = @reaction_network begin
+#     missing
+#     missing
+# end
 growth_exp = @reaction_network begin
     μ*Wf, 0 --> W
     μ, W --> 0
 end
 
-# ╔═╡ 85c57cd3-bf00-437e-937b-f0c3b62f74ff
-parameters(growth_exp)
+# ╔═╡ d69ed5dd-80cd-427e-9245-e42576a4688d
+md"""
+Convert the reaction network model into an ODE system to verify.
+"""
+
+# ╔═╡ 8b429656-1c57-4278-9633-71311f400ed8
+# missing
+convert(ODESystem, growth_exp)
 
 # ╔═╡ c6d373f4-f13c-4135-823d-ee8fbeb71b56
 md"""
@@ -475,16 +505,16 @@ Create an `ODEProblem`. Use the values in the aforementioned table as initial va
 """
 
 # ╔═╡ a97abaa7-b642-4201-86f1-5c8995b07536
-# u₀_exp = missing        # Uncomment and complete the instruction
-u0_exp = [:W => 2.0]
+# u₀_exp = missing
+u0_exp = [:W=>2.0]
 
 # ╔═╡ 387730b4-bd06-492f-94e6-231bd68b3436
-# params_exp = missing    # Uncomment and complete the instruction
-params_exp = [:μ => 0.02, :Wf => 10.0]
+# parms_exp = missing
+parms_exp = [:μ=>0.02, :Wf=>10.0]
 
 # ╔═╡ 290a7fe8-3b1e-423f-8b30-9bd8903d2e8f
-# oprob_exp = missing     # Uncomment and complete the instruction
-oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, params_exp)
+# oprob_exp = missing
+oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, parms_exp)
 
 # ╔═╡ febe2b67-2a8f-4575-946d-30877bd5f2d4
 md"""
@@ -497,14 +527,13 @@ Declare the Turing model. Take the same priors (and distributions) as before.
 """
 
 # ╔═╡ 2c6ae74c-2da4-4867-ad8a-f4e835101d63
-# Uncomment and complete the instruction
 # @model function growth_exp_inference(t_meas, W_meas)
 #     σ_W ~ missing
 #     W0 ~ missing
 #     μ ~ missing
 #     Wf ~ missing
 #     u0_exp = missing
-#     params_exp = missing
+#     parms_exp = missing
 #     oprob_exp = missing
 #     osol_exp = missing
 #     W_meas ~ missing
@@ -515,8 +544,8 @@ Declare the Turing model. Take the same priors (and distributions) as before.
     μ ~ LogNormal()
     Wf ~ LogNormal()
 	u0_exp = [:W => W0]
-	params_exp = [:μ => μ, :Wf => Wf]
-	oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, params_exp)
+	parms_exp = [:μ => μ, :Wf => Wf]
+	oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, parms_exp)
     osol_exp = solve(oprob_exp, AutoTsit5(Rosenbrock23()), saveat=t_meas)
     W_meas ~ MvNormal(osol_exp[:W], σ_W^2 * I)
 end
@@ -527,7 +556,7 @@ Provide the measurements to the Turing model.
 """
 
 # ╔═╡ fff17cf7-173d-4f64-94a9-4bf46acc882d
-# growth_exp_inf = missing           # Uncomment and complete the instruction
+# growth_exp_inf = missing
 growth_exp_inf = growth_exp_inference(t_meas, W_meas)
 
 # ╔═╡ eee55784-a641-445e-be75-0b19e2a94754
@@ -536,17 +565,17 @@ Optimize the priors ($\sigma_W$, $W_0$, $\mu$ and $W_f$). Do this with `MLE` met
 """
 
 # ╔═╡ 7844e4f5-3c7d-4b4b-beee-970c998c67a6
-# results_exp_mle = missing          # Uncomment and complete the instruction
+# results_exp_mle = missing
 results_exp_mle = optimize(growth_exp_inf, MLE(), NelderMead())
 
 # ╔═╡ c81d0140-3f4e-4eb4-8a77-1f48c5e0ecbf
 md"""
-Visualize a summary of the optimized parameters.
+Visualize a summary of the optimized parameters. Beware: this can take a lot of time...
 """
 
 # ╔═╡ 7456455b-4f31-488f-990f-6ce534038e08
-# missing              # Uncomment and complete the instruction
-results_exp_mle |> coeftable
+# missing
+# results_exp_mle |> coeftable
 
 # ╔═╡ b10c2ce4-d363-429c-a64c-ec29652137a5
 md"""
@@ -554,15 +583,15 @@ Get the optimized values and assign them to `W0_opt_exp`, `μ_opt_exp` and `Wf_o
 """
 
 # ╔═╡ 23b629a6-6866-416a-a768-9617ce6301db
-# W₀_opt_exp = missing            # Uncomment and complete the instruction
+# W₀_opt_exp = missing
 W0_opt_exp = coef(results_exp_mle)[:W0]
 
 # ╔═╡ 8788082d-f5d1-4385-8037-a0d360a841c7
-# μ_opt_exp = missing             # Uncomment and complete the instruction
+# μ_opt_exp = missing
 μ_opt_exp = coef(results_exp_mle)[:μ]
 
 # ╔═╡ 03a4fa85-08db-46d4-bb53-c0ccea90a211
-# Wf_opt_exp = missing            # Uncomment and complete the instruction
+# Wf_opt_exp = missing
 Wf_opt_exp = coef(results_exp_mle)[:Wf]
 
 # ╔═╡ 8f5e1413-227c-44fa-bb2d-3653cbc27e38
@@ -576,8 +605,8 @@ Set up initial condition with optimized initial condition:
 "
 
 # ╔═╡ 30602ff1-041b-4fca-bf8e-55ff57df9e37
-# u₀_opt_exp = missing                 # Uncomment and complete the instruction
-u0_opt_exp = [:W => W0_opt_exp]
+# u₀_opt_exp = missing
+u0_opt_exp = [:W=>W0_opt_exp]
 
 # ╔═╡ 881011be-6434-416f-915b-3333e8dea32f
 md"""
@@ -585,8 +614,8 @@ Set up parameter values with optimized parameter values:
 """
 
 # ╔═╡ 5602b88a-07f8-438b-994c-65f11e17a0ba
-# params_opt_exp = missing       # Uncomment and complete the instruction
-params_opt_exp = [:μ => μ_opt_exp, :Wf => Wf_opt_exp]
+# parms_opt_exp = missing
+parms_opt_exp = [:μ=>μ_opt_exp, :Wf=>Wf_opt_exp]
 
 # ╔═╡ 25be4255-0888-4ecd-a2fd-d66402c5cb50
 md"""
@@ -594,11 +623,11 @@ Create an ODEProblem and solve it. Use `Tsit5()` and `saveas=0.5`.
 """
 
 # ╔═╡ 36e8a174-d526-45ee-b3c6-88d698ad5d5f
-# oprob_opt_exp = missing        # Uncomment and complete the instruction
-oprob_opt_exp = ODEProblem(growth_exp, u0_opt_exp, tspan, params_opt_exp)
+# oprob_opt_exp = missing
+oprob_opt_exp = ODEProblem(growth_exp, u0_opt_exp, tspan, parms_opt_exp)
 
 # ╔═╡ 7594147d-b3da-4e0d-896d-41baacb6d7be
-# osol_opt_exp = missing       # Uncomment and complete the instruction
+# osol_opt_exp = missing
 osol_opt_exp = solve(oprob_opt_exp, Tsit5(), saveat=0.5)
 
 # ╔═╡ 8e047be9-f0f0-4a75-91b5-c523f55f8c67
@@ -607,10 +636,9 @@ Plot $W$ simulated with the optimized initial value and parameter values togethe
 """
 
 # ╔═╡ 1a9587aa-2356-48df-abcc-2ce874fa5d24
-# Uncomment and complete the instruction
 # begin
-# missing
-# missing
+# 	missing
+# 	missing
 # end
 begin
 	plot(osol_opt_exp, label="Exponential growth", xlabel="t",
@@ -627,13 +655,12 @@ Calibrate the initial condition and both parameters of the Gompertz growth model
 
 # ╔═╡ e754826a-7411-4072-b0dc-a4bad7a15f98
 md"""
-We have seen before that a possible *reaction network object* for the Gompertz growth model can be implemented as follows:
+Implement a system using MTK for the Gompertz growth model.\
+*Hint*: no need to redefine the variable `W(t)` and the parameters `μ` and `d` because they are defined at the beginning of this notebook.
 """
 
-# ╔═╡ bc1edcbe-46eb-4531-9c5f-dee8d5dc2ff9
-growth_gom = @reaction_network begin
-	μ-D*log(W), W --> 2W
-end
+# ╔═╡ 6e85c08e-9a97-4897-9c81-89517f55e254
+@mtkbuild growth_gom = ODESystem([D(W) ~ (μ - d*log(W))*W], t)
 
 # ╔═╡ 47fb9e4c-df6a-4811-9980-99d595a34908
 md"""
@@ -641,16 +668,16 @@ Create an `ODEProblem`. Use the values in the aforementioned table as initial va
 """
 
 # ╔═╡ bbd150de-ff9a-4127-a0dd-2f9762f92b07
-# u₀_gom = missing           # Uncomment and complete the instruction
-u0_gom = [:W => 2.0]
+# u0_gom = missing
+u0_gom = [:W=>2.0]
 
 # ╔═╡ da5a0cbb-b033-46f1-a300-3954de138835
-# params_gom = missing       # Uncomment and complete the instruction
-params_gom = [:μ => 0.09, :D => 0.04]
+# parms_gom = missing
+parms_gom = [:μ=>0.09, :d=>0.04]
 
 # ╔═╡ 73da8f53-c3af-43b0-9b23-60471f1e3587
-# oprob_gom = missing        # Uncomment and complete the instruction
-oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, params_gom)
+# oprob_gom = missing
+oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, parms_gom)
 
 # ╔═╡ b0e67564-efe8-4fb2-bcf2-a711b770244e
 md"""
@@ -664,12 +691,14 @@ Declare the Turing model. Take the same priors as before.
 # Take for $\sigma_W$ and $W_0$ the same priors (and distributions) as before, but take for $\mu$ a Uniform prior distribution in the range $[0, 2]$ and the same for $D$ but in the range $[0, 1]$.
 
 # ╔═╡ c739a908-2353-4e7a-8fbd-f640dc8cabe0
-# Uncomment and complete the instruction
 # @model function growth_gom_inference(t_meas, W_meas)
 #     σ_W ~ missing
 #     W0 ~ missing
 #     μ ~ missing
-#     D ~ missing
+#     d ~ missing
+#     u0_gom = missing
+#     parms_gom = missing
+#     oprob_gom = missing
 #     osol_gom = missing
 #     W_meas ~ missing
 # end
@@ -677,10 +706,10 @@ Declare the Turing model. Take the same priors as before.
     σ_W ~ InverseGamma()
     W0 ~ LogNormal()
     μ ~ LogNormal()
-    D ~ LogNormal()
+    d ~ LogNormal()
 	u0_gom = [:W => W0]
-	params_gom = [:μ => μ, :D => D]
-	oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, params_gom)
+	parms_gom = [:μ => μ, :d => d]
+	oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, parms_gom)
     osol_gom = solve(oprob_gom, AutoTsit5(Rosenbrock23()), saveat=t_meas)
     W_meas ~ MvNormal(osol_gom[:W], σ_W^2 * I)
 end
@@ -691,7 +720,7 @@ Provide the measurements to the Turing model.
 """
 
 # ╔═╡ cd1cf2f8-9f7f-4ed4-9cb7-1a6efee68ab4
-# growth_gom_inf = missing         # Uncomment and complete the instruction
+# growth_gom_inf = missing
 growth_gom_inf = growth_gom_inference(t_meas, W_meas)
 
 # ╔═╡ aba74ee0-0163-4e15-8b49-d8dcad4839f7
@@ -700,17 +729,17 @@ Optimize the priors ($\sigma_W$, $W_0$, $\mu$ and $D$). Do this with `MLE` metho
 """
 
 # ╔═╡ 0eda4142-1aaf-4e17-bd78-857e13e94acd
-# results_gom_mle = missing             # Uncomment and complete the instruction
+# results_gom_mle = missing
 results_gom_mle = optimize(growth_gom_inf, MLE(), NelderMead())
 
 # ╔═╡ 50629194-98ed-4d45-86a2-95ac22daac29
 md"""
-Visualize a summary of the optimized parameters.
+Visualize a summary of the optimized parameters. Beware: this can take a lot of time...
 """
 
 # ╔═╡ 9c239fc6-275c-4d64-9fa2-6fd57295b757
-# missing                       # Uncomment and complete the instruction
-results_gom_mle |> coeftable
+# missing
+# results_gom_mle |> coeftable
 
 # ╔═╡ dede17f2-655d-4871-b6de-5a32804947dd
 md"""
@@ -718,16 +747,16 @@ Get the optimized values and assign them to `W0_opt_gom`, `μ_opt_gom` and `D_op
 """
 
 # ╔═╡ e8c3f042-6058-4040-a67e-18563c04ee93
-# W₀_opt_gom = missing          # Uncomment and complete the instruction
+# W₀_opt_gom = missing
 W0_opt_gom = coef(results_gom_mle)[:W0]
 
 # ╔═╡ 665f4d03-3521-475a-a195-f861fd26bb69
-# μ_opt_gom = missing           # Uncomment and complete the instruction
+# μ_opt_gom = missing
 μ_opt_gom = coef(results_gom_mle)[:μ]
 
 # ╔═╡ 13775d58-ac61-431c-a6c9-447c1eec7942
-# D_opt_gom = missing           # Uncomment and complete the instruction
-D_opt_gom = coef(results_gom_mle)[:D]
+# D_opt_gom = missing
+d_opt_gom = coef(results_gom_mle)[:d]
 
 # ╔═╡ bc92f996-b626-4965-a286-d2c848eb1a21
 md"""
@@ -740,8 +769,8 @@ Set up initial condition with optimized initial condition:
 """
 
 # ╔═╡ 23fd9fd9-a13c-4c56-a0b4-daec6f1d2cd8
-# u₀_opt_gom = missing          # Uncomment and complete the instruction
-u0_opt_gom = [:W => W0_opt_gom]
+# u₀_opt_gom = missing
+u0_opt_gom = [:W=>W0_opt_gom]
 
 # ╔═╡ 6f414d15-af0a-452a-98a1-dc0b7e54d617
 md"""
@@ -749,8 +778,8 @@ Set up parameter values with optimized parameter values:
 """
 
 # ╔═╡ 57ee8a12-24df-4598-935c-f5e259b504cb
-# params_opt_gom = missing     # Uncomment and complete the instruction
-params_opt_gom = [:μ => μ_opt_gom, :D => D_opt_gom]
+# parms_opt_gom = missing
+parms_opt_gom = [:μ=>μ_opt_gom, :d=>d_opt_gom]
 
 # ╔═╡ 48bc085c-9ce6-4752-a5a9-a814f803f571
 md"""
@@ -758,11 +787,11 @@ Create an ODEProblem and solve it. Use `Tsit5()` and `saveas=0.5`.
 """
 
 # ╔═╡ 5b9b2e5b-9deb-4ff6-a923-b15b8b08f0c9
-# oprob_opt_gom = missing      # Uncomment and complete the instruction
-oprob_opt_gom = ODEProblem(growth_gom, u0_opt_gom, tspan, params_opt_gom)
+# oprob_opt_gom = missing
+oprob_opt_gom = ODEProblem(growth_gom, u0_opt_gom, tspan, parms_opt_gom)
 
 # ╔═╡ 66ee9655-a006-4c0f-b1f1-5576efa8f896
-# osol_opt_gom = missing        # Uncomment and complete the instruction
+# osol_opt_gom = missing
 osol_opt_gom = solve(oprob_opt_gom, Tsit5(), saveat=0.5)
 
 # ╔═╡ 52d7975a-5346-447f-9aad-4ecd11b6460a
@@ -771,10 +800,9 @@ Finally, we plot $W$ simulated with the optimized initial value and parameter va
 """
 
 # ╔═╡ e96efd6a-a666-4120-8480-9423e5d82ae1
-# Uncomment and complete the instruction
 # begin
-# missing
-# missing
+# 	missing
+# 	missing
 # end
 begin
 	plot(osol_opt_gom, label="Gompertz growth", xlabel="t",
@@ -791,14 +819,14 @@ Which grass growth model fits best these data? How can you prove this numericall
 md"- Answer: missing"
 
 # ╔═╡ Cell order:
+# ╟─37da8786-fea0-4c2f-a76f-6e6c68325a78
 # ╠═a09f814a-0c6a-11ef-0e79-a50b01287d63
-# ╠═7f521435-63ac-4178-a4aa-93d9c45fe820
 # ╠═f8a92690-990b-4341-89e1-322adbcb8d1b
 # ╠═015050b3-3339-4b1a-ad7d-c358cce73675
+# ╠═a83f424f-1bbb-4e71-af81-302c0ce68907
 # ╠═dbfe4800-0974-4ca1-bb0a-d8803409a98b
 # ╠═6e227e07-166a-41ce-839a-4c4c72addb23
 # ╠═b992c080-a0ce-4188-b632-e734a141e67d
-# ╟─37da8786-fea0-4c2f-a76f-6e6c68325a78
 # ╟─4623369d-8c5a-422d-9e40-0f1dd7586260
 # ╟─3cb0a166-ac53-4c3f-9832-e93742040cfb
 # ╟─987f0a4d-e416-4ceb-adbe-3dcdca9d0996
@@ -809,13 +837,18 @@ md"- Answer: missing"
 # ╠═5b320989-3e0b-447b-bc9a-25fb221ce609
 # ╟─2481cd4f-0efc-4450-ab3d-4a5492597f36
 # ╟─9a5bc72b-346d-4e95-a873-783037ed98bc
+# ╟─4b17f7e6-26b0-425a-9f53-ccf1689639fe
+# ╟─6736542c-5378-480e-a56b-65956b416225
 # ╠═ba56adb1-9405-40d5-be48-4273b42ab145
-# ╠═6e3e53ea-4fe7-4a34-8b00-cbf8d63a3203
-# ╟─f4748167-b635-47a1-9015-32e1258c0afa
-# ╠═a022b2ab-68a0-40ca-b914-7a2adcf4ae39
+# ╟─1c311b6f-6b18-4170-b500-33a8e4d3cb2d
+# ╠═50220e1f-8e42-44da-be03-08c11df967f0
+# ╠═449286b0-0210-4c6b-b28f-fca87b52d674
+# ╠═f720eac9-cb29-4eef-ac94-471395941c0f
+# ╟─024cce41-0469-415f-bdc5-69e8d38c4b69
 # ╟─acccb2fa-12b2-4fc7-91e3-58a4b1a02892
 # ╠═e54ea8d1-0854-44fa-aed8-45d106e921e4
 # ╠═8d96eb17-ce19-4523-916f-3cd0441a16ca
+# ╟─561f97d4-b7c3-491a-9031-5148336867ea
 # ╠═5c9db9df-0cbd-41ac-afe9-fb5616c967be
 # ╟─1aa44f2b-6f33-437f-b9dd-89762d9f28ea
 # ╟─b2b433ed-0266-4bea-a7e8-32adba542d4c
@@ -890,7 +923,8 @@ md"- Answer: missing"
 # ╟─4aa71200-006b-4a15-ae75-67e36aa81522
 # ╟─cdab3079-04b0-4a44-b770-468c20e321e4
 # ╠═cf1a144e-09e9-42a3-b2a3-b8676a200a39
-# ╠═85c57cd3-bf00-437e-937b-f0c3b62f74ff
+# ╟─d69ed5dd-80cd-427e-9245-e42576a4688d
+# ╠═8b429656-1c57-4278-9633-71311f400ed8
 # ╟─c6d373f4-f13c-4135-823d-ee8fbeb71b56
 # ╠═a97abaa7-b642-4201-86f1-5c8995b07536
 # ╠═387730b4-bd06-492f-94e6-231bd68b3436
@@ -920,7 +954,7 @@ md"- Answer: missing"
 # ╠═1a9587aa-2356-48df-abcc-2ce874fa5d24
 # ╟─785d500b-f8ea-446a-9952-2a5fd5d83d24
 # ╟─e754826a-7411-4072-b0dc-a4bad7a15f98
-# ╠═bc1edcbe-46eb-4531-9c5f-dee8d5dc2ff9
+# ╠═6e85c08e-9a97-4897-9c81-89517f55e254
 # ╟─47fb9e4c-df6a-4811-9980-99d595a34908
 # ╠═bbd150de-ff9a-4127-a0dd-2f9762f92b07
 # ╠═da5a0cbb-b033-46f1-a300-3954de138835
@@ -949,4 +983,4 @@ md"- Answer: missing"
 # ╟─52d7975a-5346-447f-9aad-4ecd11b6460a
 # ╠═e96efd6a-a666-4120-8480-9423e5d82ae1
 # ╟─f0b4772d-a72b-44e0-a3a1-ba9ad4c4dfeb
-# ╟─7e98a771-52bb-484e-82ab-2e42e7cb4053
+# ╠═7e98a771-52bb-484e-82ab-2e42e7cb4053
