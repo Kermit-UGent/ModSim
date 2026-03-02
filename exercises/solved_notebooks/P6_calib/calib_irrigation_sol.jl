@@ -1,36 +1,26 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ 55675f3d-2fae-4a97-a0a0-ead29a6352e6
-begin
-	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
-	using Pkg
-	Pkg.activate("..")
-end
+using Pkg; Pkg.activate("..")
 
 # ╔═╡ 2b010e5c-1121-11ef-16fe-a5e3317122e4
-using Markdown
-
-# ╔═╡ 6750d246-8e7a-4cfb-810e-d1100aa4fdef
-using InteractiveUtils
+using Markdown, InteractiveUtils
 
 # ╔═╡ 4947b0fd-13be-4f6a-b605-ed35b509d7ff
-using Catalyst, OrdinaryDiffEq
+using ModelingToolkit, OrdinaryDiffEq
 
-# ╔═╡ 61d14819-ba44-40fe-95a9-9d7b0bf3dc33
-using Turing
+# ╔═╡ 78d4e8ab-29ec-435a-9f4a-a480ddf1bbde
+using ModelingToolkit: t_nounits as t, D_nounits as D
 
 # ╔═╡ f6e77c8d-de11-4b9d-93c6-45bdcfbbbf9b
-using StatsPlots, StatsBase
+using StatsPlots, StatsBase, Turing
 
 # ╔═╡ 9345dd8f-0a60-4aaf-a27f-ef8bf860f495
-using LinearAlgebra
-
-# ╔═╡ ea02aff2-7fb8-4b8f-8d0f-0bb3c6150708
-using Optim
+using LinearAlgebra, Optim
 
 # ╔═╡ 55d5400d-1777-4918-a030-b94cb9a59f63
 md"
@@ -39,32 +29,39 @@ md"
 
 # ╔═╡ 8f1afdec-b78d-4aba-a74f-cd3e4b35fab1
 md"""
-In one of the previous practica we were introduced to an irrigation experiment carried out on a soil column consisting of two layers of soil, each with specific soil characteristics. However, here the volume of water per unit of time, $R$, irrigated evenly over the soil column, will be kept constant at $5\;mm\,h^{-1}$ in these new experiments.
+In one of the previous practica we were introduced to an irrigation experiment carried out on a soil column consisting of two layers of soil, each with specific soil characteristics. However, here the volume of water per unit of time, $r$, irrigated evenly over the soil column, will be kept constant at $5\;mm\,h^{-1}$ in these new experiments.
 
 The water falls on the upper layer and percolates to the lower layer. The relative moisture content in both layers (i.e., relative to their residual moisture contents) is denoted by $S_1$ and $S_2$. 
 
 A model description of the relative moisture content in both soil layers is given by:
 
 $$\begin{align}
-\frac{dS_1}{dt} &= R\left(1-\cfrac{S_{1,res}}{S_{max}}\right) - \cfrac{R}{S_{max}}S_1 - \cfrac{k}{S_{max}}S_1 \\
+\frac{dS_1}{dt} &= r\left(1-\cfrac{S_{1,res}}{S_{max}}\right) - \cfrac{r}{S_{max}}S_1 - \cfrac{k}{S_{max}}S_1 \\
 \frac{dS_2}{dt} &= \cfrac{k}{S_{max}}S_1 - v \,S_2^2
 \end{align}$$
 
 where $v = 10^{-3}\;h^{-1}\,mm^{-1}$ and $S_{1,res}=10 \;mm$. Previously, we also assumed $k = 3\;mm\,h^{-1}$ and $S_{max} = 150\;mm$.
 """
 
-# ╔═╡ ad42d3a7-6d83-4362-aa3f-31628a1db9b2
-md"""
-The *reaction network object* for this model could be set up as:
-"""
+# ╔═╡ 2005fc6d-bcfa-4ec4-a7df-8c7b40db44d8
+# @variables missing
+@variables S₁(t) S₂(t)
 
-# ╔═╡ dc26abff-f8ab-4881-9acf-7b325b386a16
-irrigation_mod = @reaction_network begin
-    k/Smax, S1 --> S2
-    v, 2S2 --> 0
-    R * (1 - S1res / Smax), 0 --> S1
-    R/Smax, S1 --> 0
-end
+# ╔═╡ 45df090a-6af2-4e37-9c19-0cd30fe7f83c
+# @parameters missing
+@parameters k=3 v=1.0e-3 S₁res=10 Smax=150 r=5
+
+# ╔═╡ 8a0ee69d-4529-4e39-ae73-5dad27e645fb
+# change_S1 = missing
+change_S1 = D(S₁) ~ r*(1 - S₁res/Smax) - r/Smax*S₁ - k/Smax*S₁
+
+# ╔═╡ cba7c67c-d88f-4eac-ac9c-f519fe79643b
+# change_S2 = missing
+change_S2 = D(S₂) ~ k/Smax*S₁ - v*S₂^2
+
+# ╔═╡ 23159f20-55de-4125-bd0b-ded5bd01ad20
+# @mtkbuild sys_irrigation = missing
+@mtkbuild sys_irrigation = ODESystem([change_S1, change_S2], t)
 
 # ╔═╡ e5d7520d-fd8c-48c0-bd36-826766212217
 md"""
@@ -134,19 +131,20 @@ Create an `ODEProblem`. Use the aforementioned values as initial values for the 
 """
 
 # ╔═╡ 10057510-e4b6-4a3e-9d3f-f05effc88a58
-# u0 = missing            # Uncomment and complete the instruction
-u0 = [:S1 => 0.0, :S2 => 0.0]
+# u0 = missing
+u0 = [:S₁=>0.0, :S₂=>0.0]
 
 # ╔═╡ f4d49b1d-9105-4050-a9d4-196fa00a0591
-# tspan = missing          # Uncomment and complete the instruction
+# tspan = missing
 tspan = (0.0, 150.0)
 
 # ╔═╡ 777ce59f-c849-4a2e-a6dc-ae309d2a2e7c
-# params = missing         # Uncomment and complete the instruction
-params = [:k => 3.0, :Smax => 150.0, :v => 1e-3, :R => 5.0, :S1res => 10.0]
+# parms = missing
+parms = [:k=>3.0, :Smax=>150.0, :v=>1e-3, :R=>5.0, :S1res=>10.0, :r=>5]
 
 # ╔═╡ 43b83336-aea6-4914-bc26-b2e84994ce57
-oprob = ODEProblem(irrigation_mod, u0, tspan, params)
+# oprob = missing
+oprob = ODEProblem(sys_irrigation, u0, tspan, parms)
 
 # ╔═╡ 923d04ce-b4d2-44b0-afff-7062c4628ad0
 md"""
@@ -154,15 +152,21 @@ Declare the Turing model. Make sure you take both experiments into account for o
 """
 
 # ╔═╡ 481eb8b9-5de2-4f68-b06a-ec18e054c9f5
-# Uncomment and complete the instruction
 # @model function irrigation_inference(t_meas, S1_meas1, S2_meas1, S1_meas2, S2_meas2)
 # 	σ_S1 ~ missing
 # 	σ_S2 ~ missing
 # 	k ~ missing
 # 	Smax ~ missing
+#	parms = missing
+#   # For experiment 1:
+#	u0 = missing
+#	oprob = missing
 # 	osol1 = missing
 # 	S1_meas1 ~ missing
 # 	S2_meas1 ~ missing
+#   # For experiment 2:
+#	u0 = missing
+#	oprob = missing
 # 	osol2 = missing
 # 	S1_meas2 ~ missing
 # 	S2_meas2 ~ missing
@@ -173,17 +177,19 @@ Declare the Turing model. Make sure you take both experiments into account for o
 	# k ~ Uniform(0, 10)
 	k ~ LogNormal()
 	Smax ~ Uniform(100, 200)
-	params = [:k => k, :Smax => Smax, :v => 1e-3, :R => 5.0, :S1res => 10.0]
-	u0 = [:S1 => 0.0, :S2 => 0.0]
-	oprob = ODEProblem(irrigation_mod, u0, tspan, params)
+	parms = [:k=>k, :Smax=>Smax]
+    # For experiment 1:
+	u0 = [:S₁=>0.0, :S₂=>0.0]
+	oprob = ODEProblem(sys_irrigation, u0, tspan, parms)
 	osol1 = solve(oprob, Tsit5(), saveat=t_meas)
-	S1_meas1 ~ MvNormal(osol1[:S1], σ_S1^2 * I)
-	S2_meas1 ~ MvNormal(osol1[:S2], σ_S2^2 * I)
-	u0 = [:S1 => 140.0, :S2 => 135.0]
-	oprob = ODEProblem(irrigation_mod, u0, tspan, params)
+	S1_meas1 ~ MvNormal(osol1[:S₁], σ_S1^2 * I)
+	S2_meas1 ~ MvNormal(osol1[:S₂], σ_S2^2 * I)
+    # For experiment 2:
+	u0 = [:S₁=>140.0, :S₂=>135.0]
+	oprob = ODEProblem(sys_irrigation, u0, tspan, parms)
 	osol2 = solve(oprob, Tsit5(), saveat=t_meas)
-	S1_meas2 ~ MvNormal(osol2[:S1], σ_S1^2 * I)
-	S2_meas2 ~ MvNormal(osol2[:S2], σ_S2^2 * I)
+	S1_meas2 ~ MvNormal(osol2[:S₁], σ_S1^2 * I)
+	S2_meas2 ~ MvNormal(osol2[:S₂], σ_S2^2 * I)
 end
 
 # ╔═╡ df933ae8-1f51-4467-93a7-33f153e5e4f8
@@ -192,7 +198,7 @@ Provide the measurements to the Turing model.
 """
 
 # ╔═╡ 0e2aa675-9e09-4e06-b5f8-118707ee652a
-# irrigation_inf = missing    # Uncomment and complete the instruction
+# irrigation_inf = missing
 irrigation_inf = irrigation_inference(t_meas, S1_meas1, S2_meas1, S1_meas2, S2_meas2)
 
 # ╔═╡ f7f47956-7c3b-44cc-bff7-fb7d32af874a
@@ -201,17 +207,17 @@ Optimize the priors ($\sigma_{S1}$, $\sigma_{S2}$, $k$ and $S_{max}$). Do this w
 """
 
 # ╔═╡ 8c254d5a-225b-4772-9fdd-e9f700495fbd
-# results_mle = missing      # Uncomment and complete the instruction
+# results_mle = missing
 results_mle = optimize(irrigation_inf, MLE(), NelderMead())
 
 # ╔═╡ f15a1df5-047a-4f46-9419-8492ac1248e0
 md"""
-Visualize a summary of the optimized parameters.
+Visualize a summary of the optimized parameters. Beware that this may take a lot of time...
 """
 
 # ╔═╡ 00d944e4-2c88-4a5d-b809-69f435df4684
-# missing           # Uncomment and complete the instruction
-results_mle |> coeftable
+# missing
+# results_mle |> coeftable
 
 # ╔═╡ 89eb31ef-b24f-44c8-bbe5-19101d859937
 md"""
@@ -219,11 +225,11 @@ Get the optimized values and assign them to `k_opt` and `Smax_opt`.
 """
 
 # ╔═╡ 92daa779-3373-40c0-b308-23e75e6674b6
-# k_opt = missing               # Uncomment and complete the instruction
+# k_opt = missing
 k_opt = coef(results_mle)[:k]
 
 # ╔═╡ 35ab6ee5-fcd7-4dcc-9909-cc918fb1fe80
-# Smax_opt = missing            # Uncomment and complete the instruction
+# Smax_opt = missing
 Smax_opt = coef(results_mle)[:Smax]
 
 # ╔═╡ 4026773f-ac5b-433e-bd9d-2122242861fd
@@ -237,8 +243,8 @@ Set up parameter values with optimized parameter values:
 """
 
 # ╔═╡ 97d53e48-590a-485b-bcf3-edc6a6124faf
-# params_opt = missing         # Uncomment and complete the instruction
-params_opt = [:k => k_opt, :Smax => Smax_opt, :v => 1e-3, :R => 5.0, :S1res => 10.0]
+# parms_opt = missing
+parms_opt = [:k=>k_opt, :Smax=>Smax_opt]
 
 # ╔═╡ dfd2ac98-5cdc-4627-b6cf-71b33c0ff0d4
 md"""
@@ -246,19 +252,18 @@ Plot the simulation results $S_1$ and $S_2$ for the 1st experiment together with
 """
 
 # ╔═╡ 95ace332-52c0-46c3-ae28-d038320ed2c8
-# u01 = missing                # Uncomment and complete the instruction
-u01 = [:S1 => 0.0, :S2 => 0.0]
+# u01 = missing
+u01 = [:S₁=>0.0, :S₂=>0.0]
 
 # ╔═╡ 6ae63a13-d5ae-4dfb-b88d-be295b11a472
-# oprob1_opt = missing         # Uncomment and complete the instruction
-oprob1_opt = ODEProblem(irrigation_mod, u01, tspan, params_opt)
+# oprob1_opt = missing
+oprob1_opt = ODEProblem(sys_irrigation, u01, tspan, parms_opt)
 
 # ╔═╡ bc6505ca-a61d-467f-afe6-47792a510ad5
-# osol1_opt = missing          # Uncomment and complete the instruction
+# osol1_opt = missing
 osol1_opt = solve(oprob1_opt, Tsit5(), saveat=0.5)
 
 # ╔═╡ 67e423ea-e941-45bf-af4f-3fdecb648fbc
-# Uncomment and complete the instruction
 # begin
 #   missing
 #   missing
@@ -276,19 +281,18 @@ Plot the simulation results $S_1$ and $S_2$ for the 1st experiment together with
 """
 
 # ╔═╡ a7040b8e-c240-415b-8a9a-4a1a137398d4
-# u02 = missing                  # Uncomment and complete the instruction
-u02 = [:S1 => 140.0, :S2 => 135.0]
+# u02 = missing
+u02 = [:S₁=>140.0, :S₂=>135.0]
 
 # ╔═╡ fe8f4961-68bd-42dc-a3f5-6692e918e241
-# oprob2_opt = missing           # Uncomment and complete the instruction
-oprob2_opt = ODEProblem(irrigation_mod, u02, tspan, params_opt)
+# oprob2_opt = missing
+oprob2_opt = ODEProblem(sys_irrigation, u02, tspan, parms_opt)
 
 # ╔═╡ 7f280230-7846-4529-a2ff-a81a2b9480bf
-# osol2_opt = missing            # Uncomment and complete the instruction
+# osol2_opt = missing
 osol2_opt = solve(oprob2_opt, Tsit5(), saveat=0.5)
 
 # ╔═╡ ad9818a9-ccbe-4645-8b91-0c3fa773632a
-# Uncomment and complete the instruction
 # begin
 #   missing
 #   missing
@@ -301,18 +305,19 @@ begin
 end
 
 # ╔═╡ Cell order:
+# ╟─55d5400d-1777-4918-a030-b94cb9a59f63
 # ╠═2b010e5c-1121-11ef-16fe-a5e3317122e4
-# ╠═6750d246-8e7a-4cfb-810e-d1100aa4fdef
 # ╠═55675f3d-2fae-4a97-a0a0-ead29a6352e6
 # ╠═4947b0fd-13be-4f6a-b605-ed35b509d7ff
-# ╠═61d14819-ba44-40fe-95a9-9d7b0bf3dc33
+# ╠═78d4e8ab-29ec-435a-9f4a-a480ddf1bbde
 # ╠═f6e77c8d-de11-4b9d-93c6-45bdcfbbbf9b
 # ╠═9345dd8f-0a60-4aaf-a27f-ef8bf860f495
-# ╠═ea02aff2-7fb8-4b8f-8d0f-0bb3c6150708
-# ╟─55d5400d-1777-4918-a030-b94cb9a59f63
 # ╟─8f1afdec-b78d-4aba-a74f-cd3e4b35fab1
-# ╟─ad42d3a7-6d83-4362-aa3f-31628a1db9b2
-# ╠═dc26abff-f8ab-4881-9acf-7b325b386a16
+# ╠═2005fc6d-bcfa-4ec4-a7df-8c7b40db44d8
+# ╠═45df090a-6af2-4e37-9c19-0cd30fe7f83c
+# ╠═8a0ee69d-4529-4e39-ae73-5dad27e645fb
+# ╠═cba7c67c-d88f-4eac-ac9c-f519fe79643b
+# ╠═23159f20-55de-4125-bd0b-ded5bd01ad20
 # ╟─e5d7520d-fd8c-48c0-bd36-826766212217
 # ╟─73c9b5fb-4f56-4bde-beb4-387651409c1b
 # ╠═9f94c63e-628f-4ff3-ad29-0f90d32dfcb1
