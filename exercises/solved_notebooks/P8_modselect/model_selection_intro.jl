@@ -232,20 +232,20 @@ We declare our Turing model function:
 @model function growth_log_fun(t_meas)
     σ_W ~ InverseGamma()
     W0 ~ LogNormal()
-    μ ~ LogNormal()
+    μ ~ truncated(LogNormal(log(0.1)), 0.0, 1.0)
     Wf ~ LogNormal()
 	u0_log = [:W => W0]
 	params_log = [:μ => μ, :Wf => Wf]
 	oprob_log = ODEProblem(growth_log, u0_log, tspan, params_log)
     osol_log = solve(oprob_log, AutoTsit5(Rosenbrock23()), saveat=t_meas)
-    W_s ~ MvNormal(osol_log[:W], σ_W^2 * I)
+    W_s ~ MvNormal(osol_log[:W], sqrt(σ_W))
 	return osol_log   # optionally, to be used with MCMC
 end
 
 # ╔═╡ bfb26b9d-6969-457c-8567-03422a7f2a93
 md"""
-!!! note
-	We use the auto-switching `AutoTsit5(Rosenbrock23())` solver here as the calibration of this model is otherwise quite unstable and will fail occassionally (it's not a problem if you didn't do this).
+!!! tip
+	This model can change between being non-stiff and stiff based on the sampled parameter values. You can use an auto-switching solver such as `AutoTsit5(Rosenbrock23())` here to make calibration more stable.
 """
 
 # ╔═╡ aa3e553d-2731-42d6-b0e6-1821e4d7f4d4
@@ -263,7 +263,9 @@ We are now ready to optimize the priors ($\sigma_W$, $W_0$, $\mu$ and $W_f$). Th
 
 # ╔═╡ 4536c6b7-f3bc-42e8-b044-0633f00b56bb
 md"""
-We will use the MLE (Maximum Likelihood Estimation) method here and store the optimization results in `results_log_mle`. If you get an error the first time, try running the optimization again.
+We will use the MLE (Maximum Likelihood Estimation) method here and store the optimization results in `results_log_mle`. For the optimizing algorithm, we choose `LBFGS` here, which is an adaptation of the "Broyden Fletcher Goldfarb Shanno" quasi-Newton method you have seen in *Data science* (*Datawetenschap*).
+
+If you get an error the first time, try running the optimization again.
 """
 
 # ╔═╡ bc55fb07-1d84-4927-80d2-c1a012409400
@@ -576,13 +578,13 @@ Declare the Turing model function.
 @model function growth_exp_fun(t_meas)
     σ_W ~ InverseGamma()
     W0 ~ LogNormal()
-    μ ~ LogNormal()
+    μ ~ truncated(LogNormal(log(0.1)), 0.0, 1.0)
     Wf ~ LogNormal()
 	u0_exp = [:W => W0]
 	params_exp = [:μ => μ, :Wf => Wf]
 	oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, params_exp)
     osol_exp = solve(oprob_exp, AutoTsit5(Rosenbrock23()), saveat=t_meas)
-    W_s ~ MvNormal(osol_exp[:W], σ_W^2 * I)
+    W_s ~ MvNormal(osol_exp[:W], sqrt(σ_W))
 end
 
 # ╔═╡ b9a8c0cb-fe38-448e-aa4c-e9422f24a4a4
@@ -759,13 +761,13 @@ Declare the Turing model. Take the same priors as before.
 @model function growth_gom_fun(t_meas)
     σ_W ~ InverseGamma()
     W0 ~ LogNormal()
-    μ ~ LogNormal()
+    μ ~ truncated(LogNormal(log(0.1)), 0.0, 1.0)
     D ~ LogNormal()
 	u0_gom = [:W => W0]
 	params_gom = [:μ => μ, :D => D]
 	oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, params_gom)
     osol_gom = solve(oprob_gom, AutoTsit5(Rosenbrock23()), saveat=t_meas)
-    W_s ~ MvNormal(osol_gom[:W], σ_W^2 * I)
+    W_s ~ MvNormal(osol_gom[:W], sqrt(σ_W))
 end
 
 # ╔═╡ 82bee644-7b9a-42fa-a32f-76b3eb5038b5
@@ -790,7 +792,7 @@ Visualize a summary of the optimized parameters.
 """
 
 # ╔═╡ a2738236-86a1-419a-9617-b1229f7c9240
-coeftable(results_gom_mle)
+# coeftable(results_gom_mle)
 
 # ╔═╡ 59f78a22-cac1-49a7-b3e6-9d74b694be64
 md"""
@@ -1014,7 +1016,7 @@ We can repeat the calibration and take into account the priors to obtain the MAP
 results_log_map = optimize(growth_log_cond_mod, MAP(), NelderMead())
 
 # ╔═╡ 3d5e9bb7-5e65-4de5-a521-6b1f1cb872b3
-coeftable(results_log_map)
+# coeftable(results_log_map)
 
 # ╔═╡ 3a3cd103-78b1-481a-8746-749d402346d1
 md"""
@@ -1094,6 +1096,9 @@ WAIC_exp = -2*(lppd_exp - pWAIC_exp)
 
 # ╔═╡ 8330fce5-13c9-447e-8368-01b7c7ebc68f
 results_gom_nuts = sample(growth_gom_cond_mod, NUTS(), N)
+
+# ╔═╡ a907bd5d-455d-4471-94c7-a6b26770f81f
+plot(results_gom_nuts) #!
 
 # ╔═╡ 0d2cab0c-04a2-4c8b-bb4f-2115ae0cf871
 lppd_gom = sum(results_gom_nuts.value[:, :lp])
@@ -1347,6 +1352,7 @@ md"""
 # ╠═eb9fe668-0a0f-4a8f-a793-ba545cb02e85
 # ╠═ddf9ae6d-0abe-4c8c-9646-024dd9a41e02
 # ╠═8330fce5-13c9-447e-8368-01b7c7ebc68f
+# ╠═a907bd5d-455d-4471-94c7-a6b26770f81f
 # ╠═0d2cab0c-04a2-4c8b-bb4f-2115ae0cf871
 # ╠═6900e703-de7d-4ea3-8ac5-0b38b21b083d
 # ╠═b353eab2-d78f-4c5e-8e38-bd57813b6816

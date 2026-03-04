@@ -136,7 +136,7 @@ oprob = ODEProblem(fermenter_monod, u0, tspan, parms, combinatoric_ratelaws=fals
 
 # ╔═╡ f6a8f134-6db0-4d74-8af5-82826347d8f0
 md"""
-Declare the Turing model. Use `InverseGamma()` for the standard deviations of the measurements and `LogNormal()` for `μmax` and `Ks`.
+Declare the Turing model. Use an **inverse Gamma** distribution with default parameters for the standard deviations of the measurements and a **log normal** distribution with mean 0.1 and default standard deviation for `μmax` and `K`.
 """
 
 # ╔═╡ 4c28a66a-ee2c-42a2-95c7-ea4ddb6a232d
@@ -154,14 +154,20 @@ Declare the Turing model. Use `InverseGamma()` for the standard deviations of th
 @model function fermenter_inference(t_meas, S, X)
 	σ_S ~ InverseGamma()
 	σ_X ~ InverseGamma()
-    μmax ~ LogNormal()
-	Ks ~ LogNormal()
-    parms = [:μmax=>μmax, :Ks=>Ks, :Y=>0.67, :Q=>2, :V=>40, :Sin=>0.022]
-	oprob = ODEProblem(fermenter_monod, u0, tspan, parms, combinatoric_ratelaws=false)
-    osol = solve(oprob, Tsit5(), saveat=t_meas)
-	S ~ MvNormal(osol[:S], σ_S^2 * I)
-	X ~ MvNormal(osol[:X], σ_X^2 * I)
+    μmax ~ LogNormal(log(0.1))
+	Ks ~ LogNormal(log(0.1))
+    parms = [:μmax => μmax, :Ks => Ks, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.022]
+	oprob = ODEProblem(fermenter_monod, u0, tspan, parms)
+    osol = solve(oprob, AutoTsit5(Rosenbrock23()), saveat=t_meas)
+	S ~ MvNormal(osol[:S], sqrt(σ_S))
+	X ~ MvNormal(osol[:X], sqrt(σ_X))
 end
+
+# ╔═╡ c2120cce-5cae-42e5-b1c6-1d10b49d9ffc
+md"""
+!!! tip
+	This model can change between being non-stiff and stiff based on the sampled parameter values. You can use an auto-switching solver such as `AutoTsit5(Rosenbrock23())` here to make calibration more stable.
+"""
 
 # ╔═╡ 3136b15d-5078-4bcd-954b-e89bcb8aed1b
 md"""
@@ -174,12 +180,12 @@ fermenter_inf = fermenter_inference(t_meas, S_meas, X_meas)
 
 # ╔═╡ 63420055-55f8-4def-8b0e-11ea61483010
 md"""
-Optimize the priors ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$). Do this with `MLE` method and Nelder-Mead. Store the optimization results in `results_mle`.
+Optimize the likelihood of the parameters ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$) using the LBFGS optimizer. Store the optimization results in `results_mle`.
 """
 
 # ╔═╡ d52c9da8-d8a4-4db0-ac6d-6d16ccf4775c
-# results_map = missing
-results_mle = optimize(fermenter_inf, MLE(), NelderMead())
+# results_mle = missing           # Uncomment and complete the instruction
+results_mle = optimize(fermenter_inf, MLE(), LBFGS())
 
 # ╔═╡ e1b0ee01-f16c-40e9-a0f9-80072d690936
 md"""
@@ -223,8 +229,8 @@ Create an ODEProblem and solve it. Use `Tsit5()` and `saveat=0.5`.
 """
 
 # ╔═╡ 853c1a92-d50f-4b05-9ed3-d3ee1656665a
-# oprob_opt = missing
-oprob_opt = ODEProblem(fermenter_monod, u0, tspan, parms_opt, combinatoric_ratelaws=false)
+# oprob_opt = missing         # Uncomment and complete the instruction
+oprob_opt = ODEProblem(fermenter_monod, u0, tspan, parms_opt)
 
 # ╔═╡ f45e8124-e942-438e-99c5-3032ccc01454
 # osol_opt = missing
@@ -273,6 +279,7 @@ end
 # ╠═94f3bd7b-5c2c-4661-a0ab-2cdaf2cd6743
 # ╟─f6a8f134-6db0-4d74-8af5-82826347d8f0
 # ╠═4c28a66a-ee2c-42a2-95c7-ea4ddb6a232d
+# ╟─c2120cce-5cae-42e5-b1c6-1d10b49d9ffc
 # ╟─3136b15d-5078-4bcd-954b-e89bcb8aed1b
 # ╠═6a508a62-61b9-4273-8e45-b26f594e8da9
 # ╟─63420055-55f8-4def-8b0e-11ea61483010
