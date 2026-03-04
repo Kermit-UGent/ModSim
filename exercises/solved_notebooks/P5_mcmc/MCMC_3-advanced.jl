@@ -211,12 +211,18 @@ end
 
 # ╔═╡ d9b50958-20ae-4085-80d6-19420c7d89df
 @model function petrigrowth🌟(t_obs)
-	P0 ~ dropletdist🌟
+	P0 ~ MixtureModel(
+		[
+			truncated(Normal(10, sqrt(10)), lower = 0.0),
+			truncated(Normal(30, sqrt(30)), lower = 0.0)
+		],
+		[0.75, 0.25]
+	)
     r ~ LogNormal(0.0, 0.3)
 	K ~ Normal(1e5, 1e4)
 
 	logfun = t -> logistic(t, P0, r, K)
-	Pt = logfun(t_obs)
+	Pt = max(logfun(t_obs), 0) # set to 0 if negative to prevent possible errors (not required)
     P_obs ~ Poisson(Pt)
 	
     return logfun
