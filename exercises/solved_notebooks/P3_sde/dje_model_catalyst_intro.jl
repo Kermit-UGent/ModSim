@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.23
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -210,9 +210,12 @@ md"""
 # ╔═╡ 6123a581-620c-4815-87b0-4bee10d988ae
 md"""
 !!! note
-	When working with JumpProblems (and actually also recommended for other problems) always use floating-point values when defining the time span. Practically this means that you write `tspan = (0.0, 60.0)` instead of `tspan = (0, 60)`, indicating to Julia that time points should be represented at floating points. This ensures that time points are treated as floating-point numbers. Using integers may lead to errors for JumpProblems when the solver encounters non-integer 
+	When working with JumpProblems always use floating-point values when defining the time span. Practically this means that you write `tspan = (0.0, 60.0)` instead of `tspan = (0, 60)`, indicating to Julia that time points should be represented at floating points. Using integers may lead to errors for JumpProblems when the solver encounters non-integer 
     time points (e.g. 1.6seconds).
 """
+
+# ╔═╡ 65a22422-be75-428b-86b6-47b474710975
+
 
 # ╔═╡ 69b38ef3-d99e-4f4d-8c53-79e20d0094f0
 tspan = (0.0, 60.0) #use floats!
@@ -344,6 +347,7 @@ histogram(times, bins=range(0, 60, length=61))
 # ╠═da136f6e-7605-4f1f-81bc-f0e81ed7f528
 # ╟─cef064bf-2168-4904-b753-a012a9c9f070
 # ╟─6123a581-620c-4815-87b0-4bee10d988ae
+# ╠═65a22422-be75-428b-86b6-47b474710975
 # ╠═69b38ef3-d99e-4f4d-8c53-79e20d0094f0
 # ╟─57567d6d-6303-4ad8-b171-f904b594b3fe
 # ╠═92c77720-5120-4f55-8cf6-168ec8553638

@@ -206,7 +206,7 @@ md"""
 # ╔═╡ fa2dde71-cea4-4b31-894e-432f9e3e7786
 md"""
 !!! note
-	When working with JumpProblems (and actually also recommended for other problems) always use floating-point values when defining the time span. Practically this means that you write `tspan = (0.0, 60.0)` instead of `tspan = (0, 60)`, indicating to Julia that time points should be represented at floating points. This ensures that time points are treated as floating-point numbers. Using integers may lead to errors for JumpProblems when the solver encounters non-integer 
+	When working with JumpProblems always use floating-point values when defining the time span. Practically this means that you write `tspan = (0.0, 60.0)` instead of `tspan = (0, 60)`, indicating to Julia that time points should be represented at floating points. Using integers may lead to errors for JumpProblems when the solver encounters non-integer 
     time points (e.g. 1.6seconds).
 """
 
