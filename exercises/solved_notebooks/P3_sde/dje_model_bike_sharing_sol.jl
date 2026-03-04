@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.21
+# v0.20.23
 
 using Markdown
 using InteractiveUtils
@@ -112,7 +112,7 @@ Set the timespan for the simulation:
 
 # ╔═╡ 3ae98e83-7beb-4597-89be-80c813d4349b
 # tspan = missing
-tspan = (0.0, 60.0)
+tspan = (0.0, 60.0) #use floats!
 
 # ╔═╡ 988f79c0-9c7b-4752-a7f2-d4473ad73ce6
 md"""

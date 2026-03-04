@@ -203,6 +203,13 @@ md"""
 ### Setting the timespan
 """
 
+# ╔═╡ fa2dde71-cea4-4b31-894e-432f9e3e7786
+md"""
+!!! note
+	When working with JumpProblems (and actually also recommended for other problems) always use floating-point values when defining the time span. Practically this means that you write `tspan = (0.0, 60.0)` instead of `tspan = (0, 60)`, indicating to Julia that time points should be represented at floating points. This ensures that time points are treated as floating-point numbers. Using integers may lead to errors for JumpProblems when the solver encounters non-integer 
+    time points (e.g. 1.6seconds).
+"""
+
 # ╔═╡ 69b38ef3-d99e-4f4d-8c53-79e20d0094f0
 tspan = (0.0, 60.0)
 
@@ -302,8 +309,6 @@ histogram(times, bins=range(0, 60, length=61))
 # ╠═9e8fd818-a14f-41cf-b2fd-a7425141b283
 # ╠═0b3921c9-6d6e-4c52-8c21-d883ed493028
 # ╟─f5f32d5d-0c13-4865-8024-ca47208c9b8e
-# ╟─8d9af65e-0499-4a6d-afbf-5afa9903a42e
-# ╟─9cfa5b79-2128-4d45-aa22-51da0e74f320
 # ╟─e1583a47-9171-4db2-a6e9-d4889ee294c7
 # ╟─723c2c53-7f75-4f2d-8608-11ef0ef274d9
 # ╟─0148d340-a072-49c0-9b3c-29249c21a334
@@ -333,6 +338,7 @@ histogram(times, bins=range(0, 60, length=61))
 # ╟─ad8215f6-676e-4352-b0c9-8e9701da3bc6
 # ╠═da136f6e-7605-4f1f-81bc-f0e81ed7f528
 # ╟─cef064bf-2168-4904-b753-a012a9c9f070
+# ╟─fa2dde71-cea4-4b31-894e-432f9e3e7786
 # ╠═69b38ef3-d99e-4f4d-8c53-79e20d0094f0
 # ╟─57567d6d-6303-4ad8-b171-f904b594b3fe
 # ╟─92c77720-5120-4f55-8cf6-168ec8553638

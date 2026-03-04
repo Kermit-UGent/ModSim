@@ -99,7 +99,7 @@ Set the timespan for the simulation:
 """
 
 # ╔═╡ 3ae98e83-7beb-4597-89be-80c813d4349b
-tspan = missing
+tspan = missing #floats!
 
 # ╔═╡ 988f79c0-9c7b-4752-a7f2-d4473ad73ce6
 md"""
