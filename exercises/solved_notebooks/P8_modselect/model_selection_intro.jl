@@ -173,25 +173,14 @@ osys_log  = convert(ODESystem, growth_log)
 
 # ╔═╡ cd8a7ba1-194a-4b42-8c87-2c9b1fe6b475
 md"""
-Setting initial conditions, timespan and parameter values:
+Setting the initial conditions and parameter values.
 """
 
 # ╔═╡ cbb2ca49-b019-495b-9310-83fcc00cad26
 u0_log = [:W => 2.0]
 
-# ╔═╡ be565a3c-31b6-4df1-b73b-08f308a8c09b
-md"""
-For the sake of clarity, we will use the variables `μ_log` and `Wf_log` to store the parameter values.
-"""
-
-# ╔═╡ f62806d1-77e1-470b-9711-33a924c788cc
-μ_log = 0.07
-
-# ╔═╡ 546ed163-26a7-4235-982f-7568ed609488
-Wf_log = 10.0
-
 # ╔═╡ 0da53fa2-5a42-46e6-8bd8-45d6aa903d46
-params_log = [:μ => μ_log, :Wf => Wf_log]
+params_log = [:μ => 0.07, :Wf => 10.0]
 
 # ╔═╡ b1298f40-4696-49d0-ac94-896e0cdbc996
 md"""
@@ -200,7 +189,7 @@ Creating and solving the ODEProblem and plotting results:
 
 # ╔═╡ 270647d2-1371-4272-8bc1-3a6ad77bc716
 oprob_log = ODEProblem(growth_log, u0_log, tspan, params_log);
-# Also possible here if initial conditions and parameter values are defined in the catalyst model:
+# Also possible here since the initial conditions and parameter values are defined in the catalyst model:
 # oprob_log = ODEProblem(growth_mod_log, [], tspan, [])
 
 # ╔═╡ ac235d86-1d93-4944-aa89-1b4fd38f0e6e
@@ -215,7 +204,7 @@ end
 
 # ╔═╡ e2955af0-edf0-4702-9a8f-478141ffdc3b
 md"""
-We can see that the model does not predict well the data set for the considered parameter values. Thus we will use the data to both calibrate the model parameters and assess the quality of the fit.
+We can see that the model does not predict the data well using these parameter values. Thus we will use the data to both calibrate the model parameters and assess the quality of the fit.
 """
 
 # ╔═╡ c73669c4-d7af-4877-b32d-6499f339e27a
@@ -230,16 +219,15 @@ We declare our Turing model function:
 
 # ╔═╡ 169a67ff-55fb-4d1d-b98b-126f4af47e77
 @model function growth_log_fun(t_meas)
-    σ_W ~ InverseGamma()
-    W0 ~ LogNormal()
-    μ ~ truncated(LogNormal(log(0.1)), 0.0, 1.0)
-    Wf ~ LogNormal()
+    σ_W ~ Exponential()
+    W0 ~ LogNormal(log(1))
+    μ ~ LogNormal(log(0.1))
+    Wf ~ LogNormal(log(10))
 	u0_log = [:W => W0]
-	params_log = [:μ => μ, :Wf => Wf]
-	oprob_log = ODEProblem(growth_log, u0_log, tspan, params_log)
+	parms_log = [:μ => μ, :Wf => Wf]
+	oprob_log = ODEProblem(growth_log, u0_log, tspan, parms_log)
     osol_log = solve(oprob_log, AutoTsit5(Rosenbrock23()), saveat=t_meas)
-    W_s ~ MvNormal(osol_log[:W], sqrt(σ_W))
-	return osol_log   # optionally, to be used with MCMC
+    W_s ~ MvNormal(osol_log[:W], σ_W)
 end
 
 # ╔═╡ bfb26b9d-6969-457c-8567-03422a7f2a93
@@ -263,9 +251,7 @@ We are now ready to optimize the priors ($\sigma_W$, $W_0$, $\mu$ and $W_f$). Th
 
 # ╔═╡ 4536c6b7-f3bc-42e8-b044-0633f00b56bb
 md"""
-We will use the MLE (Maximum Likelihood Estimation) method here and store the optimization results in `results_log_mle`. For the optimizing algorithm, we choose `LBFGS` here, which is an adaptation of the "Broyden Fletcher Goldfarb Shanno" quasi-Newton method you have seen in *Data science* (*Datawetenschap*).
-
-If you get an error the first time, try running the optimization again.
+We will use the MLE (Maximum Likelihood Estimation) method here and store the optimization results in `results_log_mle`. If you get an error the first time, try running the optimization again.
 """
 
 # ╔═╡ bc55fb07-1d84-4927-80d2-c1a012409400
@@ -576,15 +562,15 @@ Declare the Turing model function.
 
 # ╔═╡ 89bf91c6-117c-4647-bfb9-6fc9b8dcfb5f
 @model function growth_exp_fun(t_meas)
-    σ_W ~ InverseGamma()
-    W0 ~ LogNormal()
-    μ ~ truncated(LogNormal(log(0.1)), 0.0, 1.0)
-    Wf ~ LogNormal()
+    σ_W ~ Exponential()
+    W0 ~ LogNormal(log(1))
+    μ ~ LogNormal(log(0.1))
+    Wf ~ LogNormal(log(10))
 	u0_exp = [:W => W0]
-	params_exp = [:μ => μ, :Wf => Wf]
-	oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, params_exp)
+	parms_exp = [:μ => μ, :Wf => Wf]
+	oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, parms_exp)
     osol_exp = solve(oprob_exp, AutoTsit5(Rosenbrock23()), saveat=t_meas)
-    W_s ~ MvNormal(osol_exp[:W], sqrt(σ_W))
+    W_s ~ MvNormal(osol_exp[:W], σ_W)
 end
 
 # ╔═╡ b9a8c0cb-fe38-448e-aa4c-e9422f24a4a4
@@ -748,7 +734,7 @@ $W_0$ = 2.0, $\mu$ = 0.09 and $D$ = 0.04.
 
 # ╔═╡ 68895842-0a1b-4236-b159-19a2805ea44d
 growth_gom = @reaction_network begin
-	μ-D*log(W), W --> 2W
+	μ-d*log(W), W --> 2W
 end
 
 # ╔═╡ ec12d3c4-6b48-4f3a-b463-0fc67d3adff3
@@ -759,15 +745,15 @@ Declare the Turing model. Take the same priors as before.
 
 # ╔═╡ 1f8b10ba-f380-492e-800c-2673774cb25c
 @model function growth_gom_fun(t_meas)
-    σ_W ~ InverseGamma()
-    W0 ~ LogNormal()
-    μ ~ truncated(LogNormal(log(0.1)), 0.0, 1.0)
-    D ~ LogNormal()
+    σ_W ~ Exponential()
+    W0 ~ LogNormal(log(1.0))
+    μ ~ LogNormal(log(0.1))
+    d ~ LogNormal(log(0.1))
 	u0_gom = [:W => W0]
-	params_gom = [:μ => μ, :D => D]
-	oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, params_gom)
+	parms_gom = [:μ => μ, :d => d]
+	oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, parms_gom)
     osol_gom = solve(oprob_gom, AutoTsit5(Rosenbrock23()), saveat=t_meas)
-    W_s ~ MvNormal(osol_gom[:W], sqrt(σ_W))
+    W_s ~ MvNormal(osol_gom[:W], σ_W)
 end
 
 # ╔═╡ 82bee644-7b9a-42fa-a32f-76b3eb5038b5
@@ -780,11 +766,11 @@ growth_gom_cond_mod = growth_gom_fun(t_meas) | (W_s = W_meas,)
 
 # ╔═╡ a438470b-e037-4b65-b6b0-fb9c202e74a4
 md"""
-Optimize the priors ($\sigma_W$, $W_0$, $\mu$ and $D$). Do this now with `MAP` method and Nelder-Mead. Store the optimization results in `results_gom_map`.
+Optimize the priors ($\sigma_W$, $W_0$, $\mu$ and $D$). Do this now with the `MAP` method and Nelder-Mead. Store the optimization results in `results_gom_map`.
 """
 
 # ╔═╡ f4c3dcd0-70ec-49ab-bbad-04b550da481c
-results_gom_mle = optimize(growth_gom_cond_mod, MLE(), NelderMead())
+results_gom_map = optimize(growth_gom_cond_mod, MAP(), NelderMead())
 
 # ╔═╡ df166b45-3c28-4bad-95b8-f43429a58fd0
 md"""
@@ -792,7 +778,7 @@ Visualize a summary of the optimized parameters.
 """
 
 # ╔═╡ a2738236-86a1-419a-9617-b1229f7c9240
-# coeftable(results_gom_mle)
+# coeftable(results_gom_map)
 
 # ╔═╡ 59f78a22-cac1-49a7-b3e6-9d74b694be64
 md"""
@@ -800,13 +786,13 @@ Get the optimized values and assign them to `W0_opt_gom`, `μ_opt_gom` and `D_op
 """
 
 # ╔═╡ 7c351d72-c5ce-4e5a-b2e5-87ff9dbc70e5
-W0_opt_gom = coef(results_gom_mle)[:W0]
+W0_opt_gom = coef(results_gom_map)[:W0]
 
 # ╔═╡ d7312308-7c95-4c14-9bd6-56a7ac99d49a
-μ_opt_gom = coef(results_gom_mle)[:μ]
+μ_opt_gom = coef(results_gom_map)[:μ]
 
 # ╔═╡ 8f8b23b3-2e33-46e4-917a-294934fa090e
-D_opt_gom = coef(results_gom_mle)[:D]
+d_opt_gom = coef(results_gom_map)[:d]
 
 # ╔═╡ 4ff1079f-8dfb-4069-9a98-0d263eba9920
 md"""
@@ -827,7 +813,7 @@ Set up parameter values with optimized parameter values:
 """
 
 # ╔═╡ 0d225f18-bdf6-49d1-a827-2bc9551c158d
-params_opt_gom = [:μ => μ_opt_gom, :D => D_opt_gom]
+params_opt_gom = [:μ => μ_opt_gom, :d => d_opt_gom]
 
 # ╔═╡ 5d27e199-ad09-454a-8966-1531371ce67b
 md"""
@@ -1098,7 +1084,7 @@ WAIC_exp = -2*(lppd_exp - pWAIC_exp)
 results_gom_nuts = sample(growth_gom_cond_mod, NUTS(), N)
 
 # ╔═╡ a907bd5d-455d-4471-94c7-a6b26770f81f
-plot(results_gom_nuts) #!
+plot(results_gom_nuts)
 
 # ╔═╡ 0d2cab0c-04a2-4c8b-bb4f-2115ae0cf871
 lppd_gom = sum(results_gom_nuts.value[:, :lp])
@@ -1163,9 +1149,6 @@ md"""
 # ╠═ba181db8-d176-4b83-9168-d5939ffe9661
 # ╟─cd8a7ba1-194a-4b42-8c87-2c9b1fe6b475
 # ╠═cbb2ca49-b019-495b-9310-83fcc00cad26
-# ╟─be565a3c-31b6-4df1-b73b-08f308a8c09b
-# ╠═f62806d1-77e1-470b-9711-33a924c788cc
-# ╠═546ed163-26a7-4235-982f-7568ed609488
 # ╠═0da53fa2-5a42-46e6-8bd8-45d6aa903d46
 # ╟─b1298f40-4696-49d0-ac94-896e0cdbc996
 # ╠═270647d2-1371-4272-8bc1-3a6ad77bc716

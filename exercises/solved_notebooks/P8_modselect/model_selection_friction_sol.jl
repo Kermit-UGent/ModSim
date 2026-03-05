@@ -216,12 +216,12 @@ We create a Turing model with both parameters $k$ and $g$, where only the first 
 
 # ╔═╡ fa3383e4-f5fa-4d47-b21b-684c6aacbd46
 @model function linear(t)
-	var_x ~ InverseGamma()
+	σ_x ~ Exponential()
 	k ~ LogNormal()
 	params_linear = [:k => k, :g => g]
 	oprob_linear = ODEProblem(model_linear, u0, tspan, params_linear)
-	osol_linear = solve(oprob_linear, Tsit5(), saveat=t)
-	x ~ MvNormal(osol_linear[:x], sqrt(var_x))
+	osol_linear = solve(oprob_linear, AutoTsit5(Rosenbrock23()), saveat=t)
+	x ~ MvNormal(osol_linear[:x], σ_x)
 end
 
 # ╔═╡ 1f36c90e-ec20-4bdb-8bd0-5f44f03a1748
@@ -451,11 +451,11 @@ Let's now estimate the distance assuming a noisy error and no calibrated paramet
 
 # ╔═╡ 965ebc6f-b440-42da-8aa7-00b22e6d0a3f
 @model function no_resistance(t)
-	var_x ~ InverseGamma()
+	σ_x ~ Exponential()
 	params_nr = [:g => g]
 	oprob_nr = ODEProblem(model_nr, u0, tspan, params_nr)
-	osol_nr = solve(oprob_nr, Tsit5(), saveat=t)
-	x ~ MvNormal(osol_nr[:x], sqrt(var_x))
+	osol_nr = solve(oprob_nr, AutoTsit5(Rosenbrock23()), saveat=t)
+	x ~ MvNormal(osol_nr[:x], σ_x)
 end
 
 # ╔═╡ d7514616-736b-4cc3-a562-c23fb3d6924d
@@ -568,12 +568,12 @@ sol_quad = solve(prob_quad);
 
 # ╔═╡ b0908503-1523-4a35-bc2f-5087650e537e
 @model function quadratic1(t)
-	var_x ~ InverseGamma()
+	σ_x ~ Exponential()
 	k ~ LogNormal()
 	params_quad = [:k => k, :g => g]
 	oprob_quad = ODEProblem(model_quad, u0, tspan, params_quad)
-	osol_quad = solve(oprob_quad, Tsit5(), saveat=t)
-	x ~ MvNormal(osol_quad[:x], sqrt(var_x))
+	osol_quad = solve(oprob_quad, AutoTsit5(Rosenbrock23()), saveat=t)
+	x ~ MvNormal(osol_quad[:x], σ_x)
 end
 
 # ╔═╡ 8d95ddb9-bd58-4aea-9c8f-28e2f2119be2
@@ -667,13 +667,13 @@ end
 
 # ╔═╡ ba0a576e-4b9b-49e1-bfbc-33955dcec808
 @model function quadratic2(t)
-	var_x ~ InverseGamma()
+	σ_x ~ Exponential()
 	k₁ ~ LogNormal()
 	k₂ ~ LogNormal()
 	params_quad2 = [:k₁ => k₁, :k₂ => k₂, :g => g]
 	oprob_quad2 = ODEProblem(model_quad2, u0, tspan, params_quad2)
-	osol_quad2 = solve(oprob_quad2, Tsit5(), saveat=t)
-	x ~ MvNormal(osol_quad2[:x], sqrt(var_x))
+	osol_quad2 = solve(oprob_quad2, AutoTsit5(Rosenbrock23()), saveat=t)
+	x ~ MvNormal(osol_quad2[:x], σ_x)
 end
 
 # ╔═╡ edd1c981-56f6-44d8-a805-0b85c963b39b
@@ -766,13 +766,13 @@ sol_power = solve(prob_power);
 
 # ╔═╡ 4b53805c-c9ed-4708-b8a1-4922ce6d5a5d
 @model function power(t)
-	var_x ~ InverseGamma()
+	σ_x ~ Exponential()
 	k ~ LogNormal()
 	r ~ LogNormal()
 	params_power = [:k => k, :r => r, :g => g]
 	oprob_power = ODEProblem(model_power, u0, tspan, params_power)
-	osol_power = solve(oprob_power, Tsit5(), saveat=t)
-	x ~ MvNormal(osol_power[:x], sqrt(var_x))
+	osol_power = solve(oprob_power, AutoTsit5(Rosenbrock23()), saveat=t)
+	x ~ MvNormal(osol_power[:x], σ_x)
 end
 
 # ╔═╡ 4e579e09-2476-432d-8eb4-7a1080376998

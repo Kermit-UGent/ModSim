@@ -113,34 +113,23 @@ Furthermore, suppose that at $t = 0\;h$ no substrate $S$ is present in the react
 Calibrate the parameter values for $\mu_{max}$ and $K_s$ using the aforementioned measurement data for $S$ and $X$ in a timespan of `[0, 100]`$\mathrm{h}$. Take the values above as initial values for $\mu_{max}$ and $K_s$.
 """
 
-# ╔═╡ 7a227eaf-18d0-44f4-ac4b-f529e81c7471
-md"""
-Create an `ODEProblem`. Use the aforementioned values as initial values for the problem.
-"""
-
-# ╔═╡ 6375478f-1af9-4fd2-b6f3-101a6f796f2d
+# ╔═╡ 1689c839-9aa5-4bff-a26f-0c8fbf47aa32
 # u0 = missing
 u0 = [:S=>0.0, :X=>0.0005]
 
-# ╔═╡ 38fe8304-af61-40a7-ac86-480dfb892185
+# ╔═╡ 3fbc29b0-c299-4223-9922-d6fb9a4a6a90
 # tspan = missing
 tspan = (0.0, 100)
 
-# ╔═╡ 87482f88-8413-4820-9613-7941f3d61bd7
-# parms = missing
-parms = [:μmax=>0.40, :Ks=>0.015, :Y=>0.67, :Q=>2, :V=>40, :Sin=>0.022]
-
-# ╔═╡ 94f3bd7b-5c2c-4661-a0ab-2cdaf2cd6743
-# oprob = missing
-oprob = ODEProblem(fermenter_monod, u0, tspan, parms, combinatoric_ratelaws=false)
-
 # ╔═╡ f6a8f134-6db0-4d74-8af5-82826347d8f0
 md"""
-Declare the Turing model. Use an **inverse Gamma** distribution with default parameters for the standard deviations of the measurements and a **log normal** distribution with mean 0.1 and default standard deviation for `μmax` and `K`.
+Declare the Turing model. Assume the following for the priors:
+- The measurement error is an unknown positive value, but probably near $0$.
+- The parameters `μmax` and `K` are both positive and expected to be in $[0.0, 1.0]$, presumably around $0.1$.
 """
 
 # ╔═╡ 4c28a66a-ee2c-42a2-95c7-ea4ddb6a232d
-# @model function fermenter_inference(t_meas, S, X)
+# @model function fermenter_inference(t_meas)
     # σ_S ~ missing
     # σ_X ~ missing
     # μmax ~ missing
@@ -151,16 +140,16 @@ Declare the Turing model. Use an **inverse Gamma** distribution with default par
     # S ~ missing
     # X ~ missing
 # end
-@model function fermenter_inference(t_meas, S, X)
-	σ_S ~ InverseGamma()
-	σ_X ~ InverseGamma()
+@model function fermenter_inference(t_meas)
+	σ_S ~ Exponential()
+	σ_X ~ Exponential()
     μmax ~ LogNormal(log(0.1))
 	Ks ~ LogNormal(log(0.1))
     parms = [:μmax => μmax, :Ks => Ks, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.022]
 	oprob = ODEProblem(fermenter_monod, u0, tspan, parms)
     osol = solve(oprob, AutoTsit5(Rosenbrock23()), saveat=t_meas)
-	S ~ MvNormal(osol[:S], sqrt(σ_S))
-	X ~ MvNormal(osol[:X], sqrt(σ_X))
+	S ~ MvNormal(osol[:S], σ_S)
+	X ~ MvNormal(osol[:X], σ_X)
 end
 
 # ╔═╡ c2120cce-5cae-42e5-b1c6-1d10b49d9ffc
@@ -176,16 +165,16 @@ Provide the measurements to the Turing model.
 
 # ╔═╡ 6a508a62-61b9-4273-8e45-b26f594e8da9
 # fermenter_inf = missing
-fermenter_inf = fermenter_inference(t_meas, S_meas, X_meas)
+fermenter_inf = fermenter_inference(t_meas) | (S = S_meas, X = X_meas)
 
 # ╔═╡ 63420055-55f8-4def-8b0e-11ea61483010
 md"""
-Optimize the likelihood of the parameters ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$) using the LBFGS optimizer. Store the optimization results in `results_mle`.
+Optimize the likelihood of the parameters ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$) using the NelderMead optimizer. Store the optimization results in `results_mle`.
 """
 
 # ╔═╡ d52c9da8-d8a4-4db0-ac6d-6d16ccf4775c
 # results_mle = missing           # Uncomment and complete the instruction
-results_mle = optimize(fermenter_inf, MLE(), LBFGS())
+results_mle = optimize(fermenter_inf, MLE(), NelderMead())
 
 # ╔═╡ e1b0ee01-f16c-40e9-a0f9-80072d690936
 md"""
@@ -272,11 +261,8 @@ end
 # ╟─6c481447-28c6-4530-bf2c-64762121bc71
 # ╠═918fd524-81fa-4aff-a403-37402e47235b
 # ╟─ef977370-06ee-4a73-85e2-609a744167d3
-# ╟─7a227eaf-18d0-44f4-ac4b-f529e81c7471
-# ╠═6375478f-1af9-4fd2-b6f3-101a6f796f2d
-# ╠═38fe8304-af61-40a7-ac86-480dfb892185
-# ╠═87482f88-8413-4820-9613-7941f3d61bd7
-# ╠═94f3bd7b-5c2c-4661-a0ab-2cdaf2cd6743
+# ╠═1689c839-9aa5-4bff-a26f-0c8fbf47aa32
+# ╠═3fbc29b0-c299-4223-9922-d6fb9a4a6a90
 # ╟─f6a8f134-6db0-4d74-8af5-82826347d8f0
 # ╠═4c28a66a-ee2c-42a2-95c7-ea4ddb6a232d
 # ╟─c2120cce-5cae-42e5-b1c6-1d10b49d9ffc

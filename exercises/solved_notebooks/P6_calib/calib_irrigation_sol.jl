@@ -110,13 +110,13 @@ We can make a scatter plot of the measured data for both $S_1$ and $S_2$ for the
 
 # ╔═╡ cef4b9a8-b5bf-4a2d-8a8f-5d8f85534859
 begin
-  scatter(t_meas, S1_meas1, label="S1 meas", color=:blue, title="Experment 1")
+  scatter(t_meas, S1_meas1, label="S1 meas", color=:blue, title="Experiment 1")
   scatter!(t_meas, S2_meas1, label="S2 meas", color=:red, ylims=(0, 150))
 end
 
 # ╔═╡ fc2cabd7-e778-4211-bf87-b5c11ca054c9
 begin
-  scatter(t_meas, S1_meas2, label="S1 meas", color=:blue, title="Experment 2")
+  scatter(t_meas, S1_meas2, label="S1 meas", color=:blue, title="Experiment 2")
   scatter!(t_meas, S2_meas2, label="S2 meas", color=:red, ylims=(0, 150))
 end
 
@@ -125,26 +125,9 @@ md"""
 Calibrate the parameter values for $k$ and $S_{max}$ using the aforementioned measurement data for $S_1$ and $S_2$ in a timespan of $[0, 150]\,h$. Take the values from above as initial values for $k$ and $S_{max}$.
 """
 
-# ╔═╡ d35bbe54-5ebc-4ea5-a6c8-a6419476ec4c
-md"""
-Create an `ODEProblem`. Use the aforementioned values as initial values for the problem.
-"""
-
-# ╔═╡ 10057510-e4b6-4a3e-9d3f-f05effc88a58
-# u0 = missing
-u0 = [:S₁=>0.0, :S₂=>0.0]
-
 # ╔═╡ f4d49b1d-9105-4050-a9d4-196fa00a0591
 # tspan = missing
 tspan = (0.0, 150.0)
-
-# ╔═╡ 777ce59f-c849-4a2e-a6dc-ae309d2a2e7c
-# parms = missing
-parms = [:k=>3.0, :Smax=>150.0, :v=>1e-3, :R=>5.0, :S1res=>10.0, :r=>5]
-
-# ╔═╡ 43b83336-aea6-4914-bc26-b2e84994ce57
-# oprob = missing
-oprob = ODEProblem(sys_irrigation, u0, tspan, parms)
 
 # ╔═╡ 923d04ce-b4d2-44b0-afff-7062c4628ad0
 md"""
@@ -152,7 +135,7 @@ Declare the Turing model. Make sure you take both experiments into account for o
 """
 
 # ╔═╡ 481eb8b9-5de2-4f68-b06a-ec18e054c9f5
-# @model function irrigation_inference(t_meas, S1_meas1, S2_meas1, S1_meas2, S2_meas2)
+# @model function irrigation_inference(t_meas)
 # 	σ_S1 ~ missing
 # 	σ_S2 ~ missing
 # 	k ~ missing
@@ -171,9 +154,9 @@ Declare the Turing model. Make sure you take both experiments into account for o
 # 	S1_meas2 ~ missing
 # 	S2_meas2 ~ missing
 # end
-@model function irrigation_inference(t_meas, S1_meas1, S2_meas1, S1_meas2, S2_meas2)
-	σ_S1 ~ InverseGamma()
-	σ_S2 ~ InverseGamma()
+@model function irrigation_inference(t_meas)
+	σ_S1 ~ Exponential()
+	σ_S2 ~ Exponential()
 	# k ~ Uniform(0, 10)
 	k ~ LogNormal()
 	Smax ~ Uniform(100, 200)
@@ -181,15 +164,15 @@ Declare the Turing model. Make sure you take both experiments into account for o
     # For experiment 1:
 	u0 = [:S₁=>0.0, :S₂=>0.0]
 	oprob = ODEProblem(sys_irrigation, u0, tspan, parms)
-	osol1 = solve(oprob, Tsit5(), saveat=t_meas)
-	S1_meas1 ~ MvNormal(osol1[:S₁], σ_S1^2 * I)
-	S2_meas1 ~ MvNormal(osol1[:S₂], σ_S2^2 * I)
+	osol1 = solve(oprob, AutoTsit5(Rosenbrock23()), saveat=t_meas)
+	S1_ex1 ~ MvNormal(osol1[:S₁], σ_S1)
+	S2_ex1 ~ MvNormal(osol1[:S₂], σ_S2)
     # For experiment 2:
 	u0 = [:S₁=>140.0, :S₂=>135.0]
 	oprob = ODEProblem(sys_irrigation, u0, tspan, parms)
-	osol2 = solve(oprob, Tsit5(), saveat=t_meas)
-	S1_meas2 ~ MvNormal(osol2[:S₁], σ_S1^2 * I)
-	S2_meas2 ~ MvNormal(osol2[:S₂], σ_S2^2 * I)
+	osol2 = solve(oprob, AutoTsit5(Rosenbrock23()), saveat=t_meas)
+	S1_ex2 ~ MvNormal(osol2[:S₁], σ_S1)
+	S2_ex2 ~ MvNormal(osol2[:S₂], σ_S2)
 end
 
 # ╔═╡ df933ae8-1f51-4467-93a7-33f153e5e4f8
@@ -199,7 +182,7 @@ Provide the measurements to the Turing model.
 
 # ╔═╡ 0e2aa675-9e09-4e06-b5f8-118707ee652a
 # irrigation_inf = missing
-irrigation_inf = irrigation_inference(t_meas, S1_meas1, S2_meas1, S1_meas2, S2_meas2)
+irrigation_inf = irrigation_inference(t_meas) | (S1_ex1 = S1_meas1, S2_ex1 = S2_meas1, S1_ex2 = S1_meas2, S2_ex2 = S2_meas2)
 
 # ╔═╡ f7f47956-7c3b-44cc-bff7-fb7d32af874a
 md"""
@@ -300,7 +283,7 @@ osol2_opt = solve(oprob2_opt, Tsit5(), saveat=0.5)
 # end
 begin
   plot(osol2_opt, labels=["S1 sim" "S2 sim"], xlabel="t")
-  scatter!(t_meas, S1_meas2, label="S1 meas2", color=:blue, title="Experment 2")
+  scatter!(t_meas, S1_meas2, label="S1 meas2", color=:blue, title="Experiment 2")
   scatter!(t_meas, S2_meas2, label="S2 meas2", color=:red)
 end
 
@@ -331,11 +314,7 @@ end
 # ╠═cef4b9a8-b5bf-4a2d-8a8f-5d8f85534859
 # ╠═fc2cabd7-e778-4211-bf87-b5c11ca054c9
 # ╟─c0b2db7b-0632-4008-9cff-d5fbf3e59807
-# ╟─d35bbe54-5ebc-4ea5-a6c8-a6419476ec4c
-# ╠═10057510-e4b6-4a3e-9d3f-f05effc88a58
 # ╠═f4d49b1d-9105-4050-a9d4-196fa00a0591
-# ╠═777ce59f-c849-4a2e-a6dc-ae309d2a2e7c
-# ╠═43b83336-aea6-4914-bc26-b2e84994ce57
 # ╟─923d04ce-b4d2-44b0-afff-7062c4628ad0
 # ╠═481eb8b9-5de2-4f68-b06a-ec18e054c9f5
 # ╟─df933ae8-1f51-4467-93a7-33f153e5e4f8

@@ -202,7 +202,7 @@ Declare the Turing model function. Sample the flow rate $q$ prior from an unifor
 """
 
 # ╔═╡ b6bac48a-4a3d-47e4-90ea-788ca20dadff
-# @model function wastewater_treatment_inference(C_val)
+# @model function wastewater_treatment_inference()
 #     q ~ missing
 #     u0 = missing
 #     tspan = missing
@@ -211,7 +211,7 @@ Declare the Turing model function. Sample the flow rate $q$ prior from an unifor
 #     osol = missing
 #     C_val ~ missing
 # end
-@model function ww_treat_inf(C_val)
+@model function ww_treat_inf()
 	q ~ Uniform(0, 5.0)
     u0 = [:C=>3.0, :X=>0.5]
     tspan = (0.0, 72.0)  # the time interval to solve on
@@ -219,8 +219,8 @@ Declare the Turing model function. Sample the flow rate $q$ prior from an unifor
     oprob = ODEProblem(sys_ww_treat, u0, tspan, parms)
 	# or, since initial conditions don't change:
 	# oprob = ODEProblem(sys_ww_treat, [], tspan, parms)
-    osol = solve(oprob, Tsit5(), saveat=0.1)
-    C_val ~ Normal(osol[:C][end], 1e-3)
+    osol = solve(oprob, AutoTsit5(Rosenbrock23()), saveat=0.1)
+    C ~ Normal(osol[:C][end], 1e-3)
 end
 
 # ╔═╡ b3a40556-0c00-4f6d-8cd9-c5fca79d8bbf
@@ -232,6 +232,12 @@ Define the desired value for the organic waste with the variable name `C_val`.
 # missing
 C_val = 0.28
 
+# ╔═╡ b828105e-2677-4335-ba93-3bfd2b117220
+md"Instantiate the Turing model and condition it with the observed value of $C$"
+
+# ╔═╡ 97aca933-ebed-4b97-a872-a3d8ad533130
+ww_model = ww_treat_inf() | (C = C_val,)
+
 # ╔═╡ ee1ffc12-55a1-47ef-ac5b-33148706a09b
 md"""
 Provide the measurement to the Turing model and optimize the prior. Do this with `MLE` method and Nelder-Mead. Store the optimization results in `results_mle`.
@@ -239,7 +245,7 @@ Provide the measurement to the Turing model and optimize the prior. Do this with
 
 # ╔═╡ afc035be-075b-464b-8ba2-20235082f005
 # results_mle = missing
-results_mle = optimize(ww_treat_inf(C_val), MLE(), NelderMead())
+results_mle = optimize(ww_model, MLE(), NelderMead())
 
 # ╔═╡ 3ee8121e-3e78-4901-a32d-f04d0c6a0996
 md"""
@@ -338,6 +344,8 @@ Draw your conclusion.
 # ╠═b6bac48a-4a3d-47e4-90ea-788ca20dadff
 # ╟─b3a40556-0c00-4f6d-8cd9-c5fca79d8bbf
 # ╠═2df409ef-bd95-4ac3-a2b8-c5e17c490eba
+# ╟─b828105e-2677-4335-ba93-3bfd2b117220
+# ╠═97aca933-ebed-4b97-a872-a3d8ad533130
 # ╟─ee1ffc12-55a1-47ef-ac5b-33148706a09b
 # ╠═afc035be-075b-464b-8ba2-20235082f005
 # ╟─3ee8121e-3e78-4901-a32d-f04d0c6a0996

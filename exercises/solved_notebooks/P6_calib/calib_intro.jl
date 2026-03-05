@@ -4,6 +4,18 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    #! format: off
+    return quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+    #! format: on
+end
+
 # ╔═╡ f8a92690-990b-4341-89e1-322adbcb8d1b
 using Pkg; Pkg.activate("..")
 
@@ -42,18 +54,22 @@ In the models discussed in the previous sessions, we always knew the values of a
 
 # ╔═╡ 987f0a4d-e416-4ceb-adbe-3dcdca9d0996
 md"""
-The search of optimal parameter values usually involves a function, such as a loss function, a (log) likelihood function or a posterior distribution function. In this session we will be (mainly) using the MLE (Maximum Likelihood Estimation) and MAP (Maximum A Posteriori estimation) methods.
+The search of optimal parameter values usually involves a function, such as a loss function, a (log) likelihood function or a posterior distribution function. In this session we will be (mainly) using the MLE (Maximum Likelihood Estimation) and MAP (Maximum A Posteriori estimation) methods, which respectively try to maximize the likelihood function and the posterior probability of the data.
 
-In the MLE method, a likelihood function of a given probability density function is maximized during the search of optimal parameter values of a model in order to fit experimental data. The parameter values are considered unknown but viewed as fixed points.
+In order to understand the difference, recall Bayes' theorem applied to a set of parameters $θ$ and data $D$:
+```math
+P(θ \mid D) = \frac{P(D \mid θ) \, P(θ)}{P(D)}
+```
+In the MLE method, the likelihood function $P(D \mid θ)$ (= the probability of the data given the parameters) is maximized during the search of optimal parameter values of a model in order to fit experimental data. The parameter values are considered unknown but viewed as fixed points.
 
-In the MAP method, a posterior distribution function is maximized. Instead of viewing the parameter values as fixed points, they are now treated as random variables in the model which follow a prior distribution. In other words, we have prior belief in which distribution these parameters come from (Normal, Beta, etc). Once new data comes in, we update our prior belief, leading to a posterior belief. Hence, we now have a better idea from which distribution these parameters come.
+In the MAP method, the posterior probability $P(θ \mid D)$ (= the probability of the parameters given the data) is maximized instead. Instead of viewing the parameter values as fixed points, they are now treated as random variables in the model which follow a prior distribution. In other words, we have prior belief in which distribution these parameters come from (Normal, Beta, etc). Once new data comes in, we update our prior belief, leading to a posterior belief. Hence, we now have a better idea from which distribution these parameters come.
 
-One caveat with the MAP method is that it only considers the most likely point without taking into account other values of parameters from posterior distribution, which leads to a huge loss of useful information in posterior distribution. A better, yet computationally exhaustive method is using the MCMC (Markov chain Monte Carlo) sampling methods. Here we will use the NUTS sampler in this session. 
+One caveat with the MLE and MAP methods are that they only return a point estimate of the optimal value, which gives no information on how certain we are about this value. A more informative, yet computationally exhaustive method is using the MCMC (Markov chain Monte Carlo) sampling methods, which approximate the entire posterior distribution of the unknown values.
 """
 
 # ╔═╡ 75efff36-8da7-4d04-afa2-a2f8324bc103
 md"""
-In this notebook we will calibrate the different parameters involved in the grass growth models. Therefore, we will implement an objective function for each model and then minimizing them using an optimization algorithm. To illustrate this concept, we first revisit the three simple models modelling the grass growth yield.
+In this notebook we will calibrate the different parameters involved in the grass growth models. To illustrate this concept, we first revisit the three simple models modelling the grass growth yield.
 """
 
 # ╔═╡ 3dcb9c9d-370b-4031-b7c0-cee80742557a
@@ -69,7 +85,7 @@ In this notebook, three different models will be used, each modelling the yield 
 - Exponential growth model: $\cfrac{dW}{dt} = \mu \left( W_f - W \right)$
 - Gompertz growth model: $\cfrac{dW}{dt} = \left( \mu - d \ln(W) \right) W$
 
-with output $W$ the grass yield, and $W_f$, $\mu$ and $d$ parameters. The table below show the parameter values and the initial condition that will be used as initial values for the optimization algorithm:
+with output $W$ the grass yield, and $W_f$, $\mu$ and $d$ parameters. The table below shows some typical parameter values and initial conditions for grasslands similar to the one we observed, which we can use as prior information.
 
 |             | $\mu$      | $W_f$       | $d$          | $W_0$          |
 |:----------- |:----------:|:-----------:|:------------:|:------------:|
@@ -92,67 +108,6 @@ tspan = (0.0, 100.0)   # this will be the same for the three models
 md"""
 Variables containing the initial condition and parameters values will be defined later in the objective function.
 """
-
-# ╔═╡ 9a5bc72b-346d-4e95-a873-783037ed98bc
-md"""
-### Logistic growth model
-"""
-
-# ╔═╡ 4b17f7e6-26b0-425a-9f53-ccf1689639fe
-md"""
-We will illustrate the calibration with the logistic growth model. The latter can be done via a Catalyst reaction network model or via a model built with ModelingToolkit. As an example, we will show both possibilities for the logistic growth model.
-"""
-
-# ╔═╡ 6736542c-5378-480e-a56b-65956b416225
-md"""
-#### 1) Catalyst based model
-"""
-
-# ╔═╡ ba56adb1-9405-40d5-be48-4273b42ab145
-# growth_log = @reaction_network begin
-# 	@species W(t)=2.0
-# 	@parameters μ=0.07 Wf=10.0
-# 	μ*(1-W/Wf), W --> 2W
-# end
-
-# ╔═╡ 1c311b6f-6b18-4170-b500-33a8e4d3cb2d
-md"""
-#### ̇2) ModelingToolkit based model
-"""
-
-# ╔═╡ 50220e1f-8e42-44da-be03-08c11df967f0
-@variables W(t)
-
-# ╔═╡ 449286b0-0210-4c6b-b28f-fca87b52d674
-@parameters μ Wf d
-
-# ╔═╡ f720eac9-cb29-4eef-ac94-471395941c0f
-# IF YOU UNCOMMENT THE FOLLOWING LINE, PLEASE COMMENT THE CATALYST MODEL FIRST!!!
-@mtkbuild growth_log = ODESystem([D(W) ~ μ*(1 - W/Wf)*W], t)
-
-# ╔═╡ 024cce41-0469-415f-bdc5-69e8d38c4b69
-md"""
-#### Creating the ODEProblem
-"""
-
-# ╔═╡ acccb2fa-12b2-4fc7-91e3-58a4b1a02892
-md"""
-Next, we will need to create an `ODEProblem` in advance before we can optimize some of its parameters. We will provide the values in the aforementioned table as initial values for the problem.
-"""
-
-# ╔═╡ e54ea8d1-0854-44fa-aed8-45d106e921e4
-u0_log = [:W=>2.0]
-
-# ╔═╡ 8d96eb17-ce19-4523-916f-3cd0441a16ca
-parms_log = [:μ=>0.07, :Wf=>10.0]
-
-# ╔═╡ 561f97d4-b7c3-491a-9031-5148336867ea
-md"""
-Now you can choose which model (based on Catalyst or MTK) to use when creating the ODEProblem. They should both render the same results. *Leave one of them commented!*
-"""
-
-# ╔═╡ 5c9db9df-0cbd-41ac-afe9-fb5616c967be
-oprob_log = ODEProblem(growth_log, u0_log, tspan, parms_log);
 
 # ╔═╡ 1aa44f2b-6f33-437f-b9dd-89762d9f28ea
 md"""
@@ -187,39 +142,147 @@ scatter(t_meas, W_meas, title="Grass growth data",
                         xlims=(0, 100),
                         ylims=(0, 14))
 
+# ╔═╡ 50e6af5b-04f4-495c-853b-c746fd27254f
+md"## Calibration with Turing"
+
+# ╔═╡ a665740a-ea94-4452-8cbc-a1647319dfce
+md"""
+We will be using the familiar Turing framework to perform optimisation, which consists roughly of the following steps:
+- Define your model as a Turing model, with the following components:
+  - The observed input data as input of the model
+  - Priors for all unknown values such as initial values, parameter values and the measurement error
+  - An (ODE-based) model that predicts values of the output variable based on the observed input values and the unknown initial values, parameter values, etc.
+  - The relationship between the observed outputs and the predicted outputs, which often comes down to specifying the measurement error
+- Instantiate the Turing model and condition it on the observed values of the output variable
+- Call an optimisation algorithm on the Turing model
+- Extract the optimized parameters
+- Visualise the results
+"""
+
+# ╔═╡ b2f20a9a-0613-4bb4-a1d3-df1620aef105
+md"### The priors"
+
+# ╔═╡ 6852f166-350e-4434-8304-382c01113ba1
+md"""
+During calibration, the prior distributions have two roles:
+1. Define for every unknown quantity **the bounds**: the optimizer will only search within the domain of the prior distribution.
+1. Define part of the **posterior probability** of observing the data given the parameter values. In other words, the theoretically optimal values depend on your prior distributions.
+
+**Note that the second only applies to methods that take prior information into account, which Maximum Likelihood Estimation (MLE) does not.**
+"""
+
+# ╔═╡ 4f78b2e8-9132-4175-b9ae-9f5979649e90
+md"#### Choice of priors for the grass growth models"
+
+# ╔═╡ 557e69c5-d0c6-41ee-b3df-851bd1d16923
+md"""
+In general for our grass models, we will need to define priors for the following:
+- the measurement error (standard deviation) $\sigma_W$.
+- the initial condition $W_0$.
+- the parameters $\mu$ and either $W_f$ or $d$ (depending on the model).
+"""
+
+# ╔═╡ 237934b7-c89a-4ef6-938f-4629c0fa4c95
+md"""
+For the measurement error $\sigma_W$, a distribution with most of its probability density around 0 and a long positive tail is often a good choice. We will use the Exponential distribution here for this purpose. As for its parameters, considering our yield is in the order of 1 to 10 [t/ha], an expected value (and therefore standard deviation) of around 1 seems appropriate.
+"""
+
+# ╔═╡ 513ee94d-5d49-43d2-a1db-638fe9e2de1a
+@bind example_mean_error Slider(0.01:0.01:10.0, show_value = true, default = 1)
+
+# ╔═╡ 8e163f77-b762-427a-b005-313284dc2e9e
+plot(Exponential(example_mean_error), title = "Example prior for the measurement error", legend = false)
+
+# ╔═╡ d9c38e9d-12b8-4e98-8546-bbc123960e6f
+md"""
+For the initial- and parameter values, we will default to log-normal distributions. These have the following properties that generally fit well with biological parameters, such as is the case in this notebook:
+- A positive domain, which bounds possible values to the positive numbers
+- Most of the probability density around the expected value
+- A long postive tail, which allows for outliers
+
+As the distribution of a variable whose logarithm is normally distributed, it does have some strange behaviour: the arguments of the distribution are the mean and standard deviation of the **logarithm**. To clarify, for $X \sim \mathrm{LogNormal(μ, σ)}$:
+-  $μ = E[\mathrm{log}(X)]$
+-  $σ = \sqrt{\mathrm{Var}(\mathrm{log}(X))}$
+
+Practically, this means **you need to specify the logarithm of the desired expected value and play around with the standard deviation**. For this exercise, we will choose an expected value based on the table discussed earlier in this section and keep the standard deviation to the default value of 1.
+"""
+
+# ╔═╡ 39c70e22-86e0-467e-abab-24f99548b096
+@bind example_log_μ Slider(0.01:0.01:10.0, default = 0.1, show_value = true)
+
+# ╔═╡ ddef987d-59db-4adf-ae77-d4d32a41ddec
+@bind example_log_σ Slider(0.01:0.01:3.0, default = 1.0, show_value = true)
+
+# ╔═╡ 54fb706b-9036-42b5-833e-4081f4c2179c
+begin
+	example_param_prior = LogNormal(log(example_log_μ), example_log_σ)
+		
+	println("""Look at this strange distribution with 
+			- mean = $(mean(example_param_prior))
+			- median = $(median(example_param_prior))
+			- σ = $(std(example_param_prior))""")
+	plot(example_param_prior, xlims = (0, 5*example_log_μ), title = "Example prior for the model parameters", legend = false)
+end
+
+# ╔═╡ 9a5bc72b-346d-4e95-a873-783037ed98bc
+md"""
+## Example: the Logistic growth model
+"""
+
+# ╔═╡ 4b17f7e6-26b0-425a-9f53-ccf1689639fe
+md"""
+We will illustrate the calibration with the logistic growth model. The latter can be done via a Catalyst reaction network model or via a model built with ModelingToolkit. As an example, we will show both possibilities for the logistic growth model.
+"""
+
+# ╔═╡ 6736542c-5378-480e-a56b-65956b416225
+md"""
+#### 1) Catalyst based model
+"""
+
+# ╔═╡ ba56adb1-9405-40d5-be48-4273b42ab145
+# growth_log = @reaction_network begin
+# 	@species W(t)=2.0
+# 	@parameters μ=0.07 Wf=10.0
+# 	μ*(1-W/Wf), W --> 2W
+# end
+
+# ╔═╡ 1c311b6f-6b18-4170-b500-33a8e4d3cb2d
+md"""
+#### ̇2) ModelingToolkit based model
+"""
+
+# ╔═╡ 50220e1f-8e42-44da-be03-08c11df967f0
+@variables W(t)
+
+# ╔═╡ 449286b0-0210-4c6b-b28f-fca87b52d674
+@parameters μ Wf d
+
+# ╔═╡ f720eac9-cb29-4eef-ac94-471395941c0f
+# IF YOU UNCOMMENT THE FOLLOWING LINE, PLEASE COMMENT THE CATALYST MODEL FIRST!!!
+@mtkbuild growth_log = ODESystem([D(W) ~ μ*(1 - W/Wf)*W], t)
+
 # ╔═╡ d75246d4-e03b-4684-be7d-4bcfb61ed7ef
 md"""
 ### Declaration of the Turing model
 """
 
-# ╔═╡ dd3a32f1-bdb6-44a3-acbe-f4269725c9e4
-md"""
-In the Turing model we will define our priors for the following magnitudes:
-- the measurement error (standard deviation) $\sigma_W$, 
-- the initial condition $W_0$, and
-- the parameters $\mu$ and $W_f$.
-
-We will thereby take an Inverse Gamma prior distribution for $\sigma_W$ and LogNormal prior distributions for the initial condition and the parameters (assuming they lay in pre-defined range).
-"""
-
 # ╔═╡ 8a9115eb-4044-4cab-a7db-39b5dd86c70d
-@model function growth_log_inference(t_meas, W_meas)
-    σ_W ~ InverseGamma()
-    W0 ~ LogNormal()
-    μ ~ LogNormal()
-    Wf ~ LogNormal()
+@model function growth_log_inference(t_meas)
+    σ_W ~ Exponential()
+    W0 ~ LogNormal(log(1))
+    μ ~ LogNormal(log(0.1))
+    Wf ~ LogNormal(log(10))
 	u0_log = [:W => W0]
 	parms_log = [:μ => μ, :Wf => Wf]
 	oprob_log = ODEProblem(growth_log, u0_log, tspan, parms_log)
     osol_log = solve(oprob_log, AutoTsit5(Rosenbrock23()), saveat=t_meas)
-    W_meas ~ MvNormal(osol_log[:W], σ_W^2 * I)
+    W_s ~ MvNormal(osol_log[:W], σ_W)
 end
 
 # ╔═╡ 48c9f616-d298-40da-b917-225abd39b3d9
 md"""
 Some remarks:
 - The time points are the ones from the measurements, therefore, we set: `saveat=t_meas`.
-- We need to solve the ODE problem inside the Turing model function with values for $W_0$, $\mu$ and $W_f$ sampled from the distributions. Therefore, we need to remake our ODE problem with the appropriate initial and parameter values and solve it.
 - Depending on the priors, the parameter values of our ODE may vary wildly during calibration. As this can influence the stiffness of the system, it can be beneficial to use an ODE solver that automatically detects the stiffness of the system and switches to a stiff solver if necessary, such as `AutoTsit5(Rosenbrock23())`. We don't expect you to know when this is necessary, but if your calibration regularly gives instability errors, this may help! 
 """
 
@@ -229,7 +292,7 @@ We will provide the measurements to the Turing model:
 """
 
 # ╔═╡ 8b6534d6-776b-4285-8498-a9b34051facc
-growth_log_inf = growth_log_inference(t_meas, W_meas)
+growth_log_inf = growth_log_inference(t_meas) | (W_s = W_meas, )
 
 # ╔═╡ a6972aef-63ad-401c-acf5-6d59f9fc6698
 md"""
@@ -407,17 +470,20 @@ We will use Markov chain Monte Carlo (MCMC) method in combination with the No U-
 # ╔═╡ 0c047043-3284-422a-9c88-2f4f4c170edf
 results_log_nuts = sample(growth_log_inf, NUTS(), 500)
 
+# ╔═╡ 78a608a4-0ba7-400e-abb9-a9285c60681c
+plot(results_log_nuts) # check convergence
+
 # ╔═╡ 19c362cb-2764-41c9-a571-2e8e2bfcde93
 # summarize(results_log_nuts)
 
 # ╔═╡ 93db47b2-34e8-43b4-beac-b5620fd444e7
-W0_opt3_log = summarize(results_log_nuts)[:W0, :mean]
+W0_opt3_log = mean(results_log_nuts[:W0])
 
 # ╔═╡ 68c71cd2-6cdc-4b80-b6e7-75bfea344295
-μ_opt3_log = summarize(results_log_nuts)[:μ ,:mean]
+μ_opt3_log = mean(results_log_nuts[:μ])
 
 # ╔═╡ d6b9eaba-1d43-4e56-8fa1-bb2f87f6fe79
-Wf_opt3_log = summarize(results_log_nuts)[:Wf ,:mean]
+Wf_opt3_log = mean(results_log_nuts[:Wf])
 
 # ╔═╡ b843ee5e-9618-4b50-93db-77e19b4be366
 md"""
@@ -499,28 +565,6 @@ Convert the reaction network model into an ODE system to verify.
 # missing
 convert(ODESystem, growth_exp)
 
-# ╔═╡ c6d373f4-f13c-4135-823d-ee8fbeb71b56
-md"""
-Create an `ODEProblem`. Use the values in the aforementioned table as initial values for the problem. Use the same `tspan` as before.
-"""
-
-# ╔═╡ a97abaa7-b642-4201-86f1-5c8995b07536
-# u₀_exp = missing
-u0_exp = [:W=>2.0]
-
-# ╔═╡ 387730b4-bd06-492f-94e6-231bd68b3436
-# parms_exp = missing
-parms_exp = [:μ=>0.02, :Wf=>10.0]
-
-# ╔═╡ 290a7fe8-3b1e-423f-8b30-9bd8903d2e8f
-# oprob_exp = missing
-oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, parms_exp)
-
-# ╔═╡ febe2b67-2a8f-4575-946d-30877bd5f2d4
-md"""
-Use the same measurement data (`W_meas`, `t_meas`) as before.
-"""
-
 # ╔═╡ b4300e8a-8052-419b-98c8-0508ebee2393
 md"""
 Declare the Turing model. Take the same priors (and distributions) as before.
@@ -538,16 +582,16 @@ Declare the Turing model. Take the same priors (and distributions) as before.
 #     osol_exp = missing
 #     W_meas ~ missing
 # end
-@model function growth_exp_inference(t_meas, W_meas)
-    σ_W ~ InverseGamma()
-    W0 ~ LogNormal()
-    μ ~ LogNormal()
-    Wf ~ LogNormal()
+@model function growth_exp_inference(t_meas)
+    σ_W ~ Exponential()
+    W0 ~ LogNormal(log(1))
+    μ ~ LogNormal(log(0.1))
+    Wf ~ LogNormal(log(10))
 	u0_exp = [:W => W0]
 	parms_exp = [:μ => μ, :Wf => Wf]
 	oprob_exp = ODEProblem(growth_exp, u0_exp, tspan, parms_exp)
     osol_exp = solve(oprob_exp, AutoTsit5(Rosenbrock23()), saveat=t_meas)
-    W_meas ~ MvNormal(osol_exp[:W], σ_W^2 * I)
+    W_s ~ MvNormal(osol_exp[:W], σ_W)
 end
 
 # ╔═╡ c6a5d453-d610-4f65-847c-c878dd41726c
@@ -557,7 +601,7 @@ Provide the measurements to the Turing model.
 
 # ╔═╡ fff17cf7-173d-4f64-94a9-4bf46acc882d
 # growth_exp_inf = missing
-growth_exp_inf = growth_exp_inference(t_meas, W_meas)
+growth_exp_inf = growth_exp_inference(t_meas) | (W_s = W_meas, )
 
 # ╔═╡ eee55784-a641-445e-be75-0b19e2a94754
 md"""
@@ -662,33 +706,10 @@ Implement a system using MTK for the Gompertz growth model.\
 # ╔═╡ 6e85c08e-9a97-4897-9c81-89517f55e254
 @mtkbuild growth_gom = ODESystem([D(W) ~ (μ - d*log(W))*W], t)
 
-# ╔═╡ 47fb9e4c-df6a-4811-9980-99d595a34908
-md"""
-Create an `ODEProblem`. Use the values in the aforementioned table as initial values for the problem. Use the same `tspan` as before.
-"""
-
-# ╔═╡ bbd150de-ff9a-4127-a0dd-2f9762f92b07
-# u0_gom = missing
-u0_gom = [:W=>2.0]
-
-# ╔═╡ da5a0cbb-b033-46f1-a300-3954de138835
-# parms_gom = missing
-parms_gom = [:μ=>0.09, :d=>0.04]
-
-# ╔═╡ 73da8f53-c3af-43b0-9b23-60471f1e3587
-# oprob_gom = missing
-oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, parms_gom)
-
-# ╔═╡ b0e67564-efe8-4fb2-bcf2-a711b770244e
-md"""
-Use the same measurement data (`W_meas`, `t_meas`) as before.
-"""
-
 # ╔═╡ e5081280-d226-4834-8932-c89becd8313c
 md"""
-Declare the Turing model. Take the same priors as before.
+Declare the Turing model. Take the same priors as before, and try to find a sensible prior distribution for $d$.
 """
-# Take for $\sigma_W$ and $W_0$ the same priors (and distributions) as before, but take for $\mu$ a Uniform prior distribution in the range $[0, 2]$ and the same for $D$ but in the range $[0, 1]$.
 
 # ╔═╡ c739a908-2353-4e7a-8fbd-f640dc8cabe0
 # @model function growth_gom_inference(t_meas, W_meas)
@@ -702,16 +723,16 @@ Declare the Turing model. Take the same priors as before.
 #     osol_gom = missing
 #     W_meas ~ missing
 # end
-@model function growth_gom_inference(t_meas, W_meas)
-    σ_W ~ InverseGamma()
-    W0 ~ LogNormal()
-    μ ~ LogNormal()
-    d ~ LogNormal()
+@model function growth_gom_inference(t_meas)
+    σ_W ~ Exponential()
+    W0 ~ LogNormal(log(1.0))
+    μ ~ LogNormal(log(0.1))
+    d ~ LogNormal(log(0.1))
 	u0_gom = [:W => W0]
 	parms_gom = [:μ => μ, :d => d]
 	oprob_gom = ODEProblem(growth_gom, u0_gom, tspan, parms_gom)
     osol_gom = solve(oprob_gom, AutoTsit5(Rosenbrock23()), saveat=t_meas)
-    W_meas ~ MvNormal(osol_gom[:W], σ_W^2 * I)
+    W_s ~ MvNormal(osol_gom[:W], σ_W)
 end
 
 # ╔═╡ 1d0383ad-54d6-4ff2-8555-def83bfff0e6
@@ -721,7 +742,7 @@ Provide the measurements to the Turing model.
 
 # ╔═╡ cd1cf2f8-9f7f-4ed4-9cb7-1a6efee68ab4
 # growth_gom_inf = missing
-growth_gom_inf = growth_gom_inference(t_meas, W_meas)
+growth_gom_inf = growth_gom_inference(t_meas) | (W_s = W_meas, )
 
 # ╔═╡ aba74ee0-0163-4e15-8b49-d8dcad4839f7
 md"""
@@ -836,6 +857,26 @@ md"- Answer: missing"
 # ╟─85cd60a8-b448-4375-9b6d-399c4336c319
 # ╠═5b320989-3e0b-447b-bc9a-25fb221ce609
 # ╟─2481cd4f-0efc-4450-ab3d-4a5492597f36
+# ╟─1aa44f2b-6f33-437f-b9dd-89762d9f28ea
+# ╟─b2b433ed-0266-4bea-a7e8-32adba542d4c
+# ╠═7c966a66-0091-4b81-9a7e-02ccd0d3db10
+# ╟─3edd2acc-a865-4675-afef-8868c68256f1
+# ╠═877298e8-b61b-4c3a-ba2c-2827acdcfb50
+# ╟─ef06cc43-510b-4ff9-b0b7-1c7fc267e9b1
+# ╠═cb2bc6ee-4211-47e1-9956-5cf1b0c0671d
+# ╟─50e6af5b-04f4-495c-853b-c746fd27254f
+# ╟─a665740a-ea94-4452-8cbc-a1647319dfce
+# ╟─b2f20a9a-0613-4bb4-a1d3-df1620aef105
+# ╟─6852f166-350e-4434-8304-382c01113ba1
+# ╟─4f78b2e8-9132-4175-b9ae-9f5979649e90
+# ╟─557e69c5-d0c6-41ee-b3df-851bd1d16923
+# ╟─237934b7-c89a-4ef6-938f-4629c0fa4c95
+# ╠═513ee94d-5d49-43d2-a1db-638fe9e2de1a
+# ╠═8e163f77-b762-427a-b005-313284dc2e9e
+# ╟─d9c38e9d-12b8-4e98-8546-bbc123960e6f
+# ╠═39c70e22-86e0-467e-abab-24f99548b096
+# ╠═ddef987d-59db-4adf-ae77-d4d32a41ddec
+# ╠═54fb706b-9036-42b5-833e-4081f4c2179c
 # ╟─9a5bc72b-346d-4e95-a873-783037ed98bc
 # ╟─4b17f7e6-26b0-425a-9f53-ccf1689639fe
 # ╟─6736542c-5378-480e-a56b-65956b416225
@@ -844,21 +885,7 @@ md"- Answer: missing"
 # ╠═50220e1f-8e42-44da-be03-08c11df967f0
 # ╠═449286b0-0210-4c6b-b28f-fca87b52d674
 # ╠═f720eac9-cb29-4eef-ac94-471395941c0f
-# ╟─024cce41-0469-415f-bdc5-69e8d38c4b69
-# ╟─acccb2fa-12b2-4fc7-91e3-58a4b1a02892
-# ╠═e54ea8d1-0854-44fa-aed8-45d106e921e4
-# ╠═8d96eb17-ce19-4523-916f-3cd0441a16ca
-# ╟─561f97d4-b7c3-491a-9031-5148336867ea
-# ╠═5c9db9df-0cbd-41ac-afe9-fb5616c967be
-# ╟─1aa44f2b-6f33-437f-b9dd-89762d9f28ea
-# ╟─b2b433ed-0266-4bea-a7e8-32adba542d4c
-# ╠═7c966a66-0091-4b81-9a7e-02ccd0d3db10
-# ╟─3edd2acc-a865-4675-afef-8868c68256f1
-# ╠═877298e8-b61b-4c3a-ba2c-2827acdcfb50
-# ╟─ef06cc43-510b-4ff9-b0b7-1c7fc267e9b1
-# ╠═cb2bc6ee-4211-47e1-9956-5cf1b0c0671d
 # ╟─d75246d4-e03b-4684-be7d-4bcfb61ed7ef
-# ╟─dd3a32f1-bdb6-44a3-acbe-f4269725c9e4
 # ╠═8a9115eb-4044-4cab-a7db-39b5dd86c70d
 # ╟─48c9f616-d298-40da-b917-225abd39b3d9
 # ╟─35f158c1-858d-4e4d-ac3d-bf4807dad9a0
@@ -905,6 +932,7 @@ md"- Answer: missing"
 # ╟─29170e2a-9916-438e-92ca-9f4783397b5e
 # ╟─7ff9fe52-156b-4a92-9058-781670de3abb
 # ╠═0c047043-3284-422a-9c88-2f4f4c170edf
+# ╠═78a608a4-0ba7-400e-abb9-a9285c60681c
 # ╠═19c362cb-2764-41c9-a571-2e8e2bfcde93
 # ╠═93db47b2-34e8-43b4-beac-b5620fd444e7
 # ╠═68c71cd2-6cdc-4b80-b6e7-75bfea344295
@@ -925,11 +953,6 @@ md"- Answer: missing"
 # ╠═cf1a144e-09e9-42a3-b2a3-b8676a200a39
 # ╟─d69ed5dd-80cd-427e-9245-e42576a4688d
 # ╠═8b429656-1c57-4278-9633-71311f400ed8
-# ╟─c6d373f4-f13c-4135-823d-ee8fbeb71b56
-# ╠═a97abaa7-b642-4201-86f1-5c8995b07536
-# ╠═387730b4-bd06-492f-94e6-231bd68b3436
-# ╠═290a7fe8-3b1e-423f-8b30-9bd8903d2e8f
-# ╟─febe2b67-2a8f-4575-946d-30877bd5f2d4
 # ╟─b4300e8a-8052-419b-98c8-0508ebee2393
 # ╠═2c6ae74c-2da4-4867-ad8a-f4e835101d63
 # ╟─c6a5d453-d610-4f65-847c-c878dd41726c
@@ -955,11 +978,6 @@ md"- Answer: missing"
 # ╟─785d500b-f8ea-446a-9952-2a5fd5d83d24
 # ╟─e754826a-7411-4072-b0dc-a4bad7a15f98
 # ╠═6e85c08e-9a97-4897-9c81-89517f55e254
-# ╟─47fb9e4c-df6a-4811-9980-99d595a34908
-# ╠═bbd150de-ff9a-4127-a0dd-2f9762f92b07
-# ╠═da5a0cbb-b033-46f1-a300-3954de138835
-# ╠═73da8f53-c3af-43b0-9b23-60471f1e3587
-# ╟─b0e67564-efe8-4fb2-bcf2-a711b770244e
 # ╟─e5081280-d226-4834-8932-c89becd8313c
 # ╠═c739a908-2353-4e7a-8fbd-f640dc8cabe0
 # ╟─1d0383ad-54d6-4ff2-8555-def83bfff0e6
