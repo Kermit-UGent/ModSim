@@ -746,8 +746,8 @@ Declare the Turing model. Take the same priors as before.
 # ╔═╡ 1f8b10ba-f380-492e-800c-2673774cb25c
 @model function growth_gom_fun(t_meas)
     σ_W ~ Exponential()
-    W0 ~ LogNormal(log(1.0))
-    μ ~ LogNormal(log(0.1))
+    W0 ~ truncated(LogNormal(log(1.0)), lower = 1e-5) # prevent log(0)
+    μ ~ truncated(LogNormal(log(0.1)), upper = 1.0) # prevent overly large exponential growth from crashing the solver - this model has no carrying capacity to slow things down
     d ~ LogNormal(log(0.1))
 	u0_gom = [:W => W0]
 	parms_gom = [:μ => μ, :d => d]
