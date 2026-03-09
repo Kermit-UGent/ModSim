@@ -62,7 +62,7 @@ md"### 2: Unconditional expected value of Y"
 
 # ╔═╡ 3decb2ec-210a-4b2f-842d-6fd40dd3f77b
 @model function mole()
-	X ~ X_prior
+	X ~ Exponential(100)
 	Y ~ Uniform(0, X)
 	return Y
 end
@@ -108,7 +108,7 @@ md"### 5: Conditional distribution of X (with more data)"
 
 # ╔═╡ b2b16c34-e12a-4bea-8098-313d01913bbf
 @model function mole2()
-	X ~ X_prior
+	X ~ Exponential(100)
 	Ys = zeros(4)
 	for i in 1:length(Ys)
 		Ys[i] ~ Uniform(0, X)
@@ -245,7 +245,7 @@ md"### 3: Conditional expected value"
 
 # ╔═╡ 126d3954-c77d-4c98-abe0-fd87d14e6265
 @model function lights()
-	μ ~ lights_prior
+	μ ~ LogNormal(log(40), 0.5)
 	lifespans = zeros(4)
 	for i in 1:length(lifespans)
 		lifespans[i] ~ Exponential(μ)
@@ -284,7 +284,7 @@ md"""
 
 # ╔═╡ 8fc58fa4-b005-4f32-9eae-a8143582a1ae
 @model function lights_censored(time_observed, n_working)
-	μ ~ lights_prior
+	μ ~ LogNormal(log(40), 0.5)
 	
 	lifespans = zeros(2)
 	for i in 1:length(lifespans)
