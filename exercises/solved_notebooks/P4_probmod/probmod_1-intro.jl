@@ -78,9 +78,9 @@ x(t) &= \mathrm{cos}(α) \, v_0 \, t \, ,
 ```
 
 where the parameters are:
--  $v_0$ is the initial velocity.
--  $\alpha$ is the launching angle.
--  $g = 9.8$ is the gravitational acceleration.
+-  $v_0$: the initial velocity.
+-  $\alpha$: the launching angle.
+-  $g = 9.8$: the gravitational acceleration.
 """
 
 # ╔═╡ ee9cd05c-7fa5-4412-b3b4-32b0a1774c87
@@ -143,7 +143,7 @@ plot(
 )
 
 # ╔═╡ 314ba0ec-015f-488d-ac63-780b1dbf5bc2
-md"The latter is an **input variable**: when cycling, we can choose how far away we stay from the cyclist in front of us. The x-position of our face $x_f$ is therefore an input to the model."
+md"The third is an **input variable**: when cycling, we can choose how far away we stay from the cyclist in front of us. The x-position of our face $x_f$ is therefore an input to the model."
 
 # ╔═╡ c070f3c9-dd80-49f9-b279-c77f46316116
 md"## Defining the model"
@@ -358,7 +358,6 @@ md"""
 # ╠═╡ show_logs = false
 let
 	# model definition (comment out for speed)
-	g = 9.8
 	@model function splash(x_f)
 		v0 ~ Normal(5, 1) 
 		α ~ TriangularDist(0, pi/2)
@@ -379,12 +378,12 @@ let
 
 	# calculate interesting things
 	prob_face_hit = mean([1.5 <= y_s <= 1.7 for y_s in y_s_samples])
+
 	trajectories = [
 		x -> sin(α_samples[i]) / cos(α_samples[i]) * x -
 		g / 2 * ( x / (cos(α_samples[i])*v0_samples[i]) )^2
 		for i in 1:length(v0_samples)
 	]
-
 	plot(trajectories, xlims = (0, 5), ylims = (0, 2), 
 		 legend = false, color = :blue, alpha = 0.3,
 		 title = "Probability of getting hit ≈ $(round(100*prob_face_hit, digits = 3))%"
