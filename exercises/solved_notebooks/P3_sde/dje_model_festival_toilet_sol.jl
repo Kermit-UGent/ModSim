@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.21
+# v0.20.23
 
 using Markdown
 using InteractiveUtils
@@ -52,7 +52,7 @@ The time interval used is:
 """
 
 # ╔═╡ a30d6812-8337-4361-a16e-ee1bb86b2cb1
-tspan = (0.0, 360.0)
+tspan = (0.0, 360.0) #floats!
 
 # ╔═╡ 2bc030aa-4baa-4e75-90b7-c9fa1e7818ef
 md"""
@@ -67,14 +67,14 @@ Complete the model, create the (discrete) jump problem, solve it, and create a g
 # ╔═╡ a9830054-02ee-44f6-a94c-5722959124d7
 # toilet = @reaction_network begin
 # 	@species L(t)=missing V(t)=missing B(t)=missing
-# 	@parameters kₐ=missing kₒ=1/10 kₑ=missing
+# 	@parameters kₐ=missing kₒ=10 kₑ=missing
 # 	missing
 # 	kₒ, L + V --> B
 # 	missing
 # end
 toilet = @reaction_network begin
 	@species L(t)=0 V(t)=10 B(t)=0
-	@parameters kₐ=1.5 kₒ=1/10 kₑ=1/5
+	@parameters kₐ=1.5 kₒ=10 kₑ=1/5
 	kₐ, ∅ --> L
 	kₒ, L + V --> B
 	kₑ, B --> V
@@ -240,7 +240,7 @@ Hint: `>(L, 15)` is 1 when `L` is greater than 15, and zero in other cases. Alte
 # end
 toilet_wp = @reaction_network begin
 	@species L(t)=0 V(t)=10 B(t)=0 W(t)=0
-	@parameters kₐ=1.5 kₒ=1/10 kₑ=1/5
+	@parameters kₐ=1.5 kₒ=10 kₑ=1/5
 	kₐ, ∅ --> L
 	kₒ, L + V --> B
 	kₑ, B --> V

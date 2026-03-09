@@ -52,7 +52,7 @@ The time interval used is:
 """
 
 # ╔═╡ a30d6812-8337-4361-a16e-ee1bb86b2cb1
-tspan = (0.0, 360.0)
+tspan = missing #use floats
 
 # ╔═╡ 2bc030aa-4baa-4e75-90b7-c9fa1e7818ef
 md"""
@@ -67,7 +67,7 @@ Complete the model, create the (discrete) jump problem, solve it, and create a g
 # ╔═╡ a9830054-02ee-44f6-a94c-5722959124d7
 # toilet = @reaction_network begin
 # 	@species L(t)=missing V(t)=missing B(t)=missing
-# 	@parameters kₐ=missing kₒ=1/10 kₑ=missing
+# 	@parameters kₐ=missing kₒ=10 kₑ=missing
 # 	missing
 # 	kₒ, L + V --> B
 # 	missing
@@ -203,7 +203,7 @@ Hint: `>(L, 15)` is 1 when `L` is greater than 15, and zero in other cases. Alte
 # ╔═╡ 26c6c5e5-a7f8-4265-9423-c69b91b3d9e1
 # toilet_wp = @reaction_network begin
 # 	@species L(t)=missing V(t)=missing B(t)=missing W(t)=missing
-# 	@parameters kₐ=missing kₒ=1/10 kₑ=missing
+# 	@parameters kₐ=missing kₒ=10 kₑ=missing
 # 	missing
 # 	kₒ, L + V --> B
 # 	missing
