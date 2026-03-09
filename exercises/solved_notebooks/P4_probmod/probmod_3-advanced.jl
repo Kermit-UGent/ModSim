@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -52,7 +52,7 @@ Bacteria follow **logistic growth**, and you can use the following assumptions:
 md"""
 !!! questions
 	1. Plot the prior distribution of P0.
-	2. What is the probability your bacteria are in a splittable state 8 hours after inoculation?
+	2. What is the probability that your bacteria are in a splittable state 8 hours after inoculation?
 	3. Plot 100 of the sampled logistic growth curves from 0 to 12 hours.
 """
 
@@ -84,41 +84,31 @@ rand(dropletdist, 10000) |> histogram
 # ╔═╡ 107533fc-b300-4b8d-bea2-a3aa6a37938d
 md"### 2: Probability"
 
-# ╔═╡ 38c5b9cd-0baf-4a62-912e-4993614ddbf3
-md"""
-!!! tip
-	You can `return` the logistic function estimated within the model and retrieve it using `generated_quantities` to make plotting easier later on.
-
-	Remember: anonymous functions can be defined using `myfun = x -> ...`
-"""
-
 # ╔═╡ bde57599-1dca-41a4-94aa-498da72c2012
 logistic(t, P0, r, K) =  K / (1 + (K - P0)/P0 * exp(-r*t))
 
 # ╔═╡ 976cfb96-3196-4a61-bd5f-e4f5d24ba1e9
-@model function petrigrowth()
-	P0 ~ dropletdist
+@model function petrigrowth(t)
+	P0 ~ MixtureModel([Poisson(10), Poisson(30)], [0.75, 0.25])
     r ~ LogNormal(0.0, 0.3)
 	K ~ Normal(1e5, 1e4)
 
-	logfun = t -> logistic(t, P0, r, K)
-    return logfun
+	num_bacteria = logistic(t, P0, r, K)
+	splittable = 1e4 < num_bacteria < 1e5
+    return splittable
 end
 
 # ╔═╡ 4345b3dd-0731-4dd5-a319-627b4f91306e
-petri_model = petrigrowth();
+petri_model = petrigrowth(8);
 
 # ╔═╡ 9d747eef-a883-49b3-acb7-f0d077a2b902
 chain_petri = sample(petri_model, Prior(), 2000);
 
 # ╔═╡ ce8b53c3-0af1-4e9a-ad80-6fd7a2bf020b
-logfuns = generated_quantities(petri_model, chain_petri);
-
-# ╔═╡ e1d0c5d5-2b7a-4af4-a7ac-e1ca46e665c8
-sp_petri = [logfun(8.0) for logfun in logfuns];
+sp_splittable = generated_quantities(petri_model, chain_petri);
 
 # ╔═╡ e3092915-a083-425e-8fa1-b7bf370abc8a
-prob_splittable = mean((sp_petri .>= 1e4) .&& (sp_petri .<= 1e5))
+prob_splittable = mean(sp_splittable)
 
 # ╔═╡ e4f42f16-5cce-4fc2-aa01-8971f37c710e
 md"### 3: Plot"
@@ -126,11 +116,17 @@ md"### 3: Plot"
 # ╔═╡ 6253f255-e92d-4b5a-9d89-d4fe384fc438
 md"""
 !!! tip
-	Plotting a function `myfun` is as simple as entering `plot(myfun)`. The same syntax applies if `myfun` is a vector of functions. However, don't forget it was asked to plot only **100** functions.
+	Remember: anonymous functions can be defined using `myfun = x -> ...`, and can be visualized using `plot(myfun)`. The same syntax applies if `myfun` is a vector of functions. However, don't forget it was asked to plot only **100** functions.
 """
 
+# ╔═╡ 551e2c0c-faaf-476b-9021-7a10a75e92cf
+logfuns = [
+	t -> logistic(t, chain_petri[:P0][i], chain_petri[:r][i], chain_petri[:K][i])
+	for i in 1:length(chain_petri)
+]
+
 # ╔═╡ 14a8bc88-e10e-42d1-a4c0-7f3ebc5512a9
-plot(logfuns[1:100], color = :violet, alpha = 0.3, label = false, xlims = (0, 12))
+plot(logfuns[1:100], color = :violet, alpha = 0.5, label = false, xlims = (0, 12))
 	# extra arguments are for making the plot prettier but are not required
 
 # ╔═╡ c8941726-9e81-47fc-9b7e-cb3b5c0c61ca
@@ -138,7 +134,7 @@ md"# 2: Attraction"
 
 # ╔═╡ 431023df-3724-4325-b0ac-96dbf5e4fd20
 md"""
-Following a course on electromagnetism will teach one that computing the net force between 2 arbitrary shapes can be a terrifying task. Tragedy has it then, that this is a very general problem with application from making fusion reactors to space travel. We can ease the pain by turning it into a sampling problem.
+Following a course on electromagnetism will teach one that computing the net force between 2 arbitrary shapes can be a terrifying task. Tragedy has it then, that this is a very general problem with applications from making fusion reactors to space travel. We can ease the pain by turning it into a sampling problem.
 
 We'll start in a humble manner and simulate **the gravitational force between 2 cubes**. Both cubes are size 1. The first cube is in [0, 1] x [0, 1] x [0, 1], and the second cube in [1.1, 2.1] x [0, 1] x [0, 1], as shown in the figure below.
 """
@@ -149,7 +145,7 @@ begin
 	ye = [0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1]
 	ze = [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1]
 
-	xe2 = [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0] .+ 1.1
+	xe2 = xe .+ 1.1
 
 	plot(xlims = (-0.5, 2.5), ylims = (-1, 2), zlims = (0, 3))
 	plot!(xe, ye, ze; color = :blue, linewidth = 0.5, label = "cube 1")
@@ -241,16 +237,15 @@ histogram(estimator_sp)
 # ╠═6517d682-b524-42e3-8a13-78ed5c1ce0dc
 # ╠═60eabb68-7d65-4f78-97d9-b1e20c2dbd0a
 # ╟─107533fc-b300-4b8d-bea2-a3aa6a37938d
-# ╟─38c5b9cd-0baf-4a62-912e-4993614ddbf3
 # ╠═bde57599-1dca-41a4-94aa-498da72c2012
 # ╠═976cfb96-3196-4a61-bd5f-e4f5d24ba1e9
 # ╠═4345b3dd-0731-4dd5-a319-627b4f91306e
 # ╠═9d747eef-a883-49b3-acb7-f0d077a2b902
 # ╠═ce8b53c3-0af1-4e9a-ad80-6fd7a2bf020b
-# ╠═e1d0c5d5-2b7a-4af4-a7ac-e1ca46e665c8
 # ╠═e3092915-a083-425e-8fa1-b7bf370abc8a
 # ╟─e4f42f16-5cce-4fc2-aa01-8971f37c710e
 # ╟─6253f255-e92d-4b5a-9d89-d4fe384fc438
+# ╠═551e2c0c-faaf-476b-9021-7a10a75e92cf
 # ╠═14a8bc88-e10e-42d1-a4c0-7f3ebc5512a9
 # ╟─c8941726-9e81-47fc-9b7e-cb3b5c0c61ca
 # ╟─431023df-3724-4325-b0ac-96dbf5e4fd20

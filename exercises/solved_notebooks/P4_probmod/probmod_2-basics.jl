@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -256,13 +256,13 @@ md"## 4: Super eggs"
 
 # ╔═╡ 372436c4-262f-49b8-b1cf-626b043542bf
 md"""
-When a chicken lays an egg, there's a small chance it contains two egg yolks. This chance, as well as the number of eggs a chicken lays per year, go down as the chicken gets older. 
+When a chicken lays an egg, there's a small chance it contains two egg yolks. This chance, as well as the number of eggs a chicken lays per year, goes down as the chicken gets older. 
 """
 
 # ╔═╡ 20111742-008a-44c3-8c27-62791cce3e1e
 md"""
 You can make the following assumptions
-- The age $A$ of a random chicken (in years) is discrete and Uniformly distributed between 0 and 12.
+- The age $A$ of a random chicken (in years) is discrete and Uniformly distributed between 0 and 10.
 - The number of eggs $N$ an $A$-year old chicken lays in a year is Poisson distributed with mean $300 - 20 \, A$.
 - The probability $P$ of an $A$-year old chicken's egg having a double yolk is distributed as a `Beta(1, 800 + 100*A)`.
 """
@@ -271,7 +271,7 @@ You can make the following assumptions
 md"""
 !!! questions
     1. If someone hands you a random chicken, what is the probability it will lay 2 or more double eggs in a year? 
-    1. Compare the distributions of double eggs for 1-year old and 3-year old chickens.
+    1. Compare the distributions of double eggs for 1-year old and 5-year old chickens.
 """
 
 # ╔═╡ 6ebe676b-aee6-459b-bcda-de0fe14418a3
@@ -287,7 +287,7 @@ md"""
 
 # ╔═╡ 2b3d930f-53d9-4869-9e4a-86a1a681b9d8
 @model function eggs()
-	A ~ DiscreteUniform(0, 12)
+	A ~ DiscreteUniform(0, 10)
 	N ~ Poisson(300 - 20*A)
 	P ~ Beta(1, 800 + 100*A)
 
@@ -318,7 +318,7 @@ chicken_ages = chain_egg[:A];
 histogram(sp_egg[chicken_ages .== 1], normalize = :probability)
 
 # ╔═╡ 9d9b4091-cf44-46e6-b81b-74663c9c8dfe
-histogram(sp_egg[chicken_ages .== 3], normalize = :probability)
+histogram(sp_egg[chicken_ages .== 5], normalize = :probability)
 
 # ╔═╡ ff06c070-50a2-43d0-9729-1c47e728ff52
 md"## 5: Birthdays"
@@ -331,7 +331,7 @@ Sometimes, people are born on the same day of the year.
 # ╔═╡ 01648616-bf50-4f66-82fc-eaae3de22a38
 md"""
 !!! question
-	What is the probability that, in a class of 150 students, 3 or more share a birthday?
+	What is the probability that, in a class of 150 students, 3 or more share a birthday? Assume the probability for a person to be born is equal on every day of the year.
 """
 
 # ╔═╡ 29438eef-a725-4873-9372-194f2f899f12

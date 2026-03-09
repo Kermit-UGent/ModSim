@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -52,7 +52,7 @@ Bacteria follow **logistic growth**, and you can use the following assumptions:
 md"""
 !!! questions
 	1. Plot the prior distribution of P0.
-	2. What is the probability your bacteria are in a splittable state 8 hours after inoculation?
+	2. What is the probability that your bacteria are in a splittable state 8 hours after inoculation?
 	3. Plot 100 of the sampled logistic growth curves from 0 to 12 hours.
 """
 
@@ -77,25 +77,18 @@ dropletdist = missing;
 # ╔═╡ 107533fc-b300-4b8d-bea2-a3aa6a37938d
 md"### 2: Probability"
 
-# ╔═╡ 38c5b9cd-0baf-4a62-912e-4993614ddbf3
-md"""
-!!! tip
-	You can `return` the logistic function estimated within the model and retrieve it using `generated_quantities` to make plotting easier later on.
-
-	Remember: anonymous functions can be defined using `myfun = x -> ...`
-"""
-
 # ╔═╡ bde57599-1dca-41a4-94aa-498da72c2012
 logistic(t, P0, r, K) =  K / (1 + (K - P0)/P0 * exp(-r*t))
 
 # ╔═╡ 976cfb96-3196-4a61-bd5f-e4f5d24ba1e9
-@model function petrigrowth()
-	P0 ~ dropletdist
+@model function petrigrowth(t)
+	P0 ~ missing
     r ~ missing
 	K ~ missing
 
-	logfun = missing
-    return logfun
+	num_bacteria = missing
+	splittable = missing
+    return splittable
 end
 
 # ╔═╡ 4345b3dd-0731-4dd5-a319-627b4f91306e
@@ -104,11 +97,8 @@ petri_model = missing
 # ╔═╡ 9d747eef-a883-49b3-acb7-f0d077a2b902
 chain_petri = missing
 
-# ╔═╡ ce8b53c3-0af1-4e9a-ad80-6fd7a2bf020b
-logfuns = missing
-
 # ╔═╡ e1d0c5d5-2b7a-4af4-a7ac-e1ca46e665c8
-sp_petri = missing
+sp_splittable = missing
 
 # ╔═╡ e3092915-a083-425e-8fa1-b7bf370abc8a
 prob_splittable = missing
@@ -119,8 +109,11 @@ md"### 3: Plot"
 # ╔═╡ 2b39e0bd-91cd-456e-9053-7b8fe5a395fb
 md"""
 !!! tip
-	Plotting a function `myfun` is as simple as entering `plot(myfun)`. The same syntax applies if `myfun` is a vector of functions. However, don't forget it was asked to plot only **100** growth curves.
+	Remember: anonymous functions can be defined using `myfun = x -> ...`, and can be visualized using `plot(myfun)`. The same syntax applies if `myfun` is a vector of functions. However, don't forget it was asked to plot only **100** functions.
 """
+
+# ╔═╡ ac37dc49-ff1d-41c6-a2e3-74be2aaabd4c
+logfuns = missing
 
 # ╔═╡ d6c193d7-9fe2-413b-801f-ebc33c772ee9
 missing # plot
@@ -130,7 +123,7 @@ md"# 2: Attraction"
 
 # ╔═╡ 431023df-3724-4325-b0ac-96dbf5e4fd20
 md"""
-Following a course on electromagnetism will teach one that computing the net force between 2 arbitrary shapes can be a terrifying task. Tragedy has it then, that this is a very general problem with application from making fusion reactors to space travel. We can ease the pain by turning it into a sampling problem.
+Following a course on electromagnetism will teach one that computing the net force between 2 arbitrary shapes can be a terrifying task. Tragedy has it then, that this is a very general problem with applications from making fusion reactors to space travel. We can ease the pain by turning it into a sampling problem.
 
 We'll start in a humble manner and simulate **the gravitational force between 2 cubes**. Both cubes are size 1. The first cube is in [0, 1] x [0, 1] x [0, 1], and the second cube in [1.1, 2.1] x [0, 1] x [0, 1], as shown in the figure below.
 """
@@ -141,7 +134,7 @@ begin
 	ye = [0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1]
 	ze = [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1]
 
-	xe2 = [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0] .+ 1.1
+	xe2 = xe .+ 1.1
 
 	plot(xlims = (-0.5, 2.5), ylims = (-1, 2), zlims = (0, 3))
 	plot!(xe, ye, ze; color = :blue, linewidth = 0.5, label = "cube 1")
@@ -228,16 +221,15 @@ missing # histogram
 # ╟─bebe6f6b-9603-4062-8685-363ed7ff3dcb
 # ╠═eb6dc4e7-e779-4bfc-b865-3defa3894181
 # ╟─107533fc-b300-4b8d-bea2-a3aa6a37938d
-# ╟─38c5b9cd-0baf-4a62-912e-4993614ddbf3
 # ╠═bde57599-1dca-41a4-94aa-498da72c2012
 # ╠═976cfb96-3196-4a61-bd5f-e4f5d24ba1e9
 # ╠═4345b3dd-0731-4dd5-a319-627b4f91306e
 # ╠═9d747eef-a883-49b3-acb7-f0d077a2b902
-# ╠═ce8b53c3-0af1-4e9a-ad80-6fd7a2bf020b
 # ╠═e1d0c5d5-2b7a-4af4-a7ac-e1ca46e665c8
 # ╠═e3092915-a083-425e-8fa1-b7bf370abc8a
 # ╟─e4f42f16-5cce-4fc2-aa01-8971f37c710e
 # ╟─2b39e0bd-91cd-456e-9053-7b8fe5a395fb
+# ╠═ac37dc49-ff1d-41c6-a2e3-74be2aaabd4c
 # ╠═d6c193d7-9fe2-413b-801f-ebc33c772ee9
 # ╟─c8941726-9e81-47fc-9b7e-cb3b5c0c61ca
 # ╟─431023df-3724-4325-b0ac-96dbf5e4fd20
