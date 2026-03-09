@@ -72,7 +72,7 @@ md"""
 """
 
 # ╔═╡ eb6dc4e7-e779-4bfc-b865-3defa3894181
-dropletdist = missing;
+missing # plot
 
 # ╔═╡ 107533fc-b300-4b8d-bea2-a3aa6a37938d
 md"### 2: Probability"
@@ -82,23 +82,9 @@ logistic(t, P0, r, K) =  K / (1 + (K - P0)/P0 * exp(-r*t))
 
 # ╔═╡ 976cfb96-3196-4a61-bd5f-e4f5d24ba1e9
 @model function petrigrowth(t)
-	P0 ~ missing
-    r ~ missing
-	K ~ missing
-
-	num_bacteria = missing
-	splittable = missing
+	missing
     return splittable
 end
-
-# ╔═╡ 4345b3dd-0731-4dd5-a319-627b4f91306e
-petri_model = missing
-
-# ╔═╡ 9d747eef-a883-49b3-acb7-f0d077a2b902
-chain_petri = missing
-
-# ╔═╡ e1d0c5d5-2b7a-4af4-a7ac-e1ca46e665c8
-sp_splittable = missing
 
 # ╔═╡ e3092915-a083-425e-8fa1-b7bf370abc8a
 prob_splittable = missing
@@ -162,24 +148,12 @@ md"### 1: Net Force"
 
 # ╔═╡ 06d0e92f-1f07-41fd-b6ee-e94eb539627d
 @model function cubeforce()
-    x1 ~ missing
-    y1 ~ missing
-    z1 ~ missing
-
-	x2 ~ missing
-    y2 ~ missing
-    z2 ~ missing
-
 	F = missing
-	
     return F
 end
 
 # ╔═╡ 43119060-bd35-4c4c-8831-d5c5df1d8dd5
 cubemodel = cubeforce();
-
-# ╔═╡ d26ad946-2bb4-4383-860f-d601903ce1be
-force_sp = missing
 
 # ╔═╡ 7b117453-0875-4b41-a228-866c6c0a8208
 force_average = missing
@@ -223,9 +197,6 @@ missing # histogram
 # ╟─107533fc-b300-4b8d-bea2-a3aa6a37938d
 # ╠═bde57599-1dca-41a4-94aa-498da72c2012
 # ╠═976cfb96-3196-4a61-bd5f-e4f5d24ba1e9
-# ╠═4345b3dd-0731-4dd5-a319-627b4f91306e
-# ╠═9d747eef-a883-49b3-acb7-f0d077a2b902
-# ╠═e1d0c5d5-2b7a-4af4-a7ac-e1ca46e665c8
 # ╠═e3092915-a083-425e-8fa1-b7bf370abc8a
 # ╟─e4f42f16-5cce-4fc2-aa01-8971f37c710e
 # ╟─2b39e0bd-91cd-456e-9053-7b8fe5a395fb
@@ -239,7 +210,6 @@ missing # histogram
 # ╟─9be28327-d87f-4d50-bbcc-91e799f14dbf
 # ╠═06d0e92f-1f07-41fd-b6ee-e94eb539627d
 # ╠═43119060-bd35-4c4c-8831-d5c5df1d8dd5
-# ╠═d26ad946-2bb4-4383-860f-d601903ce1be
 # ╠═7b117453-0875-4b41-a228-866c6c0a8208
 # ╠═b28cfbae-2fac-4b38-b234-53f71e381bcd
 # ╟─304d6052-6d3d-487c-8c01-dab259276d6f
