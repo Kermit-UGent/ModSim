@@ -165,7 +165,7 @@ md"### The priors"
 # ╔═╡ 6852f166-350e-4434-8304-382c01113ba1
 md"""
 During calibration, the prior distributions have two roles:
-1. Define for every unknown quantity **the bounds**: the optimizer will only search within the domain of the prior distribution.
+1. Define for every unknown quantity **the bounds**: the optimizer will only search within the domain of the prior distribution. Note: you can add additional bounds to any existing distribution using the `truncated` function.
 1. Define part of the **posterior probability** of observing the data given the parameter values. In other words, the theoretically optimal values depend on your prior distributions.
 
 **Note that the second only applies to methods that take prior information into account, which Maximum Likelihood Estimation (MLE) does not.**
@@ -204,7 +204,7 @@ As the distribution of a variable whose logarithm is normally distributed, it do
 -  $μ = E[\mathrm{log}(X)]$
 -  $σ = \sqrt{\mathrm{Var}(\mathrm{log}(X))}$
 
-Practically, this means **you need to specify the logarithm of the desired expected value and play around with the standard deviation**. For this exercise, we will choose an expected value based on the table discussed earlier in this section and keep the standard deviation to the default value of 1.
+Practically, this means **you need to specify the logarithm of the desired expected value and play around with the standard deviation**. For this exercise, we will choose an expected value based on the table discussed earlier in this section and keep the standard deviation to the default value of 1. Additionally, for some parameters we may want to truncate them to to keep them within (biologically and numerically) sensible bounds.
 """
 
 # ╔═╡ 39c70e22-86e0-467e-abab-24f99548b096
@@ -271,7 +271,7 @@ md"""
     σ_W ~ Exponential()
     W0 ~ LogNormal(log(1))
     μ ~ LogNormal(log(0.1))
-    Wf ~ LogNormal(log(10))
+    Wf ~ truncated(LogNormal(log(10)), lower = 0.1) # prevent zeros in denominator of our model
 	u0_log = [:W => W0]
 	parms_log = [:μ => μ, :Wf => Wf]
 	oprob_log = ODEProblem(growth_log, u0_log, tspan, parms_log)
@@ -567,7 +567,7 @@ convert(ODESystem, growth_exp)
 
 # ╔═╡ b4300e8a-8052-419b-98c8-0508ebee2393
 md"""
-Declare the Turing model. Take the same priors (and distributions) as before.
+Declare the Turing model. Try to find sensible prior distributions.
 """
 
 # ╔═╡ 2c6ae74c-2da4-4867-ad8a-f4e835101d63
@@ -708,7 +708,7 @@ Implement a system using MTK for the Gompertz growth model.\
 
 # ╔═╡ e5081280-d226-4834-8932-c89becd8313c
 md"""
-Declare the Turing model. Take the same priors as before, and try to find a sensible prior distribution for $d$.
+Declare the Turing model. Try to find sensible prior distributions.
 """
 
 # ╔═╡ c739a908-2353-4e7a-8fbd-f640dc8cabe0
@@ -725,8 +725,8 @@ Declare the Turing model. Take the same priors as before, and try to find a sens
 # end
 @model function growth_gom_inference(t_meas)
     σ_W ~ Exponential()
-    W0 ~ LogNormal(log(1.0))
-    μ ~ LogNormal(log(0.1))
+    W0 ~ truncated(LogNormal(log(1.0)), lower = 1e-5) # prevent log(0)
+    μ ~ truncated(LogNormal(log(0.1)), upper = 1.0) # prevent overly large exponential growth from crashing the solver - this model has no carrying capacity to slow things down
     d ~ LogNormal(log(0.1))
 	u0_gom = [:W => W0]
 	parms_gom = [:μ => μ, :d => d]

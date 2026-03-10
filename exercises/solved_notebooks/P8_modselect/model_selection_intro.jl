@@ -222,7 +222,7 @@ We declare our Turing model function:
     σ_W ~ Exponential()
     W0 ~ LogNormal(log(1))
     μ ~ LogNormal(log(0.1))
-    Wf ~ LogNormal(log(10))
+    Wf ~ truncated(LogNormal(log(10)), lower = 0.1) # prevent zeros in denominator
 	u0_log = [:W => W0]
 	parms_log = [:μ => μ, :Wf => Wf]
 	oprob_log = ODEProblem(growth_log, u0_log, tspan, parms_log)
