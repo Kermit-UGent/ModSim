@@ -123,7 +123,7 @@ md"""
 logfuns = [
 	t -> logistic(t, chain_petri[:P0][i], chain_petri[:r][i], chain_petri[:K][i])
 	for i in 1:length(chain_petri)
-]
+];
 
 # ╔═╡ 14a8bc88-e10e-42d1-a4c0-7f3ebc5512a9
 plot(logfuns[1:100], color = :violet, alpha = 0.5, label = false, xlims = (0, 12))
@@ -154,18 +154,19 @@ end
 
 # ╔═╡ bb8e4cd6-6106-4d3f-9e35-0dfd8b2c45f5
 md"""
-The gravitational force can be estimated by **randomly sampling a point from both cubes** and using the formula for gravitational force between those points, ignoring all constants:
+You can sample the gravitational force between both cubes by **randomly sampling a point from both cubes** and using the formula for gravitational force between those points, ignoring all constants:
 
 ```math
-F = \frac{1}{r^2}
+F = \frac{1}{r^2} \, .
 ```
 """
 
 # ╔═╡ 058d2a08-7d40-46c5-8c5b-2b5ce9d2eb18
 md"""
 !!! questions
-	1. What is the estimated net force between the two cubes? Is this the same as if you had treated the cubes as point masses?
-	1. How many samples do you need to estimate this force reliably? Define a reliable estimator as one having a standard deviation of 0.1. Visualise the distribution of the estimator.
+	1. What is the estimated total force between the two cubes? Is this the same as if you had treated the cubes as point masses?
+	1. To estimate the net force, you take the average of $n$ samples. Of course, the result will vary every time you take a new sample: if you take the average of only 10 samples, your estimated total force will vary wildly! We can quantify how much the estimated total force varies by taking a **sample of sample averages** and then calculating the variance. Assuming you want your sample average to have a variance of no more than $0.01$, how many samples do you need? Visualise the distribution of the sample average.
+	    - EXTRA: How does the [central limit theorem](https://en.wikipedia.org/wiki/Central_limit_theorem) apply to this question? Can you use it to answer the question with less trial and error?
 """
 
 # ╔═╡ 3cd12379-5e7f-4f5d-a7bb-8b3a9d2e8497
@@ -195,7 +196,7 @@ cubemodel = cubeforce();
 force_sp = [cubemodel() for _ in 1:2000];
 
 # ╔═╡ 1ce8f808-b917-4831-89b4-4c318f05724d
-force_average = mean(force_sp)
+estimated_force = mean(force_sp)
 
 # ╔═╡ 420120c3-1c8c-46e4-a7c0-0f2405dd159a
 pointmass_force = 1 / 1.1^2
@@ -207,20 +208,58 @@ histogram(force_sp)
 md"### 2: Variance of Estimator"
 
 # ╔═╡ e38e8f51-90db-4136-84e2-f06cd03d502a
-@bind required_samples Slider(10:10:200, default = 140, show_value = true)
-	# manually change until standard deviation is about 0.1
+@bind n Slider(10:10:200, default = 20, show_value = true)
+	# manually change until variance is about 0.01
 
 # ╔═╡ 788f60fc-b1a1-4635-a36a-f954738bcffc
-estimator = mean([cubemodel() for _ in 1:required_samples])
+mean([cubemodel() for _ in 1:n]) # one sample of the estimated force
 
 # ╔═╡ a7e975a9-beb5-4169-9d22-3e970be2838b
-estimator_sp = [mean([cubemodel() for _ in 1:required_samples]) for _ in 1:2000];
+estimated_force_sp = [mean([cubemodel() for _ in 1:n]) for _ in 1:2000]; # "n" samples of the estimated force
 
 # ╔═╡ 7ff5cb25-47bd-432f-a404-359abaf44e3a
-estimator_sp_σ = std(estimator_sp)
+estimated_force_sp_var = var(estimated_force_sp)
 
 # ╔═╡ 99c7f6d6-eada-491b-b966-fdb1195fc111
-histogram(estimator_sp)
+histogram(estimated_force_sp)
+
+# ╔═╡ 5c8ba3b4-fee0-49bd-a5e4-4bef400807e0
+md"#### Extra: The central limit theorem"
+
+# ╔═╡ d695bdfb-1557-4923-9638-1f57689085ca
+md"""
+According to the central limit theorem, for samples $X_i$ following some distribution with mean $μ$ and variance $σ^2$, the distribution of the sample average $\bar{X}_n$ will converge to a normal distribution with mean $μ$ and variance $σ^2/n$.
+
+If we know the variance $σ_1^2$ for some sample size $n_1$, we can then find the required amount of samples $n_r$ for $σ_r^2 = 0.01$ using the following simple derivation:
+
+Given that
+```math
+\begin{align}
+σ^2_1 \approx σ^2 / n_1
+\\ σ^2_r \approx σ^2 / n_r
+\end{align}
+```
+it follows
+```math
+\begin{align}
+σ^2 &= σ^2
+\\ \Rightarrow n_1 σ^2_1 &\approx n_r σ^2_r
+\\ \Rightarrow n_r &\approx \frac{σ_1^2}{σ_r^2} n_1
+\end{align}
+```
+"""
+
+# ╔═╡ 9799aead-e2f5-418a-9079-34f985286fcb
+n_1 = 20
+
+# ╔═╡ f5769c0e-b452-49b6-9553-324eeeaad229
+var_1 = var([mean([cubemodel() for _ in 1:n_1]) for _ in 1:2000])
+
+# ╔═╡ 1a916042-ab26-4e52-9462-6880ca18072c
+var_r = 0.01
+
+# ╔═╡ 07ec86cc-84f1-497e-8cb8-5eaf3a004221
+n_r = var_1 / var_r * n_1 # we need at least ~ 130 samples
 
 # ╔═╡ Cell order:
 # ╟─52a38b60-178b-4a1d-ac32-e73fafd339f9
@@ -263,5 +302,11 @@ histogram(estimator_sp)
 # ╠═e38e8f51-90db-4136-84e2-f06cd03d502a
 # ╠═788f60fc-b1a1-4635-a36a-f954738bcffc
 # ╠═a7e975a9-beb5-4169-9d22-3e970be2838b
-# ╠═7ff5cb25-47bd-432f-a404-359abaf44e3a
 # ╠═99c7f6d6-eada-491b-b966-fdb1195fc111
+# ╠═7ff5cb25-47bd-432f-a404-359abaf44e3a
+# ╟─5c8ba3b4-fee0-49bd-a5e4-4bef400807e0
+# ╟─d695bdfb-1557-4923-9638-1f57689085ca
+# ╠═9799aead-e2f5-418a-9079-34f985286fcb
+# ╠═f5769c0e-b452-49b6-9553-324eeeaad229
+# ╠═1a916042-ab26-4e52-9462-6880ca18072c
+# ╠═07ec86cc-84f1-497e-8cb8-5eaf3a004221

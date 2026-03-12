@@ -127,20 +127,21 @@ begin
 	plot!(xe2, ye, ze; color = :orange, lw = 0.5, label = "cube 2")
 end
 
-# ╔═╡ bb8e4cd6-6106-4d3f-9e35-0dfd8b2c45f5
+# ╔═╡ 4cb55330-8a8a-4622-af4a-ab6f0b643123
 md"""
-The gravitational force can be estimated by **randomly sampling a point from both cubes** and using the formula for gravitational force between those points, ignoring all constants:
+You can sample the gravitational force between both cubes by **randomly sampling a point from both cubes** and using the formula for gravitational force between those points, ignoring all constants:
 
 ```math
-F = \frac{1}{r^2}
+F = \frac{1}{r^2} \, .
 ```
 """
 
 # ╔═╡ ceeeee76-e31c-4429-8ed0-e1c503433dbf
 md"""
 !!! questions
-	1. What is the estimated net force between the two cubes? Is this the same as if you had treated the cubes as point masses?
-	1. How many samples do you need to estimate this force reliably? Define a reliable estimator as one having a standard deviation of 0.1. Visualise the distribution of the estimator.
+	1. What is the estimated total force between the two cubes? Is this the same as if you had treated the cubes as point masses?
+	1. To estimate the net force, you take the average of $n$ samples. Of course, the result will vary every time you take a new sample: if you take the average of only 10 samples, your estimated total force will vary wildly! We can quantify how much the estimated total force varies by taking a **sample of sample averages** and then calculating the variance. Assuming you want your sample average to have a variance of no more than $0.01$, how many samples do you need? Visualise the distribution of the sample average.
+	    - EXTRA: How does the [central limit theorem](https://en.wikipedia.org/wiki/Central_limit_theorem) apply to this question? Can you use it to answer the question with less trial and error?
 """
 
 # ╔═╡ 9be28327-d87f-4d50-bbcc-91e799f14dbf
@@ -156,7 +157,7 @@ end
 cubemodel = cubeforce();
 
 # ╔═╡ 7b117453-0875-4b41-a228-866c6c0a8208
-force_average = missing
+estimated_force = missing
 
 # ╔═╡ b28cfbae-2fac-4b38-b234-53f71e381bcd
 pointmass_force = missing # (doesn't require Turing, only maths)
@@ -165,22 +166,18 @@ pointmass_force = missing # (doesn't require Turing, only maths)
 md"### 2: Variance of Estimator"
 
 # ╔═╡ e38e8f51-90db-4136-84e2-f06cd03d502a
-@bind required_samples Slider(10:10:200, show_value = true)
-
-# ╔═╡ b753fa82-28ab-46d1-9085-4c65301db046
-estimator = mean([cubemodel() for _ in 1:required_samples]) 
-	# a single estimation of the force given `required_samples` samples
+@bind n Slider(10:10:200, show_value = true)
 
 # ╔═╡ 55cf127f-5534-4926-955a-487ea9553b70
-estimator_sp = missing 
-	# a sample of estimations given `required_samples` samples
-
-# ╔═╡ f6a67c1e-3677-4e51-b6dd-5d11a5146ea7
-estimator_sp_σ = missing
-	# standard deviation of the force estimator
+estimated_force_sp = missing 
+	# multiple samples of your estimated force, using `n` samples
 
 # ╔═╡ 45f0813b-c4c9-4f13-8d66-1e58293c4422
-missing # histogram
+missing # histogram of estimated force samples
+
+# ╔═╡ f6a67c1e-3677-4e51-b6dd-5d11a5146ea7
+estimated_force_sp_var = missing
+	# variance of the estimated force
 
 # ╔═╡ Cell order:
 # ╟─52a38b60-178b-4a1d-ac32-e73fafd339f9
@@ -205,7 +202,7 @@ missing # histogram
 # ╟─c8941726-9e81-47fc-9b7e-cb3b5c0c61ca
 # ╟─431023df-3724-4325-b0ac-96dbf5e4fd20
 # ╟─599ac984-ef1d-4c7a-8e87-9d4ddb1aa710
-# ╟─bb8e4cd6-6106-4d3f-9e35-0dfd8b2c45f5
+# ╟─4cb55330-8a8a-4622-af4a-ab6f0b643123
 # ╟─ceeeee76-e31c-4429-8ed0-e1c503433dbf
 # ╟─9be28327-d87f-4d50-bbcc-91e799f14dbf
 # ╠═06d0e92f-1f07-41fd-b6ee-e94eb539627d
@@ -214,7 +211,6 @@ missing # histogram
 # ╠═b28cfbae-2fac-4b38-b234-53f71e381bcd
 # ╟─304d6052-6d3d-487c-8c01-dab259276d6f
 # ╠═e38e8f51-90db-4136-84e2-f06cd03d502a
-# ╠═b753fa82-28ab-46d1-9085-4c65301db046
 # ╠═55cf127f-5534-4926-955a-487ea9553b70
-# ╠═f6a67c1e-3677-4e51-b6dd-5d11a5146ea7
 # ╠═45f0813b-c4c9-4f13-8d66-1e58293c4422
+# ╠═f6a67c1e-3677-4e51-b6dd-5d11a5146ea7
