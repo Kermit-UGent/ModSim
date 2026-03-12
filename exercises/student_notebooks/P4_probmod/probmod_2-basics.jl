@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -93,53 +93,9 @@ varYcondX = missing
 # ╔═╡ ce9e2ce2-26e0-4f17-adf5-c922ba98239d
 missing # analytical answer of (missing)
 
-# ╔═╡ ce7d57ed-4f31-4dcf-af3b-b37a2e2a9393
-md"## 2: Combinations"
-
-# ╔═╡ 087994ce-a26d-40c4-87eb-ef9f0ce7f1fb
-md"""
-Let `U ~ Uniform(0, 4)`, `V ∼ Normal(U, 1)` and `W ~ TriangularDist(0, 4, U)`. 
-1. Use sampling (n = 10_000) to make a histogram of `|V − W|`.
-2. Estimate `P(V > W)` and `P(V * W >= 10)`
-3. Are `V` and `W` independent?
-"""
-
-# ╔═╡ 9e5cc347-c74f-46a3-9534-c5ad812844bf
-md"### 1: Histogram"
-
-# ╔═╡ 47a43282-3892-4a9a-94b7-c359fa74e12b
-@model function combinations()
-	U ~ missing
-	V ~ missing
-	W ~ missing
-end
-
-# ╔═╡ b0502f20-17af-4ecc-be80-a26b3e42d57f
-spVW = missing
-
-# ╔═╡ faa105b6-0700-4f4d-92fe-2bb72a4d6e44
-md"### 2: Probabilities"
-
-# ╔═╡ 97aec4a9-2954-4967-bc15-c0123bac2e75
-probVW1 = missing
-
-# ╔═╡ 30166840-d5f5-4a2a-acc2-cde76a87e95a
-probVW2 = missing
-
-# ╔═╡ 4decd959-aeb9-47d4-a381-14bbf4dbc5ab
-md"### 3: Independence"
-
-# ╔═╡ aa953baa-5105-49d7-82e6-94ca462624f7
-md"""
-!!! hint
-	One way to prove dependence is showing that $E[V] \neq E[V \mid W \leq w]$ for at least one value $w$. 
-
-	If the expected value of $V$ can change based on some information about $W$, they can't be independent!
-"""
-
 # ╔═╡ 9740ea64-cd4f-46b1-a741-02e392280601
 md"""
-## 3: Dice
+## 2: Dice
 """
 
 # ╔═╡ 187854bb-9e30-454d-9e03-cccf77aebb6b
@@ -214,7 +170,7 @@ md"### 3: Comparison"
 p_watercube_is_better = missing
 
 # ╔═╡ 34f3014f-f4d4-43d1-b46f-bdca73aee33f
-md"## 4: Super eggs"
+md"## 3: Super eggs"
 
 # ╔═╡ 372436c4-262f-49b8-b1cf-626b043542bf
 md"""
@@ -265,7 +221,7 @@ missing # histogram 1
 missing # histogram 2
 
 # ╔═╡ ff06c070-50a2-43d0-9729-1c47e728ff52
-md"## 5: Birthdays"
+md"## 4: Birthdays"
 
 # ╔═╡ 6ac2238a-16fd-4a8d-b779-8627d87367ed
 md"""
@@ -317,16 +273,6 @@ end
 # ╠═aedd0fe8-da3e-4463-b0cf-7c4f9a22db52
 # ╠═7ef53a87-e5df-4724-b896-3d1d46214c68
 # ╠═ce9e2ce2-26e0-4f17-adf5-c922ba98239d
-# ╟─ce7d57ed-4f31-4dcf-af3b-b37a2e2a9393
-# ╟─087994ce-a26d-40c4-87eb-ef9f0ce7f1fb
-# ╟─9e5cc347-c74f-46a3-9534-c5ad812844bf
-# ╠═47a43282-3892-4a9a-94b7-c359fa74e12b
-# ╠═b0502f20-17af-4ecc-be80-a26b3e42d57f
-# ╟─faa105b6-0700-4f4d-92fe-2bb72a4d6e44
-# ╠═97aec4a9-2954-4967-bc15-c0123bac2e75
-# ╠═30166840-d5f5-4a2a-acc2-cde76a87e95a
-# ╟─4decd959-aeb9-47d4-a381-14bbf4dbc5ab
-# ╟─aa953baa-5105-49d7-82e6-94ca462624f7
 # ╟─9740ea64-cd4f-46b1-a741-02e392280601
 # ╟─187854bb-9e30-454d-9e03-cccf77aebb6b
 # ╟─747e3c0a-357a-448a-b479-d0fcbe44a6c0

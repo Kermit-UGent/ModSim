@@ -101,74 +101,9 @@ var(Poisson(15))
 	# analytical answer of var(Y|X=15)
 	# Given X, Y follows a Poisson distribution with mean X
 
-# ╔═╡ ce7d57ed-4f31-4dcf-af3b-b37a2e2a9393
-md"## 2: Combinations"
-
-# ╔═╡ 087994ce-a26d-40c4-87eb-ef9f0ce7f1fb
-md"""
-Let `U ~ Uniform(0, 4)`, `V ∼ Normal(U, 1)` and `W ~ TriangularDist(0, 4, U)`. 
-1. Use sampling (n = 10_000) to make a histogram of `|V − W|`.
-2. Estimate `P(V > W)` and `P(V * W >= 10)`
-3. Are `V` and `W` independent?
-"""
-
-# ╔═╡ 9e5cc347-c74f-46a3-9534-c5ad812844bf
-md"### 1: Histogram"
-
-# ╔═╡ 47a43282-3892-4a9a-94b7-c359fa74e12b
-@model function combinations()
-	U ~ Uniform(0, 4)
-	V ~ Normal(U, 1.0)
-	W ~ TriangularDist(0, 4, U)
-end
-
-# ╔═╡ 890eaeb5-c63f-470c-85eb-d77cec68b740
-comb_model = combinations()
-
-# ╔═╡ 0d0297a3-60b6-47e5-b42b-bde99c09a16e
-comb_chain = sample(comb_model, Prior(), 10_000);
-
-# ╔═╡ c3cec28a-f472-46f5-9082-ddfdeb01ddf0
-spV = comb_chain[:V];
-
-# ╔═╡ 1911f031-d668-47df-995a-ca339ad4ae47
-spW = comb_chain[:W];
-
-# ╔═╡ 5c13b506-c05b-4258-95e7-93b648defa17
-spVW = abs.(spV - spW)
-
-# ╔═╡ d8ae7b0a-afee-41c0-af0c-f8b1d30086f9
-histogram(spVW)
-
-# ╔═╡ faa105b6-0700-4f4d-92fe-2bb72a4d6e44
-md"### 2: Probabilities"
-
-# ╔═╡ b4f156df-0b9c-495a-b95b-000c7f166243
-probVW1 = mean(spV .> spW)
-
-# ╔═╡ f7eb6faf-8884-4fea-9974-330d7fd555aa
-probVW2 = mean(spV .* spW .>= 10)
-
-# ╔═╡ 4decd959-aeb9-47d4-a381-14bbf4dbc5ab
-md"### 3: Independence"
-
-# ╔═╡ a465722f-49f9-4d37-9a2b-00d1120f5c06
-md"""
-!!! hint
-	One way to prove dependence is showing that $E[V] \neq E[V \mid W \leq w]$ for at least one value $w$. 
-
-	If the expected value of $V$ can change based on some information about $W$, they can't be independent!
-"""
-
-# ╔═╡ b2999f6e-2dbd-44ab-a303-97234f665d33
-mean(spV)
-
-# ╔═╡ 5ea80b00-941a-4226-87cb-66da7ee7d76d
-mean(spV[spW .<= 1]) # E[V] != E[V | W <= 1] => they are dependent
-
 # ╔═╡ 9740ea64-cd4f-46b1-a741-02e392280601
 md"""
-## 3: Dice
+## 2: Dice
 """
 
 # ╔═╡ 187854bb-9e30-454d-9e03-cccf77aebb6b
@@ -252,7 +187,7 @@ md"### 3: Comparison"
 p_watercube_is_better = mean(sp_w .> sp_d)
 
 # ╔═╡ 34f3014f-f4d4-43d1-b46f-bdca73aee33f
-md"## 4: Super eggs"
+md"## 3: Super eggs"
 
 # ╔═╡ 372436c4-262f-49b8-b1cf-626b043542bf
 md"""
@@ -321,7 +256,7 @@ histogram(sp_egg[chicken_ages .== 1], normalize = :probability)
 histogram(sp_egg[chicken_ages .== 5], normalize = :probability)
 
 # ╔═╡ ff06c070-50a2-43d0-9729-1c47e728ff52
-md"## 5: Birthdays"
+md"## 4: Birthdays"
 
 # ╔═╡ 6ac2238a-16fd-4a8d-b779-8627d87367ed
 md"""
@@ -414,23 +349,6 @@ E_triplebday = p_triplebday * 365 # The expected value of the amount of triple b
 # ╠═597d97fb-cfbe-4cff-bfbb-57df9a2f42aa
 # ╠═6ca31280-a997-4e84-98bb-e7784d0c555c
 # ╠═9dcb122b-dd12-4e80-b391-f780e637d6fe
-# ╟─ce7d57ed-4f31-4dcf-af3b-b37a2e2a9393
-# ╟─087994ce-a26d-40c4-87eb-ef9f0ce7f1fb
-# ╟─9e5cc347-c74f-46a3-9534-c5ad812844bf
-# ╠═47a43282-3892-4a9a-94b7-c359fa74e12b
-# ╠═890eaeb5-c63f-470c-85eb-d77cec68b740
-# ╠═0d0297a3-60b6-47e5-b42b-bde99c09a16e
-# ╠═c3cec28a-f472-46f5-9082-ddfdeb01ddf0
-# ╠═1911f031-d668-47df-995a-ca339ad4ae47
-# ╠═5c13b506-c05b-4258-95e7-93b648defa17
-# ╠═d8ae7b0a-afee-41c0-af0c-f8b1d30086f9
-# ╟─faa105b6-0700-4f4d-92fe-2bb72a4d6e44
-# ╠═b4f156df-0b9c-495a-b95b-000c7f166243
-# ╠═f7eb6faf-8884-4fea-9974-330d7fd555aa
-# ╟─4decd959-aeb9-47d4-a381-14bbf4dbc5ab
-# ╟─a465722f-49f9-4d37-9a2b-00d1120f5c06
-# ╠═b2999f6e-2dbd-44ab-a303-97234f665d33
-# ╠═5ea80b00-941a-4226-87cb-66da7ee7d76d
 # ╟─9740ea64-cd4f-46b1-a741-02e392280601
 # ╟─187854bb-9e30-454d-9e03-cccf77aebb6b
 # ╟─747e3c0a-357a-448a-b479-d0fcbe44a6c0
