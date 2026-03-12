@@ -335,6 +335,19 @@ md"""
 	We set a lot of keyword arguments of our plot to make the figure pretty here, but don't panic: this is still no programming course, so we will always clearly provide which one(s) you need if you need to plot something. If you ever do want to look for one yourself, you can find them on the function's help page (`?plot` or the `🔍 Live docs` in the bottom right corner).
 """
 
+# ╔═╡ 1de58e6a-4ee2-4d67-b97d-e63bbb9ed057
+md"## Sampling alternative"
+
+# ╔═╡ 83a8b9b6-72da-4aff-8364-37846b527a2f
+md"It's also possible to skip the chain construction entirely and simply call your model as a function to get a sample of the model output. Note that it's not possible to get the corresponding values of the stochastic variables using this approach, so only use this method if you **only** care about the model output."
+
+# ╔═╡ 771b9cb1-d809-46de-9380-2db73ccd014d
+# get a sample of the output 500 times
+y_s_samples_alternative = [splash_model() for _ in 1:500]
+
+# ╔═╡ 0f1cccd8-937d-4fc2-8657-c9967db483b8
+histogram(y_s_samples_alternative, bins = 15) # yup, that's the same distribution
+
 # ╔═╡ befb8f05-6ab7-4594-9cf1-71df47c1df03
 md"## Essentials"
 
@@ -456,6 +469,10 @@ end
 # ╟─00572e1a-d1e6-4c84-b1b2-b53404087dd8
 # ╠═f550ed7a-1bba-40b5-9338-cdeb0520aae9
 # ╟─3b465fc0-3a9d-4e67-8d4a-a14b3cd61f4e
+# ╟─1de58e6a-4ee2-4d67-b97d-e63bbb9ed057
+# ╟─83a8b9b6-72da-4aff-8364-37846b527a2f
+# ╠═771b9cb1-d809-46de-9380-2db73ccd014d
+# ╠═0f1cccd8-937d-4fc2-8657-c9967db483b8
 # ╟─befb8f05-6ab7-4594-9cf1-71df47c1df03
 # ╟─52af5de0-b516-4947-84f7-dde63e4c513e
 # ╟─2ceede7e-8f0c-420c-bde2-f16b726cd204
