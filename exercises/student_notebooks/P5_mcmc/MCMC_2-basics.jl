@@ -71,7 +71,7 @@ end
 molemodel = mole()
 
 # ╔═╡ 61b8ef63-a613-4dcb-8f7a-936e0d59b862
-spY = missing
+Y_samples = missing
 
 # ╔═╡ 4e8b9000-cb61-4f01-9ba9-17276ad0335e
 E_Y = missing
@@ -89,7 +89,7 @@ molechain = missing
 missing # plot molechain
 
 # ╔═╡ af4811ce-c6e7-458a-8f89-0562355b3eb0
-spXcondY = missing
+X_samplescondY = missing
 
 # ╔═╡ fd540765-95e5-4071-81f7-e689b06cad0c
 E_XcondY = missing

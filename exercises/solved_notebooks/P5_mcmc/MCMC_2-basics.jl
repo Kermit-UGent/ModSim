@@ -71,10 +71,10 @@ end
 molemodel = mole()
 
 # ╔═╡ b5bd5114-0a0c-4aa3-af00-4f3d05edc5e3
-spY = [molemodel() for i in 1:2000];
+Y_samples = [molemodel() for i in 1:2000];
 
 # ╔═╡ 4e8b9000-cb61-4f01-9ba9-17276ad0335e
-E_Y = mean(spY)
+E_Y = mean(Y_samples)
 
 # ╔═╡ 8777b133-7d7c-4a85-b89c-2f00093e9984
 md"### 3: Conditional expected value of X"
@@ -89,7 +89,7 @@ molechain = sample(cond_mole, NUTS(), 2000);
 plot(molechain)
 
 # ╔═╡ b79dafee-4f6f-4301-9267-1b9798c125ea
-spXcondY = molechain[:X];
+X_samplescondY = molechain[:X];
 
 # ╔═╡ fd540765-95e5-4071-81f7-e689b06cad0c
 E_XcondY = mean(molechain[:X])

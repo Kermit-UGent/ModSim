@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -49,13 +49,13 @@ dpmodel = doublepoisson()
 dpchain = sample(dpmodel, Prior(), 10_000)
 
 # ╔═╡ f6d90b53-0f16-4e43-b77c-8eb05b8c6943
-spY = dpchain[:Y];
+Y_samples = dpchain[:Y];
 
 # ╔═╡ 90835b5d-9705-43d0-b449-09cde57d5394
 plot(Poisson(10))
 
 # ╔═╡ 431d9be9-edfc-48fb-9df7-6a2b961fe4b4
-histogram(spY)
+histogram(Y_samples)
 
 # ╔═╡ 13989ba4-bcf8-4fdd-8aee-ab58c8905bc9
 md"### 2: Probabilities"
@@ -65,16 +65,16 @@ md"""
 !!! tip
 	When comparing a vector of values to a single number, don't forget to use `.` to execute operations element-wise in Julia!
 	
-	✅ `spY .< 1` compares every element of `spY` to `1`
+	✅ `Y_samples .< 1` compares every element of `Y_samples` to `1`
 	
-	❌ `spY < 1` compares an entire vector with a single number → errors :(
+	❌ `Y_samples < 1` compares an entire vector with a single number → errors :(
 """
 
 # ╔═╡ 09a87037-9f4f-4dd9-bb6c-fe717db39ea6
-probXY1 = mean(3 .< spY .<= 10)
+probXY1 = mean(3 .< Y_samples .<= 10)
 
 # ╔═╡ 2e2f203a-34a6-4feb-8aa1-8a1c97a09165
-probXY2 = mean(spY.^2 .> 100)
+probXY2 = mean(Y_samples.^2 .> 100)
 
 # ╔═╡ c243ca59-191d-4905-825e-6d7825a3c8a4
 md"### 3: Variances"
@@ -84,91 +84,32 @@ md"""
 !!! hint
 	To create a sample of $X$ that is conditional on some value(s) of $Y$, you can start from a sample of $X$ and select only those elements for which the corresponding sample of $Y$ has the conditioned value(s).
 
-	In other words, you'll need to index `spX` based on `spY` (and vice versa for $\text{var}(Y ∣ X)$). 
+	In other words, you'll need to index `X_samples` based on `Y_samples` (and vice versa for $\text{var}(Y ∣ X)$). 
 """
 
 # ╔═╡ 04cc5b42-7ab2-4055-a959-ba894c598f69
-spX = dpchain[:X];
+X_samples = dpchain[:X];
 
 # ╔═╡ 597d97fb-cfbe-4cff-bfbb-57df9a2f42aa
-varXcondY = var(spX[spY .== 15])
+varXcondY = var(X_samples[Y_samples .== 15])
 
 # ╔═╡ 6ca31280-a997-4e84-98bb-e7784d0c555c
-varYcondX = var(spY[spX .== 15])
+varYcondX = var(Y_samples[X_samples .== 15])
 
 # ╔═╡ 9dcb122b-dd12-4e80-b391-f780e637d6fe
 var(Poisson(15)) 
 	# analytical answer of var(Y|X=15)
 	# Given X, Y follows a Poisson distribution with mean X
 
-# ╔═╡ ce7d57ed-4f31-4dcf-af3b-b37a2e2a9393
-md"## 2: Combinations"
-
-# ╔═╡ 087994ce-a26d-40c4-87eb-ef9f0ce7f1fb
+# ╔═╡ c976dd77-6a72-4acc-9b07-342cc01fc7ee
 md"""
-Let `U ~ Uniform(0, 4)`, `V ∼ Normal(U, 1)` and `W ~ TriangularDist(0, 4, U)`. 
-1. Use sampling (n = 10_000) to make a histogram of `|V − W|`.
-2. Estimate `P(V > W)` and `P(V * W >= 10)`
-3. Are `V` and `W` independent?
+!!! warning
+	Starting here, the entire structure of the answer will no longer be given. You are therefore expected to **add more code cells** yourself, using the `+` at the left in between two cells.
 """
-
-# ╔═╡ 9e5cc347-c74f-46a3-9534-c5ad812844bf
-md"### 1: Histogram"
-
-# ╔═╡ 47a43282-3892-4a9a-94b7-c359fa74e12b
-@model function combinations()
-	U ~ Uniform(0, 4)
-	V ~ Normal(U, 1.0)
-	W ~ TriangularDist(0, 4, U)
-end
-
-# ╔═╡ 890eaeb5-c63f-470c-85eb-d77cec68b740
-comb_model = combinations()
-
-# ╔═╡ 0d0297a3-60b6-47e5-b42b-bde99c09a16e
-comb_chain = sample(comb_model, Prior(), 10_000);
-
-# ╔═╡ c3cec28a-f472-46f5-9082-ddfdeb01ddf0
-spV = comb_chain[:V];
-
-# ╔═╡ 1911f031-d668-47df-995a-ca339ad4ae47
-spW = comb_chain[:W];
-
-# ╔═╡ 5c13b506-c05b-4258-95e7-93b648defa17
-spVW = abs.(spV - spW)
-
-# ╔═╡ d8ae7b0a-afee-41c0-af0c-f8b1d30086f9
-histogram(spVW)
-
-# ╔═╡ faa105b6-0700-4f4d-92fe-2bb72a4d6e44
-md"### 2: Probabilities"
-
-# ╔═╡ b4f156df-0b9c-495a-b95b-000c7f166243
-probVW1 = mean(spV .> spW)
-
-# ╔═╡ f7eb6faf-8884-4fea-9974-330d7fd555aa
-probVW2 = mean(spV .* spW .>= 10)
-
-# ╔═╡ 4decd959-aeb9-47d4-a381-14bbf4dbc5ab
-md"### 3: Independence"
-
-# ╔═╡ a465722f-49f9-4d37-9a2b-00d1120f5c06
-md"""
-!!! hint
-	One way to prove dependence is showing that $E[V] \neq E[V \mid W \leq w]$ for at least one value $w$. 
-
-	If the expected value of $V$ can change based on some information about $W$, they can't be independent!
-"""
-
-# ╔═╡ b2999f6e-2dbd-44ab-a303-97234f665d33
-mean(spV)
-
-# ╔═╡ 5ea80b00-941a-4226-87cb-66da7ee7d76d
-mean(spV[spW .<= 1]) # E[V] != E[V | W <= 1] => they are dependent
 
 # ╔═╡ 9740ea64-cd4f-46b1-a741-02e392280601
 md"""
-## 3: Dice
+## 2: Dice
 """
 
 # ╔═╡ 187854bb-9e30-454d-9e03-cccf77aebb6b
@@ -192,7 +133,7 @@ md"### 1: Watercube"
 
 # ╔═╡ 13cdd6ee-04ec-4085-8083-3d52e88aa35c
 md"""
-!!! hint
+!!! tip
 	Consider the humble `DiscreteUniform` distribution. Not sure how it works? Open the **🔍 Live Docs** at the bottom right of the screen for more information
 """
 
@@ -212,13 +153,13 @@ end
 watermodel = watercube()
 
 # ╔═╡ 97021710-4b26-4a1c-a794-265c9559ce4d
-sp_w = [watermodel() for i in 1:2000]
+watercube_samples = [watermodel() for i in 1:2000]
 
 # ╔═╡ c0cd75bd-2a46-4f62-a59a-9bb8d47d45f2
-p_watercube_kills = mean(sp_w .>= 50)
+p_watercube_kills = mean(watercube_samples .>= 50)
 
 # ╔═╡ bc5f5d70-e269-45f9-867b-a00876ce8c40
-histogram(sp_w, bins = 30)
+histogram(watercube_samples, bins = 30)
 
 # ╔═╡ 44a2cabc-aca9-4bb7-af9d-cd735c424d7b
 md"### 2: Dirtprism"
@@ -237,32 +178,32 @@ end
 dirtmodel = dirtprism()
 
 # ╔═╡ 700cc645-1123-4c8a-821e-1ae4fe8b0674
-sp_d = [dirtmodel() for i in 1:2000]
+dirtcube_samples = [dirtmodel() for i in 1:2000]
 
 # ╔═╡ 98d04790-e86f-438a-9389-cb9697934bbf
-p_dirtprism_kills = mean(sp_d .>= 50)
+p_dirtprism_kills = mean(dirtcube_samples .>= 50)
 
 # ╔═╡ d5413573-5202-4fa2-94f6-e92a613d63aa
-histogram(sp_d, bins = 30)
+histogram(dirtcube_samples, bins = 30)
 
 # ╔═╡ 49790a8f-9f53-4ba7-9543-d6a879b520e0
 md"### 3: Comparison"
 
 # ╔═╡ 6e098cb6-eddd-4924-a184-c2578dc28473
-p_watercube_is_better = mean(sp_w .> sp_d)
+p_watercube_is_better = mean(watercube_samples .> dirtcube_samples)
 
 # ╔═╡ 34f3014f-f4d4-43d1-b46f-bdca73aee33f
-md"## 4: Super eggs"
+md"## 3: Super eggs"
 
 # ╔═╡ 372436c4-262f-49b8-b1cf-626b043542bf
 md"""
-When a chicken lays an egg, there's a small chance it contains two egg yolks. This chance, as well as the number of eggs a chicken lays per year, go down as the chicken gets older. 
+When a chicken lays an egg, there's a small chance it contains two egg yolks. This chance, as well as the number of eggs a chicken lays per year, goes down as the chicken gets older. 
 """
 
 # ╔═╡ 20111742-008a-44c3-8c27-62791cce3e1e
 md"""
 You can make the following assumptions
-- The age $A$ of a random chicken (in years) is discrete and Uniformly distributed between 0 and 12.
+- The age $A$ of a random chicken (in years) is discrete and Uniformly distributed between 0 and 10.
 - The number of eggs $N$ an $A$-year old chicken lays in a year is Poisson distributed with mean $300 - 20 \, A$.
 - The probability $P$ of an $A$-year old chicken's egg having a double yolk is distributed as a `Beta(1, 800 + 100*A)`.
 """
@@ -271,7 +212,7 @@ You can make the following assumptions
 md"""
 !!! questions
     1. If someone hands you a random chicken, what is the probability it will lay 2 or more double eggs in a year? 
-    1. Compare the distributions of double eggs for 1-year old and 3-year old chickens.
+    1. Compare the distributions of double eggs for 1-year old and 5-year old chickens.
 """
 
 # ╔═╡ 6ebe676b-aee6-459b-bcda-de0fe14418a3
@@ -279,7 +220,7 @@ md"### 1: Probability"
 
 # ╔═╡ 34aad3d6-9deb-4298-b613-bf3a616f2b31
 md"""
-!!! hint
+!!! tip
 	In this exercise, the output variable (the number of double-yolked eggs) is **also a random variable**! In other words, it also follows some distribution.
 
 	When considering what distribution, consider that each of the $N$ eggs represents a "trial" with a $P$ chance of success for a double yolk.
@@ -287,7 +228,7 @@ md"""
 
 # ╔═╡ 2b3d930f-53d9-4869-9e4a-86a1a681b9d8
 @model function eggs()
-	A ~ DiscreteUniform(0, 12)
+	A ~ DiscreteUniform(0, 10)
 	N ~ Poisson(300 - 20*A)
 	P ~ Beta(1, 800 + 100*A)
 
@@ -302,10 +243,10 @@ egg_model = eggs();
 chain_egg = sample(egg_model, Prior(), 2000)
 
 # ╔═╡ 64d04ed9-6548-4251-8a4e-11b31e8f3143
-sp_egg = generated_quantities(egg_model, chain_egg);
+egg_samples = generated_quantities(egg_model, chain_egg);
 
 # ╔═╡ 00fd5517-5232-4d88-8ab0-3a0eb925eb3e
-p_multiple_double_eggs = mean(sp_egg .>= 2) 
+p_multiple_double_eggs = mean(egg_samples .>= 2) 
 	# a ~2% chance for two or more double eggs in one year
 
 # ╔═╡ 80e3544e-86ec-469c-be44-77f94fabfc28
@@ -315,13 +256,13 @@ md"### 2: Histograms"
 chicken_ages = chain_egg[:A];
 
 # ╔═╡ fe87f9ee-a07c-4b4c-b89d-c3bb4ee7ee7f
-histogram(sp_egg[chicken_ages .== 1], normalize = :probability)
+histogram(egg_samples[chicken_ages .== 1], normalize = :probability)
 
 # ╔═╡ 9d9b4091-cf44-46e6-b81b-74663c9c8dfe
-histogram(sp_egg[chicken_ages .== 3], normalize = :probability)
+histogram(egg_samples[chicken_ages .== 5], normalize = :probability)
 
 # ╔═╡ ff06c070-50a2-43d0-9729-1c47e728ff52
-md"## 5: Birthdays"
+md"## 4: Birthdays"
 
 # ╔═╡ 6ac2238a-16fd-4a8d-b779-8627d87367ed
 md"""
@@ -331,7 +272,7 @@ Sometimes, people are born on the same day of the year.
 # ╔═╡ 01648616-bf50-4f66-82fc-eaae3de22a38
 md"""
 !!! question
-	What is the probability that, in a class of 150 students, 3 or more share a birthday?
+	What is the probability that, in a class of 150 students, 3 or more share a birthday? Assume the probability for a person to be born is equal on every day of the year.
 """
 
 # ╔═╡ 29438eef-a725-4873-9372-194f2f899f12
@@ -366,10 +307,10 @@ end
 bday_model = birthdays(150)
 
 # ╔═╡ b0443045-74a1-4b48-8f6c-a1b5e15eace4
-sp_maxoccs = [bday_model() for i in 1:2000]
+bday_samples = [bday_model() for i in 1:2000]
 
 # ╔═╡ cac00880-15fa-483a-a09f-9b6d1219b0cf
-mean(sp_maxoccs .>= 3)
+mean(bday_samples .>= 3)
 
 # ╔═╡ 13002efe-15f1-4096-be4f-671432a8991e
 md"""
@@ -414,23 +355,7 @@ E_triplebday = p_triplebday * 365 # The expected value of the amount of triple b
 # ╠═597d97fb-cfbe-4cff-bfbb-57df9a2f42aa
 # ╠═6ca31280-a997-4e84-98bb-e7784d0c555c
 # ╠═9dcb122b-dd12-4e80-b391-f780e637d6fe
-# ╟─ce7d57ed-4f31-4dcf-af3b-b37a2e2a9393
-# ╟─087994ce-a26d-40c4-87eb-ef9f0ce7f1fb
-# ╟─9e5cc347-c74f-46a3-9534-c5ad812844bf
-# ╠═47a43282-3892-4a9a-94b7-c359fa74e12b
-# ╠═890eaeb5-c63f-470c-85eb-d77cec68b740
-# ╠═0d0297a3-60b6-47e5-b42b-bde99c09a16e
-# ╠═c3cec28a-f472-46f5-9082-ddfdeb01ddf0
-# ╠═1911f031-d668-47df-995a-ca339ad4ae47
-# ╠═5c13b506-c05b-4258-95e7-93b648defa17
-# ╠═d8ae7b0a-afee-41c0-af0c-f8b1d30086f9
-# ╟─faa105b6-0700-4f4d-92fe-2bb72a4d6e44
-# ╠═b4f156df-0b9c-495a-b95b-000c7f166243
-# ╠═f7eb6faf-8884-4fea-9974-330d7fd555aa
-# ╟─4decd959-aeb9-47d4-a381-14bbf4dbc5ab
-# ╟─a465722f-49f9-4d37-9a2b-00d1120f5c06
-# ╠═b2999f6e-2dbd-44ab-a303-97234f665d33
-# ╠═5ea80b00-941a-4226-87cb-66da7ee7d76d
+# ╟─c976dd77-6a72-4acc-9b07-342cc01fc7ee
 # ╟─9740ea64-cd4f-46b1-a741-02e392280601
 # ╟─187854bb-9e30-454d-9e03-cccf77aebb6b
 # ╟─747e3c0a-357a-448a-b479-d0fcbe44a6c0

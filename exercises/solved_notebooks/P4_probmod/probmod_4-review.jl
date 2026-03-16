@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -15,7 +15,7 @@ md"# Review exercise: Buffon's needles"
 
 # ╔═╡ a6435b94-f1af-4609-abfc-93d88730d023
 md"""
-A wise man once said: ["there is no greater joy than estimating π"](https://en.wikipedia.org/wiki/Approximations_of_%CF%80). Next to throwing darts at the unit square, another method to accomplish this is using [Buffon's needle problem](https://en.wikipedia.org/wiki/Buffon%27s_needle_problem).
+A wise man once said: ["there is no greater joy than estimating π"](https://en.wikipedia.org/wiki/Approximations_of_%CF%80). One method to accomplish this is using [Buffon's needle problem](https://en.wikipedia.org/wiki/Buffon%27s_needle_problem).
 
 The experiment is as follows: consider a floor with parallel lines all a distance of 1 away from eachother. Now drop a needle of length 1 (and width ~0) on the floor with a **random position and angle**. What is the probability $P_{cross}$ that the needle will cross one of the lines?
 """
@@ -24,8 +24,8 @@ The experiment is as follows: consider a floor with parallel lines all a distanc
 md"The following image illustrates the problem (imagine $l$ = $t$ = 1) for two needles, where `a` crosses a line and `b` does not."
 
 # ╔═╡ c2ba2183-957f-4b94-a22e-0c2f3dd957ad
-md"""
-![Buffon's needles](https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Buffon_needle.svg/1920px-Buffon_needle.svg.png)
+html"""
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Buffon_needle.svg/1920px-Buffon_needle.svg.png" style="background-color:white;" alt:"Buffon's needles">
 """
 
 # ╔═╡ d71cf8dc-99e5-48e0-9abe-2242a6ccc30b
@@ -66,13 +66,13 @@ end
 needle_model = needles()
 
 # ╔═╡ 49a206fb-6390-45fa-900f-8031b77a2725
-sp_n = [needle_model() for i in 1:2000]
+needle_samples = [needle_model() for i in 1:2000]
 
 # ╔═╡ b6009fc4-2f67-4b56-acc9-ccc1a013f5e9
-mean(sp_n)
+mean(needle_samples)
 
 # ╔═╡ 63e0b367-6155-472d-8502-b405db10e979
-pi_est = 2 / mean(sp_n)
+pi_est = 2 / mean(needle_samples)
 
 # ╔═╡ Cell order:
 # ╠═882b942c-a5ae-445d-a946-6eb8cddc423e
