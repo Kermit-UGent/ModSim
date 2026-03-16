@@ -105,10 +105,10 @@ petri_model = petrigrowth(8);
 chain_petri = sample(petri_model, Prior(), 2000);
 
 # ╔═╡ ce8b53c3-0af1-4e9a-ad80-6fd7a2bf020b
-sp_splittable = generated_quantities(petri_model, chain_petri);
+splittable_samples = generated_quantities(petri_model, chain_petri);
 
 # ╔═╡ e3092915-a083-425e-8fa1-b7bf370abc8a
-prob_splittable = mean(sp_splittable)
+prob_splittable = mean(splittable_samples)
 
 # ╔═╡ e4f42f16-5cce-4fc2-aa01-8971f37c710e
 md"### 3: Plot"
@@ -215,13 +215,13 @@ md"### 2: Variance of Estimator"
 mean([cubemodel() for _ in 1:n]) # one sample of the estimated force
 
 # ╔═╡ a7e975a9-beb5-4169-9d22-3e970be2838b
-estimated_force_sp = [mean([cubemodel() for _ in 1:n]) for _ in 1:2000]; # "n" samples of the estimated force
+force_samples = [mean([cubemodel() for _ in 1:n]) for _ in 1:2000]; # "n" samples of the estimated force
 
 # ╔═╡ 7ff5cb25-47bd-432f-a404-359abaf44e3a
-estimated_force_sp_var = var(estimated_force_sp)
+force_samples_var = var(force_samples)
 
 # ╔═╡ 99c7f6d6-eada-491b-b966-fdb1195fc111
-histogram(estimated_force_sp)
+histogram(force_samples)
 
 # ╔═╡ 5c8ba3b4-fee0-49bd-a5e4-4bef400807e0
 md"#### Extra: The central limit theorem"

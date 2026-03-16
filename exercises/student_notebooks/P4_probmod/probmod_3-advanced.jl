@@ -169,14 +169,14 @@ md"### 2: Variance of Estimator"
 @bind n Slider(10:10:200, show_value = true)
 
 # ╔═╡ 55cf127f-5534-4926-955a-487ea9553b70
-estimated_force_sp = missing 
+force_samples = missing 
 	# multiple samples of your estimated force, using `n` samples
 
 # ╔═╡ 45f0813b-c4c9-4f13-8d66-1e58293c4422
 missing # histogram of estimated force samples
 
 # ╔═╡ f6a67c1e-3677-4e51-b6dd-5d11a5146ea7
-estimated_force_sp_var = missing
+force_samples_var = missing
 	# variance of the estimated force
 
 # ╔═╡ Cell order:

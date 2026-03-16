@@ -45,11 +45,17 @@ end
 # ╔═╡ 42c18a70-efb3-436b-83bb-b586280d4a4e
 dpmodel = doublepoisson();
 
+# ╔═╡ a21b2f44-c8d7-4838-926f-8fa39c36884e
+dpchain = missing
+
 # ╔═╡ b22a18d5-f70b-42a5-a09e-3de515148a6d
-spY = missing
+Y_samples = missing
+
+# ╔═╡ a11629df-31d2-4ac7-bf8e-80b910cab2fb
+missing # plot of X
 
 # ╔═╡ 34bd60df-272f-49d7-9346-fb4d125fe89b
-histogram(spY)
+missing # histogram of Y
 
 # ╔═╡ 13989ba4-bcf8-4fdd-8aee-ab58c8905bc9
 md"### 2: Probabilities"
@@ -59,9 +65,9 @@ md"""
 !!! tip
 	When comparing a vector of values to a single number, don't forget to use `.` to execute operations element-wise in Julia!
 	
-	✅ `spY .< 1` compares every element of `spY` to `1`
+	✅ `Y_samples .< 1` compares every element of `Y_samples` to `1`
 	
-	❌ `spY < 1` compares an entire vector with a single number → errors :(
+	❌ `Y_samples < 1` compares an entire vector with a single number → errors :(
 """
 
 # ╔═╡ 39e4f3eb-b7a9-4ece-846f-eb02dbd77860
@@ -78,11 +84,11 @@ md"""
 !!! hint
 	To create a sample of $X$ that is conditional on some value(s) of $Y$, you can start from a sample of $X$ and select only those elements for which the corresponding sample of $Y$ has the conditioned value(s).
 
-	In other words, you'll need to index `spX` based on `spY` (and vice versa for $\text{var}(Y ∣ X)$). 
+	In other words, you'll need to index `X_samples` based on `Y_samples` (and vice versa for $\text{var}(Y ∣ X)$). 
 """
 
 # ╔═╡ 263048e5-206c-499e-836c-bfe489ed9b74
-spX = missing;
+X_samples = missing;
 
 # ╔═╡ aedd0fe8-da3e-4463-b0cf-7c4f9a22db52
 varXcondY = missing
@@ -92,6 +98,12 @@ varYcondX = missing
 
 # ╔═╡ ce9e2ce2-26e0-4f17-adf5-c922ba98239d
 missing # analytical answer of (missing)
+
+# ╔═╡ 19e16f77-ea34-45f6-83eb-8d256e5fd10d
+md"""
+!!! warning
+	Starting here, only part of the answer's structure will be given. You are therefore expected to **add more code cells** yourself, using the `+` at the left in between two cells.
+"""
 
 # ╔═╡ 9740ea64-cd4f-46b1-a741-02e392280601
 md"""
@@ -119,7 +131,7 @@ md"### 1: Watercube"
 
 # ╔═╡ 4fefa78b-746d-4e25-baee-d791eb22d930
 md"""
-!!! hint
+!!! tip
 	Consider the humble `DiscreteUniform` distribution. Not sure how it works? Open the **🔍 Live Docs** at the bottom right of the screen for more information
 """
 
@@ -134,11 +146,11 @@ md"""
     return dicesum
 end
 
-# ╔═╡ 02bc37e2-5cf6-404a-b3fe-b2120671adb2
-watermodel = watercube()
+# ╔═╡ 5fe1080e-8c2c-4c6b-84b4-3857dc1f399e
+watercube_samples = missing # samples of dicesum for watercube
 
 # ╔═╡ b5886255-5c1d-4d84-b7ee-6c690fa526dc
-p_watercube_kills = missing
+p_watercube_kills = missing # probability that watercube kills the monster
 
 # ╔═╡ 84e06162-e3f1-4fd7-baf6-5095172413d2
 missing # histogram
@@ -150,15 +162,12 @@ md"### 2: Dirtprism"
 @model function dirtprism()
 	# check the "For-loops for many variables" section from the intro notebook!
 	
-	dicesum = missing # consider the `sum` function
+	dicesum = missing
 	return dicesum
 end
 
-# ╔═╡ 83afb3c1-9e6a-4d18-b0c7-05ed0173df40
-dirtmodel = dirtprism()
-
 # ╔═╡ d9152416-8a7b-480c-ba9f-7ab15404b7a6
-p_dirtprism_kills = missing
+p_dirtprism_kills = missing # probability that dirtprism kills the monster
 
 # ╔═╡ 90e058d7-b3fe-4c42-a652-3c42bf9d851a
 missing # histogram
@@ -197,7 +206,7 @@ md"### 1: Probability"
 
 # ╔═╡ a0341046-c14a-494d-a9bd-a60c207c9e76
 md"""
-!!! hint
+!!! tip
 	In this exercise, the output variable (the number of double-yolked eggs) is **also a random variable**! In other words, it also follows some distribution.
 
 	When considering what distribution, consider that each of the $N$ eggs represents a "trial" with a $P$ chance of success for a double yolk.
@@ -261,7 +270,9 @@ end
 # ╟─def27d26-2205-4a66-94f3-eddbc17483bf
 # ╠═ff38df99-f843-414d-8e45-b46e06a65c22
 # ╠═42c18a70-efb3-436b-83bb-b586280d4a4e
+# ╠═a21b2f44-c8d7-4838-926f-8fa39c36884e
 # ╠═b22a18d5-f70b-42a5-a09e-3de515148a6d
+# ╠═a11629df-31d2-4ac7-bf8e-80b910cab2fb
 # ╠═34bd60df-272f-49d7-9346-fb4d125fe89b
 # ╟─13989ba4-bcf8-4fdd-8aee-ab58c8905bc9
 # ╟─aba42086-224f-44a0-b616-f8f651afdd18
@@ -273,18 +284,18 @@ end
 # ╠═aedd0fe8-da3e-4463-b0cf-7c4f9a22db52
 # ╠═7ef53a87-e5df-4724-b896-3d1d46214c68
 # ╠═ce9e2ce2-26e0-4f17-adf5-c922ba98239d
+# ╟─19e16f77-ea34-45f6-83eb-8d256e5fd10d
 # ╟─9740ea64-cd4f-46b1-a741-02e392280601
 # ╟─187854bb-9e30-454d-9e03-cccf77aebb6b
 # ╟─747e3c0a-357a-448a-b479-d0fcbe44a6c0
 # ╟─eda95f45-083a-4e65-b57e-bd9890da1f9c
 # ╟─4fefa78b-746d-4e25-baee-d791eb22d930
 # ╠═36477423-5628-4ed3-b54d-9a050557f6b7
-# ╠═02bc37e2-5cf6-404a-b3fe-b2120671adb2
+# ╠═5fe1080e-8c2c-4c6b-84b4-3857dc1f399e
 # ╠═b5886255-5c1d-4d84-b7ee-6c690fa526dc
 # ╠═84e06162-e3f1-4fd7-baf6-5095172413d2
 # ╟─a1b933ac-5d1b-4800-a6e8-e942846b19d8
 # ╠═6b009ba3-83a8-4176-86d4-dd9f70ed29ec
-# ╠═83afb3c1-9e6a-4d18-b0c7-05ed0173df40
 # ╠═d9152416-8a7b-480c-ba9f-7ab15404b7a6
 # ╠═90e058d7-b3fe-4c42-a652-3c42bf9d851a
 # ╟─49790a8f-9f53-4ba7-9543-d6a879b520e0

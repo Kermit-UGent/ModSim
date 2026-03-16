@@ -281,10 +281,10 @@ Taking the sampled values of the mutation rate from the chain and plotting a his
 """
 
 # ╔═╡ b657217a-6ccc-4a41-b852-df4e39a7a10a
-sp_alpha = mutation_chain[:α];
+alpha_samples = mutation_chain[:α];
 
 # ╔═╡ 9cf08616-d599-42a3-82e8-e8c98853c1d8
-histogram(sp_alpha) # note the difference with the prior distribution!
+histogram(alpha_samples) # note the difference with the prior distribution!
 
 # ╔═╡ e02c42dc-627c-4bc0-8ebb-fdb2b0f15b64
 md"Plotting some sampled mutation rates from this distribution onto our data shows that they fit well:"
@@ -295,17 +295,17 @@ begin
 		ylabel = "Number of mutations", label = false, xlims = (0, 500), 
 		ylims = (0, 400), title = "A posteriori relationship between t and mean N"
 	);
-	plot!([x -> αᵢ*x for αᵢ in sp_alpha[1:10:end]], color = :purple, opacity = 0.1, label = false)
+	plot!([x -> αᵢ*x for αᵢ in alpha_samples[1:10:end]], color = :purple, opacity = 0.1, label = false)
 end
 
 # ╔═╡ 87059440-2919-4f6d-9d32-0df3ce75e2a2
 md"And finally we can answer our first question:"
 
 # ╔═╡ 644cff58-68b9-4d4b-8896-617fcacc39c5
-mean(sp_alpha)
+mean(alpha_samples)
 
 # ╔═╡ 5f2f5a78-ca90-4baf-8bf0-ff1fae88d785
-sqrt(var(sp_alpha))
+sqrt(var(alpha_samples))
 
 # ╔═╡ bfbf811f-7b2f-473b-b132-0c7e965c8b0d
 md"""

@@ -179,10 +179,10 @@ plot(petrichain)
 logfuns = generated_quantities(petrimodel, petrichain);
 
 # ╔═╡ c642574c-c01b-4398-aac9-43e514d7fa25
-sp_petri = [logfun(8.0) for logfun in logfuns]
+petri_samples = [logfun(8.0) for logfun in logfuns]
 
 # ╔═╡ d15fa091-839c-4239-96e2-eaf7335ce620
-prob_splittable = mean((sp_petri .>= 1e4) .&& (sp_petri .<= 1e5))
+prob_splittable = mean((petri_samples .>= 1e4) .&& (petri_samples .<= 1e5))
 
 # ╔═╡ 0ea95b67-d4da-4c5a-ad2e-05024ad074a3
 md"### 2"
@@ -227,8 +227,8 @@ let # so we dont need to rename all variables
 	petrimodel = petrigrowth🌟(5) | (P_obs = 21_000,)
 	petrichain = sample(petrimodel, NUTS(), 2_000)
 	logfuns = generated_quantities(petrimodel, petrichain);
-	sp_petri = [logfun(8.0) for logfun in logfuns]
-	prob_splittable = mean((sp_petri .>= 1e4) .&& (sp_petri .<= 1e5))
+	petri_samples = [logfun(8.0) for logfun in logfuns]
+	prob_splittable = mean((petri_samples .>= 1e4) .&& (petri_samples .<= 1e5))
 	println("The new `prob_splittable` is ", prob_splittable)
 	plot(petrichain)
 end

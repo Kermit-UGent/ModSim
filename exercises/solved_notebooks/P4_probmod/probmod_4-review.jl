@@ -66,13 +66,13 @@ end
 needle_model = needles()
 
 # ╔═╡ 49a206fb-6390-45fa-900f-8031b77a2725
-sp_n = [needle_model() for i in 1:2000]
+needle_samples = [needle_model() for i in 1:2000]
 
 # ╔═╡ b6009fc4-2f67-4b56-acc9-ccc1a013f5e9
-mean(sp_n)
+mean(needle_samples)
 
 # ╔═╡ 63e0b367-6155-472d-8502-b405db10e979
-pi_est = 2 / mean(sp_n)
+pi_est = 2 / mean(needle_samples)
 
 # ╔═╡ Cell order:
 # ╠═882b942c-a5ae-445d-a946-6eb8cddc423e

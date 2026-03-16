@@ -91,11 +91,11 @@ t_f = \frac{x_f}{\mathrm{cos}(\alpha \, v_0)} \, ,
 ```
 evaluating it's y-coordinate there
 ```math
-y_d = \mathrm{sin}(α) \, v_0 \, t_f - \frac{g}{2} \, t_f^2 \, ,
+y_f = \mathrm{sin}(α) \, v_0 \, t_f - \frac{g}{2} \, t_f^2 \, ,
 ```
 and checking if it's in the range of our face
 ```math
-y_d ∈ [1.5, 1.7] \, .
+y_f ∈ [1.5, 1.7] \, .
 ```
 """
 
@@ -145,6 +145,12 @@ plot(
 # ╔═╡ 314ba0ec-015f-488d-ac63-780b1dbf5bc2
 md"The third is an **input variable**: when cycling, we can choose how far away we stay from the cyclist in front of us. The x-position of our face $x_f$ is therefore an input to the model."
 
+# ╔═╡ 2878b32a-9e54-40b0-b151-031b95ad161b
+md"""
+!!! note
+	As you can see, to visualize a distribution you can simply call the `plot` function on the distribution (and set extra keyword arguments as desired).
+"""
+
 # ╔═╡ c070f3c9-dd80-49f9-b279-c77f46316116
 md"## Defining the model"
 
@@ -182,11 +188,11 @@ Our model can be defined as follows:
 	# get the time it takes the droplet to travel the distance x_f
 	t_f = x_f / (cos(α) * v0)
 	# get the droplet's altitude at this time
-	y_s = sin(α)*v0*t_f - g/2 * t_f^2
+	y_f = sin(α)*v0*t_f - g/2 * t_f^2
 	# to respect the ground, set altitude to 0 if it would be negative
-	y_s = max(0, y_s)
+	y_f = max(0, y_f)
 	
-	return y_s 
+	return y_f
 end
 
 # ╔═╡ 22144610-0c37-4501-b14c-83895d8b0eae
@@ -235,22 +241,22 @@ md"""
 md"### Getting the model output"
 
 # ╔═╡ 46f17c07-9aec-4fee-8590-4eeb5a13b93e
-md"To answer our question, we are interested in the `y_s` variable returned by the model. We can extract the output variable from our chain using the `generated_quantities` function:"
+md"To answer our question, we are interested in the `y_f` variable returned by the model. We can extract the output variable from our chain using the `generated_quantities` function:"
 
 # ╔═╡ 071fc405-7a33-4dab-a69a-1e68a0fb35ad
-y_s_samples = generated_quantities(splash_model, chain)
+y_f_samples = generated_quantities(splash_model, chain)
 
 # ╔═╡ 20e99145-e80b-4259-9bca-f7e14c2d355e
 md"It's often useful to visualize the distribution of our variable of interest. We can use the `histogram` function for this:"
 
 # ╔═╡ 45d44cf5-2289-4947-8d4e-1dcddb5447de
-histogram(y_s_samples, bins = 15)
+histogram(y_f_samples, bins = 15)
 
 # ╔═╡ 8d179748-40aa-4e88-b277-9234fe938251
 md"Checking whether the droplet altitude matches our face's can be done with a simple inequality operation:"
 
 # ╔═╡ 633a2b4c-379e-4e18-bbcd-b450930196a5
-face_hit_samples = [1.5 <= y_s <= 1.7 for y_s in y_s_samples]
+face_hit_samples = [1.5 <= y_f <= 1.7 for y_f in y_f_samples]
 
 # ╔═╡ ad8a6ea2-30ba-4104-824f-12a7ea8e9718
 md"Finally, we can estimate the probability of our face being hit by taking the mean amount of times we got hit in our sample."
@@ -264,7 +270,7 @@ md"""And that's the answer to our question! If we're 1m behind the cyclist in fr
 # ╔═╡ bf5642f4-09d3-491d-8eb9-47fcdb67c977
 md"""
 !!! note
-	Do you like your code sleek? You can also calculate this probability from your samples with just one line: `mean(1.5 .<= y_s_samples .<= 1.7)`
+	Do you like your code sleek? You can also calculate this probability from your samples with just one line: `mean(1.5 .<= y_f_samples .<= 1.7)`
 """
 
 # ╔═╡ 3067af6e-df69-48a0-a024-a6e219dcfc7c
@@ -343,10 +349,40 @@ md"It's also possible to skip the chain construction entirely and simply call yo
 
 # ╔═╡ 771b9cb1-d809-46de-9380-2db73ccd014d
 # get a sample of the output 500 times
-y_s_samples_alternative = [splash_model() for _ in 1:500]
+y_f_samples_alternative = [splash_model() for _ in 1:500]
 
 # ╔═╡ 0f1cccd8-937d-4fc2-8657-c9967db483b8
-histogram(y_s_samples_alternative, bins = 15) # yup, that's the same distribution
+histogram(y_f_samples_alternative, bins = 15) # yup, that's the same distribution
+
+# ╔═╡ 7806eca0-a2ad-4910-8d6e-edc50073b37b
+md"## For-loops for many variables"
+
+# ╔═╡ 64ebc3ce-83ca-4cee-ab93-cddf51138543
+md"""
+Sometimes you need to define a large number of stochastic variables following the same distribution. Let's say, for example, you want to model the total mass of water being splashed on your face assuming that 10 droplets will hit you, each having a mass that is exponentially distributed with a mean of 30 mg. 
+
+This can be done using a **for-loop** as follows:
+"""
+
+# ╔═╡ bdf3c18c-b40b-4fb4-81e7-fe9d821cc166
+@model function splash_mass()
+ 	droplet_masses = zeros(10) # instantiate vector of 10 zeros
+	for i in 1:length(droplet_masses)
+		droplet_masses[i] ~ Exponential(30) # each element of the vector follows an Exponential distribution
+	end
+	total_mass = sum(droplet_masses)
+	
+	return total_mass
+end
+
+# ╔═╡ 2cbe2750-38c1-4e7f-8d03-9bed7c16861a
+mass_model = splash_mass();
+
+# ╔═╡ ad8b48c5-f892-49b3-8f19-64d93424485c
+mass_chain = sample(mass_model, Prior(), 1000);
+
+# ╔═╡ 8507f084-eff5-4351-800d-8eba7ca673bb
+total_mass_samples = generated_quantities(mass_model, mass_chain)
 
 # ╔═╡ befb8f05-6ab7-4594-9cf1-71df47c1df03
 md"## Essentials"
@@ -376,25 +412,25 @@ let
 		α ~ TriangularDist(0, pi/2)
 	
 		t_f = x_f / (cos(α) * v0)
-		y_s = sin(α)*v0*t_f - g/2 * t_f^2
-		y_s = max(0, y_s)
-		return y_s 
+		y_f = sin(α)*v0*t_f - g/2 * t_f^2
+		y_f = max(0, y_f)
+		return y_f
 	end
 
 	# get samples
 	splash_model = splash(x_f)
 	chain = sample(splash_model, Prior(), 500);
 
-	y_s_samples = generated_quantities(splash_model, chain)
+	y_f_samples = generated_quantities(splash_model, chain)
 	v0_samples = chain["v0"]
 	α_samples = chain[:α]
 
 	# calculate interesting things
-	prob_face_hit = mean([1.5 <= y_s <= 1.7 for y_s in y_s_samples])
+	prob_face_hit = mean([1.5 <= y_f <= 1.7 for y_f in y_f_samples])
 
+	y(x, α, v0) = sin(α)/cos(α)*x - g/2*(x / (cos(α) * v0))^2
 	trajectories = [
-		x -> sin(α_samples[i]) / cos(α_samples[i]) * x -
-		g / 2 * ( x / (cos(α_samples[i])*v0_samples[i]) )^2
+		x -> y(x, α_samples[i], v0_samples[i])
 		for i in 1:length(v0_samples)
 	]
 	plot(trajectories, xlims = (0, 5), ylims = (0, 2), 
@@ -423,10 +459,11 @@ end
 # ╟─e8821ac2-baa3-4674-868c-3a5b8593cc95
 # ╟─4811e1af-9ba4-49b3-a3a1-5d8ff8d5af92
 # ╟─01156ef7-b194-4372-8bc8-de9fad5e12f1
-# ╟─f30290bd-9d31-4939-b5d6-f89f066775d2
+# ╠═f30290bd-9d31-4939-b5d6-f89f066775d2
 # ╟─dab23eba-3eb1-434b-aef5-e08730e35114
-# ╟─299e402c-634a-4b18-b867-489bafaf4564
+# ╠═299e402c-634a-4b18-b867-489bafaf4564
 # ╟─314ba0ec-015f-488d-ac63-780b1dbf5bc2
+# ╟─2878b32a-9e54-40b0-b151-031b95ad161b
 # ╟─c070f3c9-dd80-49f9-b279-c77f46316116
 # ╟─84a08354-7bf3-4783-9285-a7e8850e798b
 # ╟─8f94567c-b87b-4eb4-8441-c6434da393a8
@@ -454,7 +491,7 @@ end
 # ╟─ad8a6ea2-30ba-4104-824f-12a7ea8e9718
 # ╠═e1f9d1e9-8a0c-4b28-ab67-a89e3287b50f
 # ╟─1c9e2de1-21a0-4d4d-918d-9e2f0fc4d912
-# ╟─bf5642f4-09d3-491d-8eb9-47fcdb67c977
+# ╠═bf5642f4-09d3-491d-8eb9-47fcdb67c977
 # ╟─3067af6e-df69-48a0-a024-a6e219dcfc7c
 # ╟─cbc04c5f-aa93-4340-a61e-1583d20d86b1
 # ╟─d36784b8-9f3b-4434-88fe-03b75b94754e
@@ -473,6 +510,12 @@ end
 # ╟─83a8b9b6-72da-4aff-8364-37846b527a2f
 # ╠═771b9cb1-d809-46de-9380-2db73ccd014d
 # ╠═0f1cccd8-937d-4fc2-8657-c9967db483b8
+# ╟─7806eca0-a2ad-4910-8d6e-edc50073b37b
+# ╟─64ebc3ce-83ca-4cee-ab93-cddf51138543
+# ╠═bdf3c18c-b40b-4fb4-81e7-fe9d821cc166
+# ╠═2cbe2750-38c1-4e7f-8d03-9bed7c16861a
+# ╠═ad8b48c5-f892-49b3-8f19-64d93424485c
+# ╠═8507f084-eff5-4351-800d-8eba7ca673bb
 # ╟─befb8f05-6ab7-4594-9cf1-71df47c1df03
 # ╟─52af5de0-b516-4947-84f7-dde63e4c513e
 # ╟─2ceede7e-8f0c-420c-bde2-f16b726cd204
