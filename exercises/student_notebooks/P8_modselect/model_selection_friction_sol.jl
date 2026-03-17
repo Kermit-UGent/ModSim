@@ -358,7 +358,7 @@ function posterior(AICs) 	# AICs vector of AIC values
 	AICmin = minimum(AICs)
 	posterior = zeros(length(AICs))
 	
-	for i in eachindex(1:length(AICs))
+	for i in 1:length(AICs)
 		posterior[i] = exp((AICmin-AICs[i])/2)
 	end
 	

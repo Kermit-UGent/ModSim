@@ -63,7 +63,7 @@ md"""
     y_nest ~ Uniform(0, 1000)
     v_wasp ~ Gamma(8) # or something similar
 
-    for i in eachindex(ts)
+    for i in 1:length(ts)
 		dist = sqrt((xs[i] - x_nest)^2 + (ys[i] - y_nest)^2)
         ts[i] ~ Normal(2*dist / v_wasp, 10)
     end
