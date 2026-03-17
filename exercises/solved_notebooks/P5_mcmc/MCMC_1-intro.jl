@@ -328,7 +328,7 @@ As prior knowledge we can use the fact that it must have evolved _after_ the ray
 	α ~ prior_alpha # prior distribution of parameter
 	
 	N = zeros(length(ts)) # output variable: in this model we have multiple values, so we need to preallocate a vector
-	for i in eachindex(ts)
+	for i in 1:length(ts)
 		N_average = α * ts[i]
 		N[i] ~ Poisson(N_average)
 	end
@@ -369,7 +369,7 @@ let
 		α ~ Exponential(2) # prior distribution of parameter
 		
 		N = zeros(length(ts)) # output variable: in this model we have multiple values, so we need to preallocate a vector
-		for i in eachindex(ts)
+		for i in 1:length(ts)
 			N_average = α * ts[i]
 			N[i] ~ Poisson(N_average)
 		end

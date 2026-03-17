@@ -167,7 +167,7 @@ md"### 2: Dirtprism"
 # ╔═╡ 6b009ba3-83a8-4176-86d4-dd9f70ed29ec
 @model function dirtprism()
     rolls = zeros(20) # also possible to write out all 20 rolls by hand
-	for i in eachindex(rolls)
+	for i in 1:length(rolls)
 		rolls[i] ~ DiscreteUniform(1, 4)
 	end
     dicesum = sum(rolls)
@@ -292,7 +292,7 @@ count_occurences([5, 107, 364, 5, 5, 364]) # three 5's, one 107 and two 364's
 	# number of students used as an input to the function so you can solve the question for any number of students - this was not asked but it's nice
 	
 	bdays = zeros(n_students)
-	for bday_idx in eachindex(bdays)
+	for bday_idx in 1:length(bdays)
 		bdays[bday_idx] ~ DiscreteUniform(1, 365)
 	end
     occurences = count_occurences(bdays)
