@@ -136,12 +136,11 @@ We can sample some values from this prior distribution and use them to plot the 
 
 # ╔═╡ 1080294d-8da9-4326-a53b-afe158dc2ab9
 begin
-	scatter(times, observed_mutations, xlabel = "Time (My)",
-		ylabel = "Number of mutations", label = false, xlims = (0, 500), 
-		ylims = (0, 400), title = "A priori relationship between t and mean N"
-	);
-	for α in rand(prior_alpha, 1000)
-		plot!(x -> α*x, color = :purple, alpha = 0.05, label = false);
+	plot(xlabel = "Time (My)", ylabel = "Number of mutations", xlims = (0, 500),
+		 	ylims = (0, 400), title = "A priori relationship between t and mean N");
+	scatter!(times, observed_mutations, label = "Cyt C", color = :deeppink);
+	for α in rand(prior_alpha, 200)
+		plot!(x -> α*x, color = :dodgerblue, alpha = 0.3, label = false);
 	end
 	plot!()
 end
@@ -295,11 +294,13 @@ md"Plotting some sampled mutation rates from this distribution onto our data sho
 
 # ╔═╡ 87e70d5a-7a45-4a3e-b6c4-a894cc78621b
 begin
-	scatter(times, observed_mutations, xlabel = "Time (My)",
-		ylabel = "Number of mutations", label = false, xlims = (0, 500), 
-		ylims = (0, 400), title = "A posteriori relationship between t and mean N"
-	);
-	plot!([x -> αᵢ*x for αᵢ in alpha_samples[1:10:end]], color = :purple, opacity = 0.1, label = false)
+	plot(xlabel = "Time (My)", ylabel = "Number of mutations", xlims = (0, 500),
+		 	ylims = (0, 400), title = "A posteriori relationship between t and mean N");
+	for α in alpha_samples[1:10:end]
+		plot!(x -> α*x, color = :dodgerblue, alpha = 0.1, label = false);
+	end
+	scatter!(times, observed_mutations, label = "Cyt C", color = :deeppink);
+	plot!()
 end
 
 # ╔═╡ 87059440-2919-4f6d-9d32-0df3ce75e2a2
