@@ -318,6 +318,7 @@ md"### 3🌟: Conditional expected value (spicy)"
 
 # ╔═╡ 8629d049-b9fd-4e9e-9b55-401a3069e956
 @model function fishmixture🌟()
+	missing
 end
 
 # ╔═╡ 483cbe4d-64d3-4b16-b6fc-e97b21f174a6
