@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -62,7 +62,7 @@ md"### 2: Unconditional expected value of Y"
 
 # ╔═╡ 3decb2ec-210a-4b2f-842d-6fd40dd3f77b
 @model function mole()
-	X ~ X_prior
+	X ~ missing
 	Y ~ missing
 	return Y
 end
@@ -108,11 +108,8 @@ md"### 5: Conditional distribution of X (with more data)"
 
 # ╔═╡ b2b16c34-e12a-4bea-8098-313d01913bbf
 @model function mole2()
-	X ~ X_prior
-	Ys = missing
-	for i in missing
-		Ys[i] ~ missing
-	end
+	X ~ missing
+	# how to deal with a vector of values again...
 end
 
 # ╔═╡ 26a245d2-c5b6-484d-bdf7-541948ff06ad
@@ -233,11 +230,7 @@ md"### 3: Conditional expected value"
 
 # ╔═╡ 126d3954-c77d-4c98-abe0-fd87d14e6265
 @model function lights()
-	μ ~ lights_prior
-	lifespans = missing
-	for i in missing
-		lifespans[i] ~ missing
-	end
+	missing
 end
 
 # ╔═╡ 37bf6ca5-e42b-406e-94d6-bcd1e706e2bd
@@ -314,20 +307,8 @@ len_obs = [94.0, 88.7, 89.6, 69.8, 52.8, 84.0, 89.3, 66.4, 95.1, 81.6]
 
 # ╔═╡ b15de91a-fc48-4cdc-a35f-6453a9a59982
 @model function fishmixture()
-	fs1 ~ missing # fraction of species 1
-	fishlendist = missing
-	
-	fishlens = missing
-	for i in missing
-		fishlens[i] ~ fishlendist
-	end
+	missing
 end
-
-# ╔═╡ 94a9e163-f7c0-4d22-8d37-5641bc49eb6b
-fishmodel = missing
-
-# ╔═╡ 40d460d2-1f2b-4d33-ba74-9a9d1e48f9ec
-fishchain = missing # don't forget to plot to check convergence
 
 # ╔═╡ 819ed364-4bc9-43ec-aa50-b965c8f1c826
 fs1_est = missing
@@ -337,18 +318,6 @@ md"### 3🌟: Conditional expected value (spicy)"
 
 # ╔═╡ 8629d049-b9fd-4e9e-9b55-401a3069e956
 @model function fishmixture🌟()
-	fs1 ~ missing # fraction of species 1
-	
-	fishlens = missing
-	isspecies1 = missing
-	for i in missing
-		isspecies1[i] ~ missing
-		if isspecies1[i] == 1.0
-			fishlens[i] ~ missing
-		else
-			fishlens[i] ~ missing
-		end
-	end
 end
 
 # ╔═╡ 483cbe4d-64d3-4b16-b6fc-e97b21f174a6
@@ -418,26 +387,19 @@ md"### 1: All points"
 # ╔═╡ 84d27c98-9513-4ae3-8101-621c083a1b01
 @model function circle(σ=0.25)
 	# generate a circle center
-	xC ~ missing
-	yC ~ missing
+	missing
 	
 	# generate a radius
-	R ~ missing
+	missing
 	
 	# three random points in polar coordinates
-	θ1 ~ missing
-	θ2 ~ missing
-	θ3 ~ missing
 	
 	# P1
-	x1 ~ Normal(missing, σ)
-	y1 ~ Normal(missing, σ)
+	missing
 	# P2
-	x2 ~ Normal(missing, σ)
-	y2 ~ Normal(missing, σ)
+	missing
 	# P3
-	x3 ~ Normal(missing, σ)
-	y3 ~ Normal(missing, σ)
+	missing
 end
 
 # ╔═╡ 543c40d5-e8a7-492d-a0b8-e7e73e5953e2
@@ -572,8 +534,6 @@ end
 # ╟─8e030a06-5104-4c5b-b1f2-f86464e66502
 # ╠═6ebf3a16-0e6a-491f-8280-b4327ed52cf0
 # ╠═b15de91a-fc48-4cdc-a35f-6453a9a59982
-# ╠═94a9e163-f7c0-4d22-8d37-5641bc49eb6b
-# ╠═40d460d2-1f2b-4d33-ba74-9a9d1e48f9ec
 # ╠═819ed364-4bc9-43ec-aa50-b965c8f1c826
 # ╟─952a941a-8703-45a3-aac1-a290a181e8c5
 # ╠═8629d049-b9fd-4e9e-9b55-401a3069e956
