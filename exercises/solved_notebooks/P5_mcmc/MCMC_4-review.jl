@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -57,15 +57,23 @@ md"""
 	Where is the hornet nest located? You may assume the nest is somewhere within the plot's boundaries, and the flight speed of a wasp is around 5 to 10 m/s.
 """
 
+# ╔═╡ 0ac905af-2798-41c2-8295-60e40f384f64
+v_prior = LogNormal(log(8), 0.5) 
+	# or something else positive with a peak around 5-10
+
+# ╔═╡ 9bc4efa9-5e4c-41d5-86cb-997fb0788ea0
+plot(v_prior, xlims = (0, 20)) # seems about right!
+
 # ╔═╡ ac0496d3-aa62-4c07-8233-16fe67c52b24
 @model function horenaars(xs, ys, ts)
+	σ ~ Exponential(10)
     x_nest ~ Uniform(0, 1000)
     y_nest ~ Uniform(0, 1000)
-    v_wasp ~ Gamma(8) # or something similar
+    v_wasp ~ LogNormal(log(8), 0.5)
 
     for i in 1:length(ts)
 		dist = sqrt((xs[i] - x_nest)^2 + (ys[i] - y_nest)^2)
-        ts[i] ~ Normal(2*dist / v_wasp, 10)
+        ts[i] ~ Normal(2*dist / v_wasp, σ)
     end
 end
 
@@ -103,6 +111,8 @@ end
 # ╠═c1850e64-9e2c-46fb-b7cd-22e8af81d3aa
 # ╟─28cb3363-6856-4164-b60e-36ec2e88ed56
 # ╟─484b56ec-57b2-496d-a5cf-1b1c0da97c58
+# ╠═0ac905af-2798-41c2-8295-60e40f384f64
+# ╠═9bc4efa9-5e4c-41d5-86cb-997fb0788ea0
 # ╠═ac0496d3-aa62-4c07-8233-16fe67c52b24
 # ╠═88e95234-4e43-4ead-bd0f-f32f9fc109c2
 # ╠═c5a94b3e-a4b8-42e6-a8c7-79e942212852

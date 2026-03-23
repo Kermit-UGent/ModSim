@@ -17,6 +17,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ 75581580-2fb2-4112-b397-2b775eb64630
+# ╠═╡ show_logs = false
 using Pkg; Pkg.activate("..")
 
 # ╔═╡ e07a1ae5-43b7-4c12-831d-43e1738eeac0
@@ -158,11 +159,14 @@ plot(dropletdist)
     r ~ LogNormal(0.0, 0.3)
 	K ~ Normal(1e5, 1e4)
 
-	logfun = t -> logistic(t, P0, r, K)
-	Pt = max(logfun(t_obs), 0) 
+	# model number of bacteria at time `t_obs`
+	num_bacteria = logistic(t_obs, P0, r, K)
+	num_bacteria = max(num_bacteria, 0) 
 		# set to 0 if negative to prevent possible errors (not required)
-    P_obs ~ Poisson(Pt)
-	
+    P_obs ~ Poisson(num_bacteria)
+
+	# to answer the questions, it's useful to return the growth through time as a function 
+	logfun = t -> logistic(t, P0, r, K)
     return logfun
 end
 
@@ -173,13 +177,13 @@ petrimodel = petrigrowth(5) | (P_obs = 21_000,)
 petrichain = sample(petrimodel, PG(40), 2_000)
 
 # ╔═╡ 9633f07a-d583-4680-b3cc-f5701540968f
-plot(petrichain)
+plot(petrichain) # convergence is not great unless you use a large number of particles (and even then it's not ideal)
 
 # ╔═╡ 7d0e5f0b-2cdf-4946-a186-f70774e363bb
-logfuns = generated_quantities(petrimodel, petrichain);
+logfuns = generated_quantities(petrimodel, petrichain); # it's easy here to get a function describing growth through time because we returned it in our model!
 
 # ╔═╡ c642574c-c01b-4398-aac9-43e514d7fa25
-petri_samples = [logfun(8.0) for logfun in logfuns]
+petri_samples = [logfun(8.0) for logfun in logfuns] # get population sizes at t = 8
 
 # ╔═╡ d15fa091-839c-4239-96e2-eaf7335ce620
 prob_splittable = mean((petri_samples .>= 1e4) .&& (petri_samples .<= 1e5))
@@ -188,7 +192,7 @@ prob_splittable = mean((petri_samples .>= 1e4) .&& (petri_samples .<= 1e5))
 md"### 2"
 
 # ╔═╡ 3d9b73ef-2aae-4c19-bddc-4081927ec92d
-plot(logfuns[1:10:1000], xlims = (0, 12), legend = false, color = :skyblue, alpha = 0.5)
+plot(logfuns, xlims = (0, 12), legend = false, color = :skyblue, alpha = 0.1)
 
 # ╔═╡ 9ab88be4-4cf8-4747-ac36-3f1b82899be0
 md"### 3🌟"
@@ -200,7 +204,7 @@ dropletdist🌟 = MixtureModel(
 		truncated(Normal(30, sqrt(30)), lower = 0.0)
 	],
 	[0.75, 0.25]
-);
+); # Normal distributions are the Poisson distributions of the continuous world (make sure to match mean and variance of both distributions) - ideally also use `truncated` to ensure the normal distributions are positive
 
 # ╔═╡ 4e730df9-f619-464a-b8a3-57448132404b
 begin
