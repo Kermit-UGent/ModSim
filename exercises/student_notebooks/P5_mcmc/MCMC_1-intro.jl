@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -136,12 +136,11 @@ We can sample some values from this prior distribution and use them to plot the 
 
 # ╔═╡ 1080294d-8da9-4326-a53b-afe158dc2ab9
 begin
-	scatter(times, observed_mutations, xlabel = "Time (My)",
-		ylabel = "Number of mutations", label = false, xlims = (0, 500), 
-		ylims = (0, 400), title = "A priori relationship between t and mean N"
-	);
-	for α in rand(prior_alpha, 1000)
-		plot!(x -> α*x, color = :purple, alpha = 0.05, label = false);
+	plot(xlabel = "Time (My)", ylabel = "Number of mutations", xlims = (0, 500),
+		 	ylims = (0, 400), title = "A priori relationship between t and mean N");
+	scatter!(times, observed_mutations, label = "Cyt C", color = :deeppink);
+	for α in rand(prior_alpha, 200)
+		plot!(x -> α*x, color = :dodgerblue, alpha = 0.3, label = false);
 	end
 	plot!()
 end
@@ -199,9 +198,6 @@ mutation_model = mutations(times);
 # ╔═╡ d4dbc185-6087-4862-b6e5-b5e4f51c2866
 md"And can then generate random samples of the output as we are used to:"
 
-# ╔═╡ 8b0bf05f-92a0-4ce7-8042-08c790088688
-mutation_model() # random sample of N
-
 # ╔═╡ 3e4998e7-4981-4945-8bf2-ddb5afcb43b1
 chain = sample(mutation_model, Prior(), 2000);
 
@@ -210,6 +206,9 @@ chain = sample(mutation_model, Prior(), 2000);
 
 # ╔═╡ a9d54dfc-5337-412f-86b0-deeb5a0b6928
 histogram(α_sp, title = "Sample of prior of α")
+
+# ╔═╡ fdec279a-a7e3-4a57-a3f1-183e22558725
+generated_quantities(mutation_model, chain) # random samples of N
 
 # ╔═╡ 425b4b6c-76b8-4676-8d0a-fd26711400d6
 md"### Inference"
@@ -233,15 +232,19 @@ md"""
 """
 
 # ╔═╡ a35a43e2-e6b0-47ce-80b2-48148336274c
-# forgot_comma = mutation_model | (N = observed_mutations) 
+# forgot_comma = mutation_model | (N = observed_mutations)
 
 # ╔═╡ c5f0dbb3-fba1-41f2-b7d2-740012603555
 md"""
 We can verify that for our conditioned model, the value of `N` has been set as constant: 
 """
 
+# ╔═╡ 31d48207-4432-4d8f-a18a-40f01d4a0a6c
+# ╠═╡ show_logs = false
+conditioned_chain = sample(conditioned_model, Prior(), 5);
+
 # ╔═╡ d03cef36-3e82-4de4-89e7-af9f772edd8d
-conditioned_model() # always returns `observed_mutations`
+generated_quantities(conditioned_model, conditioned_chain) # always returns `observed_mutations`
 
 # ╔═╡ 371a48d5-daea-4d0b-968b-7e3056a65494
 md"""
@@ -291,11 +294,13 @@ md"Plotting some sampled mutation rates from this distribution onto our data sho
 
 # ╔═╡ 87e70d5a-7a45-4a3e-b6c4-a894cc78621b
 begin
-	scatter(times, observed_mutations, xlabel = "Time (My)",
-		ylabel = "Number of mutations", label = false, xlims = (0, 500), 
-		ylims = (0, 400), title = "A posteriori relationship between t and mean N"
-	);
-	plot!([x -> αᵢ*x for αᵢ in alpha_samples[1:10:end]], color = :purple, opacity = 0.1, label = false)
+	plot(xlabel = "Time (My)", ylabel = "Number of mutations", xlims = (0, 500),
+		 	ylims = (0, 400), title = "A posteriori relationship between t and mean N");
+	for α in alpha_samples[1:10:end]
+		plot!(x -> α*x, color = :dodgerblue, alpha = 0.1, label = false);
+	end
+	scatter!(times, observed_mutations, label = "Cyt C", color = :deeppink);
+	plot!()
 end
 
 # ╔═╡ 87059440-2919-4f6d-9d32-0df3ce75e2a2
@@ -320,7 +325,7 @@ md"""
 To answer how old the ancestral seahorse fossil is, we need to update the model a little.
 So far the fossil ages were considered to be known exactly and given as input to the model `ts`. Since the seahorse fossil's age is unknown, we add a parameter for it called `fossil_age`. 
 
-As prior knowledge we can use the fact that it must have evolved _after_ the ray-finned fish fossil (30 Ma after weird old fish), but _before_ modern seahorses (450 Ma after the bony fish fossil).
+As prior knowledge we can use the fact that it must have evolved _after_ the ray-finned fish fossil (30 Ma after the bony fish fossil), but _before_ modern seahorses (450 Ma after the bony fish fossil).
 """
 
 # ╔═╡ fd15afe1-72d7-4663-b2b6-afa0dd219db8
@@ -428,10 +433,10 @@ end
 # ╟─31378eb3-51a5-4ad6-a713-7f77c7ceafcc
 # ╠═48f6b7dc-13aa-4057-8468-97db047773ba
 # ╟─d4dbc185-6087-4862-b6e5-b5e4f51c2866
-# ╠═8b0bf05f-92a0-4ce7-8042-08c790088688
 # ╠═3e4998e7-4981-4945-8bf2-ddb5afcb43b1
 # ╠═3421987d-1aab-4cab-bf83-dd3653715bce
 # ╟─a9d54dfc-5337-412f-86b0-deeb5a0b6928
+# ╠═fdec279a-a7e3-4a57-a3f1-183e22558725
 # ╟─425b4b6c-76b8-4676-8d0a-fd26711400d6
 # ╟─b8adbdd4-2642-4375-9979-0cb8f52c5bc8
 # ╠═70f9e94d-a4e6-47d6-8d19-b60f7011d572
@@ -439,6 +444,7 @@ end
 # ╟─2d0c969d-03a2-4e4c-ace4-e439f81c771b
 # ╠═a35a43e2-e6b0-47ce-80b2-48148336274c
 # ╟─c5f0dbb3-fba1-41f2-b7d2-740012603555
+# ╠═31d48207-4432-4d8f-a18a-40f01d4a0a6c
 # ╠═d03cef36-3e82-4de4-89e7-af9f772edd8d
 # ╟─371a48d5-daea-4d0b-968b-7e3056a65494
 # ╠═0d2c1359-434f-4f3d-8c04-c452c46d7ae8
