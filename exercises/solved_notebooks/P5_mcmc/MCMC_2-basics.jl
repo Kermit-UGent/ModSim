@@ -5,6 +5,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 94c6f31d-1a43-4221-b60c-1fa0ef8738b8
+# ╠═╡ show_logs = false
 using Pkg; Pkg.activate("..")
 
 # ╔═╡ 45bc5b66-c81b-4afb-8a7e-51aff9609c62
@@ -70,8 +71,11 @@ end
 # ╔═╡ 76dd814d-0d9b-4f7e-aff8-990da57d052b
 molemodel = mole()
 
+# ╔═╡ 611575ef-20ee-4731-9b5d-3fec90d8b038
+molechain = sample(molemodel, Prior(), 2000)
+
 # ╔═╡ b5bd5114-0a0c-4aa3-af00-4f3d05edc5e3
-Y_samples = [molemodel() for i in 1:2000];
+Y_samples = molechain[:Y];
 
 # ╔═╡ 4e8b9000-cb61-4f01-9ba9-17276ad0335e
 E_Y = mean(Y_samples)
@@ -83,7 +87,7 @@ md"### 3: Conditional expected value of X"
 cond_mole = molemodel | (Y = 3,);
 
 # ╔═╡ 014538da-b5ef-41c8-b799-2c000b4c9134
-molechain = sample(cond_mole, NUTS(), 2000);
+molechain_cond = sample(cond_mole, NUTS(), 2000);
 
 # ╔═╡ b02dc714-e2bb-4ae2-acf9-c37a4389f953
 plot(molechain)
@@ -95,7 +99,7 @@ X_samplescondY = molechain[:X];
 E_XcondY = mean(molechain[:X])
 
 # ╔═╡ 5521933a-a42e-4a67-94b9-84eab52ddf07
-E_X = mean(X_prior)
+E_X = mean(Exponential(100))
 
 # ╔═╡ ca3e730c-a940-4c76-93eb-70ae4aa0e008
 md"### 4: Conditional distribution of X"
@@ -107,9 +111,9 @@ histogram(molechain[:X])
 md"### 5: Conditional distribution of X (with more data)"
 
 # ╔═╡ b2b16c34-e12a-4bea-8098-313d01913bbf
-@model function mole2()
+@model function mole2(n)
 	X ~ Exponential(100)
-	Ys = zeros(4)
+	Ys = zeros(n)
 	for i in 1:length(Ys)
 		Ys[i] ~ Uniform(0, X)
 	end
@@ -119,7 +123,7 @@ end
 Y_obs = [3.0, 1.5, 0.9, 5.7]
 
 # ╔═╡ 2f5c14e9-709a-40ec-a6cb-ddd870cc1a60
-mole_cond2 = mole2() | (Ys = Y_obs,)
+mole_cond2 = mole2(4) | (Ys = Y_obs,)
 
 # ╔═╡ 7f90e18d-9af8-42fa-984b-aaa7c8c458b5
 molechain2 = sample(mole_cond2, NUTS(), 2000);
@@ -174,7 +178,7 @@ histogram(potato_chain[:N])
 md"### 2: Probability"
 
 # ╔═╡ 9dd6fa35-37d5-4ab4-ac2c-f4eefdabadd2
-p_potato1 = mean(potato_chain[:N] .> 6 .&& potato_chain[:W] .> 175)
+p_potato1 = mean((potato_chain[:N] .> 6) .&& (potato_chain[:W] .> 175))
 
 # ╔═╡ 989b755b-2275-4aae-a3e2-3b107a72fc0b
 md"### 3: Probability (with more data)"
@@ -283,23 +287,27 @@ md"""
 """
 
 # ╔═╡ 8fc58fa4-b005-4f32-9eae-a8143582a1ae
-@model function lights_censored(time_observed, n_working)
+@model function lights_censored(time_observed)
 	μ ~ LogNormal(log(40), 0.5)
-	
+
+	# we still have lifespan information for 2 lights
 	lifespans = zeros(2)
 	for i in 1:length(lifespans)
 		lifespans[i] ~ Exponential(μ)
 	end
-	p_stillworking = 1 - cdf(Exponential(μ), time_observed)
-	n_working ~ Binomial(n_working + length(lifespans), p_stillworking) 
-		# or simply `2 ~ Binomial(4, p_stillworking)`
+
+	# use the information that 2 lights are still working
+	p_stillworking = 1 - cdf(Exponential(μ), time_observed) 
+		# probability that μ > 30_000 => this is the success rate for a lamp to still work after 30_000 hours
+	n_working ~ Binomial(4, p_stillworking) 
+		# the amount of lights still working (`n_workin`) follows a Binomial distribution: they can be seen as the successes of attempting to "not break" 4 times, each with the success rate for a lamp to still work after 30_000 hours
 end
 
 # ╔═╡ fe2958a7-e9dd-4eca-979d-a80df12f8735
-lightmodel_cens = lights_censored(30, 2) | (lifespans = [16, 20],)
+lightmodel_cens = lights_censored(30) | (lifespans = [16, 20], n_working = 2)
 
 # ╔═╡ 8abafb6a-dc83-422c-82d1-a721a0e1eca0
-lightschain_cens = sample(lightmodel_cens, MH(), 10_000)
+lightschain_cens = sample(lightmodel_cens, PG(10), 1_000)
 
 # ╔═╡ 5ba2886c-b2e1-49f4-90c6-549acc808f77
 plot(lightschain_cens)
@@ -381,12 +389,12 @@ md"### 3🌟: Conditional expected value (spicy)"
 	fs1 ~ Uniform(0, 1) # fraction of species 1
 	
 	fishlens = zeros(10)
-	isspecies1 = zeros(10)
+	isspecies1 = zeros(10) # for every fish: are you species 1?
 	for i in 1:length(fishlens)
-		isspecies1[i] ~ Bernoulli(fs1)
-		if isspecies1[i] == 1.0
+		isspecies1[i] ~ Bernoulli(fs1) # "are you species 1" is a binomial distr!
+		if isspecies1[i] == 1.0 # if species 1, length follows their distribution
 			fishlens[i] ~ Normal(90, 15)
-		else
+		else # otherwise length follows distribution of species 2
 			fishlens[i] ~ Normal(60, 10)
 		end
 	end
@@ -396,10 +404,10 @@ end
 fishmodel🌟 = fishmixture🌟() | (fishlens = len_obs,)
 
 # ╔═╡ bdb0d902-3056-43fb-abb0-15f2494fcf9d
-fishchain🌟 = sample(fishmodel🌟, PG(20), 2000)
+fishchain🌟 = sample(fishmodel🌟, MH(), 20_000) # PG convergences poorly without a lot of particles => takes a long time => to win time you can instead try the very fast (but inconsistent) `MH` with a criminally large amount of samples, just make sure to check convergence for this sampler!
 
 # ╔═╡ 7372c616-05a8-428d-ab04-a7be9f65653d
-plot(fishchain🌟)
+plot(fishchain🌟) # MH happened to work well this time! 🥳
 
 # ╔═╡ 40cc67c1-8627-4f1f-b135-a9770f916b53
 p_fish4_is_species1 = mean(fishchain🌟["isspecies1[4]"])
@@ -475,14 +483,15 @@ md"### 1: All points"
 	R ~ Uniform(0, 50)
 	
 	# three random points in polar coordinates
+	
+	# define angles (radius has already been chosen)
 	θ1 ~ Flat() 
-		# `Uniform(0, 2*pi)` is also possible but can get the sampler stuck
-		# at 0 or 2π!
+		# `Uniform(0, 2*pi)` is also possible but can get the sampler stuck at 0 or 2π! Another option here is a Uniform distribution with a very large domain, such as `Uniform(-1000, 1000)`
 	θ2 ~ Flat()
 	θ3 ~ Flat()
 	
 	# P1
-	x1 ~ Normal(xC + R * cos(θ1), σ)
+	x1 ~ Normal(xC + R * cos(θ1), σ) # wait, it's all trigonometry?
 	y1 ~ Normal(yC + R * sin(θ1), σ)
 	# P2
 	x2 ~ Normal(xC + R * cos(θ2), σ)
@@ -567,6 +576,7 @@ end
 # ╟─78eb7779-f182-4419-b5d8-79a2f5c5d6da
 # ╠═3decb2ec-210a-4b2f-842d-6fd40dd3f77b
 # ╠═76dd814d-0d9b-4f7e-aff8-990da57d052b
+# ╠═611575ef-20ee-4731-9b5d-3fec90d8b038
 # ╠═b5bd5114-0a0c-4aa3-af00-4f3d05edc5e3
 # ╠═4e8b9000-cb61-4f01-9ba9-17276ad0335e
 # ╟─8777b133-7d7c-4a85-b89c-2f00093e9984

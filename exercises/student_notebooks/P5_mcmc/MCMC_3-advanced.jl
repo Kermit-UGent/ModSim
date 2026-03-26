@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -86,12 +86,7 @@ md"""
 
 # ╔═╡ 70fd793a-3ce3-446f-adc1-65ce0a68e48a
 @model function cars(ts)
-	t_switch ~ missing
-	σ ~ missing
-	
-	for pointidx in 1:length(ts)
-		missing
-	end
+	missing
 end
 
 # ╔═╡ fb202b86-c058-4f03-9062-ab282c71d5c4
@@ -132,19 +127,11 @@ logistic(t, P0, r, K) =  K / (1 + (K - P0)/P0 * exp(-r*t))
 md"### 1"
 
 # ╔═╡ f080f708-a457-40a3-936c-b82d5159975d
-dropletdist = MixtureModel([Poisson(10), Poisson(30)], [0.75, 0.25]);
+dropletdist = missing
 
 # ╔═╡ 7b4aef69-10ec-4935-b7fd-4c1d49aa9b3d
 @model function petrigrowth()
-	P0 ~ dropletdist
-    r ~ LogNormal(0.0, 0.3)
-	K ~ Normal(1e5, 1e4)
-
-	logfun = t -> logistic(t, P0, r, K)
-	Pt = missing
-    P_obs ~ missing
-	
-    return logfun
+	missing
 end
 
 # ╔═╡ 3e98c640-4bb0-4b5d-bae0-769133a599a7
@@ -171,15 +158,7 @@ end
 
 # ╔═╡ d9b50958-20ae-4085-80d6-19420c7d89df
 @model function petrigrowth🌟()
-	P0 ~ dropletdist🌟
-    r ~ LogNormal(0.0, 0.3)
-	K ~ Normal(1e5, 1e4)
-
-	logfun = t -> logistic(t, P0, r, K)
-	Pt = missing
-    P_obs ~ missing
-	
-    return logfun
+	missing
 end
 
 # ╔═╡ 0704ed4d-5b3e-401d-a496-98782cb20b09
