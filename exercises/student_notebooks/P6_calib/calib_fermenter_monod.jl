@@ -92,7 +92,7 @@ Make a scatter plot of the measured data for both $S$ and $X$. Use the following
 md"""
 We have previously used the following parameter values:
 
--  `μmax = 0.40`$\mathrm{h^{-1}}$, `Ks = 0.015`$\mathrm{g/L}$, `Sin = 0.22`$\mathrm{g/L}$
+-  `μmax = 0.40`$\mathrm{h^{-1}}$, `Ks = 0.015`$\mathrm{g/L}$, `Sin = 0.022`$\mathrm{g/L}$
 -  `Y = 0.67`, `Q = 2.0`$\mathrm{L/h}$, `V = 40.0`$\mathrm{L}$
 
 Furthermore, suppose that at $t = 0\;h$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concentration of `0.0005`$\mathrm{g/L}$.
