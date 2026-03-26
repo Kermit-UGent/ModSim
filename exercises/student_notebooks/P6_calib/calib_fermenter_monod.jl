@@ -1,21 +1,14 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ c54dae10-60af-4141-b56d-ed61cb0ced8a
-begin
-	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
-	using Pkg
-	Pkg.activate("..")
-end
+using Pkg; Pkg.activate("..")
 
 # ╔═╡ 245ca9d0-10f9-11ef-0ef6-a73594e96db9
-using Markdown
-
-# ╔═╡ 78a25bef-31e5-45ef-b0ba-b9a8c8a9edeb
-using InteractiveUtils
+using Markdown, InteractiveUtils
 
 # ╔═╡ 16438e07-1b2b-467e-822a-081d19cae92b
 using Catalyst, OrdinaryDiffEq
@@ -33,16 +26,12 @@ md"""
 
 # ╔═╡ 595ea8ee-bc67-4696-9232-982612fb554d
 md"""
-In one of the previous practicals we were introduced to a fermenter in which biomass $X$ [$g/L$] grows by breaking down substrate $S$ [$g/L$]. The reactor is fed with an inlet flow rate $Q_{in}$ [$L/h$], which consists of a (manipulable) inlet concentration of substrate $S_{in}$ [$g/L$]. This process was modelled using Monod kinetics, resulting in the model below:
+In one of the previous practica we were introduced to a fermenter in which biomass $X$ [$\mathrm{g/L}$] grows by breaking down substrate $S$ [$\mathrm{g/L}$]. The reactor is fed with an inlet flow rate $Q_{in}$ [$\mathrm{L/h}$], which consists of a (manipulable) input concentration of substrate $S_{in}$ [$\mathrm{g/L}$]. This process was modelled using Monod kinetics:
 
 $$\begin{eqnarray*}
-S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s}
+S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s} \, .
 \end{eqnarray*}$$
 """
-# $$\begin{eqnarray*}
-# %S \xrightarrow[\quad\quad]{\beta} Y \, X
-# S \xrightarrow[\quad\quad]{r} Y \, X \quad\quad\quad\quad r = \mu \, X \quad \textrm{with} \quad \mu = \mu_{max} \, \cfrac{S}{S + K_s}
-# \end{eqnarray*}$$
 
 
 # ╔═╡ 824db995-7a66-4719-a534-7e0f6dec90b5
@@ -51,20 +40,16 @@ The *reaction network object* for this model could be set-up as:
 """
 
 # ╔═╡ 245c2636-95da-4c76-8b03-c4d20bbabb48
-fermenter_monod = @reaction_network begin
-    μmax/(S+Ks), S + X --> (1 + Y)*X
-    # Alternatives:
-    # X * mm(S, μmax, Ks), S => Y*X
-	# mm(S, μmax, Ks)*X, S + X => (1 + Y)*X
-    Q/V, (S, X) --> 0
-    Q/V*Sin, 0 --> S
-end
+# fermenter_monod = @reaction_network begin
+# 	@species missing
+# 	@parameters missing
+# 	missing
+# 	missing
+# 	missing
+# end
 
 # ╔═╡ 956790e2-6cac-46c9-886e-24d5aceae1c5
-convert(ODESystem, fermenter_monod, combinatoric_ratelaws=false)
-
-# ╔═╡ 68f9ecb3-15b0-4a53-8864-5dac13a89e95
-parameters(fermenter_monod)
+# convert(missing, missing)
 
 # ╔═╡ de8ddc14-8f82-403d-8f42-29673ef2a722
 md"""
@@ -98,7 +83,6 @@ Make a scatter plot of the measured data for both $S$ and $X$. Use the following
 """
 
 # ╔═╡ 918fd524-81fa-4aff-a403-37402e47235b
-# Uncomment and complete the instruction
 # begin
 # 	missing
 #   missing
@@ -108,12 +92,12 @@ Make a scatter plot of the measured data for both $S$ and $X$. Use the following
 md"""
 We have previously used the following parameter values:
 
--  $\mu_{max} = 0.40\;h^{-1}$, $K_s = 0.015\;g/L$, $S_{in} = 0.022\;g/L$
--  $Y = 0.67$, $Q = 2.0\;L/h$, $V = 40.0\;L$
+-  `μmax = 0.40`$\mathrm{h^{-1}}$, `Ks = 0.015`$\mathrm{g/L}$, `Sin = 0.22`$\mathrm{g/L}$
+-  `Y = 0.67`, `Q = 2.0`$\mathrm{L/h}$, `V = 40.0`$\mathrm{L}$
 
-Furthermore, suppose that at $t = 0\;h$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concentration of $0.0005\;g/L$.
+Furthermore, suppose that at $t = 0\;h$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concentration of `0.0005`$\mathrm{g/L}$.
 
-Calibrate the parameter values for $\mu_{max}$ and $K_s$ using the aforementioned measurement data for $S$ and $X$ in a timespan of $[0, 100]\,h$. Take the values above as initial values for $\mu_{max}$ and $K_s$.
+Calibrate the parameter values for $\mu_{max}$ and $K_s$ using the aforementioned measurement data for $S$ and $X$ in a timespan of `[0, 100]`$\mathrm{h}$. Take the values above as initial values for $\mu_{max}$ and $K_s$.
 """
 
 # ╔═╡ 7a227eaf-18d0-44f4-ac4b-f529e81c7471
@@ -122,24 +106,25 @@ Create an `ODEProblem`. Use the aforementioned values as initial values for the 
 """
 
 # ╔═╡ 6375478f-1af9-4fd2-b6f3-101a6f796f2d
-# u0 = missing      # Uncomment and complete the instruction
+# u0 = missing      
 
 # ╔═╡ 38fe8304-af61-40a7-ac86-480dfb892185
-# tspan = missing   # Uncomment and complete the instruction
+# tspan = missing   
 
 # ╔═╡ 87482f88-8413-4820-9613-7941f3d61bd7
-# params = missing  # Uncomment and complete the instruction
+# params = missing  
 
 # ╔═╡ 94f3bd7b-5c2c-4661-a0ab-2cdaf2cd6743
-# oprob = missing   # Uncomment and complete the instruction
+# oprob = missing   
 
 # ╔═╡ f6a8f134-6db0-4d74-8af5-82826347d8f0
 md"""
-Declare the Turing model. Use `InverseGamma` for the standard deviations of the measurements and `LogNormal` for `μmax` and `K`.
+Declare the Turing model. Assume the following for the priors:
+- The measurement error is an unknown positive value, but probably near $0$.
+- The parameters `μmax` and `K` are both positive and expected to be in $[0.0, 1.0]$, presumably around $0.1$.
 """
 
 # ╔═╡ 4c28a66a-ee2c-42a2-95c7-ea4ddb6a232d
-# Uncomment and complete the instruction
 # @model function fermenter_fun(t_meas)
     # σ_S ~ missing
     # σ_X ~ missing
@@ -152,29 +137,35 @@ Declare the Turing model. Use `InverseGamma` for the standard deviations of the 
     # X_s ~ missing
 # end
 
+# ╔═╡ 5928a9f3-f33c-4689-a6e5-637447f420d6
+md"""
+!!! tip
+	This model can change between being non-stiff and stiff based on the sampled parameter values. You can use an auto-switching solver such as `AutoTsit5(Rosenbrock23())` here to make calibration more stable.
+"""
+
 # ╔═╡ 3136b15d-5078-4bcd-954b-e89bcb8aed1b
 md"""
-Provide the time measurements to the defined function and instantly condition the model with the measurements of $S$ and $X$:
+Provide the measurements to the Turing model.
 """
 
 # ╔═╡ 6a508a62-61b9-4273-8e45-b26f594e8da9
-# fermenter_cond_mod = missing       # Uncomment and complete the instruction
+# fermenter_inf = missing       
 
 # ╔═╡ 63420055-55f8-4def-8b0e-11ea61483010
 md"""
-Optimize the priors ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$). Do this with `MLE` method and Nelder-Mead. Store the optimization results in `results_mle`. If necessary, run the optimization again if you get any errors.
+Optimize the likelihood of the parameters ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$) using the NelderMead optimizer. Store the optimization results in `results_mle`.
 """
 
 # ╔═╡ d52c9da8-d8a4-4db0-ac6d-6d16ccf4775c
-# results_map = missing           # Uncomment and complete the instruction
+# results_mle = missing           
 
 # ╔═╡ e1b0ee01-f16c-40e9-a0f9-80072d690936
 md"""
-Visualize a summary of the optimized parameters.
+Visualize a summary of the optimized parameters. Beware that this may take a lot of time...
 """
 
 # ╔═╡ f2d7daf8-8218-446d-b1d2-e9e05aeadfd9
-# missing        # Uncomment and complete the instruction
+# missing        
 
 # ╔═╡ 23d58bb1-d077-402e-8bee-3866c68e069a
 md"""
@@ -182,10 +173,10 @@ Get the optimized values and assign them to `μmax_opt` and `Ks_opt`.
 """
 
 # ╔═╡ 7b3a3677-b251-43c1-b125-6d6ff1a11ea3
-# μmax_opt = missing              # Uncomment and complete the instruction
+# μmax_opt = missing              
 
 # ╔═╡ fa77bcbe-2ddc-4113-8f6a-4a18d219da9e
-# Ks_opt = missing                # Uncomment and complete the instruction
+# Ks_opt = missing                
 
 # ╔═╡ 05d13a48-adc8-4e24-a6e4-be24af2c7a59
 md"""
@@ -198,7 +189,7 @@ Set up parameter values with optimized parameter values:
 """
 
 # ╔═╡ 75cf59ed-af8e-4e8a-8ed2-1f3bf4d386d0
-# params_opt = missing         # Uncomment and complete the instruction
+# params_opt = missing         
 
 # ╔═╡ 4e8870dc-2da6-4b80-82d6-26c7ceedad7d
 md"""
@@ -206,10 +197,10 @@ Create an ODEProblem and solve it. Use `Tsit5()` and `saveat=0.5`.
 """
 
 # ╔═╡ 853c1a92-d50f-4b05-9ed3-d3ee1656665a
-# oprob_opt = missing         # Uncomment and complete the instruction
+# oprob_opt = missing         
 
 # ╔═╡ f45e8124-e942-438e-99c5-3032ccc01454
-# osol_opt = missing          # Uncomment and complete the instruction
+# osol_opt = missing          
 
 # ╔═╡ 5a39b0e0-1ea1-4854-8e68-66d0d4bbf25c
 md"""
@@ -217,13 +208,10 @@ Plot $S$ and $X$ simulated with the optimal and initial parameter values togethe
 """
 
 # ╔═╡ d0156099-ad03-4711-ac0f-94882fb78266
-# Uncomment and complete the instruction
 # begin
 # 	missing
 #   missing
 #   missing
-# 	missing
-# 	missing
 # end
 
 # ╔═╡ 257ae1a9-6264-4122-80be-8022b4b7500c
@@ -245,7 +233,6 @@ md"""
 
 # ╔═╡ Cell order:
 # ╠═245ca9d0-10f9-11ef-0ef6-a73594e96db9
-# ╠═78a25bef-31e5-45ef-b0ba-b9a8c8a9edeb
 # ╠═c54dae10-60af-4141-b56d-ed61cb0ced8a
 # ╠═16438e07-1b2b-467e-822a-081d19cae92b
 # ╠═295caa68-db27-4c9b-bc34-86ab088fec24
@@ -255,7 +242,6 @@ md"""
 # ╟─824db995-7a66-4719-a534-7e0f6dec90b5
 # ╠═245c2636-95da-4c76-8b03-c4d20bbabb48
 # ╠═956790e2-6cac-46c9-886e-24d5aceae1c5
-# ╠═68f9ecb3-15b0-4a53-8864-5dac13a89e95
 # ╟─de8ddc14-8f82-403d-8f42-29673ef2a722
 # ╟─b7b7d58f-d406-4596-b834-ced6d8fada83
 # ╠═99c6f31a-0968-4804-9980-71fcc1af1f49
@@ -271,6 +257,7 @@ md"""
 # ╠═94f3bd7b-5c2c-4661-a0ab-2cdaf2cd6743
 # ╟─f6a8f134-6db0-4d74-8af5-82826347d8f0
 # ╠═4c28a66a-ee2c-42a2-95c7-ea4ddb6a232d
+# ╟─5928a9f3-f33c-4689-a6e5-637447f420d6
 # ╟─3136b15d-5078-4bcd-954b-e89bcb8aed1b
 # ╠═6a508a62-61b9-4273-8e45-b26f594e8da9
 # ╟─63420055-55f8-4def-8b0e-11ea61483010
