@@ -100,23 +100,6 @@ Furthermore, suppose that at $t = 0\;h$ no substrate $S$ is present in the react
 Calibrate the parameter values for $\mu_{max}$ and $K_s$ using the aforementioned measurement data for $S$ and $X$ in a timespan of `[0, 100]`$\mathrm{h}$. Take the values above as initial values for $\mu_{max}$ and $K_s$.
 """
 
-# ╔═╡ 7a227eaf-18d0-44f4-ac4b-f529e81c7471
-md"""
-Create an `ODEProblem`. Use the aforementioned values as initial values for the problem.
-"""
-
-# ╔═╡ 6375478f-1af9-4fd2-b6f3-101a6f796f2d
-# u0 = missing      
-
-# ╔═╡ 38fe8304-af61-40a7-ac86-480dfb892185
-# tspan = missing   
-
-# ╔═╡ 87482f88-8413-4820-9613-7941f3d61bd7
-# params = missing  
-
-# ╔═╡ 94f3bd7b-5c2c-4661-a0ab-2cdaf2cd6743
-# oprob = missing   
-
 # ╔═╡ f6a8f134-6db0-4d74-8af5-82826347d8f0
 md"""
 Declare the Turing model. Assume the following for the priors:
@@ -250,11 +233,6 @@ md"""
 # ╟─6c481447-28c6-4530-bf2c-64762121bc71
 # ╠═918fd524-81fa-4aff-a403-37402e47235b
 # ╟─ef977370-06ee-4a73-85e2-609a744167d3
-# ╟─7a227eaf-18d0-44f4-ac4b-f529e81c7471
-# ╠═6375478f-1af9-4fd2-b6f3-101a6f796f2d
-# ╠═38fe8304-af61-40a7-ac86-480dfb892185
-# ╠═87482f88-8413-4820-9613-7941f3d61bd7
-# ╠═94f3bd7b-5c2c-4661-a0ab-2cdaf2cd6743
 # ╟─f6a8f134-6db0-4d74-8af5-82826347d8f0
 # ╠═4c28a66a-ee2c-42a2-95c7-ea4ddb6a232d
 # ╟─5928a9f3-f33c-4689-a6e5-637447f420d6
