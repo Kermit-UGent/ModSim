@@ -123,7 +123,7 @@ Calibrate the parameter values for $k$ and $S_{max}$ using the aforementioned me
 
 # ╔═╡ 923d04ce-b4d2-44b0-afff-7062c4628ad0
 md"""
-Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$. Use `InverseGamma` for the standard deviations of the measurements, `LogNormal` for $k$ and `Uniform` (between 100 and 200) for $Smax$.
+Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$.
 """
 
 # ╔═╡ 481eb8b9-5de2-4f68-b06a-ec18e054c9f5
