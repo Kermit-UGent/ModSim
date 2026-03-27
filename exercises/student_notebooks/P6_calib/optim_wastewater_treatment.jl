@@ -1,11 +1,15 @@
 ### A Pluto.jl notebook ###
-# v0.20.21
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ 2b26c3b2-df08-4b24-a08d-23717248c10d
-using Pkg; Pkg.activate("..")
+begin
+	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
+	using Pkg
+	Pkg.activate("..")
+end
 
 # ╔═╡ f08fa69c-a744-11ef-0e79-3daf5bf297ea
 using Markdown
@@ -70,6 +74,7 @@ Create a *reaction network object* model for the aforementioned problem. Name it
 """
 
 # ╔═╡ 8708de16-3532-4352-b211-c092f95c82d3
+# Uncomment and complete the instruction
 # wastewater_treatment = @reaction_network begin
 #     @parameters missing
 #     @species missing
@@ -85,7 +90,7 @@ Convert the system to a symbolic differential equation model and verify your sys
 """
 
 # ╔═╡ fee917dd-7ab5-4fda-b1b7-87ee61e21f19
-# osys = missing            
+# osys = missing            # Uncomment and complete the instruction
 
 # ╔═╡ 08ebcb95-8603-4579-879e-810b1494b013
 md"""
@@ -98,7 +103,7 @@ Initialize a vector `u0` with the initial conditions:
 """
 
 # ╔═╡ fe02a755-5b00-4d80-a511-fec115b42964
-# u0 = missing              
+# u0 = missing              # Uncomment and complete the instruction
 
 # ╔═╡ 67481927-0d03-4da9-af6c-9afa409fc006
 md"""
@@ -106,7 +111,7 @@ Set the timespan:
 """
 
 # ╔═╡ fadd372a-a665-4b16-9b6d-e32cb7f25d7f
-# tspan = missing           
+# tspan = missing           # Uncomment and complete the instruction
 
 # ╔═╡ 734e4d51-95a7-464e-9a23-5ad6c8715d65
 md"""
@@ -114,7 +119,7 @@ Initialize a vector `params` with the parameter values:
 """
 
 # ╔═╡ 15ce9889-a437-46c8-9062-74b8d234a8bd
-# params = missing          
+# params = missing          # Uncomment and complete the instruction
 
 # ╔═╡ b8a48461-3882-45f6-980c-38d650ac52c7
 md"""
@@ -127,7 +132,7 @@ Create the ODE problem and store it in `oprob`:
 """
 
 # ╔═╡ b1e18139-5277-4f06-b1f8-b0f5f11c41d8
-# oprob = missing           
+# oprob = missing           # Uncomment and complete the instruction
 
 # ╔═╡ ad6d8fe6-e62f-4c67-8d63-4ee13b928ad0
 md"""
@@ -135,7 +140,7 @@ Solve the ODE problem. Use `Tsit5()` and `saveat=0.1`. Store the solution in `os
 """
 
 # ╔═╡ e2ffba9e-aaf2-4540-84cf-8b7297ae9285
-# osol = missing             
+# osol = missing             # Uncomment and complete the instruction
 
 # ╔═╡ 70871ee8-b0a4-4a9a-af39-5a63459b55f7
 md"""
@@ -143,6 +148,7 @@ Plot the results. Use `ylim=(0, 3)` and `lw=2` (or `linewidth=2`) as options.
 """
 
 # ╔═╡ 34309734-3751-47e0-a602-d113ffaae510
+# Uncomment and complete the instruction
 # begin
 #     missing
 #     hline!([0.28], ls=:dash, lw=2, lc=:green, lab="C=0.28")
@@ -154,7 +160,7 @@ Check out the end value of the organic waste.
 """
 
 # ╔═╡ f62898d5-1b8d-4350-8655-78aa3decb2a2
-# missing               
+# missing               # Uncomment and complete the instruction
 
 # ╔═╡ 7eb5df9c-a475-4812-81c3-e43484c82242
 md"""
@@ -169,6 +175,7 @@ First, declare the Turing model function. Sample the flow rate $q$ prior from an
 """
 
 # ╔═╡ b6bac48a-4a3d-47e4-90ea-788ca20dadff
+# Uncomment and complete the instruction
 # @model function wastewater_treatment_inference()
 #     q ~ missing
 #     u0 = missing
@@ -185,11 +192,11 @@ Define the desired value for the organic waste with the variable name `C_val`.
 """
 
 # ╔═╡ 2df409ef-bd95-4ac3-a2b8-c5e17c490eba
-# missing                  
+# missing                  # Uncomment and complete the instruction
 
 # ╔═╡ 70cafd87-63f7-4674-ae49-43d422fdeae7
 md"""
-Instantiate the Turing model and condition it with the observed value of $C$
+Now condition the model with the desired value:
 """
 
 # ╔═╡ ef20f8b8-4527-4f02-b449-fa67b68bbf65
@@ -201,7 +208,7 @@ Optimize the prior for $q$. Do this with `MLE` method and Nelder-Mead. Store the
 """
 
 # ╔═╡ afc035be-075b-464b-8ba2-20235082f005
-# results_mle = missing    
+# results_mle = missing    # Uncomment and complete the instruction
 
 # ╔═╡ 97a00511-93d4-45d6-b320-9bad1b102397
 md"""
@@ -217,7 +224,7 @@ Get the optimized value for $q$ and assign it to `q_opt`.
 """
 
 # ╔═╡ 98a157a1-8c20-474d-acb8-00373ee6d224
-# q_opt = missing          
+# q_opt = missing          # Uncomment and complete the instruction
 
 # ╔═╡ ceb146c9-a09a-458b-b7d8-3bb7d3de38e0
 md"""
@@ -225,7 +232,7 @@ Set up parameter values with the optimized parameter value.
 """
 
 # ╔═╡ e275df05-5c77-4c17-ad2e-503574596c31
-# params_opt = missing      
+# params_opt = missing      # Uncomment and complete the instruction
 
 # ╔═╡ cd515dad-44fb-4af2-b933-805ef76be9b3
 md"""
@@ -233,10 +240,10 @@ Create an ODEProblem and solve it. Use `Tsit5()` and `saveat=0.1`.
 """
 
 # ╔═╡ a4388f06-1223-4815-a557-9b9c3ec232bb
-# oprob_opt = missing        
+# oprob_opt = missing        # Uncomment and complete the instruction
 
 # ╔═╡ ec7bf654-b275-4cfd-a819-d82bdc1be93b
-# osol_opt = missing          
+# osol_opt = missing          # Uncomment and complete the instruction
 
 # ╔═╡ 82809c26-4cab-405e-8107-a8a43e81f699
 md"""
@@ -244,6 +251,7 @@ Plot $C$ and $X$ simulated with both the initial and the optimized parameter val
 """
 
 # ╔═╡ 81429279-4190-41d1-a72a-20da0ce90528
+# Uncomment and complete the instruction
 # begin
 #     missing
 # 	  plot!(osol, ls=:dash, lw=1, lab=:none)
