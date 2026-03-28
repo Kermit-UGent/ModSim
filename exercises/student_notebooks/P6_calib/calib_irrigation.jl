@@ -129,7 +129,6 @@ Declare the Turing model. Make sure you take both experiments into account for o
 """
 
 # ╔═╡ 481eb8b9-5de2-4f68-b06a-ec18e054c9f5
-# Uncomment and complete the instruction
 # @model function irrigation_inference(t_meas)
 # 	σ_S1 ~ missing
 # 	σ_S2 ~ missing
