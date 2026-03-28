@@ -131,7 +131,7 @@ tspan = (0.0, 150.0)
 
 # ╔═╡ 923d04ce-b4d2-44b0-afff-7062c4628ad0
 md"""
-Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$.
+Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$. Based on literature, you can assume that the value of $S_{max}$ lies somewhere between 100 and 200 mm. 
 """
 
 # ╔═╡ 481eb8b9-5de2-4f68-b06a-ec18e054c9f5
