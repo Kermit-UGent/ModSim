@@ -43,18 +43,20 @@ $$\begin{align}
 where $v = 10^{-3}\;h^{-1}\,mm^{-1}$ and $S_{1,res}=10 \;mm$. Previously, we also assumed $k = 3\;mm\,h^{-1}$ and $S_{max} = 150\;mm$.
 """
 
-# ╔═╡ ad42d3a7-6d83-4362-aa3f-31628a1db9b2
-md"""
-The *reaction network object* for this model could be set up as:
-"""
+# ╔═╡ 9f6ad49c-cfbe-46e2-a2dd-c01bb67eeb61
+# @variables missing
 
-# ╔═╡ dc26abff-f8ab-4881-9acf-7b325b386a16
-irrigation_mod = @reaction_network begin
-    k/Smax, S1 --> S2
-    v, 2S2 --> 0
-    r * (1 - S1res / Smax), 0 --> S1
-    r/Smax, S1 --> 0
-end
+# ╔═╡ fb2c7db4-e52f-45df-afa0-aeb1db78c849
+# @parameters missing
+
+# ╔═╡ c1773f17-825f-414f-9761-5744b34f1b71
+# change_S1 = missing
+
+# ╔═╡ 6e2165d4-ef72-4c37-bac0-2dfac417a192
+# change_S2 = missing
+
+# ╔═╡ 59654ad7-f42c-443f-bb34-6674db72606f
+# @mtkbuild sys_irrigation = missing
 
 # ╔═╡ e5d7520d-fd8c-48c0-bd36-826766212217
 md"""
@@ -254,8 +256,11 @@ md"- Answer: missing"
 # ╠═9345dd8f-0a60-4aaf-a27f-ef8bf860f495
 # ╟─55d5400d-1777-4918-a030-b94cb9a59f63
 # ╟─8f1afdec-b78d-4aba-a74f-cd3e4b35fab1
-# ╟─ad42d3a7-6d83-4362-aa3f-31628a1db9b2
-# ╠═dc26abff-f8ab-4881-9acf-7b325b386a16
+# ╠═9f6ad49c-cfbe-46e2-a2dd-c01bb67eeb61
+# ╠═fb2c7db4-e52f-45df-afa0-aeb1db78c849
+# ╠═c1773f17-825f-414f-9761-5744b34f1b71
+# ╠═6e2165d4-ef72-4c37-bac0-2dfac417a192
+# ╠═59654ad7-f42c-443f-bb34-6674db72606f
 # ╟─e5d7520d-fd8c-48c0-bd36-826766212217
 # ╟─73c9b5fb-4f56-4bde-beb4-387651409c1b
 # ╠═9f94c63e-628f-4ff3-ad29-0f90d32dfcb1
