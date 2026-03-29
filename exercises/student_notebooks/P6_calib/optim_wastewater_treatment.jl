@@ -116,7 +116,7 @@ Initialize a vector `u0` with the initial conditions:
 
 # ╔═╡ 67481927-0d03-4da9-af6c-9afa409fc006
 md"""
-Set the timespan:
+Set the timespan to 72 hours:
 """
 
 # ╔═╡ fadd372a-a665-4b16-9b6d-e32cb7f25d7f
