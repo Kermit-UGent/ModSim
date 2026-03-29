@@ -315,7 +315,7 @@ Draw your conclusion.
 # ╟─bbd50cc5-032a-4219-bcee-91145935a7c4
 # ╟─93d49247-8e37-4abc-b792-f380c8d59883
 # ╟─d48dae1d-a8a2-4b23-b4b8-c840be19ff66
-# ╠═08d82f11-068a-4ab3-a664-46af49f1ff11
+# ╟─08d82f11-068a-4ab3-a664-46af49f1ff11
 # ╟─dc2189d6-ca6f-4edd-be41-49ea5a6d556e
 # ╠═8dc5c4fd-687f-4dd9-ab80-bf80e40af0df
 # ╟─1b3c329c-4cd6-40cc-97bc-e8f829eb04d6
@@ -335,7 +335,7 @@ Draw your conclusion.
 # ╠═b1e18139-5277-4f06-b1f8-b0f5f11c41d8
 # ╟─ad6d8fe6-e62f-4c67-8d63-4ee13b928ad0
 # ╠═e2ffba9e-aaf2-4540-84cf-8b7297ae9285
-# ╟─70871ee8-b0a4-4a9a-af39-5a63459b55f7
+# ╠═70871ee8-b0a4-4a9a-af39-5a63459b55f7
 # ╠═34309734-3751-47e0-a602-d113ffaae510
 # ╟─a0e735ad-09c2-4aa8-bc41-b294a9d56ea8
 # ╠═f62898d5-1b8d-4350-8655-78aa3decb2a2
@@ -357,4 +357,4 @@ Draw your conclusion.
 # ╠═ec7bf654-b275-4cfd-a819-d82bdc1be93b
 # ╟─82809c26-4cab-405e-8107-a8a43e81f699
 # ╠═81429279-4190-41d1-a72a-20da0ce90528
-# ╠═6589acfd-1d81-4c10-adea-34ca7fa1ab5d
+# ╟─6589acfd-1d81-4c10-adea-34ca7fa1ab5d
