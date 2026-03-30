@@ -121,7 +121,7 @@ Calibrate the parameter values for $k$ and $S_{max}$ using the aforementioned me
 """
 
 # ╔═╡ a65a0997-9945-436e-925b-8fc02055f61a
-# missing
+# tspan = missing
 
 # ╔═╡ 923d04ce-b4d2-44b0-afff-7062c4628ad0
 md"""
@@ -134,22 +134,24 @@ Declare the Turing model. Make sure you take both experiments into account for o
 # 	σ_S2 ~ missing
 # 	k ~ missing
 # 	Smax ~ missing
-#   params = missing
-#   u01 = missing
-#   oprob1 = missing
+# 	parms = missing
+#   # For experiment 1:
+# 	u01 = missing
+# 	oprob1 = missing
 # 	osol1 = missing
-# 	S1_s1 ~ missing
-# 	S2_s1 ~ missing
-#   u02 = missing
-#   oprob2 = missing
+# 	S1_ex1 ~ missing
+# 	S2_ex1 ~ missing
+#   # For experiment 2:
+# 	u02 = missing
+# 	oprob2 = missing
 # 	osol2 = missing
-# 	S1_s2 ~ missing
-# 	S2_s2 ~ missing
+# 	S1_ex2 ~ missing
+# 	S2_ex2 ~ missing
 # end
 
 # ╔═╡ df933ae8-1f51-4467-93a7-33f153e5e4f8
 md"""
-Provide the time measurements to the defined function and instantly condition the model with the measurements of $S_1$ and $S_2$ from both experiments:
+Instantiate the model and condition it with the measurements of $S_1$ and $S_2$ from both experiments:
 """
 
 # ╔═╡ 0e2aa675-9e09-4e06-b5f8-118707ee652a
@@ -165,7 +167,7 @@ Optimize the priors ($\sigma_{S1}$, $\sigma_{S2}$, $k$ and $S_{max}$). Do this w
 
 # ╔═╡ f15a1df5-047a-4f46-9419-8492ac1248e0
 md"""
-Visualize a summary of the optimized parameters.
+Visualize a summary of the optimized parameters. Beware that this may take a lot of time...
 """
 
 # ╔═╡ 00d944e4-2c88-4a5d-b809-69f435df4684

@@ -206,12 +206,12 @@ Declare the Turing model function. Sample the flow rate $q$ prior from an unifor
 #     q ~ missing
 #     u0 = missing
 #     tspan = missing
-#     params = missing
+#     parms = missing
 #     oprob = missing
 #     osol = missing
-#     C_val ~ missing
+#     C ~ missing
 # end
-@model function ww_treat_inf()
+@model function wastewater_treatment_inference()
 	q ~ Uniform(0, 5.0)
     u0 = [:C=>3.0, :X=>0.5]
     tspan = (0.0, 72.0)  # the time interval to solve on
@@ -236,11 +236,11 @@ C_val = 0.28
 md"Instantiate the Turing model and condition it with the observed value of $C$"
 
 # ╔═╡ 97aca933-ebed-4b97-a872-a3d8ad533130
-ww_model = ww_treat_inf() | (C = C_val,)
+ww_model = wastewater_treatment_inference() | (C = C_val,)
 
 # ╔═╡ ee1ffc12-55a1-47ef-ac5b-33148706a09b
 md"""
-Provide the measurement to the Turing model and optimize the prior. Do this with `MLE` method and Nelder-Mead. Store the optimization results in `results_mle`.
+Optimize the prior for $q$. Do this with the `MLE` method and Nelder-Mead. Store the optimization results in `results_mle`.
 """
 
 # ╔═╡ afc035be-075b-464b-8ba2-20235082f005
@@ -285,20 +285,24 @@ Plot $C$ and $X$ simulated with the optimized parameter value. Use `ylim=(0, 4)`
 
 # ╔═╡ 81429279-4190-41d1-a72a-20da0ce90528
 # begin
-#     missing
-#     plot!([tspan[1], tspan[2]], [C_val, C_val],
-# 		linestyle=:dash, linewidth=2, linecolor=:green, label="C=0.28")
+# 	missing
+# 	plot!(osol, linestyle=:dash, linewidth=1, label=:none, color=[:orange :blue])
+# 	hline!([0.28], linestyle=:dash, linewidth=2, color=:orangered, label="C=0.28")
 # end
 begin
-    plot(osol_opt, ylim=(0, 4), linewidth=2)
-    plot!([tspan[1], tspan[2]], [C_val, C_val],
-		linestyle=:dash, linewidth=2, linecolor=:green, label="C=0.28")
+	plot(osol_opt, ylim=(0, 4), linewidth=2, color=[:orange :blue])
+	plot!(osol, linestyle=:dash, linewidth=1, label=:none, color=[:orange :blue])
+	hline!([0.28], linestyle=:dash, linewidth=2, color=:orangered, label="C=0.28")
 end
+
+# ╔═╡ 66a6b157-a779-4792-8bdb-f32ced3dedde
+md"""
+!!! question 
+	Does the value of $C$ now respect the limit in the concentration? Draw your conclusion.
+"""
 
 # ╔═╡ 6589acfd-1d81-4c10-adea-34ca7fa1ab5d
 md"""
-Draw your conclusion.
-
 - Conclusion: missing
 """
 
@@ -357,4 +361,5 @@ Draw your conclusion.
 # ╠═ec7bf654-b275-4cfd-a819-d82bdc1be93b
 # ╟─82809c26-4cab-405e-8107-a8a43e81f699
 # ╠═81429279-4190-41d1-a72a-20da0ce90528
+# ╟─66a6b157-a779-4792-8bdb-f32ced3dedde
 # ╟─6589acfd-1d81-4c10-adea-34ca7fa1ab5d

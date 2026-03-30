@@ -24,6 +24,11 @@ md"""
 # Exercise: Fermenter - Monod kinetics - Calibration
 """
 
+# ╔═╡ 97092124-bcbf-41af-bd1d-7b75033e0a89
+md"""
+# Exercise: Fermenter - Monod kinetics - Calibration
+"""
+
 # ╔═╡ 595ea8ee-bc67-4696-9232-982612fb554d
 md"""
 In one of the previous practica we were introduced to a fermenter in which biomass $X$ [$\mathrm{g/L}$] grows by breaking down substrate $S$ [$\mathrm{g/L}$]. The reactor is fed with an inlet flow rate $Q_{in}$ [$\mathrm{L/h}$], which consists of a (manipulable) input concentration of substrate $S_{in}$ [$\mathrm{g/L}$]. This process was modelled using Monod kinetics:
@@ -148,8 +153,8 @@ Declare the Turing model. Assume the following for the priors:
     parms = [:μmax => μmax, :Ks => Ks, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.022]
 	oprob = ODEProblem(fermenter_monod, u0, tspan, parms)
     osol = solve(oprob, AutoTsit5(Rosenbrock23()), saveat=t_meas)
-	S ~ MvNormal(osol[:S], σ_S)
-	X ~ MvNormal(osol[:X], σ_X)
+	S_s ~ MvNormal(osol[:S], σ_S)
+	X_s ~ MvNormal(osol[:X], σ_X)
 end
 
 # ╔═╡ c2120cce-5cae-42e5-b1c6-1d10b49d9ffc
@@ -190,7 +195,7 @@ Visualize a summary of the optimized parameters. Beware that this may take a lot
 
 # ╔═╡ 23d58bb1-d077-402e-8bee-3866c68e069a
 md"""
-Get the optimized values and assign them to `μmax_opt`, `Ks_opt` and `Sin_opt`.
+Get the optimized values and assign them to `μmax_opt` and `Ks_opt`.
 """
 
 # ╔═╡ 7b3a3677-b251-43c1-b125-6d6ff1a11ea3
@@ -245,6 +250,23 @@ begin
 	scatter!(t_meas, X_meas, label="X meas", color=:red)
 end
 
+# ╔═╡ c579f538-7375-49b1-8fc9-e443bb1f7e17
+md"""
+!!! question
+	How do the found optimal parameter values compare to the original values? *Or in other words*: what is the impact to be expected when we simulate the fermenter with the optimal values?
+"""
+
+# ╔═╡ 8cdf0b27-c54e-4ce2-8c90-a23a8eedd0ea
+md"""
+- Answer: 
+"""
+
+# ╔═╡ 817fc060-5608-459a-953e-2d4da3b78ad1
+md"""
+!!! hint
+	Think about the meaning of the estimated parameters and their impact on the variables $S$ and $X$.
+"""
+
 # ╔═╡ Cell order:
 # ╟─2f0a4c62-3441-4c63-9bb9-383e7f554eb5
 # ╠═245ca9d0-10f9-11ef-0ef6-a73594e96db9
@@ -252,6 +274,7 @@ end
 # ╠═16438e07-1b2b-467e-822a-081d19cae92b
 # ╠═295caa68-db27-4c9b-bc34-86ab088fec24
 # ╠═dc6e9bdc-dae0-43aa-b624-f9314d1d9884
+# ╟─97092124-bcbf-41af-bd1d-7b75033e0a89
 # ╟─595ea8ee-bc67-4696-9232-982612fb554d
 # ╟─824db995-7a66-4719-a534-7e0f6dec90b5
 # ╠═245c2636-95da-4c76-8b03-c4d20bbabb48
@@ -286,3 +309,6 @@ end
 # ╠═f45e8124-e942-438e-99c5-3032ccc01454
 # ╟─5a39b0e0-1ea1-4854-8e68-66d0d4bbf25c
 # ╠═d0156099-ad03-4711-ac0f-94882fb78266
+# ╟─c579f538-7375-49b1-8fc9-e443bb1f7e17
+# ╠═8cdf0b27-c54e-4ce2-8c90-a23a8eedd0ea
+# ╟─817fc060-5608-459a-953e-2d4da3b78ad1

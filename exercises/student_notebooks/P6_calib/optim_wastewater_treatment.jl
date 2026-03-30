@@ -124,11 +124,11 @@ Set the timespan to 72 hours:
 
 # ╔═╡ 734e4d51-95a7-464e-9a23-5ad6c8715d65
 md"""
-Initialize a vector `params` with the parameter values:
+Initialize a vector `parms` with the parameter values:
 """
 
 # ╔═╡ 15ce9889-a437-46c8-9062-74b8d234a8bd
-# params = missing  
+# parms = missing  
 
 # ╔═╡ b8a48461-3882-45f6-980c-38d650ac52c7
 md"""
@@ -175,7 +175,7 @@ Check out the end value of the organic waste.
 md"""
 ## Part 2
 
-In this part, we will optimize the value of the flow rate $q$ so that the concentration of organic waste in the tank is at most $0.28\; kg\,m^{-3}$.
+In this part, we will optimize the value of the flow rate $q$ so that the concentration of organic waste in the tank is at most $0.28\;\mathrm{kg\,m^{-3}}$.
 """
 
 # ╔═╡ 5a695734-677f-4bf6-a703-8e22382b7529
@@ -191,7 +191,7 @@ Declare the Turing model function. Sample the flow rate $q$ prior from an unifor
 #     params = missing
 #     oprob = missing
 #     osol = missing
-#     C_d ~ missing
+#     C ~ missing
 # end
 
 # ╔═╡ b3a40556-0c00-4f6d-8cd9-c5fca79d8bbf
@@ -210,7 +210,7 @@ md"Instantiate the Turing model and condition it with the observed value of $C$"
 
 # ╔═╡ ee1ffc12-55a1-47ef-ac5b-33148706a09b
 md"""
-Optimize the prior for $q$. Do this with `MLE` method and Nelder-Mead. Store the optimization results in `results_mle`.
+Optimize the prior for $q$. Do this with the `MLE` method and Nelder-Mead. Store the optimization results in `results_mle`.
 """
 
 # ╔═╡ afc035be-075b-464b-8ba2-20235082f005
@@ -230,7 +230,7 @@ Set up parameter values with the optimized parameter value.
 """
 
 # ╔═╡ e275df05-5c77-4c17-ad2e-503574596c31
-# params_opt = missing  
+# parms_opt = missing  
 
 # ╔═╡ cd515dad-44fb-4af2-b933-805ef76be9b3
 md"""
@@ -245,20 +245,20 @@ Create an ODEProblem and solve it. Use `Tsit5()` and `saveat=0.1`.
 
 # ╔═╡ 82809c26-4cab-405e-8107-a8a43e81f699
 md"""
-Plot $C$ and $X$ simulated with both the initial and the optimized parameter values. Use `ylim=(0, 3)` and `lw=2` (or `linewidth=2`) as options. The dashed line indicates $C = 0.28\; kg\,m^{-3}$.
+Plot $C$ and $X$ simulated with the optimized parameter value. Use `ylim=(0, 4)` and `linewidth=2` as options. The dashed line indicates $C = 0.28\;\mathrm{kg\,m^{-3}}$.
 """
 
 # ╔═╡ 81429279-4190-41d1-a72a-20da0ce90528
 # begin
-#     missing
-# 	  plot!(osol, ls=:dash, lw=1, lab=:none)
-#     hline!([0.28], ls=:dash, lw=2, lc=:green, lab="C=0.28")
+# 	missing
+# 	plot!(osol, linestyle=:dash, linewidth=1, label=:none, color=[:orange :blue])
+# 	hline!([0.28], linestyle=:dash, linewidth=2, color=:orangered, label="C=0.28")
 # end
 
 # ╔═╡ 6589acfd-1d81-4c10-adea-34ca7fa1ab5d
 md"""
 !!! question 
-	Does the value of $C$ respect now the limit in the concentration? Draw your conclusion.
+	Does the value of $C$ now respect the limit in the concentration? Draw your conclusion.
 """
 
 # ╔═╡ 7c7d99b9-77b9-4c08-a74e-54eaa7d187ec

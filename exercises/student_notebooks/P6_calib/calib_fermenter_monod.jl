@@ -63,7 +63,7 @@ $$\begin{eqnarray*}
 
 # ╔═╡ b7b7d58f-d406-4596-b834-ced6d8fada83
 md"""
-Suppose that during an experiment measurement data have been collected of the substrate $S$ and biomass $X$ concentration at an interval of $5\;h$ within $100\;h$:
+Suppose that during an experiment measurement data has been collected of the substrate $S$ and biomass $X$ concentration at an interval of $5\;\mathrm{h}$ within $100\;\mathrm{h}$:
 """
 
 # ╔═╡ 99c6f31a-0968-4804-9980-71fcc1af1f49
@@ -108,12 +108,12 @@ Declare the Turing model. Assume the following for the priors:
 """
 
 # ╔═╡ 4c28a66a-ee2c-42a2-95c7-ea4ddb6a232d
-# @model function fermenter_fun(t_meas)
+# @model function fermenter_inference(t_meas)
     # σ_S ~ missing
     # σ_X ~ missing
     # μmax ~ missing
     # Ks ~ missing
-	# params = missing
+	# parms = missing
 	# oprob = missing
     # osol = missing
     # S_s ~ missing
@@ -187,7 +187,7 @@ Create an ODEProblem and solve it. Use `Tsit5()` and `saveat=0.5`.
 
 # ╔═╡ 5a39b0e0-1ea1-4854-8e68-66d0d4bbf25c
 md"""
-Plot $S$ and $X$ simulated with the optimal and initial parameter values together with the measured data. We can do this to compare the found values with the initial ones and detect possible errors.
+Plot $S$ and $X$ simulated with the optimized parameter values together with the measured data.
 """
 
 # ╔═╡ d0156099-ad03-4711-ac0f-94882fb78266
@@ -211,7 +211,7 @@ md"""
 # ╔═╡ 22a6aeb4-559c-4f69-82fd-d021f68e1f17
 md"""
 !!! hint
-	Think of the meaning of the estimated parameters and their impact on the variables $S$ and $X$.
+	Think about the meaning of the estimated parameters and their impact on the variables $S$ and $X$.
 """
 
 # ╔═╡ Cell order:
