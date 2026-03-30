@@ -312,6 +312,19 @@ We will use the MLE (Maximum Likelihood Estimation) method here and store the op
 # ╔═╡ f34bb7ac-1ed8-4dd9-b0b9-49bd6e0e1d71
 results_log_mle = optimize(growth_log_inf, MLE(), NelderMead())
 
+# ╔═╡ a4dc130a-87ef-4b77-9b62-07f64917e34d
+md"""
+!!! note "NelderMead algorithm"
+	We optimize the likelihood using the Nelder–Mead method, which is deterministic: given the same starting point, it will always return the same result for a fixed problem. However, runs may still differ because in the Turing model the initial values are randomly sampled from the specified distributions. Providing explicit starting points to the optimizer can therefore improve consistency.
+
+	```
+	begin
+		init_params = [1, 2, 0.07, 10]
+		results_log_mle = optimize(growth_log_inf, MLE(), init_params, NelderMead())
+	end
+	```
+"""
+
 # ╔═╡ e55404ab-6762-4f39-bb42-9c195334a214
 md"""
 You can visualize a summary of the optimized parameters by piping them to `coeftable`. Beware that this can take a lot of time...
@@ -894,6 +907,7 @@ md"- Answer: missing"
 # ╟─73e35289-6dc0-4e2e-83eb-b56f83cdbbbf
 # ╟─47bd729c-4851-42f7-a03f-6ceacd3c717e
 # ╠═f34bb7ac-1ed8-4dd9-b0b9-49bd6e0e1d71
+# ╟─a4dc130a-87ef-4b77-9b62-07f64917e34d
 # ╟─e55404ab-6762-4f39-bb42-9c195334a214
 # ╠═80e7f6b8-7592-48a3-8587-f1953d1bfcd8
 # ╟─a1ca7d0e-639c-42d4-be09-5c61a2008f29
