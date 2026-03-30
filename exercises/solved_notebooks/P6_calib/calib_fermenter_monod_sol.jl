@@ -153,8 +153,8 @@ Declare the Turing model. Assume the following for the priors:
     parms = [:μmax => μmax, :Ks => Ks, :Y => 0.67, :Q => 2, :V => 40, :Sin => 0.022]
 	oprob = ODEProblem(fermenter_monod, u0, tspan, parms)
     osol = solve(oprob, AutoTsit5(Rosenbrock23()), saveat=t_meas)
-	S_s ~ MvNormal(osol[:S], σ_S)
-	X_s ~ MvNormal(osol[:X], σ_X)
+	S ~ MvNormal(osol[:S], σ_S)
+	X ~ MvNormal(osol[:X], σ_X)
 end
 
 # ╔═╡ c2120cce-5cae-42e5-b1c6-1d10b49d9ffc

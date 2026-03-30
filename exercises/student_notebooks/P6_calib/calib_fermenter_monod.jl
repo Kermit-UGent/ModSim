@@ -116,8 +116,8 @@ Declare the Turing model. Assume the following for the priors:
 	# parms = missing
 	# oprob = missing
     # osol = missing
-    # S_s ~ missing
-    # X_s ~ missing
+    # S ~ missing
+    # X ~ missing
 # end
 
 # ╔═╡ 5928a9f3-f33c-4689-a6e5-637447f420d6
