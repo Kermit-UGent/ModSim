@@ -131,7 +131,7 @@ tspan = (0.0, 150.0)
 
 # ╔═╡ 923d04ce-b4d2-44b0-afff-7062c4628ad0
 md"""
-Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$.
+Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$. Based on literature, you can assume that the value of $S_{max}$ lies somewhere between 100 and 200 mm.
 """
 
 # ╔═╡ 481eb8b9-5de2-4f68-b06a-ec18e054c9f5
@@ -140,19 +140,19 @@ Declare the Turing model. Make sure you take both experiments into account for o
 # 	σ_S2 ~ missing
 # 	k ~ missing
 # 	Smax ~ missing
-#	parms = missing
+# 	parms = missing
 #   # For experiment 1:
-#	u0 = missing
-#	oprob = missing
+#	u01 = missing
+#	oprob1 = missing
 # 	osol1 = missing
-# 	S1_meas1 ~ missing
-# 	S2_meas1 ~ missing
+# 	S1_ex1 ~ missing
+# 	S2_ex1 ~ missing
 #   # For experiment 2:
-#	u0 = missing
-#	oprob = missing
+#	u02 = missing
+#	oprob2 = missing
 # 	osol2 = missing
-# 	S1_meas2 ~ missing
-# 	S2_meas2 ~ missing
+# 	S1_ex2 ~ missing
+# 	S2_ex2 ~ missing
 # end
 @model function irrigation_inference(t_meas)
 	σ_S1 ~ Exponential()
@@ -162,22 +162,22 @@ Declare the Turing model. Make sure you take both experiments into account for o
 	Smax ~ Uniform(100, 200)
 	parms = [:k=>k, :Smax=>Smax]
     # For experiment 1:
-	u0 = [:S₁=>0.0, :S₂=>0.0]
-	oprob = ODEProblem(sys_irrigation, u0, tspan, parms)
-	osol1 = solve(oprob, AutoTsit5(Rosenbrock23()), saveat=t_meas)
+	u01 = [:S₁=>0.0, :S₂=>0.0]
+	oprob1 = ODEProblem(sys_irrigation, u01, tspan, parms)
+	osol1 = solve(oprob1, AutoTsit5(Rosenbrock23()), saveat=t_meas)
 	S1_ex1 ~ MvNormal(osol1[:S₁], σ_S1)
 	S2_ex1 ~ MvNormal(osol1[:S₂], σ_S2)
     # For experiment 2:
-	u0 = [:S₁=>140.0, :S₂=>135.0]
-	oprob = ODEProblem(sys_irrigation, u0, tspan, parms)
-	osol2 = solve(oprob, AutoTsit5(Rosenbrock23()), saveat=t_meas)
+	u02 = [:S₁=>140.0, :S₂=>135.0]
+	oprob2 = ODEProblem(sys_irrigation, u02, tspan, parms)
+	osol2 = solve(oprob2, AutoTsit5(Rosenbrock23()), saveat=t_meas)
 	S1_ex2 ~ MvNormal(osol2[:S₁], σ_S1)
 	S2_ex2 ~ MvNormal(osol2[:S₂], σ_S2)
 end
 
 # ╔═╡ df933ae8-1f51-4467-93a7-33f153e5e4f8
 md"""
-Provide the measurements to the Turing model.
+Instantiate the model and condition it with the measurements of $S_1$ and $S_2$ from both experiments:
 """
 
 # ╔═╡ 0e2aa675-9e09-4e06-b5f8-118707ee652a
@@ -287,6 +287,15 @@ begin
   scatter!(t_meas, S2_meas2, label="S2 meas2", color=:red)
 end
 
+# ╔═╡ 1e10084c-5636-44e4-ab06-47c3e3511676
+md"""
+!!! question
+	Do your simulations fit well the measurements?
+"""
+
+# ╔═╡ e0570822-1db8-401e-aeba-15cafb25704a
+md"- Answer: missing"
+
 # ╔═╡ Cell order:
 # ╟─55d5400d-1777-4918-a030-b94cb9a59f63
 # ╠═2b010e5c-1121-11ef-16fe-a5e3317122e4
@@ -339,3 +348,5 @@ end
 # ╠═fe8f4961-68bd-42dc-a3f5-6692e918e241
 # ╠═7f280230-7846-4529-a2ff-a81a2b9480bf
 # ╠═ad9818a9-ccbe-4645-8b91-0c3fa773632a
+# ╟─1e10084c-5636-44e4-ab06-47c3e3511676
+# ╠═e0570822-1db8-401e-aeba-15cafb25704a

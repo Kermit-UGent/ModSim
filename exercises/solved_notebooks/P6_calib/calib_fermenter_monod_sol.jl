@@ -24,9 +24,14 @@ md"""
 # Exercise: Fermenter - Monod kinetics - Calibration
 """
 
+# ╔═╡ 97092124-bcbf-41af-bd1d-7b75033e0a89
+md"""
+# Exercise: Fermenter - Monod kinetics - Calibration
+"""
+
 # ╔═╡ 595ea8ee-bc67-4696-9232-982612fb554d
 md"""
-In one of the previous practica we were introduced to a fermenter in which biomass $X$ [$\mathrm{g/L}$] grows by breaking down substrate $S$ [$\mathrm{g/L}$]. The reactor is fed with an inlet flow rate $Q_{in}$ [$\mathrm{L/h}$], which consists of a (manipulable) input concentration of substrate $S_{in}$ [$\mathrm{g/L}$]. This process was modelled using Monod kinetics:
+In one of the previous practicals we were introduced to a fermenter in which biomass $X$ [$\mathrm{g/L}$] grows by breaking down substrate $S$ [$\mathrm{g/L}$]. The reactor is fed with an inlet flow rate $Q_{in}$ [$\mathrm{L/h}$], which consists of a (manipulable) input concentration of substrate $S_{in}$ [$\mathrm{g/L}$]. This process was modelled using Monod kinetics:
 
 $$\begin{eqnarray*}
 S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s} \, .
@@ -105,7 +110,7 @@ end
 md"""
 We have previously used the following parameter values:
 
--  `μmax = 0.40`$\mathrm{h^{-1}}$, `Ks = 0.015`$\mathrm{g/L}$, `Sin = 0.22`$\mathrm{g/L}$
+-  `μmax = 0.40`$\mathrm{h^{-1}}$, `Ks = 0.015`$\mathrm{g/L}$, `Sin = 0.022`$\mathrm{g/L}$
 -  `Y = 0.67`, `Q = 2.0`$\mathrm{L/h}$, `V = 40.0`$\mathrm{L}$
 
 Furthermore, suppose that at $t = 0\;h$ no substrate $S$ is present in the reactor but that there is initially some biomass with a concentration of `0.0005`$\mathrm{g/L}$.
@@ -169,12 +174,15 @@ fermenter_inf = fermenter_inference(t_meas) | (S = S_meas, X = X_meas)
 
 # ╔═╡ 63420055-55f8-4def-8b0e-11ea61483010
 md"""
-Optimize the likelihood of the parameters ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$) using the NelderMead optimizer. Store the optimization results in `results_mle`.
+Optimize the likelihood of the parameters ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$) using the NelderMead optimizer. Store the optimization results in `results_mle`. Optionally, you can specify starting points for $\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$ to the optimizer to improve the consistency of the results. For the gaussian noise you can just use a value of 0.1.
 """
 
 # ╔═╡ d52c9da8-d8a4-4db0-ac6d-6d16ccf4775c
-# results_mle = missing           # Uncomment and complete the instruction
-results_mle = optimize(fermenter_inf, MLE(), NelderMead())
+# results_mle = missing
+begin
+	init_params = [0.1, 0.1, 0.1, 0.1]
+	results_mle = optimize(fermenter_inf, MLE(), init_params, NelderMead())
+end
 
 # ╔═╡ e1b0ee01-f16c-40e9-a0f9-80072d690936
 md"""
@@ -187,7 +195,7 @@ Visualize a summary of the optimized parameters. Beware that this may take a lot
 
 # ╔═╡ 23d58bb1-d077-402e-8bee-3866c68e069a
 md"""
-Get the optimized values and assign them to `μmax_opt`, `Ks_opt` and `Sin_opt`.
+Get the optimized values and assign them to `μmax_opt` and `Ks_opt`.
 """
 
 # ╔═╡ 7b3a3677-b251-43c1-b125-6d6ff1a11ea3
@@ -242,6 +250,23 @@ begin
 	scatter!(t_meas, X_meas, label="X meas", color=:red)
 end
 
+# ╔═╡ c579f538-7375-49b1-8fc9-e443bb1f7e17
+md"""
+!!! question
+	How do the found optimal parameter values compare to the original values? *Or in other words*: what is the impact to be expected when we simulate the fermenter with the optimal values?
+"""
+
+# ╔═╡ 8cdf0b27-c54e-4ce2-8c90-a23a8eedd0ea
+md"""
+- Answer: 
+"""
+
+# ╔═╡ 817fc060-5608-459a-953e-2d4da3b78ad1
+md"""
+!!! hint
+	Think about the meaning of the estimated parameters and their impact on the variables $S$ and $X$.
+"""
+
 # ╔═╡ Cell order:
 # ╟─2f0a4c62-3441-4c63-9bb9-383e7f554eb5
 # ╠═245ca9d0-10f9-11ef-0ef6-a73594e96db9
@@ -249,6 +274,7 @@ end
 # ╠═16438e07-1b2b-467e-822a-081d19cae92b
 # ╠═295caa68-db27-4c9b-bc34-86ab088fec24
 # ╠═dc6e9bdc-dae0-43aa-b624-f9314d1d9884
+# ╟─97092124-bcbf-41af-bd1d-7b75033e0a89
 # ╟─595ea8ee-bc67-4696-9232-982612fb554d
 # ╟─824db995-7a66-4719-a534-7e0f6dec90b5
 # ╠═245c2636-95da-4c76-8b03-c4d20bbabb48
@@ -283,3 +309,6 @@ end
 # ╠═f45e8124-e942-438e-99c5-3032ccc01454
 # ╟─5a39b0e0-1ea1-4854-8e68-66d0d4bbf25c
 # ╠═d0156099-ad03-4711-ac0f-94882fb78266
+# ╟─c579f538-7375-49b1-8fc9-e443bb1f7e17
+# ╠═8cdf0b27-c54e-4ce2-8c90-a23a8eedd0ea
+# ╟─817fc060-5608-459a-953e-2d4da3b78ad1
