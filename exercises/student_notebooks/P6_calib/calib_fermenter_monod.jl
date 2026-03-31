@@ -26,7 +26,7 @@ md"""
 
 # ╔═╡ 595ea8ee-bc67-4696-9232-982612fb554d
 md"""
-In one of the previous practica we were introduced to a fermenter in which biomass $X$ [$\mathrm{g/L}$] grows by breaking down substrate $S$ [$\mathrm{g/L}$]. The reactor is fed with an inlet flow rate $Q_{in}$ [$\mathrm{L/h}$], which consists of a (manipulable) input concentration of substrate $S_{in}$ [$\mathrm{g/L}$]. This process was modelled using Monod kinetics:
+In one of the previous practicals we were introduced to a fermenter in which biomass $X$ [$\mathrm{g/L}$] grows by breaking down substrate $S$ [$\mathrm{g/L}$]. The reactor is fed with an inlet flow rate $Q_{in}$ [$\mathrm{L/h}$], which consists of a (manipulable) input concentration of substrate $S_{in}$ [$\mathrm{g/L}$]. This process was modelled using Monod kinetics:
 
 $$\begin{eqnarray*}
 S + X \xrightarrow[\quad\quad]{k} (1 + Y) \, X \quad\quad\quad\quad \textrm{with} \quad k = \cfrac{\mu_{max}}{S + K_s} \, .
