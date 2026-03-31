@@ -136,7 +136,7 @@ Provide the measurements to the Turing model.
 
 # ╔═╡ 63420055-55f8-4def-8b0e-11ea61483010
 md"""
-Optimize the likelihood of the parameters ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$) using the NelderMead optimizer. Store the optimization results in `results_mle`. It might be a good idea to give starting points for $\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$ to the optimizer. For the gaussian noise you can just use a value of 0.1.
+Optimize the likelihood of the parameters ($\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$) using the NelderMead optimizer. Store the optimization results in `results_mle`. Optionally, you can specify starting points for $\sigma_S$, $\sigma_X$, $\mu_{max}$ and $K_s$ to the optimizer to improve the consistency of the results. For the gaussian noise you can just use a value of 0.1.
 """
 
 # ╔═╡ d52c9da8-d8a4-4db0-ac6d-6d16ccf4775c
