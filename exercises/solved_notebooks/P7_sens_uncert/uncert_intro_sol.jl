@@ -199,10 +199,26 @@ In uncertainty propagation, we are interested in the effect of uncertainties (or
 Below a Turing model is defined that samples values from a normal distribution with a 5% standard deviation. This is our Prior belief of how accurate the estimate of our intial parameters is. Remember that this is similar to what we did in practical 4.
 """
 
+# ╔═╡ 0e0dc268-faaf-462e-a980-9398c6015e02
+@model function logistic_deviation()
+	μ_dev ~ Normal(0.07, 0.0035) # 5% standard deviation
+	Wf_dev ~ Normal(10, 0.5) # 5% standard deviation
+	return solve(remake(oprob_log, p = [:Wf => Wf_dev, :μ => μ_dev]), saveat=0.5);
+end
+
 # ╔═╡ e34f4b23-ac1b-4b88-b959-65085cef4b4f
 md"""
 Using the `sample()` function we can sample values from our distribution.
 """
+
+# ╔═╡ 738448dd-d1c9-4fdc-af5d-fad4d91adf38
+μ_model = logistic_deviation();
+
+# ╔═╡ 51579212-dd33-42b9-a19e-221ab7630c1a
+chain = sample(μ_model, Prior(), 500);
+
+# ╔═╡ 22bf3f50-1909-4a2c-820f-45b87f6bce14
+solutions = generated_quantities(μ_model, chain);
 
 # ╔═╡ 616ee1d4-1f56-4c4a-a658-9f9351949f59
 md"""
@@ -216,22 +232,6 @@ Firstly, solve the original system (Wf = 10 and μ = 0.07) and afterwards we can
 
 # ╔═╡ 62afc495-29c3-4baa-b45a-94b84149d15d
 oprob_log = ODEProblem(growth_mod_log, u0_log,tspan, [:μ => 0.07, :Wf => 10]);
-
-# ╔═╡ 0e0dc268-faaf-462e-a980-9398c6015e02
-@model function logistic_deviation()
-	μ_dev ~ Normal(0.07, 0.0035) # 5% standard deviation
-	Wf_dev ~ Normal(10, 0.5) # 5% standard deviation
-	return solve(remake(oprob_log, p = [:Wf => Wf_dev, :μ => μ_dev]), saveat=0.5);
-end
-
-# ╔═╡ 738448dd-d1c9-4fdc-af5d-fad4d91adf38
-μ_model = logistic_deviation();
-
-# ╔═╡ 51579212-dd33-42b9-a19e-221ab7630c1a
-chain = sample(μ_model, Prior(), 500);
-
-# ╔═╡ 22bf3f50-1909-4a2c-820f-45b87f6bce14
-solutions = generated_quantities(μ_model, chain);
 
 # ╔═╡ 691a8b68-935e-4012-aa25-9cfdc323b1de
 osol_log = solve(oprob_log, Tsit5(), saveat = 0.5);

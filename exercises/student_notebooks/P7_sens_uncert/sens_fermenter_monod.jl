@@ -369,14 +369,18 @@ md"""
 
 # ╔═╡ 9fd59148-6993-4598-af95-ac85b6a4bb45
 md"""
-Let's take a look at how the uncertainty propagates in your model by using Monte Carlo simulations. Based on some literature search you can assume that the parameter `Ks`,is normally distributed around the original value with a standard deviation of 20%.
-
-Secondly it is useful to know that instead of creating a new ODEProblem everytime, you can simply remake an old ODEProblem by using `new_prob = remake(oprob, p = [:Ks => Ks])`. 
+Let's take a look at how the uncertainty propagates in your model by using Monte Carlo simulations. Based on some literature search you can assume that the parameter `Ks` is normally distributed around the original value with a standard deviation of 20%.
 """
 
 # ╔═╡ 5a559bc2-3d55-499c-93cf-4b0845ffc4b0
 md"""
 Start with making a Turing model in which you implement the prior and return the solution of the solved problem.
+"""
+
+# ╔═╡ ecc28b8e-0eaf-489f-8104-7c6383d4e01f
+md"""
+!!! note
+	Instead of creating a new ODEProblem everytime, you can simply remake an old ODEProblem by using `new_prob = remake(oprob, p = [:Ks => Ks])`. 
 """
 
 # ╔═╡ 26ae811d-11fd-44d8-b328-79381fa7472c
@@ -396,9 +400,7 @@ Now get sample 100 solutions from your monod_deviation model.
 
 # ╔═╡ f11827e5-de69-4a0c-b385-2c6ea031bb79
 md"""
-Now we want to take a look at how the uncertainty on the parameters propagates through the simulation. We will do this via a Monte Carlo simulation.
-
-We will do this by looping through our solutions and plotting them. It is advised to put `label = false` (avoids 100 labels) `color=:gray` (neutral color) and `alpha=0.4` (makes it more transparent) and `linestyle=:dot`.
+We can now visualise the results of our Monte Carlo simulation by looping through our solutions and plotting them. It is advised to put `label = false` (avoids 100 labels), `color=:gray` (neutral color) and `alpha=0.4` (makes it more transparent) and `linestyle=:dot`.
 """
 
 # ╔═╡ 9d0f8147-3c82-4ace-a408-20e32b4d8ea0
@@ -413,7 +415,7 @@ We will do this by looping through our solutions and plotting them. It is advise
 
 # ╔═╡ 30c270f1-cbd5-401b-92db-7123efb01db6
 md"""
-As can be seen from the graph, the uncertainty is rather high especially if we want to carefully monitor the concentration of biomass through time. If you want to quantify this you could make a histogram of the biomass at the end of the simulation and check the standard deviation, but the graph is already a clear indication.
+As can be seen from the graph, the uncertainty is rather high, especially if we want to carefully monitor the concentration of biomass through time. Note that, since we have a sample of values for $S$ and $X$ at every time step, it is also perfectly possible here to quantify the uncertainty by calculating the standard deviation at every time step, but the graph already gives a clear indication.
 """
 
 # ╔═╡ 16098df3-35c0-4d06-a482-35137fd53b97
@@ -438,10 +440,13 @@ As a process operator, you may want to reduce the uncertainty in biomass simulat
 
 Local sensitivity analysis is a useful tool in this context, as it indicates when the model output is most sensitive to changes in parameter values. At these time points, accurate measurements provide the greatest insight into the true parameter values.
 
-In this section, the objective is to identify the time at which the biomass concentration is most sensitive to variations in `Ks`.
+Start off by identifying the time at which the biomass concentration is most sensitive to variations in `Ks`.
+"""
 
-
-You can find the index of the maximum value in a vector with the `argmax()` function. For example `argmax([1, 2, 5, 4])` will give you 3. 
+# ╔═╡ 8dbadbc6-acd9-42f5-abf4-81fe6aef7fb7
+md"""
+!!! note
+	You can find the index of the maximum value in a vector with the `argmax()` function. For example `argmax([1, 2, 5, 4])` will give you 3.
 """
 
 # ╔═╡ ddfb530a-ba79-43c0-973a-4deb8cad1d33
@@ -466,13 +471,8 @@ end;
 
 # ╔═╡ 9654dea2-e13e-4aa9-8a5e-c3c368c26e24
 md"""
-Now you can use the function `real_solution(t)` to retrieve a measurement at the optimal time (`t_star`), which will return `S_meas, X_meas`. 
+We have defined a function `real_solution(t)` in this notebook that returns a hypothetical measurement (`S_meas, X_meas`) at the given timepoint `t`. Use this function to get a measurement at the optimal time (`t_star`).
 """
-
-# ╔═╡ cde42a71-868f-48b9-8838-0d6962fcc082
-function give_measurement(t)
-	return real_solution(t)
-end
 
 # ╔═╡ 77eab4ec-5012-40dd-b702-9fb48982ff38
 # S_meas, X_meas = real_solution(t_star)
@@ -486,7 +486,7 @@ md"""
 md"""
 Now we can use this measurement to calibrate our model. In this part we will use Monte Carlo Markov chain to show the decrease in uncertainty. 
 
-Similarly as the model we previously defined with our Priors (so you can get the Priors from the first part of this exercise), we will create a Turing model. For the standard deviation `σ_X` you can assume a value of 0.0002 and a value of 0.00055 for `σ_S`.
+We start by creating a Turing model, for which you can use the priors from the first part of this exercise. For the standard deviation `σ_X` you can assume a value of 0.0002 and a value of 0.00055 for `σ_S`.
 
 Make sure to truncate the domain of your parameters to a reasonable domain or you might run into issues with the solver.
 """
@@ -496,12 +496,11 @@ Make sure to truncate the domain of your parameters to a reasonable domain or yo
 #     σ_X = missing
 #     σ_S = missing
 
-#     Ks_dev   ~ missing
+#     Ks_dev ~ missing
 
 #     sol = missing
     
-#     S_pred = sol[:S][1]
-#     X_pred = sol[:X][1]
+#     S_pred, X_pred = sol(t_meas)
 
 #     X_meas ~ missing
 #     S_meas ~ missing
@@ -633,6 +632,7 @@ Lastly, create a histogram of the value of X at the end of the simulations based
 # ╟─6536f76a-0f6d-4155-ab3b-38e2e3189886
 # ╟─9fd59148-6993-4598-af95-ac85b6a4bb45
 # ╟─5a559bc2-3d55-499c-93cf-4b0845ffc4b0
+# ╟─ecc28b8e-0eaf-489f-8104-7c6383d4e01f
 # ╠═26ae811d-11fd-44d8-b328-79381fa7472c
 # ╟─62791c48-5e38-46fe-8336-3a21003f3fe3
 # ╠═9e049653-347a-4198-90fd-23f15c404d0c
@@ -644,12 +644,12 @@ Lastly, create a histogram of the value of X at the end of the simulations based
 # ╠═1b1d0997-b854-4445-8c19-e73db6784a9b
 # ╟─43aaf563-f799-43e4-9f4c-8a19be1586dd
 # ╟─f7f1f035-b48e-4108-bb84-0c00ab68a93a
+# ╟─8dbadbc6-acd9-42f5-abf4-81fe6aef7fb7
 # ╠═ddfb530a-ba79-43c0-973a-4deb8cad1d33
 # ╟─8359ea0e-a916-48f4-a07a-c905c3efaf15
 # ╟─9654dea2-e13e-4aa9-8a5e-c3c368c26e24
-# ╟─cde42a71-868f-48b9-8838-0d6962fcc082
 # ╠═77eab4ec-5012-40dd-b702-9fb48982ff38
-# ╠═3e93a001-9401-4a1f-b283-c79fd0c43434
+# ╟─3e93a001-9401-4a1f-b283-c79fd0c43434
 # ╟─684f9163-ac84-49be-beb1-66d7bdc21da8
 # ╠═4fe68607-d67e-4e71-865a-b10a06e5908d
 # ╠═11e105de-270c-434a-bfb4-9118dfc9e461
