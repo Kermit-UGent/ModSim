@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -908,16 +908,16 @@ Use the above implemented function `posterior` to calculate the posterior model 
 # posteriors
 
 # ╔═╡ 72dc27a0-0e61-4073-843a-67e1bfd1427a
-# md"""
-# We can summarize all calculated criteria so far in the following table:
+md"""
+We can summarize all calculated criteria so far in the following table:
 
-# | Model | k | Log(L) | AIC | BIC | $P(M_i\|D)$ |
-# |:---|:---|:---|:---|:---|:---|
-# | Logistic | $k_log | $(round(L_log;digits=3)) | $(round(AIC_log;digits=3)) | $(round(BIC_log;digits=3)) | $(posteriors[1]) |
-# | Exponential | $k_exp | $(round(L_exp;digits=3)) | $(round(AIC_exp;digits=3)) | $(round(BIC_exp;digits=3)) | $(posteriors[2]) |
-# | Gompertz | $k_gom | $(round(L_gom;digits=3)) | $(round(AIC_gom;digits=3)) | $(round(BIC_gom;digits=3)) | $(posteriors[3]) |
+| Model | k | Log(L) | AIC | BIC | $P(M_i\|D)$ |
+|:---|:---|:---|:---|:---|:---|
+| Logistic | $k_log | $(round(L_log;digits=3)) | $(round(AIC_log;digits=3)) | $(round(BIC_log;digits=3)) | $(posteriors[1]) |
+| Exponential | $k_exp | $(round(L_exp;digits=3)) | $(round(AIC_exp;digits=3)) | $(round(BIC_exp;digits=3)) | $(posteriors[2]) |
+| Gompertz | $k_gom | $(round(L_gom;digits=3)) | $(round(AIC_gom;digits=3)) | $(round(BIC_gom;digits=3)) | $(posteriors[3]) |
 
-# """
+"""
 
 # ╔═╡ 6240553c-0c7c-45f4-b190-ebacf09ab632
 md"""
@@ -1302,7 +1302,7 @@ md"""
 # ╟─3bf0c957-f08b-4a45-90e0-40d56330c8e0
 # ╠═947e26fe-2010-48ad-b927-d4e5186f21e0
 # ╠═3506765b-a6cf-41ca-9201-fcc650c6f56d
-# ╠═72dc27a0-0e61-4073-843a-67e1bfd1427a
+# ╟─72dc27a0-0e61-4073-843a-67e1bfd1427a
 # ╟─6240553c-0c7c-45f4-b190-ebacf09ab632
 # ╠═12f64333-36d0-4e2a-9061-e3dcc7a4ae96
 # ╟─95ba48fe-f430-4f47-ab04-f5896d75343b
