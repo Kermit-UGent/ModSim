@@ -499,7 +499,7 @@ md"""
 """
 
 # ╔═╡ f700357f-e21c-4d23-b56c-be4f9c90465f
-const NUM_PARALLEL_WORKERS = 4
+const NUM_PARALLEL_WORKERS = 2
 
 # ╔═╡ aaad71bd-5425-4783-952c-82e4d4fa7bb8
 md"""
