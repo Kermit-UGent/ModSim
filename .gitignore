@@ -344,3 +344,8 @@ Manifest.toml
 *.png
 *.jpg
 *.svg
+
+# Local build output from develop.jl / generate.jl — the site is built by CI
+_site/
+_cache/
+generation_report.html
