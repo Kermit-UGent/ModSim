@@ -745,6 +745,7 @@ template_results = let
 
 	# let's go! running all the template handlers
 	progressmap_async(allfiles; ntasks=NUM_PARALLEL_WORKERS) do f
+		println("Processing: ", f)
 		absolute_path = joinpath(dir, f)
 		
 		input = TemplateInput(;
