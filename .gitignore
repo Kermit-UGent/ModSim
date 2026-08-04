@@ -349,3 +349,4 @@ Manifest.toml
 _site/
 _cache/
 generation_report.html
+build.log
