@@ -12,7 +12,21 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
+    # Cheap gate on an expensive job: a cache that cannot serve this build means
+    # cold-running every notebook, which does not fit in the 6h job limit. Find
+    # out in seconds rather than after six hours of runner time.
+    cache-preflight:
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        steps:
+            - name: Checkout source
+              uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+            - name: 🔎 Check notebook cache against src/ and the pinned Pluto version
+              run: python3 tools/check_cache.py
+
     build-and-deploy:
+        needs: cache-preflight
         runs-on: ubuntu-latest
         timeout-minutes: 360
         steps:
