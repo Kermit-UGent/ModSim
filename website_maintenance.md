@@ -36,7 +36,74 @@ Pluto notebooks will be rendered to HTML and included in the page. What you see 
 
 On a separate system, we are running a PlutoSliderServer that is synchronized to the `Fall23` brach. This makes our notebooks interactive!
 
-Notebook outputs are **cached** (for a long time) by the file hash. This means that a notebook file will only ever run once, which makes it much faster to work on the website. If you need to re-run your notebook, add a space somewhere in the code :)
+Notebook outputs are **cached** (for a long time) by the file hash *and the Pluto version*. This means that a notebook file will only ever run once, which makes it much faster to work on the website. If you need to re-run your notebook, add a space somewhere in the code :)
+
+See [The notebook cache](#the-notebook-cache-_cache) below before you touch the Pluto version.
+
+## The notebook cache (`_cache/`)
+
+Running all notebooks from scratch takes well over six hours, which is more than a
+GitHub Actions job is allowed to run. The build only finishes because `_cache/` is
+committed to the repository, so every checkout starts warm. Treat that directory as
+build infrastructure, not as generated junk.
+
+Each file is named by PlutoSliderServer as `<pluto version><content hash>.plutostate`,
+for example `0_20_13AbC...xyz.plutostate`. Both halves matter, and they fail very
+differently.
+
+### Editing a notebook: nothing to worry about
+
+The content hash changes, so CI re-runs that one notebook (a few minutes) and
+everything else is served from cache. The old `.plutostate` is left behind as an
+orphan. Regenerate locally and commit the new cache entries, deleting the orphans, so
+the directory does not grow without bound:
+
+```
+julia --project=pluto-deployment-environment generate.jl
+python3 tools/check_cache.py     # lists orphans and notebooks that would run cold
+```
+
+### ⚠️ Bumping Pluto: read this first
+
+A new Pluto version invalidates **every** entry at once, because the version is part
+of every filename. The next build then cold-runs all notebooks, exceeds the job
+limit, and gets killed. That is how `main` broke before PR #81, and it does not
+recover on its own.
+
+`Pluto` and `PlutoSliderServer` are therefore pinned with `=` in
+`pluto-deployment-environment/Project.toml`, so `Pkg.update()` cannot do this by
+accident. To bump on purpose:
+
+1. Edit the `[compat]` pins, then `Pkg.update()` in that environment.
+2. Locally: `rm -rf _cache && julia --project=pluto-deployment-environment generate.jl`.
+   Budget several hours.
+3. Commit the regenerated `_cache/` **in the same commit** as the `Manifest.toml`
+   change. The two must never be out of step.
+4. `python3 tools/check_cache.py` must pass before you push.
+
+`pluto-deployment-environment/Manifest.toml` is the only thing that pins Pluto, so it
+is force-tracked in `.gitignore`. Do not untrack it.
+
+### The inverse problem: stale output
+
+Because the cache key is the notebook's *content*, bumping any other package
+(ModelingToolkit, Turing, ...) does **not** invalidate anything. The site keeps
+serving output produced by the old versions until a notebook is edited. After a
+significant SciML upgrade, force a full refresh by hand:
+
+```
+rm -rf _cache && julia --project=pluto-deployment-environment generate.jl
+```
+
+This also proves every notebook still runs, which a warm build never checks. Worth
+doing once a term.
+
+### The preflight check
+
+`ExportNotebooks.yml` runs `tools/check_cache.py` as a separate `cache-preflight`
+job before the expensive one. It fails in seconds when the cache cannot serve the
+build (Pluto bump, empty `_cache/`) instead of after six hours of runner time. It
+only warns for the normal cases, edited notebooks and orphans. Run it locally too.
 
 ## `.css`, `.html`, `.gif`, etc
 
