@@ -37,3 +37,12 @@ URIs = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
 Unicode = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
+
+[compat]
+# EXACT pins, on purpose. The cached notebook states in _cache/ are named
+# "<pluto version><content hash>.plutostate" (see PlutoSliderServer's
+# Export.jl), so bumping Pluto invalidates all of them at once and the next
+# build cold-runs every notebook - which exceeds GitHub's 6h job limit.
+# Bumping these is a deliberate act: see website_maintenance.md first.
+Pluto = "=0.20.13"
+PlutoSliderServer = "=1.4.0"

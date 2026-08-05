@@ -697,3 +697,8 @@ Manifest.toml
 *.jpg
 *.svg
 # _cache is on purpose omitted to avoid again cold run of github actions that results in timeout
+
+# ...but the deployment Manifest must stay tracked: it is the only thing that
+# pins Pluto to the version baked into the _cache/*.plutostate filenames.
+# Keep this last - .gitignore applies the last matching rule.
+!pluto-deployment-environment/Manifest.toml
