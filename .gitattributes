@@ -1,2 +1,16 @@
 page/* linguist-vendored
 * text=auto
+
+# Notebooks are keyed into _cache/ by sha256 of their exact bytes, so a CRLF
+# checkout (git's default on Windows, since `text=auto` above means the eol
+# attribute falls back to core.eol=native) changes every hash and misses every
+# cache entry, cold-running the whole site. Pin them to LF everywhere.
+# All 209 tracked .jl files are already LF in the index, so this renormalizes
+# nothing and invalidates no cache entry.
+*.jl text eol=lf
+
+# Cached notebook states are binary. git already detects that from content
+# today, but that is a heuristic over the first 8000 bytes: a mostly-ASCII
+# state could flip to "text" and get line-ending mangled on checkout, silently
+# corrupting the cache. Say it explicitly instead of relying on the guess.
+*.plutostate binary
