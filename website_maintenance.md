@@ -32,11 +32,13 @@ Besides small inline values, you can also write big code blocks, with `$(begin .
 
 ## Pluto notebooks
 
-Pluto notebooks will be rendered to HTML and included in the page. What you see is what you get!
+Pluto notebooks are included in the page, but they are **not executed** during the site build.
 
-On a separate system, we are running a PlutoSliderServer that is synchronized to the `Fall23` brach. This makes our notebooks interactive!
+Each notebook is loaded, its plain markdown cells are prerendered (this happens inside the build process, no notebook is started), and the result is embedded as a static Pluto editor. So a page shows the prose and the source code of every cell, but no cell outputs: no plots, no numbers, no interactive sliders.
 
-Notebook outputs are **cached** (for a long time) by the file hash. This means that a notebook file will only ever run once, which makes it much faster to work on the website. If you need to re-run your notebook, add a space somewhere in the code :)
+Visitors run the notebook themselves with the **"Edit or run this notebook"** button in the top right: on Binder, or on their own computer with the repository checked out.
+
+Because nothing is executed, there is **no notebook output cache** anymore. Editing a notebook is picked up immediately — you never have to invalidate anything, and a full site build takes a few minutes instead of hours.
 
 ## `.css`, `.html`, `.gif`, etc
 
@@ -77,20 +79,22 @@ For `.jlhtml`, we still need to figure something out 😄.
 
 Open this repository in VS Code, and install the recommended extensions.
 
-To start running the development server, open the VS Code *command palette* (press `Cmd+Shift+P`), and search for **`Tasks: Run Task`**, then **`PlutoPages: run development server`**. The first run can take some time, as it builds up the notebook outputs cache. Leave it running.
+To start running the development server, open the VS Code *command palette* (press `Cmd+Shift+P`), and search for **`Tasks: Run Task`**, then **`PlutoPages: run development server`**. The first run can take some time, as it precompiles the packages in `pluto-deployment-environment`. Leave it running.
+
+Use the same Julia version as the CI workflow (`1.11.2`, the version that `pluto-deployment-environment/Manifest.toml` was resolved with). With juliaup: `juliaup override set 1.11.2` inside this folder.
 
 This will start two things in parallel: the PlutoPages.jl notebook (which generates the website), and a static file server (with Deno_jll). It will open two tabs in your browser: one is the generation dashboard (PlutoPages), the other is the current site preview (Deno_jll).
  
 Whenever you edit a file, PlutoPages will automatically regenerate! Refresh your browser tab. If it does not pick up the change, go to the generation dashboard and click the "Read input files again" button.
 
-This workflow is recommended for writing static content, styles, and for site maintenance. But for writing Pluto notebooks, it's best to prepare the notebook first, and then run the site (because it re-runs the entire notebook on any change).
+This workflow is recommended for writing static content, styles, and for site maintenance. Notebooks are never executed by the site build, so editing one is cheap — but it also means you have to check the notebook's output in Pluto itself.
 
 ## Developing PlutoPages itself
 
 
 You need to manually run the notebook with Pluto:
 1. Go to this folder, and run `julia --project=pluto-deployment-environment`. Then `import Pkg; Pkg.instantiate();`.
-1. `import Pluto; Pluto.run()` and open the `PlutoPages.jl` notebook in this repository. The first run can take some time, as it builds up the notebook outputs cache. Leave it running.
+1. `import Pluto; Pluto.run()` and open the `PlutoPages.jl` notebook in this repository. The first run can take some time, as it precompiles packages. Leave it running.
 2. In a second terminal, go to this folder, and run `julia --project=pluto-deployment-environment`, then:
     ```julia
 	import Deno_jll

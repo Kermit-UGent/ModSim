@@ -183,6 +183,40 @@ md"""
 ## `.jl`: PlutoSliderServer.jl
 """
 
+# ╔═╡ c83871e0-90ec-11f1-9518-4946ff967f7b
+"""
+Load a Pluto notebook **without running it**, and return the packed statefile.
+
+Nothing from the notebook is executed: no notebook process is started and the
+notebook package environment is not instantiated. Pluto still prerenders
+text-only cells (i.e. plain `md"..."` cells) in this process, so the page shows
+rendered prose plus the source code of every other cell. Visitors run the
+notebook themselves with the "Edit or run this notebook" button.
+"""
+function unrun_notebook_state(absolute_path::String)::Vector{UInt8}
+	session = Pluto.ServerSession()
+	session.options.server.disable_writing_notebook_files = true
+	session.options.server.launch_browser = false
+	# NOTE: do not set `run_notebook_on_load = false` here: that code path is
+	# unsupported and broken in Pluto 0.20.13 (`DEFAULT_PRECEDENCE_HEURISTIC` is
+	# not qualified in Run.jl). `execution_allowed=false` below is enough.
+
+	notebook = Logging.with_logger(Logging.NullLogger()) do
+		Pluto.SessionActions.open(session, absolute_path;
+			run_async=false,
+			execution_allowed=false, # no worker process, no Pkg instantiate
+		)
+	end
+
+	state = Pluto.notebook_to_js(notebook)
+	delete!(state, "status_tree")
+	delete!(session.notebooks, notebook.notebook_id)
+
+	io = IOBuffer()
+	Pluto.pack(io, state)
+	take!(io)
+end
+
 # ╔═╡ bb905046-59b7-4da6-97ad-dbb9055d823a
 const pluto_deploy_settings = PlutoSliderServer.get_configuration(PlutoSliderServer.default_config_path())
 
@@ -465,12 +499,6 @@ const output_dir = mkpath(joinpath(@__DIR__, "_site"))
 # ╔═╡ 37b2cecc-e4c7-4b80-b7d9-71c68f3c0339
 
 
-# ╔═╡ 7a95681a-df77-408f-919a-2bee5afd7777
-"""
-This directory can be used to store cache files that are persisted between builds. Currently used as PlutoSliderServer.jl cache.
-"""
-const cache_dir = mkpath(joinpath(@__DIR__, "_cache"))
-
 # ╔═╡ f3d225b8-b9a5-4639-97eb-7785b1a78f5a
 md"""
 ## Running a dev web server
@@ -495,7 +523,7 @@ md"""
 md"""
 ## Running the templates
 
-(This can take a while if you are running this for the first time with an empty cache.)
+Notebooks are **not executed**: they are loaded, text-only cells are prerendered, and the result is embedded as a static Pluto editor. So there is no notebook output cache to warm up.
 """
 
 # ╔═╡ f700357f-e21c-4d23-b56c-be4f9c90465f
@@ -678,38 +706,26 @@ end
 
 # ╔═╡ e2510a44-df48-4c05-9453-8822deadce24
 function template_handler(
-	::Val{Symbol(".jl")}, 
+	::Val{Symbol(".jl")},
 	input::TemplateInput
 )::TemplateOutput
 
 	
 	if Pluto.is_pluto_notebook(input.absolute_path)
-		temp_out = mktempdir()
-		Logging.with_logger(Logging.NullLogger()) do
-			PlutoSliderServer.export_notebook(
-				input.absolute_path;
-				Export_create_index=false,
-				Export_cache_dir=cache_dir,
-				Export_baked_state=false,
-				Export_baked_notebookfile=false,
-				Export_output_dir=temp_out,
-			)
-		end
-		d = readdir(temp_out)
+		name = basename(Pluto.without_pluto_file_extension(input.absolute_path))
 
-		statefile = find(contains("state") ∘ last ∘ splitext, d)
-		notebookfile = find(!contains("html") ∘ last ∘ splitext, d)
+		statefile_contents = unrun_notebook_state(input.absolute_path)
 
-		reg_s = register_asset(read(joinpath(temp_out, statefile)), statefile)
-		reg_n = register_asset(read(joinpath(temp_out, notebookfile)), notebookfile)
+		reg_s = register_asset(statefile_contents, "$(name).plutostate")
+		reg_n = register_asset(input.contents, basename(input.absolute_path))
 
 		# TODO these relative paths can't be right...
 		h = @htl """
-		<pluto-editor 
-			statefile=$(reg_s.url) 
-			notebookfile=$(reg_n.url) 
+		<pluto-editor
+			statefile=$(reg_s.url)
+			notebookfile=$(reg_n.url)
 			slider_server_url=$(pluto_deploy_settings.Export.slider_server_url)
-			binder_url=$(pluto_deploy_settings.Export.binder_url)
+			binder_url=$(something(pluto_deploy_settings.Export.binder_url, Pluto.default_binder_url))
 			disable_ui
 		></pluto-editor>
 		"""
@@ -970,6 +986,7 @@ end
 # ╠═7717e24f-62ee-4852-9dec-d09b734d0693
 # ╠═692c1e0b-07e1-41b3-abcd-2156bda65b41
 # ╟─adb1ddac-d992-49ca-820f-e1ed8ca33bf8
+# ╠═c83871e0-90ec-11f1-9518-4946ff967f7b
 # ╠═e2510a44-df48-4c05-9453-8822deadce24
 # ╠═bb905046-59b7-4da6-97ad-dbb9055d823a
 # ╠═b638df55-fd74-4ae8-bdbd-ec7b18214b40
@@ -1002,7 +1019,6 @@ end
 # ╟─d314ab46-b866-44c6-bfca-9a413bc06514
 # ╠═e01ebbab-dc9a-4aaf-ae16-200d171fcbd9
 # ╠═37b2cecc-e4c7-4b80-b7d9-71c68f3c0339
-# ╟─7a95681a-df77-408f-919a-2bee5afd7777
 # ╟─f3d225b8-b9a5-4639-97eb-7785b1a78f5a
 # ╠═c3a495c1-3e1f-42a1-ac08-8dc0b9175fe9
 # ╠═3b2d1919-41d9-4bba-9774-c8497bba5003
