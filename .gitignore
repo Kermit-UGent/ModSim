@@ -696,4 +696,8 @@ Manifest.toml
 *.png
 *.jpg
 *.svg
-# _cache is on purpose omitted to avoid again cold run of github actions that results in timeout
+# The site build does not execute notebooks anymore, so there is no notebook
+# output cache to seed. _cache is a local leftover and must stay out of the repo.
+_cache/
+_site/
+generation_report.html
