@@ -304,3 +304,36 @@ main {
     background-position: 0 0em;
     background-size: 2px auto;
 }
+
+/* NOTEBOOK NOTICE */
+
+.run-notebook-notice {
+    max-width: 700px;
+    margin: 1rem auto 0 auto;
+    padding: 0.8rem 1rem;
+    border: 2px solid rgb(165, 213, 235);
+    border-radius: 0.4rem;
+    background: rgba(165, 213, 235, 0.15);
+    font-size: 0.9rem;
+}
+
+.run-notebook-notice p {
+    margin: 0.4rem 0;
+}
+
+.run-notebook-notice code {
+    padding: 0.1em 0.3em;
+    border-radius: 0.2em;
+    background: rgba(0, 0, 0, 0.07);
+}
+
+@media (prefers-color-scheme: dark) {
+    .run-notebook-notice {
+        border-color: rgb(82, 118, 135);
+        background: rgba(82, 118, 135, 0.25);
+    }
+
+    .run-notebook-notice code {
+        background: rgba(255, 255, 255, 0.12);
+    }
+}

@@ -719,13 +719,24 @@ function template_handler(
 		reg_s = register_asset(statefile_contents, "$(name).plutostate")
 		reg_n = register_asset(input.contents, basename(input.absolute_path))
 
+		# Only advertise Binder when it is actually configured. Our notebooks
+		# activate `pluto-deployment-environment` by a relative path, which does
+		# not exist in a Binder session, so the button would always fail.
+		binder_url = pluto_deploy_settings.Export.offer_binder ?
+			something(pluto_deploy_settings.Export.binder_url, Pluto.default_binder_url) :
+			nothing
+
 		# TODO these relative paths can't be right...
 		h = @htl """
+		<div class="run-notebook-notice">
+			<p>This page shows the notebook <strong>without its output</strong>: the code is not executed when the website is built.</p>
+			<p>To run it, and to get the plots and the interactive elements: install <a href="https://julialang.org/downloads/">Julia</a>, clone <a href="https://github.com/Kermit-UGent/ModSim/">the course repository</a>, run <code>julia launch_pluto.jl</code> in it, and open this notebook in Pluto. You can also <a href=$(reg_n.url) download>download the notebook file</a>.</p>
+		</div>
 		<pluto-editor
 			statefile=$(reg_s.url)
 			notebookfile=$(reg_n.url)
 			slider_server_url=$(pluto_deploy_settings.Export.slider_server_url)
-			binder_url=$(something(pluto_deploy_settings.Export.binder_url, Pluto.default_binder_url))
+			binder_url=$(binder_url)
 			disable_ui
 		></pluto-editor>
 		"""
