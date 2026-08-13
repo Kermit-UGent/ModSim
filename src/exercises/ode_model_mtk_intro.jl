@@ -12,7 +12,9 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 1c46508e-2354-11f0-08db-d373e43929bd
-using Pkg; Pkg.activate("..")
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
+using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 2d125aad-334c-4210-a921-1acacefc5cfa
 using StatsPlots, PlutoUI; TableOfContents()
