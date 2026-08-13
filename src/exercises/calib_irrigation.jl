@@ -1,13 +1,12 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 #> [frontmatter]
-#> order = "26"
-#> title = "5. Calibration irrigation"
-#> date = "2025-08-06"
+#> order = "33"
+#> title = "6. Calibration irrigation"
 #> tags = ["exercises"]
-#> description = "Calibration irrigation"
 #> layout = "layout.jlhtml"
+#> description = "Calibration irrigation"
 #> 
 #>     [[frontmatter.author]]
 #>     name = "Gauthier Vanhaelewyn"
@@ -16,28 +15,24 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 55675f3d-2fae-4a97-a0a0-ead29a6352e6
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 2b010e5c-1121-11ef-16fe-a5e3317122e4
-using Markdown
-
-# ╔═╡ 6750d246-8e7a-4cfb-810e-d1100aa4fdef
-using InteractiveUtils
+using Markdown, InteractiveUtils
 
 # ╔═╡ 4947b0fd-13be-4f6a-b605-ed35b509d7ff
-using Catalyst, OrdinaryDiffEq, StatsPlots
+using ModelingToolkit, OrdinaryDiffEq
 
 # ╔═╡ 61d14819-ba44-40fe-95a9-9d7b0bf3dc33
-using Turing
+using ModelingToolkit: t_nounits as t, D_nounits as D
 
 # ╔═╡ f6e77c8d-de11-4b9d-93c6-45bdcfbbbf9b
-using StatsBase
+using StatsPlots, StatsBase, Turing
 
 # ╔═╡ 9345dd8f-0a60-4aaf-a27f-ef8bf860f495
-using LinearAlgebra
-
-# ╔═╡ ea02aff2-7fb8-4b8f-8d0f-0bb3c6150708
-using Optim
+using LinearAlgebra, Optim
 
 # ╔═╡ 55d5400d-1777-4918-a030-b94cb9a59f63
 md"
@@ -60,18 +55,20 @@ $$\begin{align}
 where $v = 10^{-3}\;h^{-1}\,mm^{-1}$ and $S_{1,res}=10 \;mm$. Previously, we also assumed $k = 3\;mm\,h^{-1}$ and $S_{max} = 150\;mm$.
 """
 
-# ╔═╡ ad42d3a7-6d83-4362-aa3f-31628a1db9b2
-md"""
-The *reaction network object* for this model could be set up as:
-"""
+# ╔═╡ 9f6ad49c-cfbe-46e2-a2dd-c01bb67eeb61
+# @variables missing
 
-# ╔═╡ dc26abff-f8ab-4881-9acf-7b325b386a16
-irrigation_mod = @reaction_network begin
-    k/Smax, S1 --> S2
-    v, 2S2 --> 0
-    r * (1 - S1res / Smax), 0 --> S1
-    r/Smax, S1 --> 0
-end
+# ╔═╡ fb2c7db4-e52f-45df-afa0-aeb1db78c849
+# @parameters missing
+
+# ╔═╡ c1773f17-825f-414f-9761-5744b34f1b71
+# change_S1 = missing
+
+# ╔═╡ 6e2165d4-ef72-4c37-bac0-2dfac417a192
+# change_S2 = missing
+
+# ╔═╡ 59654ad7-f42c-443f-bb34-6674db72606f
+# @mtkbuild sys_irrigation = missing
 
 # ╔═╡ e5d7520d-fd8c-48c0-bd36-826766212217
 md"""
@@ -135,55 +132,42 @@ md"""
 Calibrate the parameter values for $k$ and $S_{max}$ using the aforementioned measurement data for $S_1$ and $S_2$ in a timespan of $[0, 150]\,h$. Take the values from above as initial values for $k$ and $S_{max}$.
 """
 
-# ╔═╡ d35bbe54-5ebc-4ea5-a6c8-a6419476ec4c
-md"""
-Create an `ODEProblem`. Use the aforementioned values as initial values for the problem.
-"""
-
-# ╔═╡ 10057510-e4b6-4a3e-9d3f-f05effc88a58
-# u0 = missing            # Uncomment and complete the instruction
-
-# ╔═╡ f4d49b1d-9105-4050-a9d4-196fa00a0591
-# tspan = missing          # Uncomment and complete the instruction
-
-# ╔═╡ 777ce59f-c849-4a2e-a6dc-ae309d2a2e7c
-# params = missing         # Uncomment and complete the instruction
-
-# ╔═╡ 43b83336-aea6-4914-bc26-b2e84994ce57
-# oprob = missing
+# ╔═╡ a65a0997-9945-436e-925b-8fc02055f61a
+# tspan = missing
 
 # ╔═╡ 923d04ce-b4d2-44b0-afff-7062c4628ad0
 md"""
-Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$. Use `InverseGamma` for the standard deviations of the measurements, `LogNormal` for $k$ and `Uniform` (between 100 and 200) for $Smax$.
+Declare the Turing model. Make sure you take both experiments into account for optimizing $k$ and $S_{max}$. Based on literature, you can assume that the value of $S_{max}$ lies somewhere between 100 and 200 mm.
 """
 
 # ╔═╡ 481eb8b9-5de2-4f68-b06a-ec18e054c9f5
-# Uncomment and complete the instruction
-# @model function irrigation_fun(t_meas)
+# @model function irrigation_inference(t_meas)
 # 	σ_S1 ~ missing
 # 	σ_S2 ~ missing
 # 	k ~ missing
 # 	Smax ~ missing
-#   params = missing
-#   u01 = missing
-#   oprob1 = missing
+# 	parms = missing
+#   # For experiment 1:
+# 	u01 = missing
+# 	oprob1 = missing
 # 	osol1 = missing
-# 	S1_s1 ~ missing
-# 	S2_s1 ~ missing
-#   u02 = missing
-#   oprob2 = missing
+# 	S1_ex1 ~ missing
+# 	S2_ex1 ~ missing
+#   # For experiment 2:
+# 	u02 = missing
+# 	oprob2 = missing
 # 	osol2 = missing
-# 	S1_s2 ~ missing
-# 	S2_s2 ~ missing
+# 	S1_ex2 ~ missing
+# 	S2_ex2 ~ missing
 # end
 
 # ╔═╡ df933ae8-1f51-4467-93a7-33f153e5e4f8
 md"""
-Provide the time measurements to the defined function and instantly condition the model with the measurements of $S_1$ and $S_2$ from both experiments:
+Instantiate the model and condition it with the measurements of $S_1$ and $S_2$ from both experiments:
 """
 
 # ╔═╡ 0e2aa675-9e09-4e06-b5f8-118707ee652a
-# irrigation_cond_mod = missing    # Uncomment and complete the instruction
+# irrigation_inf = missing   
 
 # ╔═╡ f7f47956-7c3b-44cc-bff7-fb7d32af874a
 md"""
@@ -191,15 +175,15 @@ Optimize the priors ($\sigma_{S1}$, $\sigma_{S2}$, $k$ and $S_{max}$). Do this w
 """
 
 # ╔═╡ 8c254d5a-225b-4772-9fdd-e9f700495fbd
-# results_mle = missing      # Uncomment and complete the instruction
+# results_mle = missing      
 
 # ╔═╡ f15a1df5-047a-4f46-9419-8492ac1248e0
 md"""
-Visualize a summary of the optimized parameters.
+Visualize a summary of the optimized parameters. Beware that this may take a lot of time...
 """
 
 # ╔═╡ 00d944e4-2c88-4a5d-b809-69f435df4684
-# missing           # Uncomment and complete the instruction
+# missing           
 
 # ╔═╡ 89eb31ef-b24f-44c8-bbe5-19101d859937
 md"""
@@ -207,10 +191,10 @@ Get the optimized values and assign them to `k_opt` and `Smax_opt`.
 """
 
 # ╔═╡ 92daa779-3373-40c0-b308-23e75e6674b6
-# k_opt = missing               # Uncomment and complete the instruction
+# k_opt = missing               
 
 # ╔═╡ 35ab6ee5-fcd7-4dcc-9909-cc918fb1fe80
-# Smax_opt = missing            # Uncomment and complete the instruction
+# Smax_opt = missing            
 
 # ╔═╡ 4026773f-ac5b-433e-bd9d-2122242861fd
 md"""
@@ -223,7 +207,7 @@ Set up parameter values with optimized parameter values:
 """
 
 # ╔═╡ 97d53e48-590a-485b-bcf3-edc6a6124faf
-# params_opt = missing         # Uncomment and complete the instruction
+# params_opt = missing         
 
 # ╔═╡ dfd2ac98-5cdc-4627-b6cf-71b33c0ff0d4
 md"""
@@ -231,16 +215,15 @@ Plot the simulation results $S_1$ and $S_2$ for the 1st experiment together with
 """
 
 # ╔═╡ 95ace332-52c0-46c3-ae28-d038320ed2c8
-# u01 = missing                # Uncomment and complete the instruction
+# u01 = missing                
 
 # ╔═╡ 6ae63a13-d5ae-4dfb-b88d-be295b11a472
-# oprob1_opt = missing         # Uncomment and complete the instruction
+# oprob1_opt = missing         
 
 # ╔═╡ bc6505ca-a61d-467f-afe6-47792a510ad5
-# osol1_opt = missing          # Uncomment and complete the instruction
+# osol1_opt = missing          
 
 # ╔═╡ 67e423ea-e941-45bf-af4f-3fdecb648fbc
-# Uncomment and complete the instruction
 # begin
 #   missing
 #   missing
@@ -253,16 +236,15 @@ Plot the simulation results $S_1$ and $S_2$ for the 1st experiment together with
 """
 
 # ╔═╡ a7040b8e-c240-415b-8a9a-4a1a137398d4
-# u02 = missing                  # Uncomment and complete the instruction
+# u02 = missing                  
 
 # ╔═╡ fe8f4961-68bd-42dc-a3f5-6692e918e241
-# oprob2_opt = missing           # Uncomment and complete the instruction
+# oprob2_opt = missing           
 
 # ╔═╡ 7f280230-7846-4529-a2ff-a81a2b9480bf
-# osol2_opt = missing            # Uncomment and complete the instruction
+# osol2_opt = missing            
 
 # ╔═╡ ad9818a9-ccbe-4645-8b91-0c3fa773632a
-# Uncomment and complete the instruction
 # begin
 #   missing
 #   missing
@@ -280,17 +262,18 @@ md"- Answer: missing"
 
 # ╔═╡ Cell order:
 # ╠═2b010e5c-1121-11ef-16fe-a5e3317122e4
-# ╠═6750d246-8e7a-4cfb-810e-d1100aa4fdef
 # ╠═55675f3d-2fae-4a97-a0a0-ead29a6352e6
 # ╠═4947b0fd-13be-4f6a-b605-ed35b509d7ff
 # ╠═61d14819-ba44-40fe-95a9-9d7b0bf3dc33
 # ╠═f6e77c8d-de11-4b9d-93c6-45bdcfbbbf9b
 # ╠═9345dd8f-0a60-4aaf-a27f-ef8bf860f495
-# ╠═ea02aff2-7fb8-4b8f-8d0f-0bb3c6150708
 # ╟─55d5400d-1777-4918-a030-b94cb9a59f63
 # ╟─8f1afdec-b78d-4aba-a74f-cd3e4b35fab1
-# ╟─ad42d3a7-6d83-4362-aa3f-31628a1db9b2
-# ╠═dc26abff-f8ab-4881-9acf-7b325b386a16
+# ╠═9f6ad49c-cfbe-46e2-a2dd-c01bb67eeb61
+# ╠═fb2c7db4-e52f-45df-afa0-aeb1db78c849
+# ╠═c1773f17-825f-414f-9761-5744b34f1b71
+# ╠═6e2165d4-ef72-4c37-bac0-2dfac417a192
+# ╠═59654ad7-f42c-443f-bb34-6674db72606f
 # ╟─e5d7520d-fd8c-48c0-bd36-826766212217
 # ╟─73c9b5fb-4f56-4bde-beb4-387651409c1b
 # ╠═9f94c63e-628f-4ff3-ad29-0f90d32dfcb1
@@ -304,11 +287,7 @@ md"- Answer: missing"
 # ╠═cef4b9a8-b5bf-4a2d-8a8f-5d8f85534859
 # ╠═fc2cabd7-e778-4211-bf87-b5c11ca054c9
 # ╟─c0b2db7b-0632-4008-9cff-d5fbf3e59807
-# ╟─d35bbe54-5ebc-4ea5-a6c8-a6419476ec4c
-# ╠═10057510-e4b6-4a3e-9d3f-f05effc88a58
-# ╠═f4d49b1d-9105-4050-a9d4-196fa00a0591
-# ╠═777ce59f-c849-4a2e-a6dc-ae309d2a2e7c
-# ╠═43b83336-aea6-4914-bc26-b2e84994ce57
+# ╠═a65a0997-9945-436e-925b-8fc02055f61a
 # ╟─923d04ce-b4d2-44b0-afff-7062c4628ad0
 # ╠═481eb8b9-5de2-4f68-b06a-ec18e054c9f5
 # ╟─df933ae8-1f51-4467-93a7-33f153e5e4f8

@@ -2,15 +2,12 @@
 # v0.20.4
 
 #> [frontmatter]
-#> order = "36"
-#> title = "7. Probability selection"
-#> date = "2025-08-06"
+#> order = "43"
+#> title = "8. Probability selection"
 #> tags = ["exercises"]
-#> description = "Probability selection"
 #> layout = "layout.jlhtml"
-#> 
-#>     [[frontmatter.author]]
-#>     name = "Gauthier Vanhaelewyn"
+#> description = "Probability selection"
+
 using Markdown
 using InteractiveUtils
 
@@ -27,6 +24,8 @@ macro bind(def, element)
 end
 
 # ╔═╡ a18638d0-138d-11f0-0571-33060f7da7ba
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ fe265128-33a2-40d1-ab71-bc5c53979a54
@@ -139,20 +138,20 @@ md"""
 
 # ╔═╡ 05622800-ccd9-4aa8-9a95-a1fbe34aa76c
 @model function expon(num_pearls)
-	μ_exp ~ Uniform(0, 10)
+	μ_exp ~ missing
 	pearls = zeros(num_pearls)
 	for i in 1:num_pearls
-		pearls[i] ~ Exponential(μ_exp)
+		pearls[i] ~ missing
 	end
 end
 
 # ╔═╡ c5b042bb-c1d9-4b0e-a2bd-a2c367019da3
 @model function lognorm(num_pearls)
-	μ_lognorm ~ Uniform(0, log(10))
-	σ_lognorm ~ Uniform(0, 1.0)
+	μ_lognorm ~ missing
+	σ_lognorm ~ missing
 	pearls = zeros(num_pearls)
 	for i in 1:num_pearls
-		pearls[i] ~ LogNormal(μ_lognorm, σ_lognorm)
+		pearls[i] ~ missing
 	end
 end
 
@@ -160,10 +159,10 @@ end
 md"Instantiate the models and condition them on the available data."
 
 # ╔═╡ 88306e52-d975-4bd5-a8f0-7e9293c9fb82
-expmodel = expon(length(pearlsizes)) | (pearls = pearlsizes,);
+expmodel = missing
 
 # ╔═╡ a7cf9228-7515-4d53-b689-bc711283fecc
-lognormmodel = lognorm(length(pearlsizes)) | (pearls = pearlsizes,);
+lognormmodel = missing
 
 # ╔═╡ 811ee6ce-bb0f-4bcf-95be-6de95ab9166b
 md"### Maximum likelihood"
@@ -174,27 +173,30 @@ Determine the maximum likelihood estimation (MLE) of the parameter values given 
 """
 
 # ╔═╡ 3b16c753-a2ba-4b59-a776-b35c4dd2e927
-exp_res = optimize(expmodel, MLE(), NelderMead())
+exp_res = missing
 
 # ╔═╡ 1ce90419-083a-475a-8334-32d73dafb606
-exp_mean = coef(exp_res)[:μ_exp]
+exp_mean = missing
 
 # ╔═╡ 654d0ec1-92b0-4220-91a8-607978f1cf4f
-lognorm_res = optimize(lognormmodel, MLE(), NelderMead())
+lognorm_res = missing
 
 # ╔═╡ 17e90886-1a41-4c19-b93a-96d8bd7a075f
-lognorm_mean, lognorm_spread = coef(lognorm_res)[[:μ_lognorm, :σ_lognorm]]
+lognorm_mean = missing
+
+# ╔═╡ 27883caa-5b08-4f93-8d1a-ae3d85faa9d1
+lognorm_spread = missing
 
 # ╔═╡ 62f000f3-6f21-4c1e-ab37-29a122b84088
 begin
 	histogram(pearlsizes, normalize = :pdf)
-	plot!(Exponential(exp_mean), linewidth = 3)
+	# add plot of best fit exponential distribution
 end
 
 # ╔═╡ 7dc215e7-83ef-430e-9f99-24cada961964
 begin
 	histogram(pearlsizes, normalize = :pdf)
-	plot!(LogNormal(lognorm_mean, lognorm_spread), linewidth = 3)
+	# add plot of best fit LogNormal distribution
 end
 
 # ╔═╡ abffd9fb-dd0a-4145-8b7d-8e233e498735
@@ -252,9 +254,9 @@ end
 begin
 	evidence_exp = 0.0
 	for m in 0.1:Δm:10
-		likelihood_per_point = [pdf(Exponential(m), pearlsize) for pearlsize in pearlsizes]
-		likelihood = prod(likelihood_per_point)
-		prior = pdf(Uniform(0, 10), m)
+		likelihood_per_point = [missing for pearlsize in pearlsizes]
+		likelihood = missing
+		prior = missing
 		evidence_exp += likelihood * prior * Δm
 	end
 	println(evidence_exp)
@@ -269,11 +271,11 @@ begin
 	for m in 0.1:Δm:log(10)
 		for s in 0.1:Δs:1.0
 			likelihood_per_point = [
-				pdf(LogNormal(m, s), pearlsize)
+				missing
 				for pearlsize in pearlsizes
 			]
-			likelihood = prod(likelihood_per_point)
-			prior = pdf(Uniform(0, log(10)), m) * pdf(Uniform(0, 1.0), s)
+			likelihood = missing
+			prior = missing
 			evidence_lognorm += likelihood * prior * Δm * Δs
 		end
 	end
@@ -295,9 +297,9 @@ P_M_exp = 0.5
 P_M_lognorm = 1 - P_M_exp
 
 # ╔═╡ 37f977de-f1a9-4a83-85f1-8dadf7910025
-bayes_factor = (evidence_lognorm * P_M_lognorm) / (evidence_exp * P_M_exp)
+bayes_factor = missing
 
-# ╔═╡ 4995e5a0-b56d-4aa5-b41d-e264936c3bd9
+# ╔═╡ a7fd0d4d-e0de-4f4b-84a8-64c94a300fba
 md"""
 Another comparison we can make between the models is calculating whether the first model is the correct one:
 ```math
@@ -309,19 +311,7 @@ P(M_1 \mid D) &= \frac{P(D \mid M_1) \, P(M_1)}{P(D)} \, ,
 """
 
 # ╔═╡ ce13fb27-8b5a-4efd-b415-4d0bfd6d3a6a
-P_M_exp_cond_D = evidence_exp * P_M_exp / (evidence_exp * P_M_exp + evidence_lognorm *P_M_lognorm)
-
-# ╔═╡ fd1813b9-d8f2-468b-bd8e-bafdd9dca750
-md"""
-!!! extra
-	A faster way to calculate the model evidences is using Turing's `logjoint` function and [array comprehensions](https://docs.julialang.org/en/v1/manual/arrays/#man-comprehensions).
-"""
-
-# ╔═╡ fe5e1b6d-33f2-4357-a40d-4e77845332e0
-evidence1 = sum(exp(logjoint(expmodel, (μ_exp=m,)))*Δm for m in 0.1:Δm:10)
-
-# ╔═╡ 306333d0-e7e0-4d61-9afb-b5afdc817699
-evidence2 = sum(exp(logjoint(lognormmodel, (μ_lognorm=m, σ_lognorm=s,)))*Δm*Δs for m in 0.1:Δm:10 for s in 0.1:Δs:1)
+P_M_exp_cond_D = missing
 
 # ╔═╡ 5b34c046-bc87-474d-8c20-b5732c0de219
 md"### AIC"
@@ -345,13 +335,13 @@ md"""
 """
 
 # ╔═╡ 2e1fb72c-fea9-4de1-bed5-ee947306bc65
-AIC(num_params, loglikelihood) = 2*num_params - 2 * loglikelihood
+AIC(num_params, loglikelihood) = missing
 
 # ╔═╡ 3553ed7d-07a0-418a-8d5f-6791e62d9e10
-AIC_exp = AIC(1, exp_res.lp)
+AIC_exp = missing
 
 # ╔═╡ 257f0675-c5fe-45c5-aba0-ac808efb0ead
-AIC_lognorm = AIC(2, lognorm_res.lp)
+AIC_lognorm = missing
 
 # ╔═╡ 1936f7bb-ad6b-4759-b37e-a9b73a8dabc2
 md"### BIC"
@@ -369,14 +359,13 @@ md"""
 """
 
 # ╔═╡ 01648f73-8b75-4158-a7ea-00e55ece7548
-BIC(num_observations, num_params, loglikelihood) = num_params*log(num_observations) -
-	2 * loglikelihood
+BIC(num_observations, num_params, loglikelihood) = missing
 
 # ╔═╡ 1e685af1-6abe-4849-b07b-2ab1da058edc
-BIC_exp = BIC(length(pearlsizes), 1, exp_res.lp)
+BIC_exp = missing
 
 # ╔═╡ 23a7d39c-0c0f-43fb-88be-ddfaba988a2c
-BIC_lognorm = BIC(length(pearlsizes), 2, lognorm_res.lp)
+BIC_lognorm = missing
 
 # ╔═╡ 4cf6a2d0-e58c-4b80-abf9-525097d75f35
 md"## Overlapping cells"
@@ -426,12 +415,11 @@ The model for one cell is defined as follows:
 """
 
 # ╔═╡ c8da1bc6-4455-4577-98bb-d7dd41ff4f06
-@model function singlecell(n)
-	xm ~ Normal(0, 1)
-	ym ~ Normal(0, 1)
+@model function singlecell(n) # n is number of points
+	xm ~ missing
+	ym ~ missing
 
-	xs ~ filldist(Normal(xm, 1.0), n)
-	ys ~ filldist(Normal(ym, 1.0), n)
+	missing
 end
 
 # ╔═╡ 523d6280-7147-4652-b593-cdd802d80b4e
@@ -450,36 +438,18 @@ md"""
 """
 
 # ╔═╡ 166f1c0c-1615-47e7-8538-f19cbdaa6923
-@model function doublecell(n)
-	xm1 ~ Normal(0, 1)
-	xm2 ~ Normal(0, 1)
-	ym1 ~ Normal(0, 1)
-	ym2 ~ Normal(0, 1)
-
-	xsdist = MixtureModel([Normal(xm1, 1.0), Normal(xm2, 1.0)])
-	ysdist = MixtureModel([Normal(ym1, 1.0), Normal(ym2, 1.0)])
-
-	xs ~ filldist(xsdist, n)
-	ys ~ filldist(ysdist, n)
+@model function doublecell(n) # n is number of points
+	missing
 end
-
-# ╔═╡ dab87fa9-0921-48c3-8034-bfa036dc4e0c
-my_dist = filldist(Normal(0, 1), 3)
-
-# ╔═╡ 3f25a8b2-7f68-4bf4-b8c2-48b0c870fc89
-rand(my_dist)
 
 # ╔═╡ 36093548-5b29-4bd0-959a-befdd4da3de5
 md"Instantiate and condition the models."
 
-# ╔═╡ bb7acf55-a38a-440c-97b7-f70f5e97c19a
-n = length(xs)
-
 # ╔═╡ a0502199-3e7f-4b50-b383-2e1bb4ff9d41
-singlemodel = singlecell(n) | (xs = xs, ys = ys,);
+singlemodel = missing
 
 # ╔═╡ 153ccedb-b437-4906-a2ef-1745b0dbf53e
-doublemodel = doublecell(n) | (xs = xs, ys = ys,);
+doublemodel = missing
 
 # ╔═╡ 29e3dc3a-f2c4-45a6-80a0-01bde4d41d98
 md"### Maximum likelihood"
@@ -524,16 +494,24 @@ Determine the maximum likelihood estimation (MLE) of the parameter values given 
 
 
 # ╔═╡ 8942d992-5084-4c2c-9cbc-c442b0381922
-singleres = optimize(singlemodel, MLE(), NelderMead())
+singleres = missing
 
 # ╔═╡ 99a8a4b4-bbcd-4321-ba41-4f307c04af8e
-single_xm, single_ym = coef(singleres)[[:xm, :ym]];
+begin
+	single_xm = missing
+	single_ym = missing
+end
 
 # ╔═╡ 51ce7374-c7d8-4a32-815d-1c2ff9ba9970
-doubleres = optimize(doublemodel, MLE(), NelderMead())
+doubleres = missing
 
 # ╔═╡ 5a0860a2-8a61-4abb-acaf-3ea3cad0c286
-double_xm1, double_xm2, double_ym1, double_ym2 = coef(doubleres)[[:xm1, :xm2, :ym1, :ym2]];
+begin
+	double_xm1 = missing
+	double_xm2 = missing
+	double_ym1 = missing
+	double_ym2 = missing
+end
 
 # ╔═╡ 73d259c6-f776-4586-a24f-3ecc368e28ae
 md"Visualise the results"
@@ -557,10 +535,10 @@ md"### AIC"
 md"Using the MLE results from the previous section, determine the AIC of both models. You can use the implementation from previous exercise."
 
 # ╔═╡ fef14ffe-3399-48d8-a0cb-998826cdfda4
-AIC_single = AIC(2, singleres.lp)
+AIC_single = missing
 
 # ╔═╡ 40077482-7c98-4ca6-b441-ed3ebd893369
-AIC_double = AIC(4, doubleres.lp)
+AIC_double = missing
 
 # ╔═╡ Cell order:
 # ╟─fb07436c-cc5d-4721-8a80-d7f7201721d7
@@ -595,6 +573,7 @@ AIC_double = AIC(4, doubleres.lp)
 # ╠═1ce90419-083a-475a-8334-32d73dafb606
 # ╠═654d0ec1-92b0-4220-91a8-607978f1cf4f
 # ╠═17e90886-1a41-4c19-b93a-96d8bd7a075f
+# ╠═27883caa-5b08-4f93-8d1a-ae3d85faa9d1
 # ╠═62f000f3-6f21-4c1e-ab37-29a122b84088
 # ╠═7dc215e7-83ef-430e-9f99-24cada961964
 # ╟─abffd9fb-dd0a-4145-8b7d-8e233e498735
@@ -613,11 +592,8 @@ AIC_double = AIC(4, doubleres.lp)
 # ╠═8c63219d-e520-40b7-a4b3-c6e2ffc7b17e
 # ╠═84f99a01-f3e5-4197-998d-2bdec0d53fb1
 # ╠═37f977de-f1a9-4a83-85f1-8dadf7910025
-# ╟─4995e5a0-b56d-4aa5-b41d-e264936c3bd9
+# ╟─a7fd0d4d-e0de-4f4b-84a8-64c94a300fba
 # ╠═ce13fb27-8b5a-4efd-b415-4d0bfd6d3a6a
-# ╟─fd1813b9-d8f2-468b-bd8e-bafdd9dca750
-# ╠═fe5e1b6d-33f2-4357-a40d-4e77845332e0
-# ╠═306333d0-e7e0-4d61-9afb-b5afdc817699
 # ╟─5b34c046-bc87-474d-8c20-b5732c0de219
 # ╟─cc4e9632-53ab-48c9-b179-ca2b10cbfabc
 # ╟─964706fe-e48c-4cf6-8e80-484867719bf6
@@ -647,10 +623,7 @@ AIC_double = AIC(4, doubleres.lp)
 # ╟─523d6280-7147-4652-b593-cdd802d80b4e
 # ╟─740afb3b-4bd6-4516-9a2a-7bbe5f19ccf0
 # ╠═166f1c0c-1615-47e7-8538-f19cbdaa6923
-# ╠═dab87fa9-0921-48c3-8034-bfa036dc4e0c
-# ╠═3f25a8b2-7f68-4bf4-b8c2-48b0c870fc89
 # ╟─36093548-5b29-4bd0-959a-befdd4da3de5
-# ╠═bb7acf55-a38a-440c-97b7-f70f5e97c19a
 # ╠═a0502199-3e7f-4b50-b383-2e1bb4ff9d41
 # ╠═153ccedb-b437-4906-a2ef-1745b0dbf53e
 # ╟─29e3dc3a-f2c4-45a6-80a0-01bde4d41d98

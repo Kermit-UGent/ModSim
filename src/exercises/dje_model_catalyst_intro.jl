@@ -1,13 +1,12 @@
 ### A Pluto.jl notebook ###
-# v0.20.6
+# v0.20.21
 
 #> [frontmatter]
-#> order = "14"
-#> title = "2. SSA catalyst intro"
-#> date = "2025-02-07"
+#> order = "20"
+#> title = "3. DJE_model_Catalyst_intro"
 #> tags = ["exercises"]
-#> description = "SSA catalyst intro"
 #> layout = "layout.jlhtml"
+#> description = "Introduction to solving discrete jump problems with Catalyst"
 #> 
 #>     [[frontmatter.author]]
 #>     name = "Gauthier Vanhaelewyn"
@@ -16,17 +15,12 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ a2582acb-7d17-43ab-b883-d766b1a2c984
-begin
-	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
-	using Pkg
-	Pkg.activate("../../pluto-deployment-environment")
-end
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
+using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ e5f8c320-eda0-11ee-37d0-458bdbd94f15
-using Markdown
-
-# ╔═╡ 2a1306f3-d811-459d-83ca-98cf62dc2db0
-using InteractiveUtils
+using Markdown, InteractiveUtils
 
 # ╔═╡ 4e03b93e-f63e-466c-9941-d66e62306010
 using PlutoUI; TableOfContents()
@@ -35,31 +29,23 @@ using PlutoUI; TableOfContents()
 using Catalyst
 
 # ╔═╡ 0b3921c9-6d6e-4c52-8c21-d883ed493028
-using OrdinaryDiffEq, JumpProcesses, StatsPlots
+using JumpProcesses, StatsPlots
 
 # ╔═╡ 62b185be-e327-4ef3-af39-819732d107bf
 md"""
-# Introduction to Catalyst (SSA)
+# Introduction: Solving discrete jump problems with Catalyst
 """
 
 # ╔═╡ f5f32d5d-0c13-4865-8024-ca47208c9b8e
 md"""
-Catalyst.jl is a symbolic modeling package for analysis and high performance simulation of chemical reaction networks. Catalyst defines symbolic ReactionSystems, which can be created programmatically or easily specified using Catalyst's domain specific language (DSL).
+In this practical, we will revisit the infection model which we solved last week using Catalyst.jl. Last week we assumed that the number of people is a continuous variable, while in practice this is not the case (ever
+seen 46.3 persons). In this session, we will instead use a Stochastic Simulation Algorithm (SSA), which is better suited for models with discrete variables, such as the number of infected individuals.
 """
 
-# ╔═╡ 8d9af65e-0499-4a6d-afbf-5afa9903a42e
-md"""
-This notebook describes the syntax for building chemical reaction network models using Catalyst's **D**omain-**S**pecific **L**anguage (DSL). We will illustrate this by implementing and solving an infection model by means of an SSA (**S**tochastic **S**imulation **A**lgorithm).
-"""
-
-# ╔═╡ 9cfa5b79-2128-4d45-aa22-51da0e74f320
-md"""
-## The infection model (revisited)
-"""
 
 # ╔═╡ e1583a47-9171-4db2-a6e9-d4889ee294c7
 md"""
-For the sake of clarity we restate the description of the previous infection model.
+For the sake of clarity we restate the describtion of the previous infection model.
 
 It is important to model the outbreak of infectious diseases in order to devise appropriate measures to avoid global epidemics. In this exercise we consider an isolated group of people in which a viral disease is spreading. An infection model (similar to the SIR-model but slightly extended) will be used for this purpose. We are interested in the evolution of the number of susceptible ($S$), infected ($I$), deceased ($D$) and resistant ($R$) persons.\
 We make the following assumptions:
@@ -127,14 +113,9 @@ md"""
 We are going to implement this system of *reactions* using Catalyst.
 """
 
-# ╔═╡ 30a0e2ec-ec30-401b-9270-939a767b54a8
-md"""
-We first load the Catalyst package, which is required for the code in this introduction to run:
-"""
-
 # ╔═╡ d888c734-044b-424d-b895-f8bc738346ed
 md"""
-### Implementation of the system
+## Implementation of the system
 
 First we create a *reaction network object*, that we have named `infection_model`, that implements the aforementioned *reactions*.
 """
@@ -188,12 +169,7 @@ parameters(osys)
 
 # ╔═╡ d94a467a-3194-4573-a3e0-27a265147e66
 md"""
-### Simulating the system as a (Discrete) Jump problem
-"""
-
-# ╔═╡ d8b11407-e8c0-4ad0-a49d-8e422ccc3a9c
-md"""
-We first need to load the OrdinaryDiffEq and StatsPlots packages, which are required for simulating the system and plotting the results. Additionally, the **JumpProcesses** package is needed to define and solve Jump problems.
+## Simulating the system as a (Discrete) Jump problem
 """
 
 # ╔═╡ 78e55389-3431-41de-9f4a-b6b45cb8988b
@@ -232,11 +208,18 @@ The vector holding the parameter values for $\alpha$, $\beta$, $r$ and $m$ is:
 """
 
 # ╔═╡ da136f6e-7605-4f1f-81bc-f0e81ed7f528
-params = [:α => 0.15, :β => 0.1, :r => 0.2, :m => 0.6]
+parms = [:α => 0.15, :β => 0.1, :r => 0.2, :m => 0.6]
 
 # ╔═╡ cef064bf-2168-4904-b753-a012a9c9f070
 md"""
 ### Setting the timespan
+"""
+
+# ╔═╡ fa2dde71-cea4-4b31-894e-432f9e3e7786
+md"""
+!!! note
+	When working with JumpProblems always use floating-point values when defining the time span. Practically this means that you write `tspan = (0.0, 60.0)` instead of `tspan = (0, 60)`, indicating to Julia that time points should be represented at floating points. Using integers may lead to errors for JumpProblems when the solver encounters non-integer 
+    time points (e.g. 1.6seconds).
 """
 
 # ╔═╡ 69b38ef3-d99e-4f4d-8c53-79e20d0094f0
@@ -258,7 +241,7 @@ We create a DiscreteProblem by calling the `DiscreteProblem` function. Applying 
 """
 
 # ╔═╡ e2f215e7-8d20-4e72-9e0b-cc0ce150e55b
-dprob = DiscreteProblem(infection_model, u0, tspan, params)
+dprob = DiscreteProblem(infection_model, u0, tspan, parms);
 
 # ╔═╡ d061c4e2-8fbb-4ac5-95cf-c37d2916e669
 md"""
@@ -275,11 +258,12 @@ md"""
 
 # ╔═╡ 89c75cee-2488-4e9c-a470-b2111dcfc871
 md"""
-Finally, we can simulate our model using the solve function, and plot the solution using the `plot` function. Here, the `solve` function also has a second argument `SSAStepper()`, which we recommend for now. This is a time stepping algorithm that calls the `Direct` solver method to advance a simulation.
+Finally, we can simulate our model using the solve function, and plot the solution using the `plot` function.
 """
 
 # ╔═╡ 8fbb4942-888c-4798-b972-7860e695d5ba
-dsol = solve(jprob, SSAStepper())
+dsol = solve(jprob)
+# dsol = solve(jprob, SSAStepper())  # also possible
 
 # ╔═╡ 5cfe9878-cbc2-4852-a757-ad8247d1f3d6
 md"""
@@ -304,7 +288,7 @@ Below is a piece of code that solves the problem a $1000$ times and stores the t
 begin
 	times = []                      # make empty vector
 	while length(times) < 1000      # while statement
-		dsol2 = solve(jprob, SSAStepper())    # solve the problem
+		dsol2 = solve(jprob)    # solve the problem
 		j = findfirst(dsol2[:I] .== 0)        # find index of first 0
 		if j != nothing                       # if index is a valid index
 			append!(times, dsol2.t[j])        # append time to vector times
@@ -330,14 +314,13 @@ histogram(times, bins=range(0, 60, length=61))
 # histogram(times, bins=range(0, 60, length=61), normalize=:pdf)
 
 # ╔═╡ Cell order:
+# ╟─62b185be-e327-4ef3-af39-819732d107bf
 # ╠═e5f8c320-eda0-11ee-37d0-458bdbd94f15
-# ╠═2a1306f3-d811-459d-83ca-98cf62dc2db0
 # ╠═a2582acb-7d17-43ab-b883-d766b1a2c984
 # ╠═4e03b93e-f63e-466c-9941-d66e62306010
-# ╟─62b185be-e327-4ef3-af39-819732d107bf
+# ╠═9e8fd818-a14f-41cf-b2fd-a7425141b283
+# ╠═0b3921c9-6d6e-4c52-8c21-d883ed493028
 # ╟─f5f32d5d-0c13-4865-8024-ca47208c9b8e
-# ╟─8d9af65e-0499-4a6d-afbf-5afa9903a42e
-# ╟─9cfa5b79-2128-4d45-aa22-51da0e74f320
 # ╟─e1583a47-9171-4db2-a6e9-d4889ee294c7
 # ╟─723c2c53-7f75-4f2d-8608-11ef0ef274d9
 # ╟─0148d340-a072-49c0-9b3c-29249c21a334
@@ -346,8 +329,6 @@ histogram(times, bins=range(0, 60, length=61))
 # ╟─10c93224-ac8d-4512-be8f-6961b885712f
 # ╟─7064d3d4-7ccb-4af2-a1ed-64430c50651f
 # ╟─4dd77999-2ed0-415e-b044-1af1de1b4ae3
-# ╟─30a0e2ec-ec30-401b-9270-939a767b54a8
-# ╠═9e8fd818-a14f-41cf-b2fd-a7425141b283
 # ╟─d888c734-044b-424d-b895-f8bc738346ed
 # ╠═c792559f-db9b-4d9a-8e79-c7e8f82b4603
 # ╟─2085fd23-28fc-4b68-a3e7-590c50f2c9c6
@@ -361,8 +342,6 @@ histogram(times, bins=range(0, 60, length=61))
 # ╟─b3584f8c-50f4-4800-96aa-776cfc2b8db3
 # ╠═98fa7987-b60b-4748-a3e8-38259bb0cd8c
 # ╟─d94a467a-3194-4573-a3e0-27a265147e66
-# ╟─d8b11407-e8c0-4ad0-a49d-8e422ccc3a9c
-# ╠═0b3921c9-6d6e-4c52-8c21-d883ed493028
 # ╟─78e55389-3431-41de-9f4a-b6b45cb8988b
 # ╟─9bed9d84-600a-44f0-87a1-0997d547791f
 # ╟─a2349455-5850-4950-bb10-221ae813b26f
@@ -371,6 +350,7 @@ histogram(times, bins=range(0, 60, length=61))
 # ╟─ad8215f6-676e-4352-b0c9-8e9701da3bc6
 # ╠═da136f6e-7605-4f1f-81bc-f0e81ed7f528
 # ╟─cef064bf-2168-4904-b753-a012a9c9f070
+# ╟─fa2dde71-cea4-4b31-894e-432f9e3e7786
 # ╠═69b38ef3-d99e-4f4d-8c53-79e20d0094f0
 # ╟─57567d6d-6303-4ad8-b171-f904b594b3fe
 # ╟─92c77720-5120-4f55-8cf6-168ec8553638

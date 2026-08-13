@@ -2,20 +2,21 @@
 # v0.20.4
 
 #> [frontmatter]
-#> order = "23"
-#> title = "4. MCMC review"
-#> date = "2025-08-06"
+#> order = "30"
+#> title = "5. MCMC review"
 #> tags = ["exercises"]
-#> description = "MCMC review"
 #> layout = "layout.jlhtml"
+#> description = "MCMC review"
 #> 
 #>     [[frontmatter.author]]
-#>     name = "Gauthier Vanhaelewyn"
+#>     name = "Bram Spanoghe"
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ ef127ffc-1e2e-4c30-945b-d6cded4d6515
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ deb237f9-f0ff-4dfc-8627-43053ccdeb20
@@ -23,34 +24,14 @@ using Turing, StatsPlots
 
 # ╔═╡ 2d709e7b-3350-47ec-a3ed-8aa47ad5a8c2
 function generate_data(n_wasps = 10; minbound = 0, maxbound = 1000)
-
-	# position of the nest
+	
 	x_n, y_n = rand(DiscreteUniform(minbound, maxbound), 2)
-	# positions of the feeder stations where the wasps get marked 
 	xs, ys = [rand(DiscreteUniform(minbound, maxbound), n_wasps) for _ in 1:2]
-	# speed of the wasps
 	v_wasps = rand(Uniform(5, 10), n_wasps)
-	# back and forth time of the wasps
 	ts = [2*sqrt((x-x_n)^2 + (y-y_n)^2)/v_wasp for (x, y, v_wasp) in zip(xs, ys, v_wasps)]
 
 	return xs, ys, ts, [x_n, y_n]
 end;
-
-# ╔═╡ 789acc88-314e-449e-abf2-8ba9c95bc322
-let
-	x_n, y_n = rand(DiscreteUniform(0, 1000), 2)
-	println([x_n, y_n])
-
-	xs, ys = [rand(DiscreteUniform(0, 1000), 5) for _ in 1:2]
-	println(xs)
-	println(ys)
-
-	v_wasps = rand(Uniform(5, 10), 5)
-	println(round.(v_wasps, digits=2))
-
-	ts = [2*sqrt((x-x_n)^2 + (y-y_n)^2)/v_wasp for (x, y, v_wasp) in zip(xs, ys, v_wasps)]
-	println(round.(ts, digits=2))
-end
 
 # ╔═╡ af96af94-d969-4e9a-93f4-e205f8b7f576
 md"# Review exercise: Hornet nests"
@@ -71,16 +52,20 @@ md"""
 *The Asian giant hornet (credit: Picture by KENPEI on Wikipedia)*
 """
 
-# ╔═╡ be7dbb0f-299a-4925-b4c4-20eb6ce6e4af
+# ╔═╡ bfb49d79-772d-4066-bd96-14143a1b5eeb
 md"""
-Consider below the coordinates of marked hornets, as well as their return times.
+Consider below the coordinates of feeder stations with the return times of the hornets marked there.
 """
 
 # ╔═╡ c1850e64-9e2c-46fb-b7cd-22e8af81d3aa
-xs, ys, ts, true_location = generate_data(20);
+xs, ys, ts, true_location = generate_data();
 
 # ╔═╡ 28cb3363-6856-4164-b60e-36ec2e88ed56
-scatter(xs, ys, label = "wasp locations", marker_z = ts, title = "Locations of wasps colored by return time", xlims = (0, 1000), ylims = (0, 1000))
+scatter(
+	xs, ys, label = "wasp locations", marker_z = ts,
+	title = "Locations of wasps colored by return time",
+	xlims = (0, 1000), ylims = (0, 1000)
+)
 
 # ╔═╡ 484b56ec-57b2-496d-a5cf-1b1c0da97c58
 md"""
@@ -88,66 +73,31 @@ md"""
 	Where is the hornet nest located? You may assume the nest is somewhere within the plot's boundaries.
 """
 
-# ╔═╡ 365469ba-35ce-4519-a0b7-c396caddc339
-plot(Gamma(8, 1))
+# ╔═╡ 66862953-aeb2-4310-90bc-673260f0ecc0
+x_nest_sp = missing # vector with possible values of the nest's x-coordinate
 
-# ╔═╡ ac0496d3-aa62-4c07-8233-16fe67c52b24
-@model function horenaars(xs, ys, ts)
-    x_nest ~ Uniform(0, 1000)
-    y_nest ~ Uniform(0, 1000)
-    # v_wasp ~ Uniform(5, 10)
-	v_wasp ~ Gamma(8)
+# ╔═╡ f522cbcb-112b-4d56-b860-5aee44b1aa2f
+y_nest_sp = missing # vector with possible values of the nest's y-coordinate
 
-    for i in eachindex(ts)
-		dist = sqrt((xs[i] - x_nest)^2 + (ys[i] - y_nest)^2)
-        ts[i] ~ Normal(2*dist / v_wasp, 10)
-    end
-end
-
-# ╔═╡ 88e95234-4e43-4ead-bd0f-f32f9fc109c2
-n_samples = 1000
-
-# ╔═╡ c5a94b3e-a4b8-42e6-a8c7-79e942212852
-chain = sample(horenaars(xs, ys, ts), NUTS(), n_samples)
-
-# ╔═╡ 1c84ab96-b3db-494e-860e-80e2d178da43
-plot(chain)
-
-# ╔═╡ 4eb71114-fd0d-4968-b7a3-c12290d5eb40
-x_nest_sp = chain[:x_nest];
-
-# ╔═╡ 927c8514-8c4f-4582-9c40-a2d7d7bb3452
-y_nest_sp = chain[:y_nest];
-
-# ╔═╡ 0c6be1fa-bff5-495b-90e0-90dabe03105a
+# ╔═╡ 511f27c3-7cdb-426f-b794-85897ff44135
 begin
-	scatter(x_nest_sp, y_nest_sp, opacity = 0.1, color = :blue, label = "Estimated nest locations", xlims = (0, 1000), ylims = (0, 1000));
+	scatter(x_nest_sp, y_nest_sp, opacity = 0.1, color = :blue, label = "Estimated nest locations", xlims = (0, 1000), ylims = (0, 1000), markershape = :square);
 	scatter!(xs, ys, color = :orange, label = "wasp locations", marker_z = ts)
-	scatter!(true_location[1:1], true_location[2:2], color = RGB(1, 1, 1), label = "True nest location", markershape=:rect)
+	scatter!(true_location[1:1], true_location[2:2], color = RGB(0, 1, 0), label = "True nest location", markershape = :square)
 end
-
-# ╔═╡ 6725a638-5738-49f3-801a-90389b4b66be
-true_location
 
 # ╔═╡ Cell order:
 # ╠═ef127ffc-1e2e-4c30-945b-d6cded4d6515
 # ╠═deb237f9-f0ff-4dfc-8627-43053ccdeb20
-# ╠═2d709e7b-3350-47ec-a3ed-8aa47ad5a8c2
-# ╠═789acc88-314e-449e-abf2-8ba9c95bc322
+# ╟─2d709e7b-3350-47ec-a3ed-8aa47ad5a8c2
 # ╟─af96af94-d969-4e9a-93f4-e205f8b7f576
 # ╟─07f05baa-1336-4e1a-9cbc-5f4506e5b34a
 # ╟─90aee617-84d5-4915-afb4-e7d422cfb4b7
 # ╟─082a4cc0-b151-4f8b-87da-278484218e6e
-# ╟─be7dbb0f-299a-4925-b4c4-20eb6ce6e4af
+# ╟─bfb49d79-772d-4066-bd96-14143a1b5eeb
 # ╠═c1850e64-9e2c-46fb-b7cd-22e8af81d3aa
 # ╟─28cb3363-6856-4164-b60e-36ec2e88ed56
 # ╟─484b56ec-57b2-496d-a5cf-1b1c0da97c58
-# ╠═365469ba-35ce-4519-a0b7-c396caddc339
-# ╠═ac0496d3-aa62-4c07-8233-16fe67c52b24
-# ╠═88e95234-4e43-4ead-bd0f-f32f9fc109c2
-# ╠═c5a94b3e-a4b8-42e6-a8c7-79e942212852
-# ╠═1c84ab96-b3db-494e-860e-80e2d178da43
-# ╠═4eb71114-fd0d-4968-b7a3-c12290d5eb40
-# ╠═927c8514-8c4f-4582-9c40-a2d7d7bb3452
-# ╠═0c6be1fa-bff5-495b-90e0-90dabe03105a
-# ╠═6725a638-5738-49f3-801a-90389b4b66be
+# ╠═66862953-aeb2-4310-90bc-673260f0ecc0
+# ╠═f522cbcb-112b-4d56-b860-5aee44b1aa2f
+# ╠═511f27c3-7cdb-426f-b794-85897ff44135
