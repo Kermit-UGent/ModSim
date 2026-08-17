@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="500"
+   height="500"
+   viewBox="0 0 500 500"
+   version="1.1"
+   xml:space="preserve"
+   style="clip-rule:evenodd;fill-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5"
+   id="svg11"
+   sodipodi:docname="KERMIT_warm_ico.svg"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs11">
+        
+    
+            
+            
+            
+            
+        </defs><sodipodi:namedview
+   id="namedview11"
+   pagecolor="#505050"
+   bordercolor="#eeeeee"
+   borderopacity="1"
+   inkscape:showpageshadow="0"
+   inkscape:pageopacity="0"
+   inkscape:pagecheckerboard="0"
+   inkscape:deskcolor="#d1d1d1"
+   inkscape:zoom="0.82424242"
+   inkscape:cx="319.6875"
+   inkscape:cy="284.50368"
+   inkscape:window-width="1920"
+   inkscape:window-height="1015"
+   inkscape:window-x="0"
+   inkscape:window-y="0"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="svg11" />
+    <g
+   transform="matrix(0.97132354,0,0,1.266081,-426.64224,-976.47225)"
+   id="g1">
+                <path
+   d="m 907.11691,780.1485 c 21.00526,0 38.03354,15.57349 38.03354,34.78476 0,71.78987 0,235.63114 0,307.42904 0,19.2113 -17.02828,34.7817 -38.03354,34.7817 H 486.12064 c -21.00526,0 -38.03354,-15.5704 -38.03354,-34.7817 0,-71.7979 0,-235.63917 0,-307.42904 0,-19.21127 17.02828,-34.78476 38.03354,-34.78476 92.5142,0 328.48208,0 420.99627,0 z"
+   style="fill:#fdfcdc;stroke:#0081a7;stroke-width:17.7418;stroke-dasharray:none"
+   id="path1" />
+            </g><g
+   id="g12"
+   transform="matrix(0.92532594,0,0,0.92532594,20.839779,97.63953)"><g
+     id="g11"><g
+       id="cup"
+       transform="translate(-449.355,-762.509)">
+                <g
+   transform="translate(-5.74803)"
+   id="g4">
+                    <circle
+   cx="513.78003"
+   cy="832.677"
+   r="17.716999"
+   style="fill:#f07167;stroke:#f07167;stroke-width:4.17px"
+   id="circle3" />
+                </g>
+                <g
+   transform="translate(183.386,188.976)"
+   id="g5">
+                    <circle
+   cx="513.78003"
+   cy="832.677"
+   r="17.716999"
+   style="fill:#f07167;stroke:#f07167;stroke-width:4.17px"
+   id="circle4" />
+                </g>
+                <g
+   transform="translate(372.205)"
+   id="g6">
+                    <circle
+   cx="513.78003"
+   cy="832.677"
+   r="17.716999"
+   style="fill:#f07167;stroke:#f07167;stroke-width:4.17px"
+   id="circle5" />
+                </g>
+                <path
+   d="M 508.031,832.677 697.165,1021.65 885.827,832.677"
+   style="fill:none;stroke:#f07167;stroke-width:10.42px"
+   id="path6" />
+            </g></g><g
+     id="cap"
+     transform="translate(-449.355,-762.509)">
+                <g
+   transform="translate(182.913)"
+   id="g7">
+                    <circle
+   cx="513.78003"
+   cy="832.677"
+   r="17.716999"
+   style="fill:#0081a7;stroke:#0081a7;stroke-width:4.17px"
+   id="circle6" />
+                </g>
+                <g
+   transform="translate(372.205,188.976)"
+   id="g8">
+                    <circle
+   cx="513.78003"
+   cy="832.677"
+   r="17.716999"
+   style="fill:#0081a7;stroke:#0081a7;stroke-width:4.17px"
+   id="circle7" />
+                </g>
+                <g
+   transform="translate(-5.74803,188.976)"
+   id="g9">
+                    <circle
+   cx="513.78003"
+   cy="832.677"
+   r="17.716999"
+   style="fill:#0081a7;stroke:#0081a7;stroke-width:4.17px"
+   id="circle8" />
+                </g>
+                <path
+   d="M 508.031,1021.65 696.693,832.677 885.984,1021.65"
+   style="fill:none;stroke:#0081a7;stroke-width:10.42px"
+   id="path9" />
+            </g></g>
+</svg>
