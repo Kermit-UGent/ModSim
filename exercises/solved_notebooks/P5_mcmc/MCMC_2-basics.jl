@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.21
+# v1.0.1
 
 using Markdown
 using InteractiveUtils
@@ -9,6 +9,7 @@ using InteractiveUtils
 using Pkg; Pkg.activate("..")
 
 # ╔═╡ 45bc5b66-c81b-4afb-8a7e-51aff9609c62
+# ╠═╡ show_logs = false
 using Turing, StatsPlots
 
 # ╔═╡ 8f624627-5a65-441d-989b-3fd7397e341c
@@ -90,13 +91,13 @@ cond_mole = molemodel | (Y = 3,);
 molechain_cond = sample(cond_mole, NUTS(), 2000);
 
 # ╔═╡ b02dc714-e2bb-4ae2-acf9-c37a4389f953
-plot(molechain)
+plot(molechain_cond)
 
 # ╔═╡ b79dafee-4f6f-4301-9267-1b9798c125ea
-X_samplescondY = molechain[:X];
+X_samplescondY = molechain_cond[:X];
 
 # ╔═╡ fd540765-95e5-4071-81f7-e689b06cad0c
-E_XcondY = mean(molechain[:X])
+E_XcondY = mean(molechain_cond[:X])
 
 # ╔═╡ 5521933a-a42e-4a67-94b9-84eab52ddf07
 E_X = mean(Exponential(100))
@@ -105,7 +106,7 @@ E_X = mean(Exponential(100))
 md"### 4: Conditional distribution of X"
 
 # ╔═╡ 159caa6a-2ebf-44bd-87a5-b4ab8b085354
-histogram(molechain[:X])
+histogram(molechain_cond[:X])
 
 # ╔═╡ eda00c08-de49-4d2d-acc4-ba6e21ff0b11
 md"### 5: Conditional distribution of X (with more data)"
