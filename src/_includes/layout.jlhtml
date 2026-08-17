@@ -11,6 +11,11 @@ $(begin
             r"<meta name=[\"']?description.*?>"
             r"<meta name=[\"']?description.*?>"
             r"<link rel=[\"']?icon.*?>"
+            # Pluto's default head sets a Binder URL for every page. Our
+            # notebooks cannot run on Binder (they activate a relative project
+            # path), and `<pluto-editor>` falls back to this global when it has
+            # no `binder_url` attribute, so the button would come back.
+            r"window\.pluto_binder_url = [^\n]*"
         ]; init=m[1]) do s,r
             replace(s, r => "")
         end |> HTML

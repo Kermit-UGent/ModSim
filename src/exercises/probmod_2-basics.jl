@@ -1,13 +1,12 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 #> [frontmatter]
-#> order = "17"
-#> title = "3. ProbMod basics"
-#> date = "2025-03-07"
+#> order = "24"
+#> title = "4. ProbMod basics"
 #> tags = ["exercises"]
-#> description = "Basic sampling exercises"
 #> layout = "layout.jlhtml"
+#> description = "Basic sampling exercises"
 #> 
 #>     [[frontmatter.author]]
 #>     name = "Bram Spanoghe"
@@ -15,7 +14,9 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 84d9771c-75b1-4d22-a1cd-b9078866a836
+# ╔═╡ 7d4d4d20-b323-11ef-0926-b14785cb9ab5
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 4cfd4721-e29a-4270-8d15-021bcc966eb1
@@ -56,11 +57,17 @@ end
 # ╔═╡ 42c18a70-efb3-436b-83bb-b586280d4a4e
 dpmodel = doublepoisson();
 
+# ╔═╡ a21b2f44-c8d7-4838-926f-8fa39c36884e
+dpchain = missing
+
 # ╔═╡ b22a18d5-f70b-42a5-a09e-3de515148a6d
-spY = missing
+Y_samples = missing
+
+# ╔═╡ a11629df-31d2-4ac7-bf8e-80b910cab2fb
+missing # plot of X
 
 # ╔═╡ 34bd60df-272f-49d7-9346-fb4d125fe89b
-histogram(spY)
+missing # histogram of Y
 
 # ╔═╡ 13989ba4-bcf8-4fdd-8aee-ab58c8905bc9
 md"### 2: Probabilities"
@@ -70,9 +77,9 @@ md"""
 !!! tip
 	When comparing a vector of values to a single number, don't forget to use `.` to execute operations element-wise in Julia!
 	
-	✅ `spY .< 1` compares every element of `spY` to `1`
+	✅ `Y_samples .< 1` compares every element of `Y_samples` to `1`
 	
-	❌ `spY < 1` compares an entire vector with a single number → errors :(
+	❌ `Y_samples < 1` compares an entire vector with a single number → errors :(
 """
 
 # ╔═╡ 39e4f3eb-b7a9-4ece-846f-eb02dbd77860
@@ -89,11 +96,11 @@ md"""
 !!! hint
 	To create a sample of $X$ that is conditional on some value(s) of $Y$, you can start from a sample of $X$ and select only those elements for which the corresponding sample of $Y$ has the conditioned value(s).
 
-	In other words, you'll need to index `spX` based on `spY` (and vice versa for $\text{var}(Y ∣ X)$). 
+	In other words, you'll need to index `X_samples` based on `Y_samples` (and vice versa for $\text{var}(Y ∣ X)$). 
 """
 
 # ╔═╡ 263048e5-206c-499e-836c-bfe489ed9b74
-spX = missing;
+X_samples = missing;
 
 # ╔═╡ aedd0fe8-da3e-4463-b0cf-7c4f9a22db52
 varXcondY = missing
@@ -104,53 +111,15 @@ varYcondX = missing
 # ╔═╡ ce9e2ce2-26e0-4f17-adf5-c922ba98239d
 missing # analytical answer of (missing)
 
-# ╔═╡ ce7d57ed-4f31-4dcf-af3b-b37a2e2a9393
-md"## 2: Combinations"
-
-# ╔═╡ 087994ce-a26d-40c4-87eb-ef9f0ce7f1fb
+# ╔═╡ 19e16f77-ea34-45f6-83eb-8d256e5fd10d
 md"""
-Let `U ~ Uniform(0, 4)`, `V ∼ Normal(U, 1)` and `W ~ TriangularDist(0, 4, U)`. 
-1. Use sampling (n = 10_000) to make a histogram of `|V − W|`.
-2. Estimate `P(V > W)` and `P(V * W >= 10)`
-3. Are `V` and `W` independent?
-"""
-
-# ╔═╡ 9e5cc347-c74f-46a3-9534-c5ad812844bf
-md"### 1: Histogram"
-
-# ╔═╡ 47a43282-3892-4a9a-94b7-c359fa74e12b
-@model function combinations()
-	U ~ missing
-	V ~ missing
-	W ~ missing
-end
-
-# ╔═╡ b0502f20-17af-4ecc-be80-a26b3e42d57f
-spVW = missing
-
-# ╔═╡ faa105b6-0700-4f4d-92fe-2bb72a4d6e44
-md"### 2: Probabilities"
-
-# ╔═╡ 97aec4a9-2954-4967-bc15-c0123bac2e75
-probVW1 = missing
-
-# ╔═╡ 30166840-d5f5-4a2a-acc2-cde76a87e95a
-probVW2 = missing
-
-# ╔═╡ 4decd959-aeb9-47d4-a381-14bbf4dbc5ab
-md"### 3: Independence"
-
-# ╔═╡ aa953baa-5105-49d7-82e6-94ca462624f7
-md"""
-!!! hint
-	One way to prove dependence is showing that $E[V] \neq E[V \mid W \leq w]$ for at least one value $w$. 
-
-	If the expected value of $V$ can change based on some information about $W$, they can't be independent!
+!!! warning
+	Starting here, only part of the answer's structure will be given. You are therefore expected to **add more code cells** yourself, using the `+` at the left in between two cells.
 """
 
 # ╔═╡ 9740ea64-cd4f-46b1-a741-02e392280601
 md"""
-## 3: Dice
+## 2: Dice
 """
 
 # ╔═╡ 187854bb-9e30-454d-9e03-cccf77aebb6b
@@ -174,7 +143,7 @@ md"### 1: Watercube"
 
 # ╔═╡ 4fefa78b-746d-4e25-baee-d791eb22d930
 md"""
-!!! hint
+!!! tip
 	Consider the humble `DiscreteUniform` distribution. Not sure how it works? Open the **🔍 Live Docs** at the bottom right of the screen for more information
 """
 
@@ -189,11 +158,11 @@ md"""
     return dicesum
 end
 
-# ╔═╡ 02bc37e2-5cf6-404a-b3fe-b2120671adb2
-watermodel = watercube()
+# ╔═╡ 5fe1080e-8c2c-4c6b-84b4-3857dc1f399e
+watercube_samples = missing # samples of dicesum for watercube
 
 # ╔═╡ b5886255-5c1d-4d84-b7ee-6c690fa526dc
-p_watercube_kills = missing
+p_watercube_kills = missing # probability that watercube kills the monster
 
 # ╔═╡ 84e06162-e3f1-4fd7-baf6-5095172413d2
 missing # histogram
@@ -205,15 +174,12 @@ md"### 2: Dirtprism"
 @model function dirtprism()
 	# check the "For-loops for many variables" section from the intro notebook!
 	
-	dicesum = missing # consider the `sum` function
+	dicesum = missing
 	return dicesum
 end
 
-# ╔═╡ 83afb3c1-9e6a-4d18-b0c7-05ed0173df40
-dirtmodel = dirtprism()
-
 # ╔═╡ d9152416-8a7b-480c-ba9f-7ab15404b7a6
-p_dirtprism_kills = missing
+p_dirtprism_kills = missing # probability that dirtprism kills the monster
 
 # ╔═╡ 90e058d7-b3fe-4c42-a652-3c42bf9d851a
 missing # histogram
@@ -225,17 +191,17 @@ md"### 3: Comparison"
 p_watercube_is_better = missing
 
 # ╔═╡ 34f3014f-f4d4-43d1-b46f-bdca73aee33f
-md"## 4: Super eggs"
+md"## 3: Super eggs"
 
 # ╔═╡ 372436c4-262f-49b8-b1cf-626b043542bf
 md"""
-When a chicken lays an egg, there's a small chance it contains two egg yolks. This chance, as well as the number of eggs a chicken lays per year, go down as the chicken gets older.
+When a chicken lays an egg, there's a small chance it contains two egg yolks. This chance, as well as the number of eggs a chicken lays per year, goes down as the chicken gets older.
 """
 
 # ╔═╡ 20111742-008a-44c3-8c27-62791cce3e1e
 md"""
 You can make the following assumptions
-- The age $A$ of a random chicken (in years) is discrete and Uniformly distributed between 0 and 12.
+- The age $A$ of a random chicken (in years) is discrete and Uniformly distributed between 0 and 10.
 - The number of eggs $N$ an $A$-year old chicken lays in a year is Poisson distributed with mean $300 - 20 \, A$.
 - The probability $P$ of an $A$-year old chicken's egg having a double yolk is distributed as a `Beta(1, 800 + 100*A)`.
 """
@@ -244,7 +210,7 @@ You can make the following assumptions
 md"""
 !!! questions
     1. If someone hands you a random chicken, what is the probability it will lay 2 or more double eggs in a year? 
-    1. Compare the distributions of double eggs for 1-year old and 3-year old chickens.
+    1. Compare the distributions of double eggs for 1-year old and 5-year old chickens.
 """
 
 # ╔═╡ 98fcfcef-bf63-4eae-a325-ed4cef6d4fdd
@@ -252,7 +218,7 @@ md"### 1: Probability"
 
 # ╔═╡ a0341046-c14a-494d-a9bd-a60c207c9e76
 md"""
-!!! hint
+!!! tip
 	In this exercise, the output variable (the number of double-yolked eggs) is **also a random variable**! In other words, it also follows some distribution.
 
 	When considering what distribution, consider that each of the $N$ eggs represents a "trial" with a $P$ chance of success for a double yolk.
@@ -276,7 +242,7 @@ missing # histogram 1
 missing # histogram 2
 
 # ╔═╡ ff06c070-50a2-43d0-9729-1c47e728ff52
-md"## 5: Birthdays"
+md"## 4: Birthdays"
 
 # ╔═╡ 6ac2238a-16fd-4a8d-b779-8627d87367ed
 md"""
@@ -286,7 +252,7 @@ Sometimes, people are born on the same day of the year.
 # ╔═╡ 01648616-bf50-4f66-82fc-eaae3de22a38
 md"""
 !!! question
-	What is the probability that, in a class of 150 students, 3 or more share a birthday?
+	What is the probability that, in a class of 150 students, 3 or more share a birthday? Assume the probability for a person to be born is equal on every day of the year.
 """
 
 # ╔═╡ da44d18c-8be3-446e-a5c2-905af545d2c6
@@ -308,7 +274,7 @@ end
 
 # ╔═╡ Cell order:
 # ╟─e4cb065e-12c6-4f1c-8497-1013fa9411d6
-# ╠═84d9771c-75b1-4d22-a1cd-b9078866a836
+# ╠═7d4d4d20-b323-11ef-0926-b14785cb9ab5
 # ╠═4cfd4721-e29a-4270-8d15-021bcc966eb1
 # ╠═73c2a5db-4019-4d91-b5f1-7ba378cb8c84
 # ╟─7026f66f-9076-4aef-ada9-198450ef5da6
@@ -316,7 +282,9 @@ end
 # ╟─def27d26-2205-4a66-94f3-eddbc17483bf
 # ╠═ff38df99-f843-414d-8e45-b46e06a65c22
 # ╠═42c18a70-efb3-436b-83bb-b586280d4a4e
+# ╠═a21b2f44-c8d7-4838-926f-8fa39c36884e
 # ╠═b22a18d5-f70b-42a5-a09e-3de515148a6d
+# ╠═a11629df-31d2-4ac7-bf8e-80b910cab2fb
 # ╠═34bd60df-272f-49d7-9346-fb4d125fe89b
 # ╟─13989ba4-bcf8-4fdd-8aee-ab58c8905bc9
 # ╟─aba42086-224f-44a0-b616-f8f651afdd18
@@ -328,28 +296,18 @@ end
 # ╠═aedd0fe8-da3e-4463-b0cf-7c4f9a22db52
 # ╠═7ef53a87-e5df-4724-b896-3d1d46214c68
 # ╠═ce9e2ce2-26e0-4f17-adf5-c922ba98239d
-# ╟─ce7d57ed-4f31-4dcf-af3b-b37a2e2a9393
-# ╟─087994ce-a26d-40c4-87eb-ef9f0ce7f1fb
-# ╟─9e5cc347-c74f-46a3-9534-c5ad812844bf
-# ╠═47a43282-3892-4a9a-94b7-c359fa74e12b
-# ╠═b0502f20-17af-4ecc-be80-a26b3e42d57f
-# ╟─faa105b6-0700-4f4d-92fe-2bb72a4d6e44
-# ╠═97aec4a9-2954-4967-bc15-c0123bac2e75
-# ╠═30166840-d5f5-4a2a-acc2-cde76a87e95a
-# ╟─4decd959-aeb9-47d4-a381-14bbf4dbc5ab
-# ╟─aa953baa-5105-49d7-82e6-94ca462624f7
+# ╟─19e16f77-ea34-45f6-83eb-8d256e5fd10d
 # ╟─9740ea64-cd4f-46b1-a741-02e392280601
 # ╟─187854bb-9e30-454d-9e03-cccf77aebb6b
 # ╟─747e3c0a-357a-448a-b479-d0fcbe44a6c0
 # ╟─eda95f45-083a-4e65-b57e-bd9890da1f9c
 # ╟─4fefa78b-746d-4e25-baee-d791eb22d930
 # ╠═36477423-5628-4ed3-b54d-9a050557f6b7
-# ╠═02bc37e2-5cf6-404a-b3fe-b2120671adb2
+# ╠═5fe1080e-8c2c-4c6b-84b4-3857dc1f399e
 # ╠═b5886255-5c1d-4d84-b7ee-6c690fa526dc
 # ╠═84e06162-e3f1-4fd7-baf6-5095172413d2
 # ╟─a1b933ac-5d1b-4800-a6e8-e942846b19d8
 # ╠═6b009ba3-83a8-4176-86d4-dd9f70ed29ec
-# ╠═83afb3c1-9e6a-4d18-b0c7-05ed0173df40
 # ╠═d9152416-8a7b-480c-ba9f-7ab15404b7a6
 # ╠═90e058d7-b3fe-4c42-a652-3c42bf9d851a
 # ╟─49790a8f-9f53-4ba7-9543-d6a879b520e0

@@ -2,12 +2,11 @@
 # v0.20.4
 
 #> [frontmatter]
-#> order = "33"
-#> title = "6. Uncertainty fermenter monod"
-#> date = "2025-08-06"
+#> order = "40"
+#> title = "7. Uncertainty fermenter monod"
 #> tags = ["exercises"]
-#> description = "Uncertainty fermenter monod"
 #> layout = "layout.jlhtml"
+#> description = "Uncertainty fermenter monod"
 #> 
 #>     [[frontmatter.author]]
 #>     name = "Gauthier Vanhaelewyn"
@@ -16,6 +15,8 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 9d8acf40-e635-4dc4-9938-ec63ab68e3bd
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 1ec7def2-0c43-11ef-0850-ddefa680d2a4

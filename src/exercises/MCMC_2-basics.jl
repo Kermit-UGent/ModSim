@@ -1,25 +1,29 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 #> [frontmatter]
-#> order = "21"
-#> title = "4. MCMC basics"
-#> date = "2025-08-06"
+#> order = "28"
+#> title = "5. MCMC basics"
 #> tags = ["exercises"]
-#> description = "MCMC basics"
 #> layout = "layout.jlhtml"
+#> description = "MCMC basics"
 #> 
 #>     [[frontmatter.author]]
-#>     name = "Gauthier Vanhaelewyn"
+#>     name = "Bram Spanoghe"
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ 94c6f31d-1a43-4221-b60c-1fa0ef8738b8
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 45bc5b66-c81b-4afb-8a7e-51aff9609c62
 using Turing, StatsPlots
+
+# ╔═╡ 9daad9dc-b092-4845-a276-ed3a24249924
+using PlutoUI; TableOfContents()
 
 # ╔═╡ 41dc8060-cf5e-11ef-26f9-892577e77af0
 md"# Inference notebook #2: Basics"
@@ -27,9 +31,24 @@ md"# Inference notebook #2: Basics"
 # ╔═╡ 299ba93b-0fc0-4bb3-9a2c-a571ce571f1b
 md"## 1: Mole burrow"
 
-# ╔═╡ 957386c5-775c-47f7-9a38-e1630e548689
+# ╔═╡ 0d068aa6-f7c9-4a75-8382-cfbc903efc5b
 md"""
 Consider a mole's underground tunnel network of length `X` (in m). Now and then the mole makes a new molehill somewhere randomly above its tunnel, the locations of which we denote `Y`.
+"""
+
+# ╔═╡ 5d4e269d-bd5a-422e-9547-099e04b8eedf
+md"""
+                  Y1                                Y2   Y3
+                  /\ 								/\   /\              <- molehills
+    =================================================================    <- ground
+                   |                                 |    |
+             ------------------------------------------------            <- tunnel
+             0                                              X
+"""
+
+# ╔═╡ 7abeb4d3-4648-4d8b-9383-de5213c8cc41
+md"""
+We're no mole experts, but for our prior information we can suppose a mole would not make a tunnel much longer than a few 100 m (probably a lot shorter).
 
 We can formulate this as `X ~ Exponential(100)` and `Y ~ Uniform(0, X)`.
 
@@ -38,108 +57,81 @@ We can formulate this as `X ~ Exponential(100)` and `Y ~ Uniform(0, X)`.
 	1. Estimate `E[Y]`.
 	1. Estimate `E[X|Y = 3]` and compare it with the prior expected value `E[X]`.
 	1. Plot the histogram of `X` given `Y = 3.0`.
-	1. Plot the histogram of `X` again, but now given the following values for `Y`: `[3.0, 1.5, 0.9, 5.7]`.
-"""
-
-# ╔═╡ ca8057cc-6d70-4a88-88aa-c494af9659ef
-md"""
-**Questions:**
-- How should I understand this?
-- If the mole digs a tunnels that is X long, then at position Y there is one hole?
-- Or, is there a hole at every position Y for an X meters long tunnel?
+	1. You come back a day later and find even more molehills! You now measure the following values for `Y`: `[3.0, 1.5, 0.9, 5.7]`. How long do you estimate the tunnel given this extra information?
 """
 
 # ╔═╡ 47aa2304-d312-40e9-b9c6-7c79a7d64de4
-md"### 1"
+md"### 1: Prior plot"
 
 # ╔═╡ 78c9ce62-e375-48ac-8083-55ee085c61de
-plot(Exponential(100)) # The prior only incorporates the knowledge that a mole's tunnel is probably less long than a few km - this is a diffuse to weakly informative prior
+X_prior = missing
 
-# ╔═╡ 4ab8aaba-010c-4844-9cf6-627a746c2492
-mijn_X = rand(Exponential(100))
-
-# ╔═╡ 82289137-9c20-4d7a-97b2-56f417831409
-mijn_Y = rand(Uniform(0, mijn_X))
+# ╔═╡ c64b346a-059d-4bbe-b166-80116260e19b
+missing # plot above
 
 # ╔═╡ 78eb7779-f182-4419-b5d8-79a2f5c5d6da
-md"### 2"
+md"### 2: Unconditional expected value of Y"
 
 # ╔═╡ 3decb2ec-210a-4b2f-842d-6fd40dd3f77b
 @model function mole()
-	X ~ Exponential(100)
-	Y ~ Uniform(0, X)
+	X ~ missing
+	Y ~ missing
 	return Y
 end
 
 # ╔═╡ 76dd814d-0d9b-4f7e-aff8-990da57d052b
 molemodel = mole()
 
-# ╔═╡ 5c989060-40cd-4b27-b96f-3f98a85f5122
-molemodel()   # returns Y
+# ╔═╡ 61b8ef63-a613-4dcb-8f7a-936e0d59b862
+Y_samples = missing
 
 # ╔═╡ 4e8b9000-cb61-4f01-9ba9-17276ad0335e
-E_Y = mean([molemodel() for i in 1:2000])
+E_Y = missing
 
 # ╔═╡ 8777b133-7d7c-4a85-b89c-2f00093e9984
-md"### 3"
+md"### 3: Conditional expected value of X"
 
 # ╔═╡ 9695ee7e-359b-489c-962b-1bf84b052371
-cond_mole = molemodel | (Y = 3.0,);
-
-# ╔═╡ 10deca95-9f88-45ff-a22f-30280776acef
-md"""
-**Questions:**
-- Why doesn't this work for much higher values of Y? E.g. for Y = 8 or 10?
-- Because if you sample `X = rand(Exponential(100))` and `Y = rand(Uniform(0, X))`, you usually get much larger numbers for Y than 3.
-"""
+cond_mole = missing
 
 # ╔═╡ 014538da-b5ef-41c8-b799-2c000b4c9134
-molechain = sample(cond_mole, NUTS(), 2000)
+molechain = missing
 
-# ╔═╡ b02dc714-e2bb-4ae2-acf9-c37a4389f953
-plot(molechain)
+# ╔═╡ 977d0406-f154-4b87-b9c6-cafe4809a4a6
+missing # plot molechain
+
+# ╔═╡ af4811ce-c6e7-458a-8f89-0562355b3eb0
+X_samplescondY = missing
 
 # ╔═╡ fd540765-95e5-4071-81f7-e689b06cad0c
-E_Xcond3 = mean(molechain[:X])
+E_XcondY = missing
 
 # ╔═╡ 5521933a-a42e-4a67-94b9-84eab52ddf07
-E_X = mean(Exponential(100))
+E_X = missing
 
-# ╔═╡ ca3e730c-a940-4c76-93eb-70ae4aa0e008
-md"### 4"
+# ╔═╡ 9403c355-dce8-4aa9-80a3-824ea6193905
+md"### 4: Conditional distribution of X"
 
-# ╔═╡ 159caa6a-2ebf-44bd-87a5-b4ab8b085354
-histogram(molechain[:X], normalized=:probability)
+# ╔═╡ bedd99ca-4285-4c3d-87e2-c22d414f8f07
+# histogram
 
-# ╔═╡ eda00c08-de49-4d2d-acc4-ba6e21ff0b11
-md"### 5"
+# ╔═╡ 21743f62-c7f5-4171-8277-0667edb71c56
+md"### 5: Conditional distribution of X (with more data)"
 
 # ╔═╡ b2b16c34-e12a-4bea-8098-313d01913bbf
 @model function mole2()
-	X ~ Exponential(100)
-	Ys = zeros(4)            # now we have 4 holes Ys (Ysample)
-	for i in eachindex(Ys)
-		Ys[i] ~ Uniform(0, X)
-	end
+	X ~ missing
+	# how to deal with a vector of values again...
 end
 
-# ╔═╡ 1a78d96a-fe57-42a4-9785-003266117ddb
+# ╔═╡ 26a245d2-c5b6-484d-bdf7-541948ff06ad
 Y_obs = [3.0, 1.5, 0.9, 5.7]
 
-# ╔═╡ 2f5c14e9-709a-40ec-a6cb-ddd870cc1a60
-mole_cond2 = mole2() | (Ys = Y_obs,)
+# ╔═╡ dc6aadff-7cff-4a9a-a967-32cd322b2696
+missing # (some lines of code)
 
-# ╔═╡ 7f90e18d-9af8-42fa-984b-aaa7c8c458b5
-molechain2 = sample(mole_cond2, NUTS(), 2000)
-
-# ╔═╡ caf0db69-a83f-433a-b848-7d7d8c2fa25e
-plot(molechain2)
-
-# ╔═╡ 3c1a508b-6d2c-4507-ab9f-752ee93709c9
-histogram(molechain2[:X], normalized=:probability)
-
-# ╔═╡ 2d35375a-cd92-48d1-8779-761641e7b0af
-mean(molechain2[:X])
+# ╔═╡ ea2235f0-0cfc-4603-b027-d0a1bc6fa2c1
+# I estimate the tunnel to be about (MISSING) long
 
 # ╔═╡ 951d0913-1a52-4d5b-b5bb-168487e50ab2
 md"## 2: Potatoes"
@@ -148,7 +140,7 @@ md"## 2: Potatoes"
 md"""
 Consider a number of potatoes `N` each with an average weight `W`. You weigh them together on an old balance to get an estimate of their total weight `T`.
 
-We can formulate this as `N ~ Poisson(10)`, `W ~ Uniform(150, 250)`  and `T ~ Normal(N*W, 50)`.
+Suppose the following priors: `N ~ Poisson(10)`, `W ~ Uniform(150, 250)`  and the following relationship between expected - and actual outcome: `T ~ Normal(N*W, 50)`.
 
 !!! questions
 	1. Plot a histogram of `N` given `T = 1200`.
@@ -156,84 +148,61 @@ We can formulate this as `N ~ Poisson(10)`, `W ~ Uniform(150, 250)`  and `T ~ No
 	1. Estimate `P(N = 5 | T = 1200, W = 220)`.
 """
 
-# ╔═╡ d5f544a4-ba51-4103-82ce-259ba20af11a
-let
-	N = rand(Poisson(10));
-	W = rand(Uniform(150, 250));   # in grams
-	T = rand(Normal(N*W, 50))      # in grams
-end
-
 # ╔═╡ 5f8322ca-0ded-4750-8ad6-e66e8280daca
-md"### 1"
+md"### 1: Conditional distribution of N"
 
 # ╔═╡ ec479be9-0d8a-4c8d-97c9-6f64d861924c
 @model function potatoes()
-	N ~ Poisson(10)
-	W ~ Uniform(150, 250)
-	T ~ Normal(N*W, 50)
+	N ~ missing
+	W ~ missing
+	T ~ missing
 end
 
-# ╔═╡ 4e92d825-481f-430a-94a4-fbdf31b679eb
-potato_model = potatoes()
+# ╔═╡ 438893d1-3107-493c-9299-d8813658a698
+potato_model = missing
 
-# ╔═╡ 0ced04f8-322a-42f6-a1b7-1b30faf9024b
-potato_cond = potato_model | (T = 1200,)
+# ╔═╡ dd7d84b0-1f20-4478-96ba-b3f4e9df1d2c
+potato_cond = missing
 
-# ╔═╡ e48a2d96-6d7b-4861-b315-0ae580479eda
-potato_chain = sample(potato_cond, PG(10), 2000)
+# ╔═╡ accca8d7-8822-49ae-8588-7259da82e37a
+potato_chain = missing
+	# be careful with your choice of sampling algorithm! are all priors continuous?
 
-# ╔═╡ ceb2b8fd-aa47-443b-8e5c-74a48eda1174
-plot(potato_chain)
+# ╔═╡ 519a952b-f040-4588-8acd-1cfaab88c4da
+# plot chain
 
-# ╔═╡ 8c1eb826-6023-4852-aa45-789f6d4b7051
-histogram(potato_chain[:N], normalized=:probability)
-
-# ╔═╡ 205efb15-e28a-418a-a1af-892afdf3c188
-md"""
-The above gives of the individual probabilities of having T=1200 with 5, 6, 7 and 8 potatoes.
-"""
-
-# ╔═╡ ad571d35-639c-4239-9e62-42952ddb48d0
-# Probability of having T=1200 with N=7.
-mean(potato_chain[:N] .== 7)
+# ╔═╡ 57adc714-cdd1-46cf-a4ea-d0fb04924e1e
+# histogram of N
 
 # ╔═╡ 0fddec58-67d9-4dec-a72d-445675fa46a6
-md"### 2"
+md"### 2: Probability"
 
-# ╔═╡ 9dd6fa35-37d5-4ab4-ac2c-f4eefdabadd2
-p_potato1 = mean(potato_chain[:N] .> 6 .&& potato_chain[:W] .> 175)
-
-# ╔═╡ 57ec05ca-bf37-4012-be9a-d83c1d9f0f8a
-mean(potato_chain[:N] .<= 6 .|| potato_chain[:W] .<= 175)
+# ╔═╡ b77d8796-9065-4c61-be21-3dc292b94492
+p_potato1 = missing
 
 # ╔═╡ 5bde987a-3f5c-4ff7-96a0-9e174f73fdfb
-md"### 3"
+md"### 3: Probability (with more data)"
 
-# ╔═╡ 6e3d4f8f-1766-49a6-9e4a-610671d8aa63
-potato_cond2 = potato_model | (T = 1200, W = 220,)
-# potato_cond2 = potato_model | (T = 1100, W = 220,)
+# ╔═╡ abffd02e-b917-4e9e-a94d-de197e1b0fc3
+potato_cond2 = missing # alternative conditioned model now also given `W = 220`
 
-# ╔═╡ 4cd99dce-12df-4e3a-aa91-ff00c61544a8
-pota2_chain = sample(potato_cond2, PG(10), 2000)
+# ╔═╡ 5b30d91a-7039-4d2a-bcf7-3a990622fd2a
+pota2_chain = missing
 
-# ╔═╡ 48ea9893-16f7-457e-93b0-9f168a2f72f4
-plot(pota2_chain)
+# ╔═╡ 27939d84-d6e1-47b2-a939-5038c6bdcb48
+# plot chain
 
-# ╔═╡ c3d36685-e1dd-4734-bee9-f7aeebed3473
-p_potato2 = mean(pota2_chain[:N] .== 5)
-
-# ╔═╡ bdc40079-de7b-489f-9d9b-6e1e2130109f
-mean(pota2_chain[:N] .== 4)
-
-# ╔═╡ 22d009f0-390f-412d-9af8-33d169ac7371
-mean(pota2_chain[:N] .== 6)
+# ╔═╡ 744cf31f-89c0-44e8-a6fb-0f4dcea04e5d
+p_potato2 = missing
 
 # ╔═╡ ed7c5547-bd82-4ca7-bf51-dd1c201d88af
 md"## 3: Lights out"
 
 # ╔═╡ a3c26839-2acc-49d8-98c4-3a7142dd6512
 md"""
-You use 4 of the same LED light in your room. Let `μ` be the **average** lifespan of your LED lights (in khr or 1000 hours) and `L`ᵢ the lifespan of the `i`-th LED light.
+You use 4 of the same LED light in your room. Define:
+-  $μ$ the **average** lifespan of your LED lights (in khr or 1000 hours) 
+-  $Lᵢ$ the lifespan of the `i`-th LED light.
 
 Assume that `μ ~ LogNormal(log(40), 0.5)`.
 """
@@ -248,91 +217,48 @@ md"""
 """
 
 # ╔═╡ 7df97000-5cf0-4a29-b3c3-f867403f4318
-md"### 1"
+md"### 1: Unconditional expected value"
 
 # ╔═╡ 0fe475dd-411e-474e-9524-ef9fcceed7af
-lights_prior = LogNormal(log(40), 0.5)
+lights_prior = missing
 
-# ╔═╡ 382db9a6-edcb-497b-9535-b576cd6badb0
-plot(lights_prior) # not asked but a visualisation can always be useful
-
-# ╔═╡ fce3e814-97a7-4e12-a7cc-b5b086dc8340
-E_mu = mean(lights_prior)
-
-# ╔═╡ a7811e57-2820-4662-8c20-a4d2d7efd642
-rand(lights_prior)
+# ╔═╡ db77b90b-33b5-4d70-8229-b4c7d74fa96c
+E_mu = missing
 
 # ╔═╡ 308cb1f5-e26b-43b2-be4d-9eabd68b3670
-md"### 2"
+md"### 2: Choice of distribution"
 
-# ╔═╡ 490cbc67-3e0c-4c79-a83d-52cf493854a2
+# ╔═╡ 738b4097-56e1-4921-9195-2d535c78ae73
 md"""
-The exponential distribution is often used to model the waiting time for an event. This makes it a natural fit for a lamp's lifespan, which is the waiting time until it breaks. We know it needs to have a mean value of μ, so `Exponential(μ)` is a good choice.
-
-One could also argue for a LogNormal distribution with mean μ or a Normal distribution with mean μ restricted to only the positive values. Both would need a large variance to reflect the lack of additional information outside of the mean lifespan.
+!!! note
+	See theory p. 96 for an overview of elementary distributions.
 """
 
-# ╔═╡ dbadf227-1399-45f7-ad48-df9d59e18343
-# Average waiting time before it breaks is 45 khr. The longer we wait, the
-# higher the chance that it breaks!
-plot(Exponential(45))
-
-# ╔═╡ 5d812594-733e-4b18-88dc-c28867cf0933
-μ = 27
-
-# ╔═╡ 0373b6a5-bb2c-47b9-a137-5a484b0c7bf2
-plot(Normal(μ, sqrt(μ)))
-
-# ╔═╡ ec06259f-67b5-4920-8635-35c52c080751
-begin
-	plot([LogNormal(log(μ), 1), Exponential(45)]; xlim=[0,400])
-	vline!([mean(LogNormal(log(μ), 1)), mean(Exponential(45))])
-end
-
-# ╔═╡ a628bd3f-5d07-435e-80cc-b72662e13e7b
-plot(cdf(Exponential(45), 0:400))
-
-# ╔═╡ e2fd7500-277a-4d52-982c-5aea8421d756
-cdf(Exponential(45), 100)   # probability that it breaks before 100 khr
-
-# ╔═╡ 96ee6380-719e-47c1-a429-4fdd1931c9ce
-1 - cdf(Exponential(45), 100)  # probability that it is still working after 100 khr
+# ╔═╡ d797cb9b-430b-4d1d-8ded-21959a7cb3a9
+# A sensible distribution for the lifespan of a LED-light is (missing)
 
 # ╔═╡ cd37e5fc-ae9a-429d-844d-4b450b187b5e
-md"### 3"
+md"### 3: Conditional expected value"
 
 # ╔═╡ 126d3954-c77d-4c98-abe0-fd87d14e6265
 @model function lights()
-	μ ~ lights_prior
-	lifespans = zeros(4)
-	for i in 1:length(lifespans)
-		lifespans[i] ~ LogNormal(log(μ), 1) # Normal(μ, sqrt(μ)) #Exponential(μ) 
-	end
+	missing
 end
 
-# ╔═╡ 15fe25d9-5314-4056-8021-cf259ba27c94
-lightmodel = lights() | (lifespans = [16, 20, 23, 41],)
+# ╔═╡ 37bf6ca5-e42b-406e-94d6-bcd1e706e2bd
+L_obs = [16, 20, 23, 41]
 
-# ╔═╡ 2a142576-aec2-4311-9c0e-cb68665d59f6
-lightschain = sample(lightmodel, NUTS(), 2000)
-
-# ╔═╡ 0130c903-e3dd-415e-aa17-1b705f9e4ccc
-plot(lightschain)
-
-# ╔═╡ 11676f8a-d4fe-4999-9ea2-486fca461f65
-E_mu_cond = mean(lightschain[:μ])
-
-# ╔═╡ f6bc2fad-24c7-48a7-9328-34b616fa106f
-histogram(lightschain[:μ], normalize=true)
-
-# ╔═╡ 347a4533-244f-4e93-b125-cdd56a5a08ad
-begin
-	plot([LogNormal(log(μ), 1), Exponential(45)]; xlim=[0,400])
-	vline!([mean(LogNormal(log(μ), 1)), mean(Exponential(45))])
-end
+# ╔═╡ c49955c7-7082-4261-b4db-0056b5c637f1
+E_mu_cond = missing
 
 # ╔═╡ 9a168680-9d96-466f-ba75-122d6a391501
-md"### 4 🌟🌟🌟"
+md"### 4 🌟🌟🌟: Working with censored data"
+
+# ╔═╡ ab6331a3-676e-45e6-b5be-e9c4154ea071
+md"""
+!!! note
+	This question is way above the exam's difficulty level. Don't feel bad if you can't find the answer right away!
+"""
 
 # ╔═╡ 1f35d962-a249-4be7-9a96-17eb83fca7d8
 md"""
@@ -340,92 +266,13 @@ md"""
 	You can model the number of lights that still work as a `Binomial` distribution, the success rate of which depends on `μ`.
 """
 
-# ╔═╡ 3ad29b60-375b-400b-b1e5-8918da6497ff
-1-cdf(Exponential(40), 30)
-
-# ╔═╡ 0cce9dee-43ac-42d3-9113-8b1503c7a73c
-rand(Binomial(2 + 2, 0.47))
-
-# ╔═╡ 8d501c17-58d2-43d3-92c2-0d21bc9113e3
-md"""
-After 30 khr, two lights have died: one at 16 khr and one at 20 khr. The two other lights are still working. What is the expected value of `μ` given this information?
-"""
-
-# ╔═╡ c626d3bf-4abe-4bdc-991a-363bee27b25b
-md"""
-Here you need to provide two arguments to the model function:
-- How many lights still working? `n`
-- At what time they are still working? `time_observed`
-
-"""
-
 # ╔═╡ 8fc58fa4-b005-4f32-9eae-a8143582a1ae
-@model function lights_censored(n, time_observed)
-	μ ~ lights_prior
-	
-	lifespans = zeros(2)
-	for i in 1:length(lifespans)
-		lifespans[i] ~ Exponential(μ)	
-	end
-
-	# Given the observation time, what is the probability that
-	# a single light still works:
-	p_stillworking = 1 - cdf(Exponential(μ), time_observed)
-	# cdf(Exponential(μ), time_observed) is the  probability that it broke
-	#     in [0, time_observed]
-	# Number of lights still working with the above probability:
-	n ~ Binomial(n + length(lifespans), p_stillworking)
-
-	return (μ, lifespans, p_stillworking, n)
+@model function lights_censored(time_observed)
+	missing
 end
 
-# ╔═╡ fe2958a7-e9dd-4eca-979d-a80df12f8735
-lightmodel_cens = lights_censored(2, 30) | (lifespans = [16, 20],)
-
-# ╔═╡ 93f6b680-aece-45d7-804e-a27073130d94
-lightmodel_cens()
-
-# ╔═╡ 8abafb6a-dc83-422c-82d1-a721a0e1eca0
-lightschain_cens = sample(lightmodel_cens, NUTS(), 2000)
-
-# ╔═╡ 5ba2886c-b2e1-49f4-90c6-549acc808f77
-plot(lightschain_cens)
-
-# ╔═╡ ed022247-5959-481f-a81e-41e5ee5a1448
-E_mu_cond🌟 = mean(lightschain_cens[:μ])
-
-# ╔═╡ c57046cd-5f53-43a2-9de4-9bfad27dcab9
-@model function lights_censored2(time_observed)
-	μ ~ lights_prior
-	
-	lifespans = zeros(2)
-	for i in 1:length(lifespans)
-		lifespans[i] ~ Exponential(μ)	
-	end
-	
-	p_stillworking = 1 - cdf(Exponential(μ), time_observed)
-	n ~ Binomial(4, p_stillworking)
-	
-	return (μ, lifespans, p_stillworking, n)
-end
-
-# ╔═╡ a2ebe90c-1006-4fc3-b8bd-bdf9c9e9fed5
-plot(cdf(Exponential(10), 0:100))
-
-# ╔═╡ 5b505f97-e776-4cc3-99f8-721dc241ae2a
-lightmodel_cens2 = lights_censored2(30) | (lifespans = [16, 20], n = 2,)
-
-# ╔═╡ deaf3485-9bc1-48da-809c-61327cce5ad9
-lightmodel_cens2()
-
-# ╔═╡ 56a91508-29fa-4e5f-8dcc-0bb9d67db1fe
-lightschain_cens2 = sample(lightmodel_cens2, NUTS(), 2000)
-
-# ╔═╡ 878e5eaf-2f1c-4c09-a9dd-47821e9295e5
-plot(lightschain_cens2)
-
-# ╔═╡ 7366d15b-9c03-4200-8720-6d879bb65476
-mean(lightschain_cens2[:μ])
+# ╔═╡ 410521d8-f767-4c4e-b19b-25cf31ec0f36
+E_mu_cond🌟 = missing
 
 # ╔═╡ 9dc0456b-7fd2-4120-8f9e-3de1984ff516
 md"## 4: Fish"
@@ -450,7 +297,7 @@ md"""
 """
 
 # ╔═╡ b477b212-83a2-42f0-a616-52516e152d48
-md"### 1"
+md"### 1: Prior distribution given `fs1`"
 
 # ╔═╡ 23056f1e-128e-463e-a80f-56299397022e
 md"""
@@ -459,96 +306,35 @@ md"""
 """
 
 # ╔═╡ 3cd0c888-9f11-47f1-a293-b96aa80ea3b0
-lengthdist = MixtureModel([Normal(90, 15), Normal(60, 10)], [0.3, 0.7])
+lengthdist = missing
 
-# ╔═╡ afcf1260-db4d-4ff1-ac07-978161874e6c
-histogram(rand(lengthdist, 10000))
+# ╔═╡ e23756e0-7688-4e3b-ba8d-a827e621e862
+missing # plot
 
 # ╔═╡ 8e030a06-5104-4c5b-b1f2-f86464e66502
-md"### 2"
+md"### 2: Conditional expected value"
 
 # ╔═╡ 6ebf3a16-0e6a-491f-8280-b4327ed52cf0
 len_obs = [94.0, 88.7, 89.6, 69.8, 52.8, 84.0, 89.3, 66.4, 95.1, 81.6]
 
 # ╔═╡ b15de91a-fc48-4cdc-a35f-6453a9a59982
 @model function fishmixture()
-	fs1 ~ Uniform(0, 1) # fraction of species 1
-	# fish length distribution
-	fishlendist = MixtureModel([Normal(90, 15), Normal(60, 10)], [fs1, 1-fs1])
-	
-	fishlens = zeros(10)    # fish lengths
-	for i in eachindex(fishlens)
-		fishlens[i] ~ fishlendist
-	end
+	missing
 end
 
-# ╔═╡ 4f6bfecd-43a3-44c1-a20c-224c01b8469d
-fishmodel = fishmixture() | (fishlens = len_obs,)
-
-# ╔═╡ 41c1e279-4d0b-4447-a9ab-015863df8e91
-fishchain = sample(fishmodel, NUTS(), 2000)
-
-# ╔═╡ a786c349-34e3-4dda-b139-808259495753
-plot(fishchain)
-
-# ╔═╡ 4f5c0761-12ef-4997-9e40-050c30ec84ab
-fs1_est = mean(fishchain[:fs1])
+# ╔═╡ 819ed364-4bc9-43ec-aa50-b965c8f1c826
+fs1_est = missing
 
 # ╔═╡ 952a941a-8703-45a3-aac1-a290a181e8c5
-md"### 3🌟"
+md"### 3🌟: Conditional expected value (spicy)"
 
 # ╔═╡ 8629d049-b9fd-4e9e-9b55-401a3069e956
 @model function fishmixture🌟()
-	fs1 ~ Uniform(0, 1)      # fraction of species 1 
-	                         # or probability of belonging to species 1
-	
-	fishlens = zeros(10)     # samples with fish lengths
-	isspecies1 = zeros(10)   # samples with 1's meaning belonging to species 1
-	                         # samples with 0's meaning belonging to species 2
-	for i in eachindex(fishlens)
-		isspecies1[i] ~ Bernoulli(fs1) # samples belonging to species 1 or not
-		if isspecies1[i] == 1.0        # if belongs to species 1
-			fishlens[i] ~ Normal(90, 15)  # sample from distribution of species 1
-		else
-			fishlens[i] ~ Normal(60, 10)  # sample from distribution of species 1
-		end
-	end
+	missing
 end
 
-# ╔═╡ 75d4d482-2f30-4c21-be04-0b821635346f
-fishmodel🌟 = fishmixture🌟() | (fishlens = len_obs,)
-
-# ╔═╡ bdb0d902-3056-43fb-abb0-15f2494fcf9d
-fishchain🌟 = sample(fishmodel🌟, PG(20), 2000)
-
-# ╔═╡ 7372c616-05a8-428d-ab04-a7be9f65653d
-plot(fishchain🌟)
-
-# ╔═╡ a60315f2-92f5-4f3b-b154-c3428816bfb5
-# fish species 1 -> large fish
-# fish species 2 -> small fish
-#        [94.0, 88.7, 89.6, 69.8, 52.8, 84.0, 89.3, 66.4, 95.1, 81.6]
-# fish:    1     2     3     4     5     6     7     8     9    10
-# species: 1     1     1    1or2   2     1     1    1or2   1     1
-
-# ╔═╡ 05c700e8-f24a-4c82-9d15-cb3450de9e2a
-# We expect a very high chance here because 94.0 is a large fish
-p_fish1_is_species1 = mean(fishchain🌟["isspecies1[1]"])
-
-# ╔═╡ 40cc67c1-8627-4f1f-b135-a9770f916b53
-# We expect medium chance here because 69.8 is between small and large
-p_fish4_is_species1 = mean(fishchain🌟["isspecies1[4]"])
-
-# ╔═╡ 8b9d7708-4a67-457a-9fe1-de12fb2a2de9
-# We expect a very small chance here because 52.8 is a small fish
-p_fish5_is_species1 = mean(fishchain🌟["isspecies1[5]"])
-
-# ╔═╡ 5d8929fd-5aa4-4186-9fd0-e0a64ac06cbe
-# We expect medium chance here because 66.4 is between small and large
-p_fish8_is_species1 = mean(fishchain🌟["isspecies1[8]"])
-
-# ╔═╡ 8e09d7f1-f8db-42a1-beb0-ed3afb043c19
-mean(fishchain🌟[:fs1])   # should be the same as before
+# ╔═╡ 483cbe4d-64d3-4b16-b6fc-e97b21f174a6
+p_fish4_is_species1 = missing
 
 # ╔═╡ 30088664-5157-4d99-8584-7a42d0acdfb8
 md"## 5: Circleference"
@@ -606,76 +392,34 @@ begin
 end
 
 # ╔═╡ 4e96908a-4fc9-429d-bf37-7a569194a038
-scatter([x1, x2, x3], [y1, y2, y3], aspect_ratio=:equal, xlim=[-40, 40], ylim=[-40, 40])
+scatter([x1, x2, x3], [y1, y2, y3])
 
 # ╔═╡ 7eedb74d-eee1-4cf0-b2bf-5febf474edd2
-md"### 1"
-
-# ╔═╡ abbb225e-fdcd-435e-9f81-c1e6fa1c8f5d
-# Flat() -> p134 in syllabus
-rand(Flat())
-
-# ╔═╡ f1086281-ba2d-461d-bcfe-82e3d09aaae0
-rand(2*π*Flat())
-
-# ╔═╡ c4a2335d-5926-4da4-a46f-41da7b67fa01
-rand(Uniform(0, 2*π))
+md"### 1: All points"
 
 # ╔═╡ 84d27c98-9513-4ae3-8101-621c083a1b01
 @model function circle(σ=0.25)
 	# generate a circle center
-	xC ~ Uniform(-20, 20)
-	yC ~ Uniform(-20, 20)
+	missing
 	
 	# generate a radius
-	R ~ Uniform(0, 50)
+	missing
 	
 	# three random points in polar coordinates
-	θ1 ~ 2*π*Flat() 
-		# `Uniform(0, 2*pi)` is also possible but can get the sampler stuck
-		# at 0 or 2π!
-	θ2 ~ 2*π*Flat()
-	θ3 ~ 2*π*Flat()
 	
 	# P1
-	x1 ~ Normal(xC + R * cos(θ1), σ)
-	y1 ~ Normal(yC + R * sin(θ1), σ)
+	missing
 	# P2
-	x2 ~ Normal(xC + R * cos(θ2), σ)
-	y2 ~ Normal(yC + R * sin(θ2), σ)
+	missing
 	# P3
-	x3 ~ Normal(xC + R * cos(θ3), σ)
-	y3 ~ Normal(yC + R * sin(θ3), σ)
+	missing
 end
 
 # ╔═╡ 543c40d5-e8a7-492d-a0b8-e7e73e5953e2
 circlemodel = circle() | (x1=x1, y1=y1, x2=x2, y2=y2, x3=x3, y3=y3);
 
-# ╔═╡ 22173937-25a1-4ec0-877d-f9669653e43e
-circlechain = sample(circlemodel, NUTS(), 2000)
-
-# ╔═╡ 0b59a6bc-a886-49fd-a3f5-9b20e60882b9
-plot(circlechain)
-
-# ╔═╡ 121c291f-ec34-47cb-a9fc-01309b0f42c5
-# Circle center at:
-(mean(circlechain[:xC]), mean(circlechain[:yC]))
-
-# ╔═╡ 7efa1868-08b9-49fb-b799-76f1c99d1a0e
-mean.([circlechain[:xC], circlechain[:yC]])
-
-# ╔═╡ 374d7cea-2dc6-4cb3-b929-ddaba1f4c6fb
-# Radius:
-mean(circlechain[:R])
-
-# ╔═╡ 95d223a0-748b-4656-8777-e151c0dc8e93
-mean(circlechain[:θ1])*180.0/π
-
-# ╔═╡ 2668e03a-91eb-420f-af3f-b74d83126f76
-mean(circlechain[:θ2])*180.0/π
-
-# ╔═╡ 87be71c4-2bc3-432b-a977-f3d46424a68f
-mean(circlechain[:θ3])*180.0/π
+# ╔═╡ 25ea29e7-b391-4bd1-bdbc-1957adb8c993
+circlechain = missing
 
 # ╔═╡ 0d04b0e8-3d1a-4281-b175-570148569ef2
 begin
@@ -690,23 +434,19 @@ begin
 end
 
 # ╔═╡ 0a140d2a-a24b-48df-9af8-7fa5d586a26f
-md"### 2"
+md"### 2: Some points"
 
 # ╔═╡ b7649523-fd40-4fe3-8d86-fc2cb2c8c488
-circle1 = circle() | (x1=x1, y1=y1)
-# This can be any circle through (x1, y1) with centrer
-# in [-20, 20]x[-20, 20] and radius between 0 and 50.
+circle1 = missing # given one point
 
 # ╔═╡ b7ba8f91-f440-4166-af9e-11fcb5f1755f
-circle2 = circle1 | (x2=x2, y2=y2)
-# This can be any circle through (x1, y1) and (x2, y2) with centrer
-# in [-20, 20]x[-20, 20] and radius between 0 and 50.
+circle2 = missing # given two points
 
 # ╔═╡ 3b5f3623-3d00-4ba4-9182-5bddacc56567
-chain1 = sample(circle1, NUTS(), 100);
+chain1 = missing
 
 # ╔═╡ c11452bc-f404-4e51-8f68-292f5b538c88
-chain2 = sample(circle2, NUTS(), 100);
+chain2 = missing
 
 # ╔═╡ c1174a5c-a6a1-46a0-96be-6997e3201dfc
 begin
@@ -736,126 +476,81 @@ end
 # ╟─41dc8060-cf5e-11ef-26f9-892577e77af0
 # ╠═94c6f31d-1a43-4221-b60c-1fa0ef8738b8
 # ╠═45bc5b66-c81b-4afb-8a7e-51aff9609c62
+# ╠═9daad9dc-b092-4845-a276-ed3a24249924
 # ╟─299ba93b-0fc0-4bb3-9a2c-a571ce571f1b
-# ╟─957386c5-775c-47f7-9a38-e1630e548689
-# ╟─ca8057cc-6d70-4a88-88aa-c494af9659ef
+# ╟─0d068aa6-f7c9-4a75-8382-cfbc903efc5b
+# ╟─5d4e269d-bd5a-422e-9547-099e04b8eedf
+# ╟─7abeb4d3-4648-4d8b-9383-de5213c8cc41
 # ╟─47aa2304-d312-40e9-b9c6-7c79a7d64de4
 # ╠═78c9ce62-e375-48ac-8083-55ee085c61de
-# ╠═4ab8aaba-010c-4844-9cf6-627a746c2492
-# ╠═82289137-9c20-4d7a-97b2-56f417831409
+# ╠═c64b346a-059d-4bbe-b166-80116260e19b
 # ╟─78eb7779-f182-4419-b5d8-79a2f5c5d6da
 # ╠═3decb2ec-210a-4b2f-842d-6fd40dd3f77b
 # ╠═76dd814d-0d9b-4f7e-aff8-990da57d052b
-# ╠═5c989060-40cd-4b27-b96f-3f98a85f5122
+# ╠═61b8ef63-a613-4dcb-8f7a-936e0d59b862
 # ╠═4e8b9000-cb61-4f01-9ba9-17276ad0335e
 # ╟─8777b133-7d7c-4a85-b89c-2f00093e9984
 # ╠═9695ee7e-359b-489c-962b-1bf84b052371
-# ╟─10deca95-9f88-45ff-a22f-30280776acef
 # ╠═014538da-b5ef-41c8-b799-2c000b4c9134
-# ╠═b02dc714-e2bb-4ae2-acf9-c37a4389f953
+# ╠═977d0406-f154-4b87-b9c6-cafe4809a4a6
+# ╠═af4811ce-c6e7-458a-8f89-0562355b3eb0
 # ╠═fd540765-95e5-4071-81f7-e689b06cad0c
 # ╠═5521933a-a42e-4a67-94b9-84eab52ddf07
-# ╟─ca3e730c-a940-4c76-93eb-70ae4aa0e008
-# ╠═159caa6a-2ebf-44bd-87a5-b4ab8b085354
-# ╟─eda00c08-de49-4d2d-acc4-ba6e21ff0b11
+# ╟─9403c355-dce8-4aa9-80a3-824ea6193905
+# ╠═bedd99ca-4285-4c3d-87e2-c22d414f8f07
+# ╟─21743f62-c7f5-4171-8277-0667edb71c56
 # ╠═b2b16c34-e12a-4bea-8098-313d01913bbf
-# ╠═1a78d96a-fe57-42a4-9785-003266117ddb
-# ╠═2f5c14e9-709a-40ec-a6cb-ddd870cc1a60
-# ╠═7f90e18d-9af8-42fa-984b-aaa7c8c458b5
-# ╠═caf0db69-a83f-433a-b848-7d7d8c2fa25e
-# ╠═3c1a508b-6d2c-4507-ab9f-752ee93709c9
-# ╠═2d35375a-cd92-48d1-8779-761641e7b0af
+# ╠═26a245d2-c5b6-484d-bdf7-541948ff06ad
+# ╠═dc6aadff-7cff-4a9a-a967-32cd322b2696
+# ╠═ea2235f0-0cfc-4603-b027-d0a1bc6fa2c1
 # ╟─951d0913-1a52-4d5b-b5bb-168487e50ab2
 # ╟─49035a16-c419-4531-b157-a5ab357b44fe
-# ╠═d5f544a4-ba51-4103-82ce-259ba20af11a
 # ╟─5f8322ca-0ded-4750-8ad6-e66e8280daca
 # ╠═ec479be9-0d8a-4c8d-97c9-6f64d861924c
-# ╠═4e92d825-481f-430a-94a4-fbdf31b679eb
-# ╠═0ced04f8-322a-42f6-a1b7-1b30faf9024b
-# ╠═e48a2d96-6d7b-4861-b315-0ae580479eda
-# ╠═ceb2b8fd-aa47-443b-8e5c-74a48eda1174
-# ╠═8c1eb826-6023-4852-aa45-789f6d4b7051
-# ╟─205efb15-e28a-418a-a1af-892afdf3c188
-# ╠═ad571d35-639c-4239-9e62-42952ddb48d0
+# ╠═438893d1-3107-493c-9299-d8813658a698
+# ╠═dd7d84b0-1f20-4478-96ba-b3f4e9df1d2c
+# ╠═accca8d7-8822-49ae-8588-7259da82e37a
+# ╠═519a952b-f040-4588-8acd-1cfaab88c4da
+# ╠═57adc714-cdd1-46cf-a4ea-d0fb04924e1e
 # ╟─0fddec58-67d9-4dec-a72d-445675fa46a6
-# ╠═9dd6fa35-37d5-4ab4-ac2c-f4eefdabadd2
-# ╠═57ec05ca-bf37-4012-be9a-d83c1d9f0f8a
+# ╠═b77d8796-9065-4c61-be21-3dc292b94492
 # ╟─5bde987a-3f5c-4ff7-96a0-9e174f73fdfb
-# ╠═6e3d4f8f-1766-49a6-9e4a-610671d8aa63
-# ╠═4cd99dce-12df-4e3a-aa91-ff00c61544a8
-# ╠═48ea9893-16f7-457e-93b0-9f168a2f72f4
-# ╠═c3d36685-e1dd-4734-bee9-f7aeebed3473
-# ╠═bdc40079-de7b-489f-9d9b-6e1e2130109f
-# ╠═22d009f0-390f-412d-9af8-33d169ac7371
+# ╠═abffd02e-b917-4e9e-a94d-de197e1b0fc3
+# ╠═5b30d91a-7039-4d2a-bcf7-3a990622fd2a
+# ╠═27939d84-d6e1-47b2-a939-5038c6bdcb48
+# ╠═744cf31f-89c0-44e8-a6fb-0f4dcea04e5d
 # ╟─ed7c5547-bd82-4ca7-bf51-dd1c201d88af
 # ╟─a3c26839-2acc-49d8-98c4-3a7142dd6512
 # ╟─dac55632-6e17-479e-8090-5cf8eaa67dad
 # ╟─7df97000-5cf0-4a29-b3c3-f867403f4318
 # ╠═0fe475dd-411e-474e-9524-ef9fcceed7af
-# ╠═382db9a6-edcb-497b-9535-b576cd6badb0
-# ╠═fce3e814-97a7-4e12-a7cc-b5b086dc8340
-# ╠═a7811e57-2820-4662-8c20-a4d2d7efd642
+# ╠═db77b90b-33b5-4d70-8229-b4c7d74fa96c
 # ╟─308cb1f5-e26b-43b2-be4d-9eabd68b3670
-# ╟─490cbc67-3e0c-4c79-a83d-52cf493854a2
-# ╠═dbadf227-1399-45f7-ad48-df9d59e18343
-# ╠═5d812594-733e-4b18-88dc-c28867cf0933
-# ╠═0373b6a5-bb2c-47b9-a137-5a484b0c7bf2
-# ╠═ec06259f-67b5-4920-8635-35c52c080751
-# ╠═a628bd3f-5d07-435e-80cc-b72662e13e7b
-# ╠═e2fd7500-277a-4d52-982c-5aea8421d756
-# ╠═96ee6380-719e-47c1-a429-4fdd1931c9ce
+# ╟─738b4097-56e1-4921-9195-2d535c78ae73
+# ╠═d797cb9b-430b-4d1d-8ded-21959a7cb3a9
 # ╟─cd37e5fc-ae9a-429d-844d-4b450b187b5e
 # ╠═126d3954-c77d-4c98-abe0-fd87d14e6265
-# ╠═15fe25d9-5314-4056-8021-cf259ba27c94
-# ╠═2a142576-aec2-4311-9c0e-cb68665d59f6
-# ╠═0130c903-e3dd-415e-aa17-1b705f9e4ccc
-# ╠═11676f8a-d4fe-4999-9ea2-486fca461f65
-# ╠═f6bc2fad-24c7-48a7-9328-34b616fa106f
-# ╠═347a4533-244f-4e93-b125-cdd56a5a08ad
+# ╠═37bf6ca5-e42b-406e-94d6-bcd1e706e2bd
+# ╠═c49955c7-7082-4261-b4db-0056b5c637f1
 # ╟─9a168680-9d96-466f-ba75-122d6a391501
+# ╟─ab6331a3-676e-45e6-b5be-e9c4154ea071
 # ╟─1f35d962-a249-4be7-9a96-17eb83fca7d8
-# ╠═3ad29b60-375b-400b-b1e5-8918da6497ff
-# ╠═0cce9dee-43ac-42d3-9113-8b1503c7a73c
-# ╟─8d501c17-58d2-43d3-92c2-0d21bc9113e3
-# ╟─c626d3bf-4abe-4bdc-991a-363bee27b25b
 # ╠═8fc58fa4-b005-4f32-9eae-a8143582a1ae
-# ╠═fe2958a7-e9dd-4eca-979d-a80df12f8735
-# ╠═93f6b680-aece-45d7-804e-a27073130d94
-# ╠═8abafb6a-dc83-422c-82d1-a721a0e1eca0
-# ╠═5ba2886c-b2e1-49f4-90c6-549acc808f77
-# ╠═ed022247-5959-481f-a81e-41e5ee5a1448
-# ╠═c57046cd-5f53-43a2-9de4-9bfad27dcab9
-# ╠═a2ebe90c-1006-4fc3-b8bd-bdf9c9e9fed5
-# ╠═5b505f97-e776-4cc3-99f8-721dc241ae2a
-# ╠═deaf3485-9bc1-48da-809c-61327cce5ad9
-# ╠═56a91508-29fa-4e5f-8dcc-0bb9d67db1fe
-# ╠═878e5eaf-2f1c-4c09-a9dd-47821e9295e5
-# ╠═7366d15b-9c03-4200-8720-6d879bb65476
+# ╠═410521d8-f767-4c4e-b19b-25cf31ec0f36
 # ╟─9dc0456b-7fd2-4120-8f9e-3de1984ff516
 # ╟─225cd579-1e0d-4680-8d3f-5a737a656eb8
 # ╟─3ffac5ca-3635-4aa1-bab7-7c28e7a801cb
 # ╟─b477b212-83a2-42f0-a616-52516e152d48
 # ╟─23056f1e-128e-463e-a80f-56299397022e
 # ╠═3cd0c888-9f11-47f1-a293-b96aa80ea3b0
-# ╠═afcf1260-db4d-4ff1-ac07-978161874e6c
+# ╠═e23756e0-7688-4e3b-ba8d-a827e621e862
 # ╟─8e030a06-5104-4c5b-b1f2-f86464e66502
 # ╠═6ebf3a16-0e6a-491f-8280-b4327ed52cf0
 # ╠═b15de91a-fc48-4cdc-a35f-6453a9a59982
-# ╠═4f6bfecd-43a3-44c1-a20c-224c01b8469d
-# ╠═41c1e279-4d0b-4447-a9ab-015863df8e91
-# ╠═a786c349-34e3-4dda-b139-808259495753
-# ╠═4f5c0761-12ef-4997-9e40-050c30ec84ab
+# ╠═819ed364-4bc9-43ec-aa50-b965c8f1c826
 # ╟─952a941a-8703-45a3-aac1-a290a181e8c5
 # ╠═8629d049-b9fd-4e9e-9b55-401a3069e956
-# ╠═75d4d482-2f30-4c21-be04-0b821635346f
-# ╠═bdb0d902-3056-43fb-abb0-15f2494fcf9d
-# ╠═7372c616-05a8-428d-ab04-a7be9f65653d
-# ╠═a60315f2-92f5-4f3b-b154-c3428816bfb5
-# ╠═05c700e8-f24a-4c82-9d15-cb3450de9e2a
-# ╠═40cc67c1-8627-4f1f-b135-a9770f916b53
-# ╠═8b9d7708-4a67-457a-9fe1-de12fb2a2de9
-# ╠═5d8929fd-5aa4-4186-9fd0-e0a64ac06cbe
-# ╠═8e09d7f1-f8db-42a1-beb0-ed3afb043c19
+# ╠═483cbe4d-64d3-4b16-b6fc-e97b21f174a6
 # ╟─30088664-5157-4d99-8584-7a42d0acdfb8
 # ╟─7dd2c189-79c0-4d29-9e17-9c24a78b5791
 # ╟─dcbf405c-786c-4226-b35c-dc718452bb61
@@ -865,19 +560,9 @@ end
 # ╠═81eca3b3-12d9-43d7-af14-e9aeb73f2471
 # ╠═4e96908a-4fc9-429d-bf37-7a569194a038
 # ╟─7eedb74d-eee1-4cf0-b2bf-5febf474edd2
-# ╠═abbb225e-fdcd-435e-9f81-c1e6fa1c8f5d
-# ╠═f1086281-ba2d-461d-bcfe-82e3d09aaae0
-# ╠═c4a2335d-5926-4da4-a46f-41da7b67fa01
 # ╠═84d27c98-9513-4ae3-8101-621c083a1b01
 # ╠═543c40d5-e8a7-492d-a0b8-e7e73e5953e2
-# ╠═22173937-25a1-4ec0-877d-f9669653e43e
-# ╠═0b59a6bc-a886-49fd-a3f5-9b20e60882b9
-# ╠═121c291f-ec34-47cb-a9fc-01309b0f42c5
-# ╠═7efa1868-08b9-49fb-b799-76f1c99d1a0e
-# ╠═374d7cea-2dc6-4cb3-b929-ddaba1f4c6fb
-# ╠═95d223a0-748b-4656-8777-e151c0dc8e93
-# ╠═2668e03a-91eb-420f-af3f-b74d83126f76
-# ╠═87be71c4-2bc3-432b-a977-f3d46424a68f
+# ╠═25ea29e7-b391-4bd1-bdbc-1957adb8c993
 # ╠═0d04b0e8-3d1a-4281-b175-570148569ef2
 # ╟─0a140d2a-a24b-48df-9af8-7fa5d586a26f
 # ╠═b7649523-fd40-4fe3-8d86-fc2cb2c8c488

@@ -1,7 +1,11 @@
 [Export]
 baked_state = false
 baked_notebookfile = false
-offer_binder = true
+# Binder is disabled: our notebooks activate `pluto-deployment-environment` by a
+# relative path, which does not exist in a Binder session, so every Binder run
+# fails with "Package ... not found in current path". Re-enable this together
+# with a Binder image that ships the environment.
+offer_binder = false
 ignore_cache = [
     "index.jl",
 ]

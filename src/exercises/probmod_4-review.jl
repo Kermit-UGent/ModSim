@@ -1,13 +1,12 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 #> [frontmatter]
-#> order = "19"
-#> title = "3. ProbMod review"
-#> date = "2025-03-07"
+#> order = "26"
+#> title = "4. ProbMod review"
 #> tags = ["exercises"]
-#> description = "Review sampling exercise"
 #> layout = "layout.jlhtml"
+#> description = "Review sampling exercise"
 #> 
 #>     [[frontmatter.author]]
 #>     name = "Bram Spanoghe"
@@ -15,7 +14,9 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 432217b3-d4c0-4472-9350-28649d7ad958
+# ╔═╡ 882b942c-a5ae-445d-a946-6eb8cddc423e
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ aa2737db-f89f-4e08-9abe-0a86e8880c19
@@ -26,7 +27,7 @@ md"# Review exercise: Buffon's needles"
 
 # ╔═╡ a6435b94-f1af-4609-abfc-93d88730d023
 md"""
-A wise man once said: ["there is no greater joy than estimating π"](https://en.wikipedia.org/wiki/Approximations_of_%CF%80). Next to throwing darts at the unit square, another method to accomplish this is using [Buffon's needle problem](https://en.wikipedia.org/wiki/Buffon%27s_needle_problem).
+A wise man once said: ["there is no greater joy than estimating π"](https://en.wikipedia.org/wiki/Approximations_of_%CF%80). One method to accomplish this is using [Buffon's needle problem](https://en.wikipedia.org/wiki/Buffon%27s_needle_problem).
 
 The experiment is as follows: consider a floor with parallel lines all a distance of 1 away from eachother. Now drop a needle of length 1 (and width ~0) on the floor with a **random position and angle**. What is the probability $P_{cross}$ that the needle will cross one of the lines?
 """
@@ -35,8 +36,8 @@ The experiment is as follows: consider a floor with parallel lines all a distanc
 md"The following image illustrates the problem (imagine $l$ = $t$ = 1) for two needles, where `a` crosses a line and `b` does not."
 
 # ╔═╡ c2ba2183-957f-4b94-a22e-0c2f3dd957ad
-md"""
-![Buffon's needles](https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Buffon_needle.svg/1920px-Buffon_needle.svg.png)
+html"""
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Buffon_needle.svg/1920px-Buffon_needle.svg.png" style="background-color:white;" alt:"Buffon's needles">
 """
 
 # ╔═╡ d71cf8dc-99e5-48e0-9abe-2242a6ccc30b
@@ -65,7 +66,7 @@ md"""
 """
 
 # ╔═╡ Cell order:
-# ╠═432217b3-d4c0-4472-9350-28649d7ad958
+# ╠═882b942c-a5ae-445d-a946-6eb8cddc423e
 # ╠═aa2737db-f89f-4e08-9abe-0a86e8880c19
 # ╟─5be87389-1a97-481e-bec6-1d781f016077
 # ╟─a6435b94-f1af-4609-abfc-93d88730d023

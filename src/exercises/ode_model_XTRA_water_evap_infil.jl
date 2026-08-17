@@ -1,13 +1,12 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 #> [frontmatter]
-#> order = "9"
-#> title = "EXTRA. ODE water evaporation"
-#> date = "2025-02-07"
+#> order = "16"
+#> title = "2. ODE_model_Xtra_evaporation"
 #> tags = ["exercises"]
-#> description = "ODE model of water evaporation"
 #> layout = "layout.jlhtml"
+#> description = "Extra exercise on water evaporation and infiltration in a reservoir"
 #> 
 #>     [[frontmatter.author]]
 #>     name = "Gauthier Vanhaelewyn"
@@ -16,34 +15,34 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ e079823b-8b40-42a2-a63f-1645a97b33f0
-begin
-	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
-	using Pkg
-	Pkg.activate("../../pluto-deployment-environment")
-end
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
+using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 62dc7706-f58a-11ee-2d3d-f78f7ceca914
-using Markdown
-
-# ╔═╡ 4071647d-3084-4c8b-9fb7-eca7255253a9
-using InteractiveUtils
+using Markdown, InteractiveUtils
 
 # ╔═╡ 65571bb8-e260-4a82-b0d2-198e47c56271
-using PlutoUI
-
-# ╔═╡ 2574879f-28d1-4d30-a1aa-a637dd1b216a
-using Catalyst
+using StatsPlots, PlutoUI; TableOfContents()
 
 # ╔═╡ 6c4b3d09-09c2-4439-9167-63b59b078104
-using OrdinaryDiffEq, StatsPlots
+using OrdinaryDiffEq, Plots
+
+# ╔═╡ c131694c-ad64-44b5-a4fa-0976cd3ec3dd
+md"""
+# Exercise: Water evaporation and infiltration
+"""
 
 # ╔═╡ 66e8a12c-74b6-4077-b90e-3d85e5a61d6e
 hint(text) = Markdown.MD(Markdown.Admonition("hint", "Hint", [text]));
 
+# ╔═╡ d01091d7-2593-482d-b734-01209dde2249
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/water_evap_infil_model.png)
+"""
+
 # ╔═╡ f55e0ca3-07ff-43a1-907f-9ad640227822
 md"""
-# Exercise: Water evaporation and infiltration
-
 Consider a water reservoir, such as a lake, where the water in the reservoir is in contact with the air as well as with the groundwater. We will denote the water level in the reservoir as $W$ and the groundwater level as $G$.
 
 The water in the reservoir evaporates at a rate $k_1$ (i.e. the *evaporation coefficient*) and there can be infiltration into or from the groundwater at a rate $k_2$ (i.e., *infiltration coefficient*) depending on the difference in the water level in the reservoir and groundwater (cf. $(W-G)$)
@@ -147,7 +146,7 @@ Create the ODE problem and store it in `oprob`:
 """
 
 # ╔═╡ a25d3652-13f5-47ef-9f16-c6698547a734
-# oprob = missing           # Uncomment and complete the instruction
+# oprob = missing;           # Uncomment and complete the instruction
 
 # ╔═╡ 451a3c66-5bcc-4161-af81-f89af33b5862
 md"""
@@ -191,12 +190,20 @@ md"""
 # ╔═╡ 4ce3328e-3436-45ad-b899-9b901b53a8ea
 md"- Answer: missing"
 
+# ╔═╡ 2574879f-28d1-4d30-a1aa-a637dd1b216a
+using Catalyst
+
+# ╔═╡ 10143dd3-2143-4293-9411-a3b34d6bb80e
+using OrdinaryDiffEq, Catalyst
+
 # ╔═╡ Cell order:
+# ╟─c131694c-ad64-44b5-a4fa-0976cd3ec3dd
 # ╠═62dc7706-f58a-11ee-2d3d-f78f7ceca914
-# ╠═4071647d-3084-4c8b-9fb7-eca7255253a9
 # ╠═e079823b-8b40-42a2-a63f-1645a97b33f0
 # ╠═65571bb8-e260-4a82-b0d2-198e47c56271
+# ╠═10143dd3-2143-4293-9411-a3b34d6bb80e
 # ╟─66e8a12c-74b6-4077-b90e-3d85e5a61d6e
+# ╟─d01091d7-2593-482d-b734-01209dde2249
 # ╟─f55e0ca3-07ff-43a1-907f-9ad640227822
 # ╟─a551f3c5-2fc3-4236-ab4a-3d9c14afc62b
 # ╟─4eb95688-ba9d-4524-a522-3b8343f4e2be

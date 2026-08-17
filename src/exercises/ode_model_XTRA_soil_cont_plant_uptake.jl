@@ -1,13 +1,12 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.21
 
 #> [frontmatter]
-#> order = "8"
-#> title = "EXTRA. ODE soil"
-#> date = "2025-02-07"
+#> order = "15"
+#> title = "2. ODE_model_Xtra_soil_contamination"
 #> tags = ["exercises"]
-#> description = "ODE model of soil"
 #> layout = "layout.jlhtml"
+#> description = "Extra exercise on soil contamination with plant uptake"
 #> 
 #>     [[frontmatter.author]]
 #>     name = "Gauthier Vanhaelewyn"
@@ -16,27 +15,27 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 6c7911b4-fec2-4139-8b54-36a4fb5916a0
-begin
-	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
-	using Pkg
-	Pkg.activate("../../pluto-deployment-environment")
-end
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
+using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 121df656-f57a-11ee-140e-dfb61e112370
-using Markdown
-
-# ╔═╡ 74a1a82f-8c30-45e5-a2b7-1c1ce4d5c523
-using InteractiveUtils
+using Markdown, InteractiveUtils
 
 # ╔═╡ 895c1016-a8ce-43ae-8094-5d6ea75a6053
-using Catalyst
+using StatsPlots, PlutoUI; TableOfContents()
 
 # ╔═╡ 28e9e96c-fce6-4507-97c9-37337a0731bc
-using OrdinaryDiffEq, StatsPlots
+using OrdinaryDiffEq, Catalyst
 
 # ╔═╡ 2f0c3dd4-9429-4f5b-9150-011970b003f4
 md"""
 # Exercise: Soil Contamination with Plant Uptake
+"""
+
+# ╔═╡ 2a8fdc6b-2372-4a97-a094-d218a22274d8
+md"""
+![](https://users.ugent.be/~gvhaelew/fig/soil_plant_cont_model.png)
 """
 
 # ╔═╡ c0c35547-9eed-428b-b513-4b5166decb7e
@@ -75,7 +74,7 @@ Convert the system to a symbolic differential equation model and verify that you
 """
 
 # ╔═╡ 1a7c3080-5773-44b9-a5c5-bb16f25048a3
-# osys = missing         # Uncomment and complete the instruction
+osys = missing
 
 # ╔═╡ 7c4767ac-ee72-4f46-8699-68f4bfb15d92
 md"""
@@ -88,7 +87,7 @@ Initialize a vector `u0` with the initial conditions:
 """
 
 # ╔═╡ 9d4fc31d-32b4-49c7-9e4c-577530199513
-# u0 = missing         # Uncomment and complete the instruction
+u0 = missing
 
 # ╔═╡ 51ffec7c-6033-47a9-b65a-5f9a7ab96fb9
 md"""
@@ -96,15 +95,15 @@ Set the timespan for the simulation:
 """
 
 # ╔═╡ 20b43337-58fd-4b23-8e4d-c4fd8234bb5f
-# tspan =  missing      # Uncomment and complete the instruction
+tspan = missing
 
 # ╔═╡ ad63f799-bc65-4f2c-ba6c-461fa10139d0
 md"""
-Initialize a vector `param` with the parameter values:
+Initialize a vector `parms` with the parameter values:
 """
 
 # ╔═╡ 01e33f75-fdfe-4983-a3bd-4cf074152390
-# params = missing       # Uncomment and complete the instruction
+parms = missing
 
 # ╔═╡ 0f326aa7-044c-4c6f-be71-acf5c032f796
 md"""
@@ -112,7 +111,7 @@ Create the ODE problem and store it in `oprob`:
 """
 
 # ╔═╡ 6f84b532-a718-4d42-9829-91366693b51c
-# oprob = missing        # Uncomment and complete the instruction
+oprob = missing;
 
 # ╔═╡ ca65797f-a1dd-42dd-992c-ba067932a018
 md"""
@@ -120,7 +119,7 @@ Solve the ODE problem. Use `Tsit5()` and `saveat=1.0`. Store the solution in `os
 """
 
 # ╔═╡ 3d66d40f-f627-4268-890f-ab662c0efdd6
-# osol = missing         # Uncomment and complete the instruction
+osol = missing
 
 # ╔═╡ 22dc63ad-47d5-45c4-8902-e9d7abc0a4f6
 md"""
@@ -128,11 +127,12 @@ Plot the solutions:
 """
 
 # ╔═╡ 0f920caa-5993-448c-a449-6449feea121a
-# missing              # Uncomment and complete the instruction
+missing
 
 # ╔═╡ 62c66f8a-6561-4d50-b6d9-4dfc43cef0a8
 md"""
-1. Interprate the simulation results (cf. peak in $C$ and increase of $P$) in terms of the used parameter values.
+!!! question
+	1. Interprate the simulation results (cf. peak in $C$ and increase of $P$) in terms of the used parameter values.
 """
 
 # ╔═╡ 27c1e08f-5e6a-43e3-b8e3-bba78e093556
@@ -140,7 +140,8 @@ md"- Answer: missing"
 
 # ╔═╡ 73b63510-e1a1-44a6-8902-67ee383e6582
 md"""
-2. How would you modify the basic model to make it a more realistic biological model (cf. hill, monod, ...).
+!!! question
+	2. How would you modify the basic model to make it a more realistic biological model (cf. hill, monod, ...)?
 """
 
 # ╔═╡ a7068013-ed98-486a-ba59-a57f26d12d1c
@@ -148,24 +149,25 @@ md"- Answer: missing"
 
 # ╔═╡ ad11f590-aa18-45f6-99be-571039ccbbae
 md"""
-3. What are the units of the parameters k₁, k₂ and k₃?
+!!! question
+	3. What are the units of the parameters k₁, k₂ and k₃?
 """
 
 # ╔═╡ 1ebbac82-068a-4754-8eec-1afa662feb96
 md"- Answer: missing"
 
 # ╔═╡ Cell order:
-# ╠═121df656-f57a-11ee-140e-dfb61e112370
-# ╠═74a1a82f-8c30-45e5-a2b7-1c1ce4d5c523
-# ╠═6c7911b4-fec2-4139-8b54-36a4fb5916a0
 # ╟─2f0c3dd4-9429-4f5b-9150-011970b003f4
-# ╟─c0c35547-9eed-428b-b513-4b5166decb7e
+# ╠═121df656-f57a-11ee-140e-dfb61e112370
+# ╠═6c7911b4-fec2-4139-8b54-36a4fb5916a0
 # ╠═895c1016-a8ce-43ae-8094-5d6ea75a6053
+# ╠═28e9e96c-fce6-4507-97c9-37337a0731bc
+# ╟─2a8fdc6b-2372-4a97-a094-d218a22274d8
+# ╟─c0c35547-9eed-428b-b513-4b5166decb7e
 # ╟─34e7090b-66c6-4e07-a2ad-b4f82a3669a0
 # ╠═ba6c2c9b-6ba9-48b8-9137-6b43813815ec
 # ╟─16402872-3590-44dd-922f-1846640c92fa
 # ╠═1a7c3080-5773-44b9-a5c5-bb16f25048a3
-# ╠═28e9e96c-fce6-4507-97c9-37337a0731bc
 # ╟─7c4767ac-ee72-4f46-8699-68f4bfb15d92
 # ╟─340328cc-78ed-4c6c-a0bf-73fd1be21d21
 # ╠═9d4fc31d-32b4-49c7-9e4c-577530199513
@@ -180,8 +182,8 @@ md"- Answer: missing"
 # ╟─22dc63ad-47d5-45c4-8902-e9d7abc0a4f6
 # ╠═0f920caa-5993-448c-a449-6449feea121a
 # ╟─62c66f8a-6561-4d50-b6d9-4dfc43cef0a8
-# ╟─27c1e08f-5e6a-43e3-b8e3-bba78e093556
+# ╠═27c1e08f-5e6a-43e3-b8e3-bba78e093556
 # ╟─73b63510-e1a1-44a6-8902-67ee383e6582
-# ╟─a7068013-ed98-486a-ba59-a57f26d12d1c
+# ╠═a7068013-ed98-486a-ba59-a57f26d12d1c
 # ╟─ad11f590-aa18-45f6-99be-571039ccbbae
-# ╟─1ebbac82-068a-4754-8eec-1afa662feb96
+# ╠═1ebbac82-068a-4754-8eec-1afa662feb96

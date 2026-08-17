@@ -2,12 +2,11 @@
 # v0.20.4
 
 #> [frontmatter]
-#> order = "31"
-#> title = "6. Sensitivity insuline"
-#> date = "2025-08-06"
+#> order = "38"
+#> title = "7. Sensitivity insuline"
 #> tags = ["exercises"]
-#> description = "Sensitivity insuline"
 #> layout = "layout.jlhtml"
+#> description = "Sensitivity insuline"
 #> 
 #>     [[frontmatter.author]]
 #>     name = "Gauthier Vanhaelewyn"
@@ -28,6 +27,8 @@ macro bind(def, element)
 end
 
 # ╔═╡ 7bc363b0-9415-4954-807f-81a308bde531
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 52b28a4c-b0bb-11ef-2841-17ecfb596676

@@ -1,21 +1,19 @@
 ### A Pluto.jl notebook ###
-# v0.20.6
+# v0.20.21
 
 #> [frontmatter]
-#> order = "35"
-#> title = "7. Model selection intro"
-#> date = "2025-08-06"
+#> order = "42"
+#> title = "8. Model selection intro"
 #> tags = ["exercises"]
-#> description = "Model selection intro"
 #> layout = "layout.jlhtml"
-#> 
-#>     [[frontmatter.author]]
-#>     name = "Gauthier Vanhaelewyn"
+#> description = "Model selection intro"
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ e1e7bc8e-7264-4cbc-98d2-aa73679fa2df
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ 5f4fea06-0632-11ef-102e-21f5606d2056
@@ -28,13 +26,13 @@ using InteractiveUtils
 using PlutoUI; TableOfContents()
 
 # ╔═╡ cdcebbb1-40e0-457f-a6ec-b769f6b1f2e9
-using OrdinaryDiffEq, StatsPlots
+using OrdinaryDiffEq
 
 # ╔═╡ 22489bd4-ab64-4bf9-ad03-5372ea273935
 using Catalyst
 
 # ╔═╡ 4ad72a6a-f541-4d0a-8392-56369e29ac96
-using Turing, StatsBase
+using Turing, StatsPlots, StatsBase
 
 # ╔═╡ 70590d28-058a-44df-8cf6-092d8c87438c
 using LinearAlgebra, Optim
@@ -447,7 +445,7 @@ function posterior(AICs) 	# AICs vector of AIC values
 	AICmin = minimum(AICs)
 	posterior = zeros(length(AICs))
 	
-	for i in eachindex(1:length(AICs))
+	for i in 1:length(AICs)
 		posterior[i] = exp((AICmin-AICs[i])/2)
 	end
 	
@@ -915,16 +913,16 @@ Use the above implemented function `posterior` to calculate the posterior model 
 # posteriors
 
 # ╔═╡ 72dc27a0-0e61-4073-843a-67e1bfd1427a
-# md"""
-# We can summarize all calculated criteria so far in the following table:
+md"""
+We can summarize all calculated criteria so far in the following table:
 
-# | Model | k | Log(L) | AIC | BIC | $P(M_i\|D)$ |
-# |:---|:---|:---|:---|:---|:---|
-# | Logistic | $k_log | $(round(L_log;digits=3)) | $(round(AIC_log;digits=3)) | $(round(BIC_log;digits=3)) | $(posteriors[1]) |
-# | Exponential | $k_exp | $(round(L_exp;digits=3)) | $(round(AIC_exp;digits=3)) | $(round(BIC_exp;digits=3)) | $(posteriors[2]) |
-# | Gompertz | $k_gom | $(round(L_gom;digits=3)) | $(round(AIC_gom;digits=3)) | $(round(BIC_gom;digits=3)) | $(posteriors[3]) |
+| Model | k | Log(L) | AIC | BIC | $P(M_i\|D)$ |
+|:---|:---|:---|:---|:---|:---|
+| Logistic | $k_log | $(round(L_log;digits=3)) | $(round(AIC_log;digits=3)) | $(round(BIC_log;digits=3)) | $(posteriors[1]) |
+| Exponential | $k_exp | $(round(L_exp;digits=3)) | $(round(AIC_exp;digits=3)) | $(round(BIC_exp;digits=3)) | $(posteriors[2]) |
+| Gompertz | $k_gom | $(round(L_gom;digits=3)) | $(round(AIC_gom;digits=3)) | $(round(BIC_gom;digits=3)) | $(posteriors[3]) |
 
-# """
+"""
 
 # ╔═╡ 6240553c-0c7c-45f4-b190-ebacf09ab632
 md"""
@@ -1309,7 +1307,7 @@ md"""
 # ╟─3bf0c957-f08b-4a45-90e0-40d56330c8e0
 # ╠═947e26fe-2010-48ad-b927-d4e5186f21e0
 # ╠═3506765b-a6cf-41ca-9201-fcc650c6f56d
-# ╠═72dc27a0-0e61-4073-843a-67e1bfd1427a
+# ╟─72dc27a0-0e61-4073-843a-67e1bfd1427a
 # ╟─6240553c-0c7c-45f4-b190-ebacf09ab632
 # ╠═12f64333-36d0-4e2a-9061-e3dcc7a4ae96
 # ╟─95ba48fe-f430-4f47-ab04-f5896d75343b

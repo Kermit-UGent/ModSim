@@ -2,12 +2,11 @@
 # v0.20.4
 
 #> [frontmatter]
-#> order = "30"
-#> title = "6. Sensitivity bitrophic model"
-#> date = "2025-08-06"
+#> order = "37"
+#> title = "7. Sensitivity bitrophic model"
 #> tags = ["exercises"]
-#> description = "Sensitivity bitrophic model"
 #> layout = "layout.jlhtml"
+#> description = "Sensitivity bitrophic model"
 #> 
 #>     [[frontmatter.author]]
 #>     name = "Gauthier Vanhaelewyn"
@@ -16,6 +15,8 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ a3c1055e-b44f-4412-9ca0-f8ec5f972494
+# Running this yourself? Point this at your own environment —
+# we advise one shared project in the parent folder: Pkg.activate("..")
 using Pkg; Pkg.activate("../../pluto-deployment-environment")
 
 # ╔═╡ fd357fe0-0920-11ef-02e4-25a84575c6a2
