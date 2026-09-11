@@ -57,10 +57,6 @@ end)
 <script src="https://cdn.jsdelivr.net/npm/lite-youtube-embed@0.3.0/src/lite-yt-embed.js" integrity="sha256-sDRYYtDc+jNi2rrJPUS5kGxXXMlmnOSCq5ek5tYAk/M=" crossorigin="anonymous" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lite-youtube-embed@0.3.0/src/lite-yt-embed.css" integrity="sha256-lv6SEl7Dhri7d86yiHCTuSWFb9CYROQFewxZ7Je0n5k=" crossorigin="anonymous">
 
-<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "8572a580bead4b729ad55779ba3a1cd6"}'></script>
-
-<script data-goatcounter="https://computationalthinking-stats.plutojl.org/count" async src="//computationalthinking-stats.plutojl.org/count.js"></script>
-
 $(pluto_head)
 
 </head>
@@ -105,21 +101,15 @@ $(pluto_head)
                         tags = get(output.frontmatter, "tags", String[])
                         active = page.url == other_page.url
                         
-                        homework_number = get(output.frontmatter, "homework_number", nothing)
-                        
                         href = root_url * "/" * other_page.url
 
                         class = [
                             active ? "active" : nothing,
-                            homework_number === nothing ? "lecture" : "homework",
+                            "lecture",
                             ("tag_$(replace(x, " "=>"_"))" for x in tags)...,
                         ]
                         
-                        if homework_number === nothing
-                            @htl("""<li class=$(class)><a href=$(href) title=$(desc)><span class="entry-number">$(number)</span> $(name)</a></li>""")
-                        else
-                            @htl("""<li class=$(class)><a href=$(href) title=$(desc)><span class="entry-number">Homework $(homework_number):</span> $(name)</a></li>""")
-                        end
+                        @htl("""<li class=$(class)><a href=$(href) title=$(desc)><span class="entry-number">$(number)</span> $(name)</a></li>""")
                     end for other_page in collections[section_id].pages
                 ])
                 </ul>
@@ -149,9 +139,7 @@ $(pluto_head)
         </nav>
         <div id="pages-content">
            $(isempty(f("title", "")) ? nothing : @htl("""<div class="lecture-header" >
-                $(if !isempty(f("homework_number", ""))
-                @htl("""<p class="number">Homework $(f("homework_number", ""))</p>""")
-                elseif !isempty(f("chapter", "")) && !isempty(f("section", ""))
+                $(if !isempty(f("chapter", "")) && !isempty(f("section", ""))
                 @htl("""<p class="number">Section $(f("chapter", "-")).$(f("section", "-"))</p>""")
                 else
                 nothing

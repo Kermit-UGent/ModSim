@@ -167,31 +167,12 @@
     align-items: stretch;
 }
 
-#pages-sidebar li li.homework {
-    padding-left: 1ch;
-    /* background: yellow; */
-}
-
 #pages-sidebar li li a {
     margin: 0.2em 0;
 }
 
-#pages-sidebar li li.homework a {
-    /* background: #ffb60012; */
-    margin: 0.4em 0px;
-    outline: 3px dashed #92929278;
-    outline-offset: -1px;
-}
-
-/* #pages-sidebar li li.homework a::before {
-    content: "👉 ";
-} */
-
 #pages-sidebar li li span.entry-number {
     opacity: 0.6;
-}
-#pages-sidebar li li.homework span.entry-number {
-    display: block;
 }
 
 #pages-sidebar li li.active a {
@@ -199,9 +180,6 @@
 }
 #pages-sidebar li li:hover a {
     background-color: var(--sidebar-li-hover-bg);
-}
-#pages-sidebar li li.not_in_track {
-    opacity: 0.4;
 }
 
 /* TRACK CHOOSER */
