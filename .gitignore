@@ -17,33 +17,7 @@ generation_report.html
 build.log
 
 # ---------------------------------------------------------------------------
-# Generated figures (root output dir of makefigs.jl / scripts). Anchored to
-# the repo root: nested figures/ dirs (e.g. examples/ProbMod/figures) and
-# course/**/Figures are tracked source material.
 # ---------------------------------------------------------------------------
-/figures/
-
-# ---------------------------------------------------------------------------
-# LaTeX / Typst build artefacts, scoped to course/ only.
-# Figures, PDFs and site assets elsewhere are tracked on purpose -- never
-# blanket-ignore *.pdf / *.png / *.jpg / *.svg.
-# ---------------------------------------------------------------------------
-course/**/*.aux
-course/**/*.log
-course/**/*.out
-course/**/*.toc
-course/**/*.idx
-course/**/*.ind
-course/**/*.ilg
-course/**/*.bbl
-course/**/*.blg
-course/**/*.fdb_latexmk
-course/**/*.fls
-course/**/*.synctex*
-course/**/_minted*/
-course/**/main.pdf
-course/**/main.synctex.gz
-
 # ---------------------------------------------------------------------------
 # Private material (exams) -- never committed
 # ---------------------------------------------------------------------------
@@ -58,3 +32,5 @@ examen/
 
 # per-run build artefact of CheckNotebooks CI (Pkg.instantiate); the env is resolved fresh
 exercises/solved_notebooks/Manifest.toml
+
+__pycache__/

@@ -20,8 +20,7 @@ To launch Pluto, either:
   - `sync_exercises.jl` regenerates `src/exercises/` from `exercises/student_notebooks/`; CI runs it with `--check` and fails when the website copies are out of sync.
 - `project/`: the course project.
 - `examples/`: worked examples used in the lectures.
-- `scripts/` and `makefigs.jl`: scripts that produce the figures of the course notes.
-- `course/notes/`: the course notes (LaTeX for now, moving to Typst).
+- The course notes themselves (Typst sources, figures and the notebooks that generate them) live in the **private** repository `ModSim-course-notes`; they are not part of this repo.
 - `pluto-deployment-environment/`: the Julia environment used to build the website (Julia 1.12). Keep its `Project.toml` and `Manifest.toml` up to date when you add packages to notebooks that are rendered on the website.
 
 ## Website
