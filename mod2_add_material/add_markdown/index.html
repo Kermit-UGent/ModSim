@@ -1,0 +1,185 @@
+<!DOCTYPE html><html lang="en">
+<head>
+
+<title>Add markdown files — MODSIM </title>
+
+
+<link rel="root" href="../.." />
+
+<link rel="icon" href="../../assets/favicon.ico" />
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+
+<link rel="stylesheet" href="../../assets/styles/index.css" type="text/css" />
+<link rel="stylesheet" href="../../assets/styles/layout.css" type="text/css" />
+<script src="../../assets/scripts/sidebar.js" type="module"></script>
+
+<link rel="pp-search-data" href="../../pp_search_data.json" />
+<script src="https://cdn.jsdelivr.net/npm/lunr@2.3.9/lunr.min.js" integrity="sha256-DFDZACuFeAqEKv/7Vnu1Tt5ALa58bcWZegGGFNgET8g=" crossorigin="anonymous" defer></script>
+<script src="../../assets/scripts/search.js" type="module" defer></script>
+
+<script src="https://cdn.jsdelivr.net/npm/lite-youtube-embed@0.3.0/src/lite-yt-embed.js" integrity="sha256-sDRYYtDc+jNi2rrJPUS5kGxXXMlmnOSCq5ek5tYAk/M=" crossorigin="anonymous" defer></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lite-youtube-embed@0.3.0/src/lite-yt-embed.css" integrity="sha256-lv6SEl7Dhri7d86yiHCTuSWFb9CYROQFewxZ7Je0n5k=" crossorigin="anonymous">
+
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "8572a580bead4b729ad55779ba3a1cd6"}'></script>
+
+<script data-goatcounter="https://computationalthinking-stats.plutojl.org/count" async src="//computationalthinking-stats.plutojl.org/count.js"></script>
+
+<meta name="viewport" content="width=device-width"><meta charset="utf-8">
+<meta name="pluto-insertion-spot-meta">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="white"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#2a2928"><meta name="color-scheme" content="light dark"><link rel="pluto-external-source" id="pluto-logo-big" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/logo.49a14041.svg"><link rel="pluto-external-source" id="pluto-logo-small" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/favicon_unsaturated.c11d4d33.svg"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/editor.15e94937.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/editor.69b60e77.css"><script type="module" src="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/index.8e5508d8.js"></script><script type="module" src="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/editor.runtime.54cd98a7.js"></script><script defer>console.log("Pluto.jl, by Fons van der Plas (https://github.com/fonsp), Mikołaj Bochenski (https://github.com/malyvsen), Michiel Dral (https://github.com/dralletje) and friends \uD83C\uDF08");</script><script src="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/editor.21e3b1fd.js" defer></script><link rel="pluto-external-source" id="vmsg-wasm" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/vmsg.56bb9389.wasm"><link rel="pluto-external-source" id="arrow_up_circle_icon" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/arrow-up-circle-outline.3f146ffe.svg"><link rel="pluto-external-source" id="document_text_icon" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/document-text-outline.8d1e2333.svg"><link rel="pluto-external-source" id="help_circle_icon" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/help-circle-outline.a023036a.svg"><link rel="pluto-external-source" id="open_icon" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/open-outline.87533923.svg"><script id="iframe-resizer-content-window-script" src="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/editor.69996afe.js" crossorigin defer></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/editor.fa1be6bc.css" type="text/css"><script data-pluto-file="launch-parameters">
+window.pluto_notebook_id = undefined;
+window.pluto_isolated_cell_ids = undefined;
+window.pluto_notebookfile = undefined;
+window.pluto_disable_ui = true;
+window.pluto_slider_server_url = undefined;
+
+window.pluto_statefile = undefined;
+window.pluto_preamble_html = undefined;
+window.pluto_recording_url = undefined;
+window.pluto_recording_audio_url = undefined;
+</script>
+
+<meta name="pluto-insertion-spot-parameters">
+<script src="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/editor.914724dc.js" type="module" defer></script><script src="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/index.11569726.js"></script><link rel="pluto-external-source" id="MathJax-script" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.20.13/frontend-dist/tex-svg-full.f72d1ae1.js" type="text/javascript">
+<meta name="pluto-insertion-spot-preload">
+
+
+</head>
+<body>
+    <div id="pages-layout">
+        <button id="toggle-nav" title="Open navigation"></button>
+        <nav id="pages-sidebar">
+        <div>
+        <ul>
+            <li class="sidebar-about">
+                <div class="course-title">
+                    <h1><a href="../.."><span>MODSIM</span></a></h1>
+                    <h2><span>Modelling and Simulation of Biosystems</span></h2>
+                </div>
+                <div class="authors">
+                    by <a href="https://github.com/MichielStock">Michiel Stock</a>, <a href="https://github.com/orgs/Kermit-UGent/">Bram Spanoghe</a>, <a href="https://github.com/orgs/Kermit-UGent/">Daniel Illana González</a>, <a href="https://github.com/orgs/Kermit-UGent/">Gauthier Vanhaelewyn</a>, <a href="https://github.com/DaanVanHauwermeiren/">Daan Van Hauwermeiren</a>
+                </div>
+            </li>
+        <li>
+<h3>Welcome</h3>
+<ul>
+<li class=' lecture tag_welcome'><a href='../../welcome/logistics/'><span class="entry-number"></span> Class logistics</a></li><li class=' lecture tag_welcome'><a href='../../welcome/installation/'><span class="entry-number"></span> Software installation</a></li><li class=' lecture tag_welcome'><a href='../../welcome/errata/'><span class="entry-number"></span> Errata</a></li>
+</ul>
+</li>
+<li>
+<h3>Cheat Sheets</h3>
+<ul>
+<li class=' lecture tag_cheat_sheets'><a href='../../cheat_sheets/cheatsheets/'><span class="entry-number"></span> Overview</a></li><li class=' lecture tag_cheat_sheets'><a href='../../cheat_sheets/intro_to_julia/' title='General introduction to Julia'><span class="entry-number"></span> Intro to Julia</a></li><li class=' lecture tag_cheat_sheets'><a href='../../cheat_sheets/catalyst/' title='Catalyst Cheat Sheet'><span class="entry-number"></span> Catalyst</a></li><li class=' lecture tag_cheat_sheets'><a href='../../cheat_sheets/turing/' title='Turing Cheat Sheet'><span class="entry-number"></span> Turing Cheat Sheet</a></li>
+</ul>
+</li>
+<li>
+<h3>Exercises</h3>
+<ul>
+<li class=' lecture tag_exercises'><a href='../../exercises/exercises/'><span class="entry-number"></span> Introduction</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_mtk_intro/' title='Introduction to ModelingToolkit'><span class="entry-number"></span> 1. ODE_model_MTK_intro</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_irrigation_mtk/' title='Modeling of irrigation with MTK'><span class="entry-number"></span> 1. ODE_model_irrigation</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_diver_mtk/' title='modeling of pressure on diver with MTK'><span class="entry-number"></span> 1. ODE_model_diver</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_tank_h_mtk/' title='modeling the height of the water in a tank'><span class="entry-number"></span> 1. ODE_model_tank_h_mtk</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_tractor_seat_mtk/' title='modeling the movement of a oscilatory tractor seat'><span class="entry-number"></span> 1. ODE_model_tractor_seat</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_XTRA_tank_T_h_mtk/' title='extra exercises on modeling water height in a tank'><span class="entry-number"></span> 1. ODE_model_Xtra_tank</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_XTRA_temp_reactors_mtk/' title='modeling temperature in a CSTR'><span class="entry-number"></span> 1. ODE_model_temp_reactor</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_XTRA_water_evap_infil_mtk/' title='modeling evaporation and infiltration in ground'><span class="entry-number"></span> 1. ODE_model_Xtra_evaporation</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_catalyst_intro/' title='Introduction to Catalyst as an alternative to ModelingToolkit'><span class="entry-number"></span> 2. ODE_model_Catalyst_intro</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_birth_death/' title='Simple birth-death model for a mice population'><span class="entry-number"></span> 2. ODE_model_birth_death</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_fermenter_monod/' title='Fermenter with biomass growing on substrate through Monod kinetics'><span class="entry-number"></span> 2. ODE_model_fermenter_monod</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_infection/' title='Infection model built as a reaction network'><span class="entry-number"></span> 2. ODE_model_infection</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_XTRA_fermenter_firstorder/' title='Extra exercise on a fermenter with first-order kinetics'><span class="entry-number"></span> 2. ODE_model_Xtra_fermenter_firstorder</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_XTRA_anaerobic_fermentation/' title='Extra exercise on anaerobic fermentation'><span class="entry-number"></span> 2. ODE_model_Xtra_anaerobic_fermentation</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_XTRA_soil_cont_plant_uptake/' title='Extra exercise on soil contamination with plant uptake'><span class="entry-number"></span> 2. ODE_model_Xtra_soil_contamination</a></li><li class=' lecture tag_exercises'><a href='../../exercises/ode_model_XTRA_water_evap_infil/' title='Extra exercise on water evaporation and infiltration in a reservoir'><span class="entry-number"></span> 2. ODE_model_Xtra_evaporation</a></li><li class=' lecture tag_exercises'><a href='../../exercises/sde_model_heston_mtk_intro/' title='Introduction to solving SDE problems with ModelingToolkit'><span class="entry-number"></span> 3. SDE_model_Heston_intro</a></li><li class=' lecture tag_exercises'><a href='../../exercises/sde_model_aging_mtk/' title='Aging with saturated repair, modelled as an SDE'><span class="entry-number"></span> 3. SDE_model_aging</a></li><li class=' lecture tag_exercises'><a href='../../exercises/sde_model_fermenter_secondorder_mtk/' title='Fermenter with second-order kinetics, modelled as an SDE'><span class="entry-number"></span> 3. SDE_model_fermenter_secondorder</a></li><li class=' lecture tag_exercises'><a href='../../exercises/dje_model_catalyst_intro/' title='Introduction to solving discrete jump problems with Catalyst'><span class="entry-number"></span> 3. DJE_model_Catalyst_intro</a></li><li class=' lecture tag_exercises'><a href='../../exercises/dje_model_bike_sharing/' title='Discrete jump model of a simple bike sharing system'><span class="entry-number"></span> 3. DJE_model_bike_sharing</a></li><li class=' lecture tag_exercises'><a href='../../exercises/dje_model_festival_toilet/' title='Discrete jump model of a festival toilet queue'><span class="entry-number"></span> 3. DJE_model_festival_toilet</a></li><li class=' lecture tag_exercises'><a href='../../exercises/probmod_1-intro/' title='Introduction to the sampling practicals'><span class="entry-number"></span> 4. ProbMod intro</a></li><li class=' lecture tag_exercises'><a href='../../exercises/probmod_2-basics/' title='Basic sampling exercises'><span class="entry-number"></span> 4. ProbMod basics</a></li><li class=' lecture tag_exercises'><a href='../../exercises/probmod_3-advanced/' title='Advanced sampling exercises'><span class="entry-number"></span> 4. ProbMod advanced</a></li><li class=' lecture tag_exercises'><a href='../../exercises/probmod_4-review/' title='Review sampling exercise'><span class="entry-number"></span> 4. ProbMod review</a></li><li class=' lecture tag_exercises'><a href='../../exercises/MCMC_1-intro/' title='MCMC intro'><span class="entry-number"></span> 5. MCMC intro</a></li><li class=' lecture tag_exercises'><a href='../../exercises/MCMC_2-basics/' title='MCMC basics'><span class="entry-number"></span> 5. MCMC basics</a></li><li class=' lecture tag_exercises'><a href='../../exercises/MCMC_3-advanced/' title='MCMC advanced'><span class="entry-number"></span> 5. MCMC advanced</a></li><li class=' lecture tag_exercises'><a href='../../exercises/MCMC_4-review/' title='MCMC review'><span class="entry-number"></span> 5. MCMC review</a></li><li class=' lecture tag_exercises'><a href='../../exercises/calib_intro/' title='Calibration intro'><span class="entry-number"></span> 6. Calibration intro</a></li><li class=' lecture tag_exercises'><a href='../../exercises/calib_fermenter_monod/' title='Calibration fermenter monod'><span class="entry-number"></span> 6. Calibration fermenter monod</a></li><li class=' lecture tag_exercises'><a href='../../exercises/calib_irrigation/' title='Calibration irrigation'><span class="entry-number"></span> 6. Calibration irrigation</a></li><li class=' lecture tag_exercises'><a href='../../exercises/optim_wastewater_treatment/' title='Optimisation wastewater treatment'><span class="entry-number"></span> 6. Optimisation wastewater treatment</a></li><li class=' lecture tag_exercises'><a href='../../exercises/sens_intro/' title='Sensitivity intro'><span class="entry-number"></span> 7. Sensitivity intro</a></li><li class=' lecture tag_exercises'><a href='../../exercises/sens_fermenter_monod/' title='Sensitivity fermenter monod'><span class="entry-number"></span> 7. Sensitivity fermenter monod</a></li><li class=' lecture tag_exercises'><a href='../../exercises/sens_bitrophic_model/' title='Sensitivity bitrophic model'><span class="entry-number"></span> 7. Sensitivity bitrophic model</a></li><li class=' lecture tag_exercises'><a href='../../exercises/sens_insuline/' title='Sensitivity insuline'><span class="entry-number"></span> 7. Sensitivity insuline</a></li><li class=' lecture tag_exercises'><a href='../../exercises/uncert_intro/' title='Uncertainty intro'><span class="entry-number"></span> 7. Uncertainty intro</a></li><li class=' lecture tag_exercises'><a href='../../exercises/uncert_fermenter_monod/' title='Uncertainty fermenter monod'><span class="entry-number"></span> 7. Uncertainty fermenter monod</a></li><li class=' lecture tag_exercises'><a href='../../exercises/uncert_bitrophic_model/' title='Uncertainty bitrophic model'><span class="entry-number"></span> 7. Uncertainty bitrophic model</a></li><li class=' lecture tag_exercises'><a href='../../exercises/model_selection_intro/' title='Model selection intro'><span class="entry-number"></span> 8. Model selection intro</a></li><li class=' lecture tag_exercises'><a href='../../exercises/probabilistic_selection/' title='Probability selection'><span class="entry-number"></span> 8. Probability selection</a></li>
+</ul>
+</li>
+<li>
+<h3>Project</h3>
+<ul>
+<li class=' lecture tag_project'><a href='../../project/project/'><span class="entry-number"></span> Introduction</a></li><li class=' lecture tag_project'><a href='../../project/project_template/' title='Project Template'><span class="entry-number"></span> template (EN)</a></li><li class=' lecture tag_project'><a href='../../project/project_template_nl/' title='Project Template'><span class="entry-number"></span> template (NL)</a></li><li class=' lecture tag_project'><a href='../../project/project_antibiotics/' title='Project example antibiotics'><span class="entry-number"></span> example antibiotics</a></li><li class=' lecture tag_project'><a href='../../project/project_estrogen/' title='Project example estrogen'><span class="entry-number"></span> example estrogen</a></li><li class=' lecture tag_project'><a href='../../project/project_ladybugs/' title='Project example ladybugs'><span class="entry-number"></span> example ladybugs</a></li>
+</ul>
+</li>
+
+                <li><hr></li>
+            <li class="sidebar-about">
+                <div class="semester-details">
+                    <a href="../../semesters/">2nd semester &apos;24-&apos;25</a>
+                    <div class="course-numbers"><span>I002445</span></div>
+                </div>
+                <div class="logos">
+                    <picture title="Ghent University">
+                        <img src="../../assets/KERMIT_warm.png">
+                    </picture>
+                    <picture title="Julia Programming Language">
+                        <source srcset="../../assets/julia-logo-dark.svg" media="(prefers-color-scheme: dark)" />
+                        <img src="../../assets/julia-logo-color.svg">
+                    </picture>
+                </div>
+            </li>
+        </ul>
+        </div>
+        </nav>
+        <div id="pages-content">
+           <div class="lecture-header" >
+    <p class="number">Section 2.1</p>
+    <h1>Add markdown files</h1>
+    
+    
+</div>
+        <div class="pages-markdown">
+<main>
+<h2 id="add-markdown-files"><a href="#add-markdown-files" class="anchor"></a>Add markdown files</h2>
+<p>If your lecture does not need to run code or use interactivity. You can write it as a markdown file.</p>
+<p>As an extra twist, you can evaluate julia code inside a <code>$</code> symbol. For example,</p>
+<pre><code class="language-julia">$(1 + 1)
+</code></pre>
+<p>will become</p>
+<p>2</p>
+<h2 id="add-front-matter"><a href="#add-front-matter" class="anchor"></a>Add Front-matter</h2>
+<p>For each file, markdown or pluto, you will need to add a <em>front-matter</em>, which specifies the page metadata. For markdown files, the front-matter is specified at the top of the file between three dashes <code>---</code>. For example, the front-matter of this file is</p>
+<pre><code>---
+title: &quot;Add markdown file&quot;
+order: 1
+chapter: 2
+section: 1
+layout: &quot;md.jlmd&quot;
+tags: [&quot;module2&quot;, &quot;track_material&quot;, &quot;markdown&quot;, &quot;frontmatter&quot;]
+---
+</code></pre>
+<p>You will need to specify the following attributes</p>
+<ul>
+<li><strong><code>title</code></strong>: title of the page</li>
+<li><strong><code>order</code></strong>: the position of the page in the module on the sidebar. <strong>Hint!</strong>: You can also use fractional numbers, e.g. <code>1.5</code>. This can be handy for homeworks, so you can include the homework between the first and second lesson without messing up lessons counting.</li>
+<li><strong><code>layout</code></strong>: set to <code>&quot;md.jlmd&quot;</code>, unless you are using some custom layout</li>
+<li><strong><code>chapter</code></strong> and <strong><code>section</code></strong> (optional): used to number the page. If for example <code>chapter=1</code> and <code>section=2</code>, the page will be displayed as <code>1.2</code> on the sidebar and page header.</li>
+<li><strong><code>image</code></strong> (optional): link to summarizing image to display in the <code>subjects</code> section on the homepage. If left empty, the page wont be included in the subjects section. If no page has an <code>image</code> field in the front-matter, the subjects section is not displayed.</li>
+<li><strong><code>description</code></strong> (optional): short description of the notebook</li>
+<li><strong><code>youtube_id</code></strong> (optional): youtube id of the video associated with the page. If included, the page header will embed the youtube video.</li>
+<li><strong><code>homework_number</code></strong>: needed only for homeworks, the number of the homework</li>
+<li><strong><code>tags</code></strong>: list of keywords for the page. It should at least include the module name, as defined in <code>_data/sidebar.jl</code> to include the page in the sidebar. You can also associate pages to a given track by adding the track id, prefixed with <code>track_</code> to the tags. For example, if you want to include the page in the julia track, add <code>track_julia</code> in the tags list.</li>
+</ul>
+<h2 id="markdown-101"><a href="#markdown-101" class="anchor"></a>Markdown 101</h2>
+<p>If you are not familiar with markdown, you can see for example <a href="https://www.markdowntutorial.com/">here</a>. Here is a quick and dirty cheatsheet</p>
+<ol>
+<li>Use <code>#</code> for headers, for example</li>
+</ol>
+<pre><code class="language-markdown"># Header
+## Subheader
+### Sub-sub-header
+</code></pre>
+<ol start="2">
+<li>You can create links with the syntax</li>
+</ol>
+<pre><code class="language-markdown">[text](adddress)
+</code></pre>
+<p>For example the link to the mardown tutorial above was typed as</p>
+<pre><code class="language-markdown">[here](https://www.markdowntutorial.com/)
+</code></pre>
+<ol start="3">
+<li>You can insert pictures with the syntax</li>
+</ol>
+<pre><code class="language-markdown">![optional alternative text](link-to-picture)
+</code></pre>
+<p>for example</p>
+<pre><code>![](https://raw.githubusercontent.com/JuliaLang/julia-logo-graphics/master/images/julia-logo-color.png)
+</code></pre>
+<p>will give</p>
+<p><img src="https://raw.githubusercontent.com/JuliaLang/julia-logo-graphics/master/images/julia-logo-color.png" alt="" /></p>
+</main>
+</div>
+
+        <div class="page-foot">
+            <div class="copyright">
+                <a href="https://github.com/Kermit-UGent/ModSim/"><b>Edit this page on <img class="github-logo" src="https://unpkg.com/ionicons@5.1.2/dist/svg/logo-github.svg"></b></a><br>
+                Website based on the MIT course <a href="https://computationalthinking.mit.edu"><em><b>Computational Thinking</b>, a live online Julia/Pluto textbook</em></a> and built with <a href="https://plutojl.org/">Pluto.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
+            </div>
+        </div>
+        </div>
+    </div>
+</body>
+</html>
