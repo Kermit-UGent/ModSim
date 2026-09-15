@@ -1,7 +1,7 @@
 cd(@__DIR__)
 notebook_path = joinpath(@__DIR__, "PlutoPages.jl")
 
-@assert VERSION >= v"1.10.7"
+@assert VERSION >= v"1.12"
 
 begin
     begin
