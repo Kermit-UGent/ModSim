@@ -12,6 +12,7 @@ ignore_cache = [
 create_index = false
 exclude = [
     # these are in the repo but not used on the website
+    "tools/*",
     "PlutoPages.jl",
 ]
 
@@ -20,7 +21,11 @@ port = 8080
 host = "0.0.0.0"
 exclude=[
     # these are in the repo but not used on the website
+    "tools/*",
     "PlutoPages.jl",
     
     # notebooks not interactive
+
+    # don't run homeworks
+    "*/hw*.jl",
 ]
