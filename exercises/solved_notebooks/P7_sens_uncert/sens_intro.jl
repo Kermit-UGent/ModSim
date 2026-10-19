@@ -371,7 +371,7 @@ Create a *reaction network object* for the exponential growth model. Name it `gr
 """
 
 # ╔═╡ 2836f231-3b90-4829-9012-3ed9a09239ff
-# Uncomment and complete the instruction
+# # Uncomment and complete the instruction
 # growth_exp = @reaction_network begin
 #     @species missing
 #     @parameters missing
@@ -448,7 +448,7 @@ Write a solution function with as argument a vector of the parameters (that you 
 """
 
 # ╔═╡ eb1e5f97-3e09-43f0-b6ce-cc6cbc42ec2f
-# Uncomment and complete the instruction
+# # Uncomment and complete the instruction
 # function growth_sim_exp(params)
 #     missing
 #     ...
@@ -520,7 +520,11 @@ Plot both normalized sensitivity functions (with appropriate title and labels):
 
 # ╔═╡ 33031b53-6f2d-4256-a0aa-0ba97beaa7af
 # missing     # Uncomment and complete the instruction
-plot(t_vals, [sens_W_on_μ_rel_exp, sens_W_on_Wf_rel_exp], title="Normalized sensitivities", label=["W on μ" "W on Wf"], xlabel="Time (day)")
+begin
+	plot(t_vals, sens_W_on_μ_rel_exp, title = "Normalized sensitivities", 
+		 label = "W on μ", xlabel = "Time (day)")
+	plot!(t_vals, sens_W_on_Wf_rel_exp, label = "W on Wf")
+end
 
 # ╔═╡ 22b58c97-1aa2-49c4-8a0a-488c63014a90
 md"
@@ -536,9 +540,11 @@ Perform a global sensitivity analysis on this model, now using the **Morris meth
 """
 
 # ╔═╡ a8c930a2-a119-4681-a063-7a6c99615c5b
+# gsa_res_exp = missing
 gsa_res_exp = gsa(growth_sim_exp, Morris(num_trajectory = 50), p_range, samples = 1_000_000);
 
 # ╔═╡ 1f9d7f84-fae7-4f0e-8783-7a8ce44051a3
+# missing
 begin
 	plot(t_vals, gsa_res_exp.means[1][1, :], label = "μ", xlabel = "Time (day)",
 		title = "Global sensitivities"
@@ -557,7 +563,7 @@ Create a *reaction network object* for the Gompertz growth model. Name it `growt
 """
 
 # ╔═╡ 1ae76036-42ef-46e9-88bf-d66d4267addc
-# Uncomment and complete the instruction
+# # Uncomment and complete the instruction
 # growth_gom = @reaction_network begin
 #     @species missing
 #     @parameters missing
@@ -587,9 +593,11 @@ Initialize a vector `params_gom` with the parameter values:
 """
 
 # ╔═╡ e9408c0f-cbcb-4703-8b85-e349e37b2025
+# μ_gom = missing
 μ_gom = 0.09;
 
 # ╔═╡ 24c4e348-7322-4c70-b8da-ec70d25356a9
+# D_gom = missing
 D_gom = 0.04;
 
 # ╔═╡ bf9291d5-6fc5-4359-874e-167237a22147
@@ -602,7 +610,7 @@ Create the ODE problem and store it in `oprob_gom`, using the same initial condi
 """
 
 # ╔═╡ 3aab9073-cf4d-4ee5-9e8a-e3db586d9f68
-# oprob_gom = missing                 # Uncomment and complete the instruction
+# oprob_gom = missing               # Uncomment and complete the instruction
 oprob_gom = ODEProblem(growth_gom, u0, tspan, params_gom);
 
 # ╔═╡ 30c35371-d106-4673-8569-d07b39edbdfe
@@ -629,7 +637,7 @@ Write a solution function with as argument a vector of the parameters (that you 
 """
 
 # ╔═╡ be21e269-16c4-42b0-8930-2d009bd91161
-# Uncomment and complete the instruction
+# # Uncomment and complete the instruction
 # function growth_sim_gom(params)
 #     missing
 #     ...
