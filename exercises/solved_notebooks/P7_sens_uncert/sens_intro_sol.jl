@@ -451,7 +451,6 @@ Write a solution function with as argument a vector of the parameters (that you 
 # # Uncomment and complete the instruction
 # function growth_sim_exp(params)
 #     missing
-#     ...
 # end
 function growth_sim_exp(params)
 	μ, Wf = params
@@ -640,7 +639,6 @@ Write a solution function with as argument a vector of the parameters (that you 
 # # Uncomment and complete the instruction
 # function growth_sim_gom(params)
 #     missing
-#     ...
 # end
 function growth_sim_gom(params)
 	μ, D = params
