@@ -7,7 +7,7 @@ using InteractiveUtils
 # ╔═╡ e1e7bc8e-7264-4cbc-98d2-aa73679fa2df
 begin
 	# add this cell if you want the notebook to use the environment from where the Pluto server is launched
-	using Pkg; Pkg.activate("../../solved_notebooks")
+	using Pkg; Pkg.activate("..")
 	using Catalyst
 	using OrdinaryDiffEq, StatsPlots
 	using PlutoUI; TableOfContents()
