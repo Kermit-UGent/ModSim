@@ -72,11 +72,10 @@ const FRONTMATTER = Dict{String,NamedTuple}(
     "optim_wastewater_treatment.jl"           => (order = "34", title = "6. Optimisation wastewater treatment",     description = "Optimisation wastewater treatment",                                     author = "Gauthier Vanhaelewyn"),
     # P7_sens_uncert
     "sens_intro.jl"                           => (order = "35", title = "7. Sensitivity intro",                     description = "Sensitivity intro",                                                     author = "Gauthier Vanhaelewyn"),
-    "sens_fermenter_monod.jl"                 => (order = "36", title = "7. Sensitivity fermenter monod",           description = "Sensitivity fermenter monod",                                           author = "Gauthier Vanhaelewyn"),
     "sens_bitrophic_model.jl"                 => (order = "37", title = "7. Sensitivity bitrophic model",           description = "Sensitivity bitrophic model",                                           author = "Gauthier Vanhaelewyn"),
     "sens_insuline.jl"                        => (order = "38", title = "7. Sensitivity insuline",                  description = "Sensitivity insuline",                                                  author = "Gauthier Vanhaelewyn"),
     "uncert_intro.jl"                         => (order = "39", title = "7. Uncertainty intro",                     description = "Uncertainty intro",                                                     author = "Gauthier Vanhaelewyn"),
-    "uncert_fermenter_monod.jl"               => (order = "40", title = "7. Uncertainty fermenter monod",           description = "Uncertainty fermenter monod",                                           author = "Gauthier Vanhaelewyn"),
+    "fermenter_mutant.jl"                     => (order = "40", title = "7. Fermenter mutant",                      description = "Sensitivity and uncertainty: switching to a mutant strain?",            author = "Ward Claerhout"),
     "uncert_bitrophic_model.jl"               => (order = "41", title = "7. Uncertainty bitrophic model",           description = "Uncertainty bitrophic model",                                           author = "Gauthier Vanhaelewyn"),
     # P8_modselect
     "model_selection_intro.jl"                => (order = "42", title = "8. Model selection intro",                 description = "Model selection intro",                                                 author = nothing),
