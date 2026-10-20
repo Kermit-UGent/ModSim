@@ -371,7 +371,6 @@ Create a *reaction network object* for the exponential growth model. Name it `gr
 """
 
 # ╔═╡ 2836f231-3b90-4829-9012-3ed9a09239ff
-# # Uncomment and complete the instruction
 # growth_exp = @reaction_network begin
 #     @species missing
 #     @parameters missing
@@ -392,7 +391,7 @@ Convert the system to a symbolic differential equation model (name it: `osys_exp
 """
 
 # ╔═╡ 78d175b4-a9b2-49b5-bbc8-eb348799985b
-# osys_exp = missing           # Uncomment and complete the instruction
+# osys_exp = missing         
 osys_exp = convert(ODESystem, growth_exp)
 
 # ╔═╡ 05e96232-ce95-452b-98e4-e79817d45ae2
@@ -412,7 +411,7 @@ Initialize a vector `params_exp` with the parameter values:
 """
 
 # ╔═╡ 7005d88f-9e28-47fe-9a32-dec023903dc3
-# params_exp = missing        # Uncomment and complete the instruction
+# params_exp = missing      
 params_exp = [:μ => μ_exp, :Wf => Wf_exp];
 
 # ╔═╡ c8853554-26c5-491c-a536-4c07e8c6a986
@@ -421,7 +420,7 @@ Create the ODE problem and store it in `oprob_exp`, using the same initial condi
 """
 
 # ╔═╡ 025c1154-b2ae-4e1c-af1b-277b24d648a4
-# oprob_exp = missing         # Uncomment and complete the instruction
+# oprob_exp = missing       
 oprob_exp = ODEProblem(growth_exp, u0, tspan, params_exp);
 
 # ╔═╡ f58825d2-55fc-43f1-b164-9555bf9f5b84
@@ -430,7 +429,7 @@ Solve the ODE problem. Use `Tsit5()` and `saveat=0.5`. Store the solution in `os
 """
 
 # ╔═╡ 8044dd5f-9996-4062-a54a-8fb0eee30b46
-# osol_exp = missing          # Uncomment and complete the instruction
+# osol_exp = missing        
 osol_exp = solve(oprob_exp, Tsit5(), saveat=0.5);
 
 # ╔═╡ a1752ad4-2c11-416c-8321-9da058f9aaea
@@ -439,7 +438,7 @@ Plot the result:
 """
 
 # ╔═╡ 0f58fd3d-1495-46c7-9d92-5539395cf12e
-# missing                     # Uncomment and complete the instruction
+# missing                   
 plot(osol_exp)
 
 # ╔═╡ 6321774c-5bbe-42a7-bdad-0168c891b5ce
@@ -448,7 +447,6 @@ Write a solution function with as argument a vector of the parameters (that you 
 """
 
 # ╔═╡ eb1e5f97-3e09-43f0-b6ce-cc6cbc42ec2f
-# # Uncomment and complete the instruction
 # function growth_sim_exp(params)
 #     missing
 # end
@@ -465,7 +463,7 @@ Make a function based on the solution function that returns the output of a sing
 """
 
 # ╔═╡ f2fa716f-d7b5-4c95-a8c6-6b16fbfe1499
-# growth_sim_W_exp(params) = missing   # Uncomment and complete the instruction
+# growth_sim_W_exp(params) = missing 
 growth_sim_W_exp(params) = growth_sim_exp(params)[:W];
 
 # ╔═╡ 98070d41-e8c5-49e6-9eea-04c718cbff65
@@ -474,7 +472,7 @@ Compute the output for the given parameter values.
 """
 
 # ╔═╡ cef751aa-f9c8-46da-9436-9cc2e5d7515c
-# W_exp = missing              # Uncomment and complete the instruction
+# W_exp = missing            
 W_exp = growth_sim_W_exp([μ_exp, Wf_exp]);
 
 # ╔═╡ 9e7bb7ec-8fe3-422e-920f-13c2ef055feb
@@ -483,7 +481,7 @@ Using `ForwardDiff.jacobian` to compute the sensitivities for the single ouput(s
 """
 
 # ╔═╡ b13b5e77-ca60-465b-9f63-be9e5da0482f
-# sens_W_exp = missing           # Uncomment and complete the instruction
+# sens_W_exp = missing         
 sens_W_exp = ForwardDiff.jacobian(growth_sim_W_exp, [μ_exp, Wf_exp]);
 
 # ╔═╡ 735f5191-259e-440f-a379-20a2a70ec72c
@@ -492,11 +490,11 @@ Extract the (absolute) sensitivities of the outputs on the different parameters.
 """
 
 # ╔═╡ 689556c9-a690-4e9e-9052-7ac66e999d4d
-# sens_W_on_μ_exp = missing      # Uncomment and complete the instruction
+# sens_W_on_μ_exp = missing    
 sens_W_on_μ_exp = sens_W_exp[:, 1];
 
 # ╔═╡ b85f0d09-a102-435b-a898-149ba4b29caa
-# sens_W_on_Wf_exp = missing     # Uncomment and complete the instruction
+# sens_W_on_Wf_exp = missing   
 sens_W_on_Wf_exp = sens_W_exp[:, 2];
 
 # ╔═╡ d067f814-1dd5-4e59-8cfd-3bc0b2d97612
@@ -505,11 +503,11 @@ Compute the normalized sensitivities.
 """
 
 # ╔═╡ e01657f3-33ac-4eb8-b39e-e2441a165a8d
-# sens_W_on_μ_rel_exp = missing   # Uncomment and complete the instruction
+# sens_W_on_μ_rel_exp = missing 
 sens_W_on_μ_rel_exp = sens_W_on_μ_exp .* μ_exp ./ W_exp;
 
 # ╔═╡ 7231e54e-b293-48fc-b1f0-273f45f51539
-# sens_W_on_Wf_rel_exp = missing   # Uncomment and complete the instruction
+# sens_W_on_Wf_rel_exp = missing 
 sens_W_on_Wf_rel_exp = sens_W_on_Wf_exp .* Wf_exp ./ W_exp;
 
 # ╔═╡ 0524a976-9d4d-4ef9-b088-bdd9102415e6
@@ -518,7 +516,7 @@ Plot both normalized sensitivity functions (with appropriate title and labels):
 """
 
 # ╔═╡ 33031b53-6f2d-4256-a0aa-0ba97beaa7af
-# missing     # Uncomment and complete the instruction
+# missing   
 begin
 	plot(t_vals, sens_W_on_μ_rel_exp, title = "Normalized sensitivities", 
 		 label = "W on μ", xlabel = "Time (day)")
@@ -562,7 +560,6 @@ Create a *reaction network object* for the Gompertz growth model. Name it `growt
 """
 
 # ╔═╡ 1ae76036-42ef-46e9-88bf-d66d4267addc
-# # Uncomment and complete the instruction
 # growth_gom = @reaction_network begin
 #     @species missing
 #     @parameters missing
@@ -583,7 +580,7 @@ Convert the system to a symbolic differential equation model (name it: `osys_gom
 """
 
 # ╔═╡ acaf5b91-accc-4dfa-9371-6495a47c8736
-# osys_gom = missing                  # Uncomment and complete the instruction
+# osys_gom = missing                
 osys_gom = convert(ODESystem, growth_gom)
 
 # ╔═╡ 70df05e7-4527-4087-a762-942a33e89f74
@@ -600,7 +597,7 @@ Initialize a vector `params_gom` with the parameter values:
 D_gom = 0.04;
 
 # ╔═╡ bf9291d5-6fc5-4359-874e-167237a22147
-# params_gom = missing                # Uncomment and complete the instruction
+# params_gom = missing              
 params_gom = [:μ => μ_gom, :D => D_gom];
 
 # ╔═╡ 9e3158c5-d4b2-456c-b920-8431e2047770
@@ -609,7 +606,7 @@ Create the ODE problem and store it in `oprob_gom`, using the same initial condi
 """
 
 # ╔═╡ 3aab9073-cf4d-4ee5-9e8a-e3db586d9f68
-# oprob_gom = missing               # Uncomment and complete the instruction
+# oprob_gom = missing             
 oprob_gom = ODEProblem(growth_gom, u0, tspan, params_gom);
 
 # ╔═╡ 30c35371-d106-4673-8569-d07b39edbdfe
@@ -618,7 +615,7 @@ Solve the ODE problem. Use `Tsit5()` and `saveat=0.5`. Store the solution in `os
 """
 
 # ╔═╡ c01fe052-3701-4e22-9a64-f681d52a445a
-# osol_gom = missing                  # Uncomment and complete the instruction
+# osol_gom = missing                
 osol_gom = solve(oprob_gom, Tsit5(), saveat=0.5);
 
 # ╔═╡ 4f959d21-954b-4116-a498-bafc1aada47a
@@ -627,7 +624,7 @@ Plot the result:
 """
 
 # ╔═╡ 5f427df2-1b7e-46c7-adb9-66b05deac6e8
-# missing                             # Uncomment and complete the instruction
+# missing                           
 plot(osol_gom)
 
 # ╔═╡ 958854fc-8e23-4364-88c5-1ec060b86a16
@@ -636,7 +633,6 @@ Write a solution function with as argument a vector of the parameters (that you 
 """
 
 # ╔═╡ be21e269-16c4-42b0-8930-2d009bd91161
-# # Uncomment and complete the instruction
 # function growth_sim_gom(params)
 #     missing
 # end
@@ -653,7 +649,7 @@ Make a function based on the solution function that returns a single output.
 """
 
 # ╔═╡ 69f96b57-7c8d-4e64-9e6a-9804d001b0b1
-# growth_sim_W_gom(params) = missing  # Uncomment and complete the instruction
+# growth_sim_W_gom(params) = missing
 growth_sim_W_gom(params) = growth_sim_gom(params)[:W];
 
 # ╔═╡ 09eeab39-79a1-420a-8298-72b7002ec168
@@ -662,7 +658,7 @@ Compute the output for the given parameter values.
 """
 
 # ╔═╡ 9e15601f-4ad2-41be-8168-db30548a1c3b
-# W_gom = missing           # Uncomment and complete the instruction
+# W_gom = missing         
 W_gom = growth_sim_W_gom([μ_gom, D_gom]);
 
 # ╔═╡ 2b731e4a-d6eb-48f2-91f0-27e916d85683
@@ -671,7 +667,7 @@ Using `ForwardDiff.jacobian` to compute the sensitivities for the single ouput(s
 """
 
 # ╔═╡ 68ad7e05-7f79-4e8d-9031-fefb5f5c0897
-# sens_W_gom = missing          # Uncomment and complete the instruction
+# sens_W_gom = missing        
 sens_W_gom = ForwardDiff.jacobian(growth_sim_W_gom, [μ_gom, D_gom]);
 
 # ╔═╡ 362a8e24-8fac-4978-bc0e-13596a05d39e
@@ -680,11 +676,11 @@ Extract the (absolute) sensitivities of the outputs on the different parameters.
 """
 
 # ╔═╡ e9114d64-fe3e-420d-9fde-4b0fcbbc8527
-# sens_W_on_μ_gom = missing      # Uncomment and complete the instruction
+# sens_W_on_μ_gom = missing    
 sens_W_on_μ_gom = sens_W_gom[:,1];
 
 # ╔═╡ 7c9e1112-0a63-417f-a65a-9c2bdfa8bc47
-# sens_W_on_D_gom = missing      # Uncomment and complete the instruction
+# sens_W_on_D_gom = missing    
 sens_W_on_D_gom = sens_W_gom[:,2];
 
 # ╔═╡ 94e66042-b352-4bf2-a24b-b15789e10fe3
@@ -693,11 +689,11 @@ Compute the normalized sensitivities.
 """
 
 # ╔═╡ 1711346a-c161-415a-96f9-1235d786a584
-# sens_W_on_μ_rel_gom = missing   # Uncomment and complete the instruction
+# sens_W_on_μ_rel_gom = missing 
 sens_W_on_μ_rel_gom = sens_W_on_μ_gom .* μ_gom ./ W_gom;
 
 # ╔═╡ 7a87bfbb-a8c0-4071-8f86-66513ae40968
-# sens_W_on_D_rel_gom = missing    # Uncomment and complete the instruction
+# sens_W_on_D_rel_gom = missing  
 sens_W_on_D_rel_gom = sens_W_on_D_gom .* D_gom ./ W_gom;
 
 # ╔═╡ 7593a4bf-ad0f-4fd3-aa3c-8b6a5073cb02
@@ -706,7 +702,7 @@ Plot both sensitivity functions (with appropriate title and labels):
 "
 
 # ╔═╡ ad70a1d5-9b68-4cd6-9259-a3c25cad706b
-# missing        # Uncomment and complete the instruction
+# missing      
 plot(t_vals, [sens_W_on_μ_rel_gom, sens_W_on_D_rel_gom], title="Normalized sensitivities", label=["W on μ" "W on D"], xlabel="Time (day)")
 
 # ╔═╡ 12f64333-36d0-4e2a-9061-e3dcc7a4ae96
