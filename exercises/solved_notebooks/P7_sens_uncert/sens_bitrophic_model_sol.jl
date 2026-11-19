@@ -329,7 +329,7 @@ md"""
 """
 
 # ╔═╡ 9fafbd32-28de-4e8e-b53a-8b5fe5d48033
-scatter(cond_chain[:f], cond_chain[:ϕ], xlabel = "f", ylabel = "ϕ", alpha = 0.3, label = false)
+scatter(cond_chain[:f], cond_chain[:ϕ], xlabel = "f", ylabel = "ϕ", alpha = 0.3, label = false, title = "Posterior relation between ϕ and f")
 
 # ╔═╡ Cell order:
 # ╠═fd357fe0-0920-11ef-02e4-25a84575c6a2
