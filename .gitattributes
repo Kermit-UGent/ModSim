@@ -1,2 +1,3 @@
 page/* linguist-vendored
 * text=auto
+*.jl text eol=lf
