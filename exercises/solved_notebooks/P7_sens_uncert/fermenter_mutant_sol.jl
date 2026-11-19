@@ -444,7 +444,8 @@ Create a Turing model `mutant_meas(t_meas)` with:
 	μmax_dev ~ LogNormal(log(0.35), 0.15)
 	σ_X ~ Exponential()
 
-	sol = solve(remake(oprob_mut, p = [:μmax => μmax_dev]), Tsit5(), saveat=dt)
+	sol = solve(remake(oprob_mut, p = [:μmax => μmax_dev]),
+				Rosenbrock23(), saveat=dt)
 	X_pred = sol(t_meas, idxs=:X)
 
 	X_meas = zeros(3)
