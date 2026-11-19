@@ -1,6 +1,9 @@
 ### A Pluto.jl notebook ###
 # v0.20.28
 
+#> [[frontmatter.author]]
+#> name = "Ward Claerhout; Gauthier Vanhaelewyn"
+
 using Markdown
 using InteractiveUtils
 
