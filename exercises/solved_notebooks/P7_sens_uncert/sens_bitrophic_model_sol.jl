@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.21
+# v0.20.28
 
 using Markdown
 using InteractiveUtils
@@ -18,7 +18,13 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ cce8fcde-069f-49b9-aadd-6abccbcfbace
-using Catalyst
+using ModelingToolkit
+
+# ╔═╡ ab75267c-d28f-47ce-88bb-5aeb885398e4
+using ModelingToolkit: t_nounits as t, D_nounits as D
+
+# ╔═╡ 88aefc2c-5114-48ff-843b-e0d8f08ba3b5
+using Turing
 
 # ╔═╡ b48e4b46-3a07-4ff0-b617-6bc1125f6a1e
 using OrdinaryDiffEq, StatsPlots
@@ -26,382 +32,363 @@ using OrdinaryDiffEq, StatsPlots
 # ╔═╡ ddc035a2-3b03-4a54-807c-05a271384ca7
 using ForwardDiff
 
-# ╔═╡ ceec287b-5622-48d2-9fe1-26b3e84e3f45
+# ╔═╡ aaa54f95-466f-463e-958a-fc02560fd7d1
+using GlobalSensitivity
+
+# ╔═╡ 2293569d-491b-4b7f-a065-0c17d43b56d5
 md"""
-### Exercise: Bitrophic model - Sensitivity analysis
+# Hermione's PhD on plant insect interactions
 """
 
-# ╔═╡ 2a732f39-0499-4c90-be62-a1e2278e0c8b
+# ╔═╡ 9bc7b562-e1d2-4395-beb6-92f413589928
 md"""
-The dynamic relationship between a field crop and a voracious insect population within an ecosystem can be represented by a bitrophic model. Such model typically consists of two variables: the abundance of the field crop, often representing a primary producer such as a plant species, and the population size of the voracious insect, which acts as a consumer feeding on the crop. The differential equations below describe how changes in the crop population affect the growth and behavior of the insect population, and vice versa, under the influence of an insecticide.
+During her PhD Hermione has studied in her first year the plant Cucurbita pepo in a greenhouse. She determined the following parameters.
+- the carrying capacity $k$ of her experimental setup is 4000 kg/ha
+- the crop growth rate θ is 0.2 $d^{-1}$
+
+In the second year she studied the leaf-cutter ant (Atta cephalotes) and the effect of a neurotoxin on the ant from which she determined the following parameters. 
+- The mortality rate μ equals 0.1 $d^{-1}$
+- the insecticide effect factor $p$ equals 3
+
+In her last year, she is interested in the interactions between Cucurbita pepo and the leaf-cutter ant in her experimental setup. She knows that the relationship between a field crop (C) and a voracious insect (A) is described by the bitrophic model:
 
 $$\begin{eqnarray*}
 \frac{dC}{dt} &= \theta C \left(1-\frac{C}{k}\right)-fCA \\
 \frac{dA}{dt} &= \phi f CA -(1 + p)\, \mu A
 \end{eqnarray*}$$
 
-Understanding this bitrophic interaction is crucial for predicting the impact of insect predation on crop yields and devising effective strategies for pest management in agriculture and ecological conservation efforts.
+| Parameter | Value | Description |
+| :--- | :---: | :--- |
+| $\theta$ | $0.2$ | Growth rate of $C$ |
+| $k$ | $4000$ | Carrying capacity |
+| $p$ | $3$ | Insecticide effect |
+| $\mu$ | $0.1$ | Natural mortality rate |
+| $f$ | **?** | feeding rate |
+| $\phi$ | **?** | Conversion efficiency |
 
-In these equations, $C$ and $A$ are both expressed in $kg/ha$, $\theta=0.2\;d^{-1}$, $k=4000\;kg/ha$, $f=0.001\;ha/(kg\,d)$, the efficiency ratio $\phi=0.2$, and the mortality ratio $\mu=0.1\;d^{-1}$. The crop can be treated with an insecticide which increases the insect's death coefficient by a factor of $p=3$. The factor $p$ depends on the applied insecticide concentration and can therefore be controlled externally. 
+Based on a literature review she retrieves some initial ideas of the distributions of the feeding rate $f$ and the conversion $ϕ$.
+- The feeding rate $f$ is LogNormal distributed around $f=0.001\;ha/(kg\,d)$ as `LogNormal(log(0.001), 0.5)`. In literature the values for $f$ are in the range of `[0.0005, 0.002]`.
+- The conversion efficiency $ϕ$ is somewhere between 0.07 and 0.3 with a peak around 0.15.
 
-At the beginning of a season, $100\;kg$ of the crop and $0.5\;kg$ of insects per $ha$ are present. 
+**Her final goal is to be able to predict the pumpkin harvest in natural habitats with ants after 200 days.** She wants to know if in natural habitats the yield can reach over 2000 kg/ha, because that makes it profitable for farmers.
 """
 
-# ╔═╡ 87508f87-42d7-44e7-a0fb-415e6d7190c2
+# ╔═╡ 07495e3b-9b66-4f58-9b23-db461751e3ca
 md"""
-Set up a *reaction network* model by analysing the terms in the above differential equations and simulate the evolution of $C$ and $A$ for $200$ days. Next, perform a sensitivity analysis of $C$ and $A$ to the parameters $\theta$, $\phi$ and $p$.
+## Roadmap of Hermione's third year
 """
 
-# ╔═╡ eeb52e5e-f57b-4746-bbfc-7f043fc50e96
+# ╔═╡ 39eeb5cf-2c10-40d3-a628-4778d593776a
 md"""
-Set up a *reaction network* model and name it `bitrophic_model`.\
-Hints:
--  $C$ is growing (i.e., $C \rightarrow 2C$) at a rate $\theta \left(1-\frac{C}{k}\right)$.
--  The insects $A$ eat crops $C$ (i.e., $C + A$) at a rate $f$ resulting in an increase of a factor of $\phi$ more insects (i.e., $(1+\phi)A$).
--  The insects $A$ are dying (i.e., $A \rightarrow 0$) at a rate $(1 + p)\, \mu$.
+1. Gain insights in the overall sensitivity of the model. What parameters have a major influence on the pumpkin harvest?
+2. Determine the influence of the unknown parameters on the harvested pumpkin. What are the chances a farmer has less than 2000 kg/ha yield?
+3. After the first year, the farmer reports a yield of 2400 kg/ha. Can you a priori know which parameter ($ϕ$ or $f$) will be better estimated using this extra measurement? Secondly use this measurement to update your beliefs about these parameters.
 """
 
-# ╔═╡ 0b902d89-f0c2-4621-998e-7013931315ae
-# bitrophic_model = @reaction_network begin
-#     missing        # Uncomment and complete the instruction
-#     missing        # Uncomment and complete the instruction
-#     missing        # Uncomment and complete the instruction
-# end
-bitrophic_model = @reaction_network begin
-	θ*(1-C/k), C --> 2C
-	f, C+A --> (1+ϕ)*A
-    (1+p)*μ, A --> 0
-end
-
-# ╔═╡ 92027dcf-9765-4fad-a0a4-f19967ce6bce
+# ╔═╡ 60a25144-e430-45cf-b250-3d196bdb4723
 md"""
-Check out the species and the parameters.
+!!! tip "Step 0"
+	Implement the model, use the default values `f=0.001`and `ϕ=0.15`. The initial crop density is `100 kg/ha` and the intial ant population is `0.5 kg/ha`. We want to simulate the harvest after `200 days`.
 """
 
-# ╔═╡ 15dbf491-c5ae-4682-a21d-1a815a957993
-# missing             # Uncomment and complete the instruction
-species(bitrophic_model)
+# ╔═╡ fdd9a533-c441-4b77-bba8-687bddf3e4cb
+@variables C(t) A(t)
 
-# ╔═╡ 051f1b87-34ec-4e3f-8d4e-c4e42430be8f
-# missing             # Uncomment and complete the instruction
-parameters(bitrophic_model)
+# ╔═╡ 30ca6976-4336-4fe9-953c-2fc37a9f2288
+@parameters θ k f ϕ p μ
 
-# ╔═╡ f11bae81-a855-48ec-90a7-16b4ea1fc30b
-md"""
-Convert the system to a symbolic differential equations model, name it `osys` and verify, by analyzing the differential equations, that your model is correctly implemented.
-"""
-
-# ╔═╡ 1a19c02c-5d0f-4271-b0e7-7da873030d7e
-# osys = missing       # Uncomment and complete the instruction
-osys = convert(ODESystem, bitrophic_model)
-
-# ╔═╡ 55eba88f-d4cf-4ccf-b061-51feb3a4290c
-md"""
-Initialize a vector `u0` with the initial conditions, define the timespan in `tspan` and initialize a vector `param` with the parameter values:
-"""
+# ╔═╡ 4f91272e-ddd9-4bbd-aab7-f6883566b037
+eqns = [D(C) ~ θ*C*(1-C/k)-f*C*A,
+	   D(A) ~ ϕ*f*C*A - (1+p)*μ*A]
 
 # ╔═╡ 7769c7a5-5f19-4e1a-8721-41ee03c2024e
-# u0 = missing         # Uncomment and complete the instruction
 u0 = [:C => 100, :A => 0.5]
 
 # ╔═╡ 00453a3c-88d1-4cc4-a8f2-d4fa2eed0b66
-# tspan = missing      # Uncomment and complete the instruction
 tspan = (0.0, 200.0)
 
-# ╔═╡ 4e1acbdd-65ce-4f5e-b557-633af8a11aa9
-md"""
-For clarity, we will use the variables `θ`, `ϕ` and `p` to store the parameter values that are used for the calculation of the sensitivity functions.
-"""
-
-# ╔═╡ 9fda8191-e28d-4d10-b330-c386711a2a73
-θ = 0.2
-
-# ╔═╡ ae172c81-539c-4482-9cd2-ab74fd83c26a
-ϕ = 0.2
-
-# ╔═╡ 28417aea-9c05-4ba0-8b85-b8cccd808238
-p = 3
-
 # ╔═╡ 157eae84-9c8a-4d23-9ada-9d53ba520b0a
-# params = missing     # Uncomment and complete the instruction
-params = [:θ => θ, :k => 4000.0, :f => 0.001, :ϕ => ϕ, :p => p, :μ => 0.1]
+params = [:θ => 0.2, :k => 4000.0, :f => 0.001, :ϕ => 0.15, :p => 3, :μ => 0.1]
 
-# ╔═╡ eddc01fa-3ab0-4fd0-963f-5704f48778a7
+# ╔═╡ ab331db3-9eb6-4c6c-a0a1-63496e73a183
+@mtkbuild ode_sys = ODESystem(eqns, t)
+
+# ╔═╡ d6c1c97d-bd3b-4902-8224-31c119bc3026
+ode_prob = ODEProblem(ode_sys, u0, tspan, params)
+
+# ╔═╡ 1995aff0-c888-4a4c-8311-cc8792c41f98
+ode_sol = solve(ode_prob, Tsit5(), saveat = 0.5)
+
+# ╔═╡ 0f340b0c-468a-4570-a5f8-6f72bc384798
+plot(ode_sol,lw = 2, idxs = [:A :C], title = "Bitrophic model")
+
+# ╔═╡ f741a2eb-48dc-4ff4-817e-849a6dd839d3
 md"""
-Create the ODE problem and store it in `oprob`. Next, solve the ODE problem using `Tsit5()` and `saveat=0.5`, and store the solution in `osol`. Finally plot the results.
+## Part I: What determines the pumpkin harvest?
 """
 
-# ╔═╡ 1c185585-7c7a-4073-85f5-8300d3fe19e4
-# oprob = missing       # Uncomment and complete the instruction
-oprob = ODEProblem(bitrophic_model, u0, tspan, params)
-
-# ╔═╡ 2f1b4426-7235-4caf-84ed-ec6e04eaa34a
-# osol = missing        # Uncomment and complete the instruction
-osol = solve(oprob, Tsit5(), saveat=0.5)
-
-# ╔═╡ 63b33638-b967-43a7-b6ff-f6912f9a12e3
-# missing               # Uncomment and complete the instruction
-plot(osol)
-
-# ╔═╡ 81c6198f-5f69-4d78-b67c-b6e283a6c3b1
+# ╔═╡ ed3c3b7e-bb51-442b-a455-eebff351b227
 md"""
-Interpret the simulations results. Ask yourself the following questions:
-
-1. What happens to $C$ and $A$ during the first 30 days?
-    - Answer: missing
-2. Why does $C$ starts to decline around day 40?
-    - Answer: missing
-3. What happen to $C$ and $A$ from day 50 on, do they finally reach steady state values?
-    - Answer: missing
+!!! tip "Question 1"
+    Gain insights in the overall sensitivity of the model. What is the potential influence of $f$ and $ϕ$ on the final harvest?
 """
-#=
-1. C is increasing strongly while A remains relatively weak and constant.
-2. Around t=40, A starts to increase (use the option ylim=(0, 300) in plot to see this). As A increase, then C will decline.
-3. They will somehow start to oscillate around their steady state values. They finally reach steady state values.
-=#
 
-# ╔═╡ aa07ac11-1d6e-41ea-885d-1a6ae38bd58d
-md"""
-Write a solution function with as argument a vector of the parameters (that you want the sensitivity on), and that returns the outputs.
-"""
+
+# ╔═╡ 592a9822-f8e9-40ed-acdf-ee93975b6784
+p_range = [[0.07, 0.3], [0.0005, 0.002]];
 
 # ╔═╡ 2a858811-9ffd-4dc7-84ba-f7a59421753f
-# Uncomment and complete the instruction
-# function bitrophic_model_sim(params)
-# 	missing
-# 	...
-# end
 function bitrophic_model_sim(params)
-	θ, ϕ, p = params
-    u0 = [:C => 100, :A => 0.5]
-    tspan = (0.0, 200.0)
-    params = [:θ => θ, :k => 4000.0, :f => 0.001, :ϕ => ϕ, :p => p, :μ => 0.1]
-    oprob = ODEProblem(bitrophic_model, u0, tspan, params)
+	ϕ, f = params
+	model_params = [:f => f, :ϕ => ϕ]
+	oprob = remake(ode_prob, p = model_params)
 	osol = solve(oprob, Tsit5(), saveat=0.5)
-	return osol
+	return osol[:C]
 end
 
-# ╔═╡ e911dc09-c56a-42ed-9a09-9c4bba1aa5f6
-md"""
-Make two functions based on the solution function that each returns a single output, hence, one function that returns the output $C$, and another function that returns the output $A$.
-"""
+# ╔═╡ fd71123c-dea5-49a9-91bd-32a59d97c0da
+gsa_res = gsa(bitrophic_model_sim, Sobol(), p_range, samples = 200)
 
-# ╔═╡ 2e43110a-d948-4e6f-9ed9-a35101ba223a
-# bitrophic_model_sim_C(params) = missing # Uncomment and complete the instruction
-bitrophic_model_sim_C(params) = bitrophic_model_sim(params)[:C]
-
-# ╔═╡ 298604da-3207-40db-8535-f628d17a0f39
-# bitrophic_model_sim_A(params) = missing # Uncomment and complete the instruction
-bitrophic_model_sim_A(params) = bitrophic_model_sim(params)[:A]
-
-# ╔═╡ 76b256dc-bdec-4fb8-95c7-b32df03ba8b1
-md"""
-Make the time vector.
-"""
+# ╔═╡ 48123288-495f-4a96-89ba-f35c6fc4dc44
+bar(["ϕ", "f"], gsa_res.ST[end,:], colour = :orange,
+   title = "global sensitivities on harvested mass of pumpkin",
+   ylims = [0, 1])
 
 # ╔═╡ 3d1f2c90-2e4e-4fa1-af41-9d44d00e5090
-# t_vals = missing         # Uncomment and complete the instruction
 t_vals = 0:0.5:200.0
 
-# ╔═╡ c2ca4b68-39a6-45f7-a2a1-0f5c4903ed07
-md"""
-Compute the two outputs $C$ and $A$ for the given parameter values.
-"""
-
-# ╔═╡ 7bc637be-8238-43f4-b190-b46833fc9d34
-# C_sim =  missing         # Uncomment and complete the instruction
-C_sim = bitrophic_model_sim_C([θ, ϕ, p])
-
-# ╔═╡ 127d8761-97d6-4fcb-b633-98ee30ebc617
-# A_sim = missing           # Uncomment and complete the instruction
-A_sim = bitrophic_model_sim_A([θ, ϕ, p])
-
-# ╔═╡ cda34ccc-e018-4e2c-a4d3-8ed3d0c1624b
-md"""
-Using `ForwardDiff.jacobian` to compute the sensitivities for the single ouputs $C$ and $A$. Hence, you need to call `ForwardDiff.jacobian` twice.
-"""
-
-# ╔═╡ 55f00963-bfb0-420f-ae6f-d20f93f01b1e
-# sens_C = missing           # Uncomment and complete the instruction
-sens_C = ForwardDiff.jacobian(bitrophic_model_sim_C, [θ, ϕ, p])
-
-# ╔═╡ 4d2c77f2-1a5f-437c-adb6-232155f2cafb
-# sens_A = missing            # Uncomment and complete the instruction
-sens_A = ForwardDiff.jacobian(bitrophic_model_sim_A, [θ, ϕ, p])
-
-# ╔═╡ c261b580-2cc7-4aba-af15-1778f9293278
-md"""
-Extract the (absolute) sensitivities of the outputs on the different parameters.
-"""
-
-# ╔═╡ 730de2d2-104b-4f4a-96da-4f96b0445f95
-# Uncomment and complete the instruction
-# begin
-# 	sens_C_on_θ = missing
-# 	sens_C_on_ϕ = missing
-# 	sens_C_on_p = missing
-# end
+# ╔═╡ 06528d30-37cf-43b0-b0bd-82426df2f964
 begin
-	sens_C_on_θ = sens_C[:, 1]
-	sens_C_on_ϕ = sens_C[:, 2]
-	sens_C_on_p = sens_C[:, 3]
+    labels = ["ϕ", "f"]
+
+    plt = plot(
+        xlabel = "Time (day)",
+        ylabel = "Total-order Sobol index",
+        title = "Global sensitivity analysis",
+        ylims = (0, 2),
+        legend = :outerright
+    )
+
+    for i in eachindex(labels)
+        plot!(plt, t_vals, gsa_res.ST[:, i], label = labels[i])
+    end
+
+    plt
 end
 
-# ╔═╡ 2d8df796-c362-49d9-b938-26f1917e800b
-# Uncomment and complete the instruction
-# begin
-# 	sens_A_on_θ = missing
-# 	sens_A_on_ϕ = missing
-# 	sens_A_on_p = missing
-# end
-begin
-	sens_A_on_θ = sens_A[:, 1]
-	sens_A_on_ϕ = sens_A[:, 2]
-	sens_A_on_p = sens_A[:, 3]
+# ╔═╡ ee3ff488-dfbc-410a-ab4c-23d854272dab
+md"""
+**Conclusion:** From the global sensitivity analysis we can conclude that both parameters explain approximately as much variance at harvest time, so we have to take both parameters into account. Looking at the global sensitivity through time, you can deduce that the feeding rate has a high influence on the growth phase of the crop (around t = 25).
+"""
+
+# ╔═╡ e296e434-017c-45ce-bfe0-76601e277612
+md"""
+## Part II: How reliable/variable are the outcomes?
+"""
+
+# ╔═╡ 8f8c1f5d-a5c5-4da0-8230-d81b9ce7dab5
+md"""
+!!! tip "Question 2"
+	Determine the influence of the unknown parameters on the harvested pumpkin. What are the chances a farmer has less than 2000 kg/ha yield?
+"""
+
+# ╔═╡ e9f132c6-4828-43bc-9c7b-7b93515d4322
+@model function uncertain_bitrophic()
+	ϕ ~ TriangularDist(0.07, 0.3, 0.15)
+	f ~ LogNormal(log(0.001), 0.5)
+	oprob = remake(ode_prob, p = [:ϕ => ϕ, :f => f])
+	return solve(oprob, Tsit5())
 end
 
-# ╔═╡ 6b3ee543-e3e2-4fe6-925d-1f201243d014
-md"""
-Compute the normalized sensitivities.
-"""
+# ╔═╡ 3f419b58-52a9-4cca-ad3f-5a462e3174c8
+bitrophic_chain = sample(uncertain_bitrophic(), Prior(), 200)
 
-# ╔═╡ 89830894-4481-480b-954d-b24971590eaf
-# Uncomment and complete the instruction
-# begin
-# 	sens_C_on_θ_rel = missing
-# 	sens_C_on_ϕ_rel = missing
-# 	sens_C_on_p_rel = missing
-# end
-begin
-	sens_C_on_θ_rel = sens_C_on_θ .* θ ./ C_sim
-	sens_C_on_ϕ_rel = sens_C_on_ϕ .* ϕ ./ C_sim
-	sens_C_on_p_rel = sens_C_on_p .* p ./ C_sim
+# ╔═╡ 69906d82-e61a-42eb-a370-b293c22b9b83
+prior_sols = generated_quantities(uncertain_bitrophic(), bitrophic_chain);
+
+# ╔═╡ 9fad293a-46e4-474a-9d71-e727772563a2
+begin 
+	p2 = plot(title = "uncertainty propagation")
+	plot!(ode_sol,lw = 5, idxs = :C)
+	for sol in prior_sols
+		plot!(sol, colour = :gray, alpha = 0.3, label = false, ls = :dot, idxs = :C)
+	end
+	p2
 end
 
-# ╔═╡ c2b5c2c4-3aa6-466d-b106-d0d7aef43bdf
-# Uncomment and complete the instruction
-# begin
-# 	sens_A_on_θ_rel = missing
-# 	sens_A_on_ϕ_rel = missing
-# 	sens_A_on_p_rel = missing
-# end
+# ╔═╡ 13331268-92f3-468d-9414-564b73b6c7c3
+sol_end = collect([prior_sols[i][:C][end] for i in eachindex(prior_sols)])
+
+# ╔═╡ ec8906b5-6388-46cf-844d-d49578e8f9fc
+histogram(sol_end, title = "Distribution of yield at harvest time",
+		 label = "counts")
+
+# ╔═╡ 001649f9-f722-4e5a-a2c3-48b01b677c57
+chance = mean(sol_end .< 2000.0)
+
+# ╔═╡ ae341780-b8e9-4b73-a8fe-26efd8588e6a
+println("The chance of having less than 2000 kg/ha is : $(chance*100)%")
+
+# ╔═╡ 1b092702-1614-4fb6-90e1-df97aab1183c
+md"""
+**Conclusion:** Based on our Prior belief the farmer has 39% to have less than 2000 kg/ha yield.
+"""
+
+# ╔═╡ af93263f-fda7-4cad-8f3d-74ab4a5b345d
+md"""
+## Part III: Can we reduce uncertainty after year one?
+"""
+
+# ╔═╡ fe08b97c-08ad-4a19-8272-b047bc652ec6
+md"""
+!!! tip "Question 3"
+	After the first year, the farmer reports a yield of 2400 kg/ha. Can you a priori know which parameter ($ϕ$ or $f$) will be better estimated using this extra measurement? Secondly use this measurement to update your beliefs about these parameters. What is the updated chance that the farmer will have less than 2000 kg/ha yield?
+
+	Make use of the Metropolis-Hastings algorithm and use 5000 samples. You can assume a standard deviation of 50 kg/ha on the measured harvest yield.
+"""
+
+# ╔═╡ 81aa36db-b28f-4dff-9513-cfc3b80daaab
 begin
-	sens_A_on_θ_rel = sens_A_on_θ .* θ ./ A_sim
-	sens_A_on_ϕ_rel = sens_A_on_ϕ .* ϕ ./ A_sim
-	sens_A_on_p_rel = sens_A_on_p .* p ./ A_sim
+	f_val = 0.001
+	ϕ_val = 0.15
 end
 
-# ╔═╡ 3814640e-ed0b-48a1-b4ac-6b7f04d899f3
+# ╔═╡ 4609ffec-3400-4f75-9ffa-a8c5006c3b48
+begin
+    p0 = [ϕ_val, f_val]
+    C_nom = bitrophic_model_sim(p0)
+    jac = ForwardDiff.jacobian(bitrophic_model_sim, p0)
+    rel_sens_ϕ = jac[:, 1] ./ C_nom .* ϕ_val
+    rel_sens_f = jac[:, 2] ./ C_nom .* f_val
+end
+
+# ╔═╡ 850feaf3-2b20-4ca9-988e-3f934a767a4a
+begin
+	plot(t_vals, rel_sens_f, label = "sens f", title = "normalized sensitivities",
+		xlabel = "time")
+	plot!(t_vals, rel_sens_ϕ, label = "sens ϕ")
+end
+
+# ╔═╡ 12803a13-ccbb-4a98-9a23-2c4e5e5559b7
 md"""
-Plot the sensitivity functions of $C$ and $A$ on $\theta$. Provide a suitable title (`title="..."`), labels (`label=["..." "..."]`) and an x-label (`xlabel="..."`).
+**Conclusion**: A priori, it is not possible to define which parameter is most sensititive for the extra measurement. So based on this, we do not know which parameter will benefit the most. A second observation is that the parameters are less sensitive at the end of the simulation period. If you could choose to pick one measurement day, a measurement after 85 days would be more informative.
 """
 
-# ╔═╡ bbe8980e-441d-4ac6-abc5-88ff77de9f24
-# missing       # Uncomment and complete the instruction
-plot(t_vals, [sens_C_on_θ_rel, sens_A_on_θ_rel], title="Normalized sensitivities", label=["C on θ" "A on θ"], xlabel="Time (days)")
+# ╔═╡ 2c9fe511-e31c-4cd6-b60f-19798803b715
+@model function uncertain_harvest()
+	ϕ ~ TriangularDist(0.07, 0.3, 0.15)
+	f ~ LogNormal(log(0.001), 0.5)
+	osol = solve(remake(ode_prob, p = [:ϕ => ϕ, :f => f]), AutoTsit5(Rosenbrock23()))
+	harvest ~ Normal(osol[:C][end], 50.0)
+	return harvest
+end
 
-# ╔═╡ a8257414-2d6a-4913-9f05-6369c62189e8
+# ╔═╡ a8b2df6a-ec78-49cf-9226-e11a7cf6d522
+harvest_cond = uncertain_harvest() | (harvest = 2400.0,)
+
+# ╔═╡ 527ae9f4-8a0b-4e3c-9923-d240923f242c
+cond_chain = sample(harvest_cond, MH(), 5000)
+
+# ╔═╡ fef6de4a-e362-4422-8097-7298e8dbcfff
+plot(cond_chain)
+
+# ╔═╡ 1ccdb12d-a30a-49ae-b79a-2c12334ffe21
+begin
+	println("mean f is: $(mean(cond_chain[:f]))")
+	histogram(cond_chain[:f], title = "Posterior distribution f")
+end
+
+# ╔═╡ e43afba4-0bc6-417b-b44b-244e1ab2436e
+begin
+	println("mean ϕ is: $(mean(cond_chain[:ϕ]))")
+	histogram(cond_chain[:ϕ], title = "Posterior distribution ϕ")
+end
+
+# ╔═╡ 77df7791-2411-47b9-b891-af6c00fbde18
+begin
+	p3 = plot(title = "Updated beliefs model")
+	harvest_end = []
+	for (f, ϕ) in zip(cond_chain[:f][1:5:end], cond_chain[:ϕ][1:5:end])
+		prob = remake(ode_prob, p = [:f => f, :ϕ => ϕ])
+		osol_new = solve(prob, Tsit5())
+		push!(harvest_end, osol_new[:C][end])
+		plot!(osol_new, label = false, color = :gray, ls = :dot)
+	end
+	plot!(ode_sol, lw = 2, idxs = [:A :C])
+	p3
+end
+
+# ╔═╡ 424871d9-dc81-49a7-804b-a25865962c09
+println("chances that harvest is smaller than 2000 kg/ha: $(mean((harvest_end .< 2000)))")
+
+# ╔═╡ 69b26cd0-7964-42f8-b471-e85118114867
 md"""
-Interpret your results. Try to answer the following question(s):
+**Conclusion:** Based on the simulation results above, the chance of having less than 2000 kg/ha yield has shrunk to approximately 0%.
 
-- In steady state, does $\theta$ have any influence on $C$? Explain why this could be.
-    - Answer: missing
-- In steady state, why does $\theta$ have a positive effect on $A$? Explain why this could be.
-    - Answer: missing
-"""
-#=
-Answer for both questions: theta seems to have no influence on C in steady state. This could be because if theta increases, then the growth rate of C increases resulting in more crops, but then this will also result in more voracious insects (positive effect on A from θ) which will feed on the increased number of crops resulting in cancelling out the increase of the crops.
-If you calculated analytically the steady state for C and A (call them Cw and Aw), then you will get:
-Cw = (1+p)*μ/(ϕ*f) and Aw = (θ/f)*(1-Cw/k)
-you can see that Cw is independend on θ, while Aw is proportional to θ
-=#
-
-# ╔═╡ 882f2f6b-eb58-4c8f-877e-76e460900c0c
-md"""
-Plot the sensitivity functions of $C$ and $A$ on $\phi$. Provide a suitable title (`title="..."`), labels (`label=["..." "..."]`) and an x-label (`xlabel="..."`).
+**Side note:** Although we obtained a posterior distribution, a single harvest measurement cannot pin down $f$ and $ϕ$ individually. Both parameters have a similar influence on the yield at $t = 200$ d (see the sensitivity analysis), so many *combinations* of $f$ and $ϕ$ explain the observed 2400 kg/ha equally well. The data constrain the combination of parameters, not each parameter on its own. Yet the *prediction* of the harvest has become very certain.
 """
 
-# ╔═╡ f76e5c58-12fc-4b2d-8718-e15144fbef98
-# missing        # Uncomment and complete the instruction
-plot(t_vals, [sens_C_on_ϕ_rel, sens_A_on_ϕ_rel], title="Normalized sensitivities", label=["C on ϕ" "A on ϕ"], xlabel="Time (days)")
-
-# ╔═╡ 0bd84cf5-c0a2-4bb2-b5f4-f16da6eaab04
-md"""
-Plot the sensitivity functions of $C$ and $A$ on $p$. Provide a suitable title (`title="..."`), labels (`label=["..." "..."]`) and an x-label (`xlabel="..."`).
-"""
-
-# ╔═╡ cb02ebf8-aee5-47a2-9496-6f63fc123147
-# missing            # Uncomment and complete the instruction
-plot(t_vals, [sens_C_on_p_rel, sens_A_on_p_rel], title="Normalized sensitivities", label=["C on p" "A on p"], xlabel="Time (days)")
-
-# ╔═╡ 869a9dc3-8227-4c6e-8901-198cafb489e2
-md"""
-Interpret your results. Try to answer the following question(s):
-
-1. In steady state, does $\phi$ have a positive or negative effect on $C$? Explain why this could be.
-    - Answer: missing
-2. In steady state, does $p$ have a positive or negative effect on $C$? Explain why this could be.
-    - Answer: missing
-"""
-#=
-1. ϕ has a negative influence on C This makes sense because ϕ is the yield factor for the varocious insects, the larger ϕ, the more insects and hence less crops.
-2. The factor p contributes to the amount of pesticides, hence if p is increased, A will decrease and hence C will increase.
-=#
+# ╔═╡ 9fafbd32-28de-4e8e-b53a-8b5fe5d48033
+scatter(cond_chain[:f], cond_chain[:ϕ], xlabel = "f", ylabel = "ϕ", alpha = 0.3, label = false)
 
 # ╔═╡ Cell order:
 # ╠═fd357fe0-0920-11ef-02e4-25a84575c6a2
 # ╠═0ddc1082-bf8d-4357-a056-2fa861824b47
 # ╠═a3c1055e-b44f-4412-9ca0-f8ec5f972494
 # ╠═cce8fcde-069f-49b9-aadd-6abccbcfbace
+# ╠═ab75267c-d28f-47ce-88bb-5aeb885398e4
+# ╠═88aefc2c-5114-48ff-843b-e0d8f08ba3b5
 # ╠═b48e4b46-3a07-4ff0-b617-6bc1125f6a1e
 # ╠═ddc035a2-3b03-4a54-807c-05a271384ca7
-# ╟─ceec287b-5622-48d2-9fe1-26b3e84e3f45
-# ╟─2a732f39-0499-4c90-be62-a1e2278e0c8b
-# ╟─87508f87-42d7-44e7-a0fb-415e6d7190c2
-# ╟─eeb52e5e-f57b-4746-bbfc-7f043fc50e96
-# ╠═0b902d89-f0c2-4621-998e-7013931315ae
-# ╟─92027dcf-9765-4fad-a0a4-f19967ce6bce
-# ╠═15dbf491-c5ae-4682-a21d-1a815a957993
-# ╠═051f1b87-34ec-4e3f-8d4e-c4e42430be8f
-# ╟─f11bae81-a855-48ec-90a7-16b4ea1fc30b
-# ╠═1a19c02c-5d0f-4271-b0e7-7da873030d7e
-# ╟─55eba88f-d4cf-4ccf-b061-51feb3a4290c
+# ╠═aaa54f95-466f-463e-958a-fc02560fd7d1
+# ╟─2293569d-491b-4b7f-a065-0c17d43b56d5
+# ╟─9bc7b562-e1d2-4395-beb6-92f413589928
+# ╟─07495e3b-9b66-4f58-9b23-db461751e3ca
+# ╟─39eeb5cf-2c10-40d3-a628-4778d593776a
+# ╟─60a25144-e430-45cf-b250-3d196bdb4723
+# ╠═fdd9a533-c441-4b77-bba8-687bddf3e4cb
+# ╠═30ca6976-4336-4fe9-953c-2fc37a9f2288
+# ╠═4f91272e-ddd9-4bbd-aab7-f6883566b037
 # ╠═7769c7a5-5f19-4e1a-8721-41ee03c2024e
 # ╠═00453a3c-88d1-4cc4-a8f2-d4fa2eed0b66
-# ╟─4e1acbdd-65ce-4f5e-b557-633af8a11aa9
-# ╠═9fda8191-e28d-4d10-b330-c386711a2a73
-# ╠═ae172c81-539c-4482-9cd2-ab74fd83c26a
-# ╠═28417aea-9c05-4ba0-8b85-b8cccd808238
 # ╠═157eae84-9c8a-4d23-9ada-9d53ba520b0a
-# ╟─eddc01fa-3ab0-4fd0-963f-5704f48778a7
-# ╠═1c185585-7c7a-4073-85f5-8300d3fe19e4
-# ╠═2f1b4426-7235-4caf-84ed-ec6e04eaa34a
-# ╠═63b33638-b967-43a7-b6ff-f6912f9a12e3
-# ╟─81c6198f-5f69-4d78-b67c-b6e283a6c3b1
-# ╟─aa07ac11-1d6e-41ea-885d-1a6ae38bd58d
+# ╠═ab331db3-9eb6-4c6c-a0a1-63496e73a183
+# ╠═d6c1c97d-bd3b-4902-8224-31c119bc3026
+# ╠═1995aff0-c888-4a4c-8311-cc8792c41f98
+# ╠═0f340b0c-468a-4570-a5f8-6f72bc384798
+# ╟─f741a2eb-48dc-4ff4-817e-849a6dd839d3
+# ╟─ed3c3b7e-bb51-442b-a455-eebff351b227
+# ╠═592a9822-f8e9-40ed-acdf-ee93975b6784
 # ╠═2a858811-9ffd-4dc7-84ba-f7a59421753f
-# ╟─e911dc09-c56a-42ed-9a09-9c4bba1aa5f6
-# ╠═2e43110a-d948-4e6f-9ed9-a35101ba223a
-# ╠═298604da-3207-40db-8535-f628d17a0f39
-# ╟─76b256dc-bdec-4fb8-95c7-b32df03ba8b1
+# ╠═fd71123c-dea5-49a9-91bd-32a59d97c0da
+# ╠═48123288-495f-4a96-89ba-f35c6fc4dc44
 # ╠═3d1f2c90-2e4e-4fa1-af41-9d44d00e5090
-# ╟─c2ca4b68-39a6-45f7-a2a1-0f5c4903ed07
-# ╠═7bc637be-8238-43f4-b190-b46833fc9d34
-# ╠═127d8761-97d6-4fcb-b633-98ee30ebc617
-# ╟─cda34ccc-e018-4e2c-a4d3-8ed3d0c1624b
-# ╠═55f00963-bfb0-420f-ae6f-d20f93f01b1e
-# ╠═4d2c77f2-1a5f-437c-adb6-232155f2cafb
-# ╟─c261b580-2cc7-4aba-af15-1778f9293278
-# ╠═730de2d2-104b-4f4a-96da-4f96b0445f95
-# ╠═2d8df796-c362-49d9-b938-26f1917e800b
-# ╟─6b3ee543-e3e2-4fe6-925d-1f201243d014
-# ╠═89830894-4481-480b-954d-b24971590eaf
-# ╠═c2b5c2c4-3aa6-466d-b106-d0d7aef43bdf
-# ╟─3814640e-ed0b-48a1-b4ac-6b7f04d899f3
-# ╠═bbe8980e-441d-4ac6-abc5-88ff77de9f24
-# ╟─a8257414-2d6a-4913-9f05-6369c62189e8
-# ╟─882f2f6b-eb58-4c8f-877e-76e460900c0c
-# ╠═f76e5c58-12fc-4b2d-8718-e15144fbef98
-# ╟─0bd84cf5-c0a2-4bb2-b5f4-f16da6eaab04
-# ╠═cb02ebf8-aee5-47a2-9496-6f63fc123147
-# ╟─869a9dc3-8227-4c6e-8901-198cafb489e2
+# ╠═06528d30-37cf-43b0-b0bd-82426df2f964
+# ╟─ee3ff488-dfbc-410a-ab4c-23d854272dab
+# ╟─e296e434-017c-45ce-bfe0-76601e277612
+# ╟─8f8c1f5d-a5c5-4da0-8230-d81b9ce7dab5
+# ╠═e9f132c6-4828-43bc-9c7b-7b93515d4322
+# ╠═3f419b58-52a9-4cca-ad3f-5a462e3174c8
+# ╠═69906d82-e61a-42eb-a370-b293c22b9b83
+# ╠═9fad293a-46e4-474a-9d71-e727772563a2
+# ╠═13331268-92f3-468d-9414-564b73b6c7c3
+# ╠═ec8906b5-6388-46cf-844d-d49578e8f9fc
+# ╠═001649f9-f722-4e5a-a2c3-48b01b677c57
+# ╠═ae341780-b8e9-4b73-a8fe-26efd8588e6a
+# ╟─1b092702-1614-4fb6-90e1-df97aab1183c
+# ╟─af93263f-fda7-4cad-8f3d-74ab4a5b345d
+# ╟─fe08b97c-08ad-4a19-8272-b047bc652ec6
+# ╠═81aa36db-b28f-4dff-9513-cfc3b80daaab
+# ╠═4609ffec-3400-4f75-9ffa-a8c5006c3b48
+# ╠═850feaf3-2b20-4ca9-988e-3f934a767a4a
+# ╟─12803a13-ccbb-4a98-9a23-2c4e5e5559b7
+# ╠═2c9fe511-e31c-4cd6-b60f-19798803b715
+# ╠═a8b2df6a-ec78-49cf-9226-e11a7cf6d522
+# ╠═527ae9f4-8a0b-4e3c-9923-d240923f242c
+# ╠═fef6de4a-e362-4422-8097-7298e8dbcfff
+# ╠═1ccdb12d-a30a-49ae-b79a-2c12334ffe21
+# ╠═e43afba4-0bc6-417b-b44b-244e1ab2436e
+# ╠═77df7791-2411-47b9-b891-af6c00fbde18
+# ╠═424871d9-dc81-49a7-804b-a25865962c09
+# ╟─69b26cd0-7964-42f8-b471-e85118114867
+# ╠═9fafbd32-28de-4e8e-b53a-8b5fe5d48033
