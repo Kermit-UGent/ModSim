@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.28
+# v1.0.1
 
 using Markdown
 using InteractiveUtils
@@ -11,38 +11,29 @@ begin
 	Pkg.activate("..")
 end
 
-
 # ╔═╡ fd357fe0-0920-11ef-02e4-25a84575c6a2
 using Markdown
-
 
 # ╔═╡ 0ddc1082-bf8d-4357-a056-2fa861824b47
 using InteractiveUtils
 
-
 # ╔═╡ cce8fcde-069f-49b9-aadd-6abccbcfbace
 using ModelingToolkit
-
 
 # ╔═╡ ab75267c-d28f-47ce-88bb-5aeb885398e4
 using ModelingToolkit: t_nounits as t, D_nounits as D
 
-
 # ╔═╡ 88aefc2c-5114-48ff-843b-e0d8f08ba3b5
 using Turing
-
 
 # ╔═╡ b48e4b46-3a07-4ff0-b617-6bc1125f6a1e
 using OrdinaryDiffEq, StatsPlots
 
-
 # ╔═╡ ddc035a2-3b03-4a54-807c-05a271384ca7
 using ForwardDiff
 
-
 # ╔═╡ aaa54f95-466f-463e-958a-fc02560fd7d1
 using GlobalSensitivity
-
 
 # ╔═╡ 2293569d-491b-4b7f-a065-0c17d43b56d5
 md"""
