@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.28
+# v1.0.1
 
 using Markdown
 using InteractiveUtils
@@ -111,19 +111,19 @@ Initialize a vector `u0` with the initial conditions, set the timespan `tspan` t
 
 # ╔═╡ 6afb23f2-3da7-43e0-8a3b-fc4bb5eb9bde
 # u0 = missing
-u0 = [:S => 0.0, :X => 0.0005]
+u0 = [:S => 0.0, :X => 0.0005];
 
 # ╔═╡ 1b09c8cb-d3b7-4a15-b6ed-d03019c5f57b
 # tspan = missing
-tspan = (0.0, 100.0)
+tspan = (0.0, 100.0);
 
 # ╔═╡ 9e3c427b-8a56-4787-9b28-43ec3932ddbe
 # dt = missing
-dt = 0.5
+dt = 0.5;
 
 # ╔═╡ 62f4049b-617f-4268-beba-b2c634b46642
 # parms = missing
-parms = [:μmax => 0.40, :Ks => 0.015, :Y => 0.67, :Q => 2.0, :V => 40.0, :Sin => 0.022]
+parms = [:μmax => 0.40, :Ks => 0.015, :Y => 0.67, :Q => 2.0, :V => 40.0, :Sin => 0.022];
 
 # ╔═╡ 0e4c73d3-1630-463b-994d-073170c1a6c3
 md"""
@@ -132,11 +132,11 @@ Create the ODE problem and store it in `oprob`. Next, solve the ODE problem usin
 
 # ╔═╡ 3cad11d6-c2eb-4865-858a-d407aa25d780
 # oprob = missing
-oprob = ODEProblem(fermenter_monod, u0, tspan, parms, combinatoric_ratelaws=false)
+oprob = ODEProblem(fermenter_monod, u0, tspan, parms, combinatoric_ratelaws=false);
 
 # ╔═╡ 40168902-0780-4f92-8eca-23982c80511e
 # osol = missing
-osol = solve(oprob, Tsit5(), saveat=dt)
+osol = solve(oprob, Tsit5(), saveat=dt);
 
 # ╔═╡ 4d753fdb-089d-41dc-89ef-45a1733af786
 # missing
@@ -179,7 +179,7 @@ Create an ODE problem `oprob_mut` for the mutant by remaking `oprob` with $Y = 0
 
 # ╔═╡ 225eaaff-42a2-4aca-94e1-afcd988de4eb
 # oprob_mut = missing
-oprob_mut = remake(oprob, p = [:μmax => 0.35, :Y => 0.70])
+oprob_mut = remake(oprob, p = [:μmax => 0.35, :Y => 0.70]);
 
 # ╔═╡ 18ffe877-c579-4b4c-80bd-b5d50baf36bb
 md"""
@@ -307,7 +307,7 @@ end
 
 # ╔═╡ b7f14c48-ba19-4fbc-bded-829a34bd7ac8
 # mutant_sim_X(parms) = missing
-mutant_sim_X(parms) = mutant_sim(parms)[:X]
+mutant_sim_X(parms) = mutant_sim(parms)[:X];
 
 # ╔═╡ 73345fe4-6877-476d-8ce1-5a0056c73cc6
 md"""
@@ -320,11 +320,11 @@ t_vals = tspan[1]:dt:tspan[2]
 
 # ╔═╡ 82ae802b-2a7a-4525-9cc6-dfaa552ba990
 # μmax_val = missing
-μmax_val = 0.35
+μmax_val = 0.35;
 
 # ╔═╡ 8a655d11-0d45-4e7c-bcbf-8ea9659516aa
 # X_sim = missing
-X_sim = mutant_sim_X([μmax_val])
+X_sim = mutant_sim_X([μmax_val]);
 
 # ╔═╡ 9a97a7c7-bc3e-434e-9dce-7c859417aac2
 md"""
@@ -333,11 +333,11 @@ Use `ForwardDiff.jacobian` to compute the sensitivity `sens_X_on_μmax`, and com
 
 # ╔═╡ d7d3028a-51c1-41e0-a865-b521ed235548
 # sens_X_on_μmax = missing
-sens_X_on_μmax = ForwardDiff.jacobian(mutant_sim_X, [μmax_val])[:, 1]
+sens_X_on_μmax = ForwardDiff.jacobian(mutant_sim_X, [μmax_val])[:, 1];
 
 # ╔═╡ cb6047f2-3884-4fbd-96f2-f15cf684bea8
 # sens_X_on_μmax_rel = missing
-sens_X_on_μmax_rel = sens_X_on_μmax .* μmax_val ./ X_sim
+sens_X_on_μmax_rel = sens_X_on_μmax .* μmax_val ./ X_sim;
 
 # ╔═╡ f623b4b4-6010-45fa-b9a9-bc796f0fb106
 md"""
@@ -455,7 +455,7 @@ Condition the model on the measurements and store it in `mutant_cond_model`.
 
 # ╔═╡ 11e105de-270c-434a-bfb4-9118dfc9e461
 # mutant_cond_model = missing
-mutant_cond_model = mutant_meas(t_star) | (X_meas = X_meas,)
+mutant_cond_model = mutant_meas(t_star) | (X_meas = X_meas,);
 
 # ╔═╡ e46afb98-16de-4d19-86b4-b920b6b929c5
 md"""
@@ -464,7 +464,7 @@ md"""
 
 # ╔═╡ f99ca771-8c14-4e19-a1ae-478a2103716a
 # mutant_chain = missing
-mutant_chain = sample(mutant_cond_model, NUTS(), 500)
+mutant_chain = sample(mutant_cond_model, NUTS(), 500);
 
 # ╔═╡ e76a7bf7-4d8d-4f2f-8272-b63e49cd4ae9
 md"""
