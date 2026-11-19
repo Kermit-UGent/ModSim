@@ -160,7 +160,13 @@ md"""
 md"""
 Some batch tests show that the mutant has a yield of $Y = 0.70$ instead of $0.67$. All other parameters are the same as for the current strain, except $\mu_{max}$, which is unknown.
 
-From the literature on mutants with an improved yield, you expect $\mu_{max}$ to be around $0.35\;h^{-1}$, give or take $15\%$. You express this **prior belief** with a log-normal distribution `LogNormal(log(0.35), 0.15)`.
+From the literature on mutants with an improved yield, you expect $\mu_{max}$ to be around $0.35\;h^{-1}$, give or take about $15\%$. You express this **prior belief** with a log-normal distribution `LogNormal(log(0.35), 0.15)`.
+"""
+
+# ╔═╡ 50f517d1-e742-4589-b390-2ad7c1ca6f35
+md"""
+!!! note
+	Using the relative error on the mean as the scale parameter of a LogNormal distribution works, but only as long as the relative error is not too large.
 """
 
 # ╔═╡ f5482531-b23f-472b-968f-20f7a6471778
@@ -648,6 +654,7 @@ Answers:
 # ╠═ec042e61-04b8-4d51-8e7d-35e1646cc5ba
 # ╟─9ee22028-7a37-4510-9b61-198d3bd99a73
 # ╟─cc9ac43b-448a-4a67-ba0b-8fdf21a4236e
+# ╟─50f517d1-e742-4589-b390-2ad7c1ca6f35
 # ╟─f5482531-b23f-472b-968f-20f7a6471778
 # ╟─ff21b3cd-64b1-4d09-8eb1-afc617585fc8
 # ╠═225eaaff-42a2-4aca-94e1-afcd988de4eb
